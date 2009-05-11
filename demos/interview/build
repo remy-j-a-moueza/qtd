@@ -1,0 +1,3 @@
+#! /bin/bash
+
+dmd main.d model.d -L-L../../lib -L-lqtdgui -L-lqtdcore -I../../ -L-lQtGui -L-lQtCore

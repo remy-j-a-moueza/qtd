@@ -1,0 +1,3 @@
+#! /bin/bash
+
+dmd main.d -L-L../../lib -L-lqtdcore -I../../ -L-lQtCore

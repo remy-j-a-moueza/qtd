@@ -1,0 +1,1 @@
+dmd main.d libqtdcore.lib -I../../

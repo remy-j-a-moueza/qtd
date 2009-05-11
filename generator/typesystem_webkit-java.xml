@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<typesystem package="qt.webkit" default-superclass="qt.QtJambiObject">
+    <inject-code>
+    qt.Utilities.loadQtLibrary("QtGui");
+    qt.Utilities.loadQtLibrary("QtNetwork");
+    qt.Utilities.loadQtLibrary("QtWebKit");
+    </inject-code>
+</typesystem>

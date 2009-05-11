@@ -1,0 +1,16 @@
+<typesystem package=qt.tools.designer" default-superclass="qt.QtJambiObject">
+
+    <inject-code>
+        qt.Utilities.loadQtLibrary("QtCore");
+        qt.Utilities.loadQtLibrary("QtGui");
+        qt.Utilities.loadQtLibrary("QtXml");
+        qt.Utilities.loadQtLibrary("QtSvg");
+        qt.Utilities.loadQtLibrary("QtScript");
+        qt.Utilities.loadQtLibrary("QtDesigner");
+        qt.Utilities.loadQtLibrary("QtDesignerComponents");
+    </inject-code>
+
+    <primitive-type name="qdesigner_internal::FlagType" java-name="int" preferred-conversion="no" jni-name="jint" />
+    <primitive-type name="qdesigner_internal::EnumType" java-name="int" preferred-conversion="no" jni-name="jint" />
+
+</typesystem>

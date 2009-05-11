@@ -1,0 +1,7 @@
+changes since 0.1
+
+ * lots of bugs fixed
+ * brand new signals implementation by Max Samukha
+ * switch to Qt 4.5
+ * all imports inside Qt are public to avoid import hell
+ * API dealing with containers is now wrapped

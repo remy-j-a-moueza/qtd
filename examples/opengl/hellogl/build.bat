@@ -1,0 +1,1 @@
+dmd main.d window.d glwidget.d libqtdgui.lib libqtdcore.lib libqtdopengl.lib opengl32.lib glu32.lib -I../../../

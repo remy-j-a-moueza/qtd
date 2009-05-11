@@ -1,0 +1,10 @@
+set(QT_CORE_SRCS_D
+Qt.d
+QChildEvent.d
+QCoreApplication.d
+QEvent.d
+QEventLoop.d
+QObject.d
+QTimerEvent.d
+QTranslator.d
+)

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<typesystem package="qt.opengl" default-superclass="QtDObject">
+  <inject-code>
+    qt.Utilities.loadQtLibrary("QtGui");
+    qt.Utilities.loadQtLibrary("QtOpenGL");
+  </inject-code>
+
+  <primitive-type name="GLuint" java-name="int" preferred-conversion="no" jni-name="jint"/>
+  <primitive-type name="GLint" java-name="int" preferred-conversion="no" jni-name="jint"/>
+  <primitive-type name="GLenum" java-name="int" preferred-conversion="no" jni-name="jint"/>
+
+
+    <value-type name="QGLColormap">
+        <inject-code>
+            <import-file name="typesystem_opengl-java.java" quote-after-line="class QGLColormap___" quote-before-line="}// class"/>
+        </inject-code>
+
+  </value-type>
+</typesystem>
