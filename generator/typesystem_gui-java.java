@@ -1051,6 +1051,39 @@ class QPainter___ extends QPainter {
     public final void drawConvexPolygon(QPointF[] points) {
         qtd_QPainter_drawConvexPolygon_nativepointerQPointF_int(nativeId, points.ptr, points.length);
     }
+    
+    public final void drawLines(QLine[] lines) {
+        qtd_QPainter_drawLines_nativepointerQLine_int(nativeId, lines.ptr, lines.length);
+    }
+
+    public final void drawLines(QLineF[] lines) {
+        qtd_QPainter_drawLines_nativepointerQLineF_int(nativeId, lines.ptr, lines.length);
+    }
+    
+    public final void drawPolygon(QPoint[] points, Qt_FillRule fillRule = Qt_FillRule.OddEvenFill) {
+        qtd_QPainter_drawPolygon_nativepointerQPoint_int_FillRule(nativeId, points.ptr, points.length, fillRule);
+    }
+
+    public final void drawPolygon(QPointF[] points, Qt_FillRule fillRule = Qt_FillRule.OddEvenFill) {
+        qtd_QPainter_drawPolygon_nativepointerQPointF_int_FillRule(nativeId, points.ptr, points.length, fillRule);
+    }
+
+    public final void drawPolyline(QPoint[] points) {
+        qtd_QPainter_drawPolyline_nativepointerQPoint_int(nativeId, points.ptr, points.length);
+    }
+
+    public final void drawPolyline(QPointF[] points) {
+        qtd_QPainter_drawPolyline_nativepointerQPointF_int(nativeId, points.ptr, points.length);
+    }
+    
+    public final void drawPoints(QPoint[] points) {
+        qtd_QPainter_drawPoints_nativepointerQPoint_int(nativeId, points.ptr, points.length);
+    }
+
+    public final void drawPoints(QPointF[] points) {
+        qtd_QPainter_drawPoints_nativepointerQPointF_int(nativeId, points.ptr, points.length);
+    }
+    
 /*
     public static QPaintDeviceInterface redirected(QPaintDeviceInterface device, qt.core.QPoint offset) {
         return redirected(device, offset == null ? null : offset.nativePointer());

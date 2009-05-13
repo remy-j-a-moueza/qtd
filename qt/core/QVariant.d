@@ -149,13 +149,13 @@ public class QVariant : QtDObject
 
 
     public this(QLine line) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QLine(line is null ? null : line.nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QLine(&line);
         super(__qt_return_value);
     }
 
 
     public this(QLineF line) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QLineF(line is null ? null : line.nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QLineF(&line);
         super(__qt_return_value);
     }
 
@@ -350,13 +350,11 @@ public class QVariant : QtDObject
     }
 
     public final QLine toLine() {
-        void* __qt_return_value = qtd_QVariant_toLine(nativeId);
-        return new QLine(__qt_return_value, false);
+        return qtd_QVariant_toLine(nativeId);
     }
 
     public final QLineF toLineF() {
-        void* __qt_return_value = qtd_QVariant_toLineF(nativeId);
-        return new QLineF(__qt_return_value, false);
+        return qtd_QVariant_toLineF(nativeId);
     }
 
     public final QLocale toLocale() {
@@ -512,8 +510,8 @@ private extern(C) double  qtd_QVariant_toDouble_nativepointerbool(void* __this_n
  bool* ok0);
 private extern(C) int  qtd_QVariant_toInt_nativepointerbool(void* __this_nativeId,
  bool* ok0);
-private extern(C) void*  qtd_QVariant_toLine(void* __this_nativeId);
-private extern(C) void*  qtd_QVariant_toLineF(void* __this_nativeId);
+private extern(C) QLine  qtd_QVariant_toLine(void* __this_nativeId);
+private extern(C) QLineF  qtd_QVariant_toLineF(void* __this_nativeId);
 private extern(C) void*  qtd_QVariant_toLocale(void* __this_nativeId);
 private extern(C) long  qtd_QVariant_toLongLong_nativepointerbool(void* __this_nativeId,
  bool* ok0);

@@ -47,11 +47,11 @@ public struct QSize
     
     final void height(int h)
     { ht = h; }
-
-    final void setWidth(int w)
+    
+    final void setWidth(int w) // for convenience
     { wd = w; }
     
-    void setHeight(int h)
+    final void setHeight(int h) // for convenience
     { ht = h; }
     
     void transpose() {
@@ -93,8 +93,8 @@ public struct QSize
 	QSize opMulAssign(qreal c)
 	{ wd = qRound(wd*c); ht = qRound(ht*c); return *this; }
 
-	bool opEquals(ref QSize s1, ref QSize s2)
-	{ return s1.wd == s2.wd && s1.ht == s2.ht; }
+	bool opEquals(ref QSize s)
+	{ return wd == s.wd && ht == s.ht; }
 
 	QSize opAdd(ref QSize s)
 	{ return QSize(this.wd+s.wd, this.ht+s.ht); }
@@ -216,8 +216,8 @@ public struct QSizeF
 	QSizeF opMulAssign(qreal c)
 	{ wd *= c; ht *= c; return *this; }
 
-	bool opEquals(ref QSizeF s1, ref QSizeF s2)
-	{ return qFuzzyCompare(s1.wd, s2.wd) && qFuzzyCompare(s1.ht, s2.ht); }
+	bool opEquals(ref QSizeF s)
+	{ return qFuzzyCompare(wd, s.wd) && qFuzzyCompare(ht, s.ht); }
 
 	QSizeF opAdd(ref QSizeF s)
 	{ return QSizeF(this.wd+s.wd, this.ht+s.ht); }

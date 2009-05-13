@@ -7249,53 +7249,64 @@
       <access modifier="private"/>
     </modify-function>
     <modify-function signature="drawLines(const QLine *, int)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
     <modify-function signature="drawLines(const QLineF *, int)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
-    <modify-function signature="drawLines(const QPoint *, int)">
-        <remove/>
-    </modify-function>
-    <modify-function signature="drawLines(const QPointF *, int)">
-        <remove/>
-    </modify-function>
+
     <modify-function signature="drawPoints(const QPoint *, int)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
     <modify-function signature="drawPoints(const QPointF *, int)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
+    
     <modify-function signature="drawPolygon(const QPoint *, int, Qt::FillRule)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
     <modify-function signature="drawPolygon(const QPointF *, int, Qt::FillRule)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
+
     <modify-function signature="drawPolyline(const QPoint *, int)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
     <modify-function signature="drawPolyline(const QPointF *, int)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
+    
     <modify-function signature="drawRects(const QRect *, int)">
         <remove/>
     </modify-function>
     <modify-function signature="drawRects(const QRectF *, int)">
         <remove/>
     </modify-function>
-    <modify-function signature="drawLines(const QVector&lt;QPoint&gt; &amp;)">
-        <rename to="drawLinesFromPoints"/>
-    </modify-function>
-    <modify-function signature="drawLines(const QVector&lt;QPointF&gt; &amp;)">
-        <rename to="drawLinesFromPointsF"/>
-    </modify-function>
-    <modify-function signature="drawLines(const QVector&lt;QLineF&gt; &amp;)">
-        <rename to="drawLinesF"/>
-    </modify-function>
     <modify-function signature="drawRects(const QVector&lt;QRectF&gt; &amp;)">
         <rename to="drawRectsF"/>
     </modify-function>
+
+    <modify-function signature="drawLines(const QVector&lt;QLine&gt; &amp;)">
+        <remove/>
+    </modify-function>
+    <modify-function signature="drawLines(const QVector&lt;QLineF&gt; &amp;)">
+        <remove/>
+    </modify-function>
+
+    <modify-function signature="drawLines(const QVector&lt;QPoint&gt; &amp;)">
+        <remove/>
+    </modify-function>
+    <modify-function signature="drawLines(const QVector&lt;QPointF&gt; &amp;)">
+        <remove/>
+    </modify-function>
+
+    <modify-function signature="drawLines(const QPoint *, int)">
+        <remove/>
+    </modify-function>
+    <modify-function signature="drawLines(const QPointF *, int)">
+        <remove/>
+    </modify-function>
+
 
     <modify-function signature="QPainter(QPaintDevice *)">
         <modify-argument index="1">

@@ -732,27 +732,19 @@ extern "C" DLL_PUBLIC int qtd_QVariant_toInt_nativepointerbool
 }
 
 // QVariant::toLine() const
-extern "C" DLL_PUBLIC void* qtd_QVariant_toLine
+extern "C" DLL_PUBLIC QLine qtd_QVariant_toLine
 (void* __this_nativeId)
 {
     QVariant_QtDShell *__qt_this = (QVariant_QtDShell *) __this_nativeId;
-    QLine  __qt_return_value = __qt_this->toLine();
-
-    void* __java_return_value = (void*) new QLine(__qt_return_value);
-
-    return __java_return_value;
+    return __qt_this->toLine();
 }
 
 // QVariant::toLineF() const
-extern "C" DLL_PUBLIC void* qtd_QVariant_toLineF
+extern "C" DLL_PUBLIC QLineF qtd_QVariant_toLineF
 (void* __this_nativeId)
 {
     QVariant_QtDShell *__qt_this = (QVariant_QtDShell *) __this_nativeId;
-    QLineF  __qt_return_value = __qt_this->toLineF();
-
-    void* __java_return_value = (void*) new QLineF(__qt_return_value);
-
-    return __java_return_value;
+    return __qt_this->toLineF();
 }
 
 // QVariant::toList() const

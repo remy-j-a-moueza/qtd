@@ -35,7 +35,13 @@ public struct QPoint
 
     void y(int ypos)
     { yp = ypos; }
-    
+
+    void setX(int xpos) // for convenience
+        { xp = xpos; }
+
+    void setY(int ypos) // for convenience
+        { yp = ypos; }
+
     public final int manhattanLength() {
         return qtd_QPoint_manhattanLength(this);
     }
@@ -56,8 +62,8 @@ inline int &ry()
     QPoint opMulAssign(qreal c)
     { xp = qRound(xp*c); yp = qRound(yp*c); return *this; }
     
-    bool opEquals(ref QPoint p1, ref QPoint p2)
-    { return p1.xp == p2.xp && p1.yp == p2.yp; }
+    bool opEquals(ref QPoint p)
+    { return xp == p.xp && yp == p.yp; }
 
     QPoint opAdd(ref QPoint p)
     { return QPoint(this.xp+p.xp, this.yp+p.yp); }
@@ -170,8 +176,8 @@ inline qreal &QPointF::ry()
     QPointF opMulAssign(qreal c)
     { xp*=c; yp*=c; return *this; }
     
-    bool opEquals(ref QPointF p1, ref QPointF p2)
-    { return qFuzzyCompare(p1.xp, p2.xp) && qFuzzyCompare(p1.yp, p2.yp); }
+    bool opEquals(ref QPointF p)
+    { return qFuzzyCompare(xp, p.xp) && qFuzzyCompare(yp, p.yp); }
     
     QPointF opAdd(ref QPointF p)
     { return QPointF(this.xp+p.xp, this.yp+p.yp); }
