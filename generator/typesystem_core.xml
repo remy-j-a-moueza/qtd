@@ -382,6 +382,8 @@
   <rejection class="QSizeF"/>
   <rejection class="QPoint"/>
   <rejection class="QPointF"/>
+  <rejection class="QLine"/>
+  <rejection class="QLineF"/>
 
   <rejection class="QMdi"/>
   <rejection class="stdext"/>
@@ -1921,8 +1923,8 @@
 		-->
     </object-type>
 
-  <value-type name="QLine"/>
-  <value-type name="QLineF">
+  <value-type name="QLine" wrap="struct"/>
+  <value-type name="QLineF" wrap="struct">
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QLineF___" quote-before-line="}// class"/>
         </inject-code>
