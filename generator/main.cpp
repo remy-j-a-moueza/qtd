@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
     QString typesystemFileName;
     QString pp_file = ".preprocessed.tmp";
     QStringList rebuild_classes;
+    QString source_dir;
 
     QMap<QString, QString> args;
 
@@ -150,7 +151,12 @@ int main(int argc, char *argv[])
         }
     }
 
+    source_dir = args.value("source-directory");
     fileName = args.value("arg-1");
+    if (!source_dir.isEmpty())
+    {
+        fileName = source_dir + "/" + fileName;
+    }
 
     typesystemFileName = args.value("arg-2");
     if (args.contains("arg-3"))
@@ -172,11 +178,10 @@ int main(int argc, char *argv[])
 
     printf("Running the QtD Generator. Please wait while source files are being generated...\n");
 
-    if (!TypeDatabase::instance()->parseFile(typesystemFileName))
+    if (!TypeDatabase::instance()->parseFile(typesystemFileName, source_dir))
         qFatal("Cannot parse file: '%s'", qPrintable(typesystemFileName));
 
-
-    if (!Preprocess::preprocess(fileName, pp_file, args.value("include-paths"))) {
+    if (!Preprocess::preprocess(fileName, pp_file, args.value("include-paths"), source_dir, args.value("qt-include-directory"))) {
         fprintf(stderr, "Preprocessor failed on file: '%s'\n", qPrintable(fileName));
         return 1;
     }
@@ -212,8 +217,11 @@ void displayHelp(GeneratorSet* generatorSet) {
     printf("General:\n");
     printf(
            "  --cpp-shared                              \n"
+           "  --qt-include-directory                    \n"
+           "  --qt-directory                            \n"
+           "  --source-directory                        \n"
            "  --debug-level=[sparse|medium|full]        \n"
-           "  --d-target=[d1-tango|d2-phobos]                 \n"
+           "  --d-target=[d1-tango|d2-phobos]           \n"
            "  --dump-object-tree                        \n"
            "  --help, -h or -?                          \n"
            "  --no-suppress-warnings                    \n"

@@ -1,0 +1,1 @@
+build_example(t6 main.d)

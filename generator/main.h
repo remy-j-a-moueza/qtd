@@ -49,7 +49,8 @@
 
 struct Preprocess
 {
-    static bool preprocess(const QString &sourceFile, const QString &targetFile, const QString &commandLineIncludes = QString())
+    static bool preprocess(const QString &sourceFile, const QString &targetFile, const QString &commandLineIncludes = QString(),
+                           QString qtdir = QString(), QString qtdir_inc = QString())
     {
         rpp::pp_environment env;
         rpp::pp preprocess(env);
@@ -86,10 +87,12 @@ struct Preprocess
             includes += commandLineIncludes.split(path_splitter);
 
         // Include Qt
-        QString qtdir_inc = getenv ("QTDIR_INC");
-        QString qtdir = getenv ("QTDIR");
+        if (qtdir.isEmpty())
+            qtdir = getenv ("QTDIR");
+        if (qtdir_inc.isEmpty())
+            qtdir_inc = getenv ("QTDIR_INC");
         if (qtdir.isEmpty() && qtdir_inc.isEmpty()) {
-            qWarning("QTDIR and(or) QTDIR_INC environment variables not set. This may cause problems with finding the necessary include files.");
+            qWarning("QTDIR and QTDIR_INC environment variables not set. This may cause problems with finding the necessary include files.");
         } else {
             if (qtdir_inc.isEmpty())
                 qtdir_inc = qtdir + "/include";
@@ -100,7 +103,6 @@ struct Preprocess
             includes << (qtdir_inc + "/QtOpenGL");
             includes << qtdir_inc;
         }
-
 
         foreach (QString include, includes)
             preprocess.push_include_path(QDir::convertSeparators(include).toStdString());

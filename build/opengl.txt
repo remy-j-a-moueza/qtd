@@ -1,0 +1,19 @@
+##QTD_OPENGL += opengl/QGL opengl/gl opengl/glu opengl/glfuncs opengl/gltypes
+
+## Qt Lib name.
+set(lib_name QtOpenGL)
+
+set(link_cpp ${cpp_core_implib} ${cpp_gui_implib} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})
+
+set(link_d qtdcore)
+
+set(classes 
+	QGLWidget
+	QGLContext
+	QGLFormat
+	QGLColormap
+    )
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+  set(link_example opengl32 glu32)
+endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)

@@ -1924,7 +1924,7 @@
     </object-type>
 
   <value-type name="QLine" wrap="struct"/>
-  <value-type name="QLineF" wrap="struct">
+  <value-type name="QLineF" wrap="struct" >
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QLineF___" quote-before-line="}// class"/>
         </inject-code>

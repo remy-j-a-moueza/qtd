@@ -1,0 +1,5 @@
+add_subdirectory(itemviews)
+add_subdirectory(mainwindows)
+add_subdirectory(opengl)
+add_subdirectory(tutorials)
+add_subdirectory(widgets)

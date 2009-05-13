@@ -1186,7 +1186,7 @@ public:
     static QString globalNamespaceClassName(const TypeEntry *te);
     QString filename() const { return "typesystem.txt"; }
 
-    bool parseFile(const QString &filename, bool generate = true);
+    bool parseFile(const QString &filename, const QString &work_dir, bool generate = true);
 
 private:
     uint m_suppressWarnings : 1;

@@ -1,0 +1,1 @@
+build_example(t5 main.d)

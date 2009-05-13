@@ -1,0 +1,1 @@
+build_example(dockwidgets main.d mainwindow.d)

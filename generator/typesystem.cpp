@@ -138,8 +138,8 @@ class StackElement
 class Handler : public QXmlDefaultHandler
 {
 public:
-    Handler(TypeDatabase *database, bool generate)
-        : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass)
+    Handler(TypeDatabase *database, const QString &source_dir, bool generate)
+        : m_database(database), m_generate(generate ? TypeEntry::GenerateAll : TypeEntry::GenerateForSubclass), m_source_dir(source_dir)
     {
         m_current_enum = 0;
         current = 0;
@@ -215,6 +215,8 @@ private:
     FieldModificationList m_field_mods;
 
     QHash<QString, StackElement::ElementType> tagNames;
+
+    QString m_source_dir;
 };
 
 bool Handler::error(const QXmlParseException &e)
@@ -840,7 +842,7 @@ bool Handler::startElement(const QString &, const QString &n,
                     return false;
                 }
 
-                if (!m_database->parseFile(name, convertBoolean(attributes["generate"], "generate", true))) {
+                if (!m_database->parseFile(name, m_source_dir, convertBoolean(attributes["generate"], "generate", true))) {
                     m_error = QString("Failed to parse: '%1'").arg(name);
                     return false;
                 }
@@ -1512,16 +1514,21 @@ TypeDatabase::TypeDatabase() : m_suppressWarnings(true), m_includeEclipseWarning
     addRemoveFunctionToTemplates(this);
 }
 
-bool TypeDatabase::parseFile(const QString &filename, bool generate)
+bool TypeDatabase::parseFile(const QString &filename, const QString &source_dir, bool generate)
 {
-    QFile file(filename);
+    QString name;
+    if (source_dir.isEmpty())
+	name = filename;
+    else
+        name = source_dir + "/" + filename;
+    QFile file(name);
     Q_ASSERT(file.exists());
     QXmlInputSource source(&file);
 
     int count = m_entries.size();
 
     QXmlSimpleReader reader;
-    Handler handler(this, generate);
+    Handler handler(this, source_dir, generate);
 
     reader.setContentHandler(&handler);
     reader.setErrorHandler(&handler);

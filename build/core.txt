@@ -1,0 +1,52 @@
+## Qt Lib name.
+set (lib_name QtCore)
+## Libraries linked to the cpp part (is active only if CPP_SHARED == true).
+set (link_cpp  ${QT_QTCORE_LIBRARY})
+## Libraries linked to the d part (is active only if CPP_SHARED == true)..
+set (link_d )
+## Module specific cpp files.
+set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
+    qt_core/QPoint_shell qt_core/QPointF_shell
+    qt_core/QSize_shell qt_core/QSizeF_shell
+    qt_core/QLine_shell qt_core/QLineF_shell
+    qt_core/QString_shell qt_core/QVariant_shell
+    qt_core/QModelIndex_shell)
+## Module specific d files.
+set (d_files QGlobal qtd/Str QtDObject Signal d1/Signal qtd/ArrayOpsPrimitive
+    core/QPoint core/QPointF
+    core/QSize core/QSizeF
+    core/QLine core/QLineF
+    core/QString core/QVariant
+    core/QModelIndex)
+set (d_generated_files core/Qt)
+## Classes.
+set (classes 
+	QChildEvent
+	QCoreApplication
+	QEvent
+	QEventLoop
+	QObject
+	QTimerEvent
+	QTranslator
+	QRect	
+	QByteArray
+	QLocale
+	QDataStream
+	QMimeData
+	QIODevice
+	QRectF
+	QDateTime
+	QDate
+	QTime
+	QBitArray
+	QRegExp
+	QUrl
+	QAbstractItemModel
+	QAbstractFileEngine
+	QFile
+	QDir
+	QFileInfo
+	QTextStream
+	QTimer
+    )
+	
