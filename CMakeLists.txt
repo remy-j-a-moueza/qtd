@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 PROJECT(qtd CXX C)
 FIND_PACKAGE(Qt4 REQUIRED)
 
-include_directories(${QT_INCLUDES} include)
+include_directories(${QT_INCLUDES} include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 option(BUILD_QT_OPENGL "Build QtOpenGL" "ON")
 option(BUILD_EXAMPLES "Build examples" "ON")

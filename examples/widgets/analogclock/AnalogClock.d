@@ -64,26 +64,16 @@ public:
 
     void paintEvent(QPaintEvent event)
     {
-/*        static const QPoint hourHand[3] = {
+        static const QPoint[3] hourHand = [
             QPoint(7, 8),
             QPoint(-7, 8),
             QPoint(0, -40)
-        };
-        static const QPoint minuteHand[3] = {
+        ];
+        static const QPoint[3] minuteHand = [
             QPoint(7, 8),
             QPoint(-7, 8),
             QPoint(0, -70)
-        };
-*/
-        scope hourHand = new QPolygon;
-        hourHand.append(QPoint(7, 8));
-        hourHand.append(QPoint(-7, 8));
-        hourHand.append(QPoint(0, -40));
-
-        scope minuteHand = new QPolygon;
-        minuteHand.append(QPoint(7, 8));
-        minuteHand.append(QPoint(-7, 8));
-        minuteHand.append(QPoint(0, -70));
+        ];
 
         scope hourColor = new QColor(127, 0, 127);
         scope minuteColor = new QColor(0, 127, 127, 191);
