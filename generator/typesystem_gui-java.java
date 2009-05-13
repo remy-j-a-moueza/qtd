@@ -1084,6 +1084,13 @@ class QPainter___ extends QPainter {
         qtd_QPainter_drawPoints_nativepointerQPointF_int(nativeId, points.ptr, points.length);
     }
     
+    public final void drawRects(QRect[] rects) {
+        qtd_QPainter_drawRects_nativepointerQRect_int(nativeId, rects.ptr, rects.length);
+    }
+
+    public final void drawRects(QRectF[] rects) {
+        qtd_QPainter_drawRects_nativepointerQRectF_int(nativeId, rects.ptr, rects.length);
+    }
 /*
     public static QPaintDeviceInterface redirected(QPaintDeviceInterface device, qt.core.QPoint offset) {
         return redirected(device, offset == null ? null : offset.nativePointer());

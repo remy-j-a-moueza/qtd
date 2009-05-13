@@ -7277,13 +7277,18 @@
     </modify-function>
     
     <modify-function signature="drawRects(const QRect *, int)">
-        <remove/>
+        <access modifier="private"/>
     </modify-function>
     <modify-function signature="drawRects(const QRectF *, int)">
+        <access modifier="private"/>
+    </modify-function>
+    
+    <!-- removed stuff -->
+    <modify-function signature="drawRects(const QVector&lt;QRect&gt; &amp;)">
         <remove/>
     </modify-function>
     <modify-function signature="drawRects(const QVector&lt;QRectF&gt; &amp;)">
-        <rename to="drawRectsF"/>
+        <remove/>
     </modify-function>
 
     <modify-function signature="drawLines(const QVector&lt;QLine&gt; &amp;)">

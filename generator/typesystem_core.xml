@@ -382,6 +382,8 @@
   <rejection class="QSizeF"/>
   <rejection class="QPoint"/>
   <rejection class="QPointF"/>
+  <rejection class="QRect"/>
+  <rejection class="QRectF"/>
   <rejection class="QLine"/>
   <rejection class="QLineF"/>
 
@@ -851,25 +853,25 @@
         </inject-code>
     </value-type>
 
-  <value-type name="QRect">
-    <modify-function signature="getCoords(int*,int*,int*,int*)const"> <remove/> </modify-function>
+  <value-type name="QRect" wrap="struct">
+<!--    <modify-function signature="getCoords(int*,int*,int*,int*)const"> <remove/> </modify-function>
     <modify-function signature="getRect(int*,int*,int*,int*)const"> <remove/> </modify-function>
     <modify-function signature="operator&amp;=(QRect)"> <remove/> </modify-function>
     <modify-function signature="operator|=(QRect)"> <remove/> </modify-function>
     <modify-function signature="operator&amp;(QRect)const"> <remove/> </modify-function>
-    <modify-function signature="operator|(QRect)const"> <remove/> </modify-function>
+    <modify-function signature="operator|(QRect)const"> <remove/> </modify-function> -->
 
     <modify-function signature="intersect(const QRect&amp;)const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="unite(const QRect&amp;)const" remove="all"/> <!--### Obsolete in 4.3-->
   </value-type>
 
-  <value-type name="QRectF">
-    <modify-function signature="getCoords(double*,double*,double*,double*)const"> <remove/> </modify-function>
+  <value-type name="QRectF" wrap="struct">
+<!--    <modify-function signature="getCoords(double*,double*,double*,double*)const"> <remove/> </modify-function>
     <modify-function signature="getRect(double*,double*,double*,double*)const"> <remove/> </modify-function>
     <modify-function signature="operator&amp;=(QRectF)"> <remove/> </modify-function>
     <modify-function signature="operator|=(QRectF)"> <remove/> </modify-function>
     <modify-function signature="operator&amp;(QRectF)const"> <remove/> </modify-function>
-    <modify-function signature="operator|(QRectF)const"> <remove/> </modify-function>
+    <modify-function signature="operator|(QRectF)const"> <remove/> </modify-function> -->
 
     <modify-function signature="intersect(const QRectF&amp;)const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="unite(const QRectF&amp;)const" remove="all"/> <!--### Obsolete in 4.3-->
@@ -1924,7 +1926,7 @@
     </object-type>
 
   <value-type name="QLine" wrap="struct"/>
-  <value-type name="QLineF" wrap="struct" >
+  <value-type name="QLineF" wrap="struct">
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QLineF___" quote-before-line="}// class"/>
         </inject-code>

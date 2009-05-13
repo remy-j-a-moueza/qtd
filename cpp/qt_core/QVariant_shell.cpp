@@ -796,27 +796,23 @@ extern "C" DLL_PUBLIC QPointF qtd_QVariant_toPointF
 }
 
 // QVariant::toRect() const
-extern "C" DLL_PUBLIC void* qtd_QVariant_toRect
+extern "C" DLL_PUBLIC QRect qtd_QVariant_toRect
 (void* __this_nativeId)
 {
     QVariant_QtDShell *__qt_this = (QVariant_QtDShell *) __this_nativeId;
     QRect  __qt_return_value = __qt_this->toRect();
 
-    void* __java_return_value = (void*) new QRect(__qt_return_value);
-
-    return __java_return_value;
+    return __qt_return_value;
 }
 
 // QVariant::toRectF() const
-extern "C" DLL_PUBLIC void* qtd_QVariant_toRectF
+extern "C" DLL_PUBLIC QRectF qtd_QVariant_toRectF
 (void* __this_nativeId)
 {
     QVariant_QtDShell *__qt_this = (QVariant_QtDShell *) __this_nativeId;
     QRectF  __qt_return_value = __qt_this->toRectF();
 
-    void* __java_return_value = (void*) new QRectF(__qt_return_value);
-
-    return __java_return_value;
+    return __qt_return_value;
 }
 
 // QVariant::toRegExp() const

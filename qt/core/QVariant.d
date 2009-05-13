@@ -179,13 +179,13 @@ public class QVariant : QtDObject
 
 
     public this(QRect rect) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QRect(rect is null ? null : rect.nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QRect(&rect);
         super(__qt_return_value);
     }
 
 
     public this(QRectF rect) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QRectF(rect is null ? null : rect.nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QRectF(&rect);
         super(__qt_return_value);
     }
 
@@ -375,13 +375,11 @@ public class QVariant : QtDObject
     }
 
     public final QRect toRect() {
-        void* __qt_return_value = qtd_QVariant_toRect(nativeId);
-        return new QRect(__qt_return_value, false);
+        return qtd_QVariant_toRect(nativeId);
     }
 
     public final QRectF toRectF() {
-        void* __qt_return_value = qtd_QVariant_toRectF(nativeId);
-        return new QRectF(__qt_return_value, false);
+        return qtd_QVariant_toRectF(nativeId);
     }
 
     public final QRegExp toRegExp() {
@@ -517,8 +515,8 @@ private extern(C) long  qtd_QVariant_toLongLong_nativepointerbool(void* __this_n
  bool* ok0);
 private extern(C) QPoint  qtd_QVariant_toPoint(void* __this_nativeId);
 private extern(C) QPointF  qtd_QVariant_toPointF(void* __this_nativeId);
-private extern(C) void*  qtd_QVariant_toRect(void* __this_nativeId);
-private extern(C) void*  qtd_QVariant_toRectF(void* __this_nativeId);
+private extern(C) QRect  qtd_QVariant_toRect(void* __this_nativeId);
+private extern(C) QRectF  qtd_QVariant_toRectF(void* __this_nativeId);
 private extern(C) void*  qtd_QVariant_toRegExp(void* __this_nativeId);
 private extern(C) QSize  qtd_QVariant_toSize(void* __this_nativeId);
 private extern(C) QSizeF  qtd_QVariant_toSizeF(void* __this_nativeId);
