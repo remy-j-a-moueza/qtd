@@ -39,13 +39,13 @@ if (DC)
 	string(REGEX MATCH "LLVM-based D Compiler" is_ldc "${d_output}")   
 	if (is_ldc)
 	    exec_program(${DC} ARGS "--version" OUTPUT_VARIABLE d_output)
-	    string(REGEX MATCH "based on DMD v[0-9]\\.[0-9]+ and llvm [0-9]\\.[0-9]+" ldc_version "${d_output}")
+	    string(REGEX MATCH "based on DMD v[0-9]\\.[0-9]+" ldc_version "${d_output}")
 	    set(D_IS_LLVM true)
 	    if(ldc_version)
 		set(D_IS_LLVM true)
 		set(D_COMPILER_NAME "LLVM-based D Compiler")
-		string(REGEX REPLACE "based on DMD v([0-9])\\.[0-9]+ and llvm [0-9]\\.[0-9]+" "\\1" D_VERSION "${ldc_version}")
-		string(REGEX REPLACE "based on DMD v[0-9]\\.([0-9]+) and llvm [0-9]\\.[0-9]+" "\\1" D_FRONTEND "${ldc_version}")	    
+		string(REGEX REPLACE "based on DMD v([0-9])\\.[0-9]+" "\\1" D_VERSION "${ldc_version}")
+		string(REGEX REPLACE "based on DMD v[0-9]\\.([0-9]+)" "\\1" D_FRONTEND "${ldc_version}")	    
 	    else(ldc_version)
 		message(FATAL_ERROR "LDC compiler was found, but the version can not be processed")
 	    endif(ldc_version)
@@ -99,7 +99,6 @@ if(D_IS_MARS AND ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 else(D_IS_MARS AND ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set(D_FLAGS ${D_FLAGS} -L-L${CMAKE_BINARY_DIR}/lib)
 endif(D_IS_MARS AND ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-
 
 # System specifc settings.
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -420,34 +419,34 @@ foreach(package_big ${packages_big})
 	endforeach(link ${link_example})
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
 
-#     set(regexp_str "(${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
-#     foreach(source ${d_sources})
-# # 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
-# # 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
-# 	string(REGEX REPLACE ${regexp_str} "\\2" inc_path "${source}")
-# 	string(REGEX REPLACE ${regexp_str} "\\3" file_name "${source}")
-# 	set(interface_file_path ${CMAKE_BINARY_DIR}/include/${inc_path})
-# 	set(interface_file "${interface_file_path}/${file_name}.di")
-# 	if(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
-# 	    add_custom_command(OUTPUT "${interface_file}"
-# 			COMMAND "${DC}"
-# 			ARGS ${D_FLAGS} -o- -H -Hd${interface_file_path} ${source}
-# 			COMMENT "Generating header for ${source}"
-# 			DEPENDS ${source}
-# 			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-# 			)	    
-# 	else(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
-# 	    add_custom_command(OUTPUT "${interface_file}"
-# 			COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
-# 			COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
-# 			COMMAND ${CMAKE_COMMAND} -E copy ${source} ${interface_file}
-# 			COMMENT ""
-# 			DEPENDS ${source}
-# 			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-# 			)	    
-# 	endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
-# 	set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di)
-#     endforeach(source)
+    set(regexp_str "(${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
+    foreach(source ${d_sources})
+# 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
+# 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+	string(REGEX REPLACE ${regexp_str} "\\2" inc_path "${source}")
+	string(REGEX REPLACE ${regexp_str} "\\3" file_name "${source}")
+	set(interface_file_path ${CMAKE_BINARY_DIR}/include/${inc_path})
+	set(interface_file "${interface_file_path}/${file_name}.di")
+	if(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+	    add_custom_command(OUTPUT "${interface_file}"
+			COMMAND "${DC}"
+			ARGS ${D_FLAGS} -o- -H -Hd${interface_file_path} ${source}
+			COMMENT "Generating header for ${source}"
+			DEPENDS ${source}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			)	    
+	else(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+	    add_custom_command(OUTPUT "${interface_file}"
+			COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
+			COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
+			COMMAND ${CMAKE_COMMAND} -E copy ${source} ${interface_file}
+			COMMENT ""
+			DEPENDS ${source}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			)	    
+	endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+	set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di)
+    endforeach(source)
  endforeach(package_big ${packages_big}) 
 # add_custom_target(generate_headers DEPENDS ${interfaces_list})
 
