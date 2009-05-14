@@ -63,7 +63,9 @@ if(D_IS_MARS)
 elseif(D_IS_LLVM)
     option(SINGLE_D_OBJECT "Build all d sources to one object file" "OFF")
     if(SINGLE_D_OBJECT)
-	set(D_FLAGS ${D_FLAGS} -singleobj)
+	message(STATUS "LDC not support build multiple source files in one .obj file")
+	set(SINGLE_D_OBJECT "OFF") 
+	#set(D_FLAGS ${D_FLAGS} -singleobj)
     endif(SINGLE_D_OBJECT)
 endif(D_IS_MARS)
 
@@ -337,6 +339,11 @@ foreach(package_big ${packages_big})
     endforeach(d_source)
     foreach(d_source ${d_generated_files})
 	set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${d_source}.d)
+	get_filename_component(path ${d_source}.d PATH)
+	get_filename_component(path ${d_source}.d NAME_WE)
+	if(NOT GENERATE_DI_FILES)
+	    install(FILES ${d_source} DESTINATION include/d/qtd/${path} RENAME ${class}.di)
+	endif(NOT GENERATE_DI_FILES)
     endforeach(d_source)
     foreach (cpp_source ${cpp_files})
 	set(cpp_sources ${cpp_sources} ${CMAKE_SOURCE_DIR}/cpp/${cpp_source}.cpp)
@@ -347,13 +354,17 @@ foreach(package_big ${packages_big})
 	set(cpp_sources ${cpp_sources} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp) 
 	add_sources_for_generating(${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp)	
 	add_sources_for_generating(${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)
+	if(NOT GENERATE_DI_FILES)
+	    install(FILES ${d_source} DESTINATION include/d/qtd/${package} RENAME ${class}.di)
+	endif(NOT GENERATE_DI_FILES)
     endforeach(class)
 
     ## Link CPP library.
-    set(lib_name ${D_LIB_PREFIX}qtd${package}${D_LIB_SUFFIX})    
     add_library(cpp_${package} SHARED ${cpp_sources})
 
     ## Link D library.
+    set(lib_name ${D_LIB_PREFIX}qtd${package}${D_LIB_SUFFIX})    
+    set(lib lib/${lib_name})  
     compile_d_files(${package}_dobjs objects  ${d_sources})
     set(d_objs ${d_objs} ${objects}) 
     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -374,31 +385,33 @@ foreach(package_big ${packages_big})
 			COMMENT "Creating implib ${lib_name}"
 		    )
 	add_custom_command(
-			OUTPUT "${lib_name}"
+			OUTPUT "${lib}"
 			COMMAND "${DC}"
-			ARGS -lib ${d_objs} ${d_implib} -oflib/${lib_name}
+			ARGS -lib ${d_objs} ${d_implib} -of${lib}
 			DEPENDS ${d_objs} ${d_implib}
 			COMMENT "Linking ${lib_name}"
 		    )
+	install(FILES ${cpp_lib} DESTINATION lib)
     else(${CMAKE_SYSTEM_NAME} STREQUAL Linux)   
 	set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
 	foreach(cpp_source ${cpp_sources})
 	    set(cpp_source ${cpp_source})
 	    obj_path(cpp_source)
-	    set(cpp_objs ${cpp_objs} CMakeFiles/cpp_${package}.dir/${cpp_source}.o)
+	    set(cpp_objs ${cpp_objs} CMakeFiles/cpp_${package}.dir/${cpp_source}${CMAKE_CXX_OUTPUT_EXTENSION})
 	endforeach(cpp_source)	
 	add_custom_command(
-			OUTPUT "${lib_name}"
+			OUTPUT "${lib}"
 			COMMAND "${CMAKE_AR}"
-			ARGS rcs lib/${lib_name} ${d_objs} ${cpp_objs}
+			ARGS rcs ${lib} ${d_objs} ${cpp_objs}
 			DEPENDS ${d_objs} cpp_${package}
 			COMMENT "Linking ${lib_name}"
 		    )
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows) 
+    install(FILES ${lib} DESTINATION lib)
 
     ## Dependences.
     add_dependencies(cpp_${package} dgen)
-    add_custom_target(${package} DEPENDS ${lib_name})
+    add_custom_target(${package} DEPENDS ${lib})
     foreach(depend ${depends})
 	add_dependencies(cpp_${package} cpp_${depend})
 	add_dependencies(${package} ${depend})
@@ -424,36 +437,41 @@ foreach(package_big ${packages_big})
 	endforeach(link ${link_example})
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
 
-    set(regexp_str "(${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
-    foreach(source ${d_sources})
-# 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
-# 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
-	string(REGEX REPLACE ${regexp_str} "\\2" inc_path "${source}")
-	string(REGEX REPLACE ${regexp_str} "\\3" file_name "${source}")
-	set(interface_file_path ${CMAKE_BINARY_DIR}/include/${inc_path})
-	set(interface_file "${interface_file_path}/${file_name}.di")
-	if(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
-	    add_custom_command(OUTPUT "${interface_file}"
-			COMMAND "${DC}"
-			ARGS ${D_FLAGS} -o- -H -Hd${interface_file_path} ${source}
-			COMMENT "Generating header for ${source}"
-			DEPENDS ${source}
-			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-			)	    
-	else(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
-	    add_custom_command(OUTPUT "${interface_file}"
-			COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
-			COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
-			COMMAND ${CMAKE_COMMAND} -E copy ${source} ${interface_file}
-			COMMENT ""
-			DEPENDS ${source}
-			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-			)	    
-	endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
-	set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di)
-    endforeach(source)
- endforeach(package_big ${packages_big}) 
-# add_custom_target(generate_headers DEPENDS ${interfaces_list})
+    if(GENERATE_DI_FILES)
+      set(regexp_str "(${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
+      foreach(source ${d_sources})
+  # 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
+  # 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+	  string(REGEX REPLACE ${regexp_str} "\\2" inc_path "${source}")
+	  string(REGEX REPLACE ${regexp_str} "\\3" file_name "${source}")
+	  set(interface_file_path ${CMAKE_BINARY_DIR}/d/${inc_path})
+	  set(interface_file "${interface_file_path}/${file_name}.di")
+	  if(NOT "${file_name}" STREQUAL "QGlobal")
+	      add_custom_command(OUTPUT "${interface_file}"
+			  COMMAND "${DC}"
+			  ARGS ${D_FLAGS} -o- -H -Hd${interface_file_path} ${source}
+			  COMMENT "Generating header for ${source}"
+			  DEPENDS ${source}
+			  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			  )		   
+	  else(NOT "${file_name}" STREQUAL "QGlobal") ## DMD frontend crash on this file.
+	      add_custom_command(OUTPUT "${interface_file}"
+			  COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
+			  COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
+			  COMMAND ${CMAKE_COMMAND} -E copy ${source} ${interface_file}
+			  COMMENT ""
+			  DEPENDS ${source}
+			  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			  )	    
+	  endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+	  set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di) 
+	  install(FILES ${interface_file} DESTINATION include/d/${inc_path})
+      endforeach(source)
+    endif(GENERATE_DI_FILES)
+endforeach(package_big ${packages_big})
+if(GENERATE_DI_FILES) 
+    add_custom_target(generate_headers ALL DEPENDS ${interfaces_list})
+endif(GENERATE_DI_FILES)
 
 ##--------------------------------------------
 ## Build other parts of the QtD.
