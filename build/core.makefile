@@ -1,11 +1,11 @@
 ifeq ($(D_VERSION), 1)
-D_PATH = d1
+D_PATH = d1/qt
 else
-D_PATH = d2
+D_PATH = d2/qt
 endif
 
 ##--------------------------
-QTD_CORE += QGlobal qtd/Str core/Qt qtd/ArrayOpsPrimitive QtDObject Signal $(D_PATH)/Signal
+QTD_CORE += QGlobal qtd/Str core/Qt qtd/ArrayOpsPrimitive QtDObject $(D_PATH)/Signal
 ##--------------------------
 
 ## Qt Lib name.
