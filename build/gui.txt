@@ -209,4 +209,5 @@ set(classes
 	QMdiArea
 	QUndoCommand
 	QStandardItemModel
+    QDialogButtonBox
 )

@@ -225,4 +225,5 @@ gui_classes = \
     QInputMethodEvent_Attribute \
     QMdiArea \
     QUndoCommand \
-    QStandardItemModel
+    QStandardItemModel \
+    QDialogButtonBox
