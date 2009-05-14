@@ -2376,6 +2376,19 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 */
     s << "}" << endl;
 
+    /* ---------------- injected free code ----------------*/
+    const ComplexTypeEntry *class_type = d_class->typeEntry();
+    Q_ASSERT(class_type);
+
+    CodeSnipList code_snips = class_type->codeSnips();
+    foreach (const CodeSnip &snip, code_snips) {
+        if (!d_class->isInterface() && snip.language == TypeSystem::TargetLangFreeCode) {
+            s << endl;
+            snip.formattedCode(s, INDENT);
+        }
+    }
+    /* --------------------------------------------------- */
+
     interfaces = d_class->interfaces();
     if (!interfaces.isEmpty()) {
         for (int i=0; i<interfaces.size(); ++i) {

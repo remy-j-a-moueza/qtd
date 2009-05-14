@@ -1315,6 +1315,7 @@ bool Handler::startElement(const QString &, const QString &n,
                 static QHash<QString, TypeSystem::Language> languageNames;
                 if (languageNames.isEmpty()) {
                     languageNames["java"] = TypeSystem::TargetLangCode;
+                    languageNames["java-free"] = TypeSystem::TargetLangFreeCode;
                     languageNames["native"] = TypeSystem::NativeCode;
                     languageNames["shell"] = TypeSystem::ShellCode;
                     languageNames["shell-declaration"] = TypeSystem::ShellDeclaration;

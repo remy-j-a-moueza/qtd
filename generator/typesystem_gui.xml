@@ -1050,19 +1050,61 @@
 
   <value-type name="QTextListFormat" delete-in-main-thread="yes"/>
   <value-type name="QPolygon">
+    <extra-includes>
+        <include file-name="qt.core.QPoint" location="java"/>
+    </extra-includes>
+    
     <modify-function signature="QPolygon(int, const int *)" remove="all"/>
     <modify-function signature="operator+(QVector&lt;QPoint&gt;)const" remove="all"/>
     <modify-function signature="operator&lt;&lt;(QPoint)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(QVector&lt;QPoint&gt;)" remove="all"/>
+    
+    <inject-code class="java">
+    public final void insert(int i, QPoint t) {
+        qtd_QPolygon_insert_int_QPoint(nativeId, i, t);
+    }
+    
+    public final void insert(int i, int n, QPoint t) {
+        qtd_QPolygon_insert_int_int_QPoint(nativeId, i, n, t);
+    }
+    </inject-code>
+    <inject-code class="java-free">
+private extern(C) void  qtd_QPolygon_insert_int_QPoint(void* __this_nativeId,
+ int i0,
+ QPoint t1);
+private extern(C) void  qtd_QPolygon_insert_int_int_QPoint(void* __this_nativeId,
+ int i0,
+ int n1,
+ QPoint t2);
+    </inject-code>
+    <inject-code class="native">
+// QPolygon::insert(int i, const QPoint &amp; t)
+extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_QPoint
+(void* __this_nativeId,
+ int i0,
+ QPoint t1)
+{
+    QPolygon *__qt_this = (QPolygon *) __this_nativeId;
+    __qt_this->insert((int )i0, (const QPoint&amp; )t1);
 
+}
 
-  
-        <extra-includes>
-            <include file-name="qt.core.QPoint" location="java"/>
-        </extra-includes>
-        <inject-code>
-            <import-file name="typesystem_gui-java.java" quote-after-line="class QPolygon___" quote-before-line="}// class"/>
-        </inject-code>
+// QPolygon::insert(int i, int n, const QPoint &amp; t)
+extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
+(void* __this_nativeId,
+ int i0,
+ int n1,
+ QPoint t2)
+{
+    QPolygon *__qt_this = (QPolygon *) __this_nativeId;
+    __qt_this->insert((int )i0, (int )n1, (const QPoint&amp; )t2);
+
+}
+    </inject-code>
+    
+    <inject-code>
+        <import-file name="typesystem_gui-java.java" quote-after-line="class QPolygon___" quote-before-line="}// class"/>
+    </inject-code>
 <!-- qtd2
         <inject-code class="native">
       extern "C" JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QPolygon_add_1private)
@@ -1102,6 +1144,48 @@
       }
         </inject-code>
 		-->
+    <inject-code class="java">
+    public final void insert(int i, QPointF t) {
+        qtd_QPolygonF_insert_int_QPointF(nativeId, i, t);
+    }
+
+    public final void insert(int i, int n, QPointF t) {
+        qtd_QPolygonF_insert_int_int_QPointF(nativeId, i, n, t);
+    }
+    </inject-code>
+    <inject-code class="java-free">
+private extern(C) void  qtd_QPolygonF_insert_int_QPointF(void* __this_nativeId,
+ int i0,
+ QPointF t1);
+private extern(C) void  qtd_QPolygonF_insert_int_int_QPointF(void* __this_nativeId,
+ int i0,
+ int n1,
+ QPointF t2);
+    </inject-code>
+    <inject-code class="native">
+// QPolygonF::insert(int i, const QPointF &amp; t)
+extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_QPointF
+(void* __this_nativeId,
+ int i0,
+ QPointF t1)
+{
+    QPolygonF *__qt_this = (QPolygonF *) __this_nativeId;
+    __qt_this->insert((int )i0, (const QPointF&amp; )t1);
+
+}
+
+// QPolygonF::insert(int i, int n, const QPointF &amp; t)
+extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
+(void* __this_nativeId,
+ int i0,
+ int n1,
+ QPointF t2)
+{
+    QPolygonF *__qt_this = (QPolygonF *) __this_nativeId;
+    __qt_this->insert((int )i0, (int )n1, (const QPointF&amp; )t2);
+
+}
+    </inject-code>
     </value-type>
 
   <value-type name="QIcon" delete-in-main-thread="yes">

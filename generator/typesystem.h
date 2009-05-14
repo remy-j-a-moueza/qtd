@@ -95,6 +95,7 @@ namespace TypeSystem {
         NoLanguage          = 0x0000,
         TargetLangCode      = 0x0001,
         NativeCode          = 0x0002,
+        TargetLangFreeCode  = 0x0003,
         ShellCode           = 0x0004,
         ShellDeclaration    = 0x0008,
         PackageInitializer  = 0x0010,

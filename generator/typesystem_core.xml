@@ -2394,7 +2394,8 @@
         <include file-name="QVarLengthArray" location="global"/>
     </extra-includes>
 
-  
+
+
       <inject-code class="java">
           <import-file name="typesystem_core-java.java" quote-after-line="class QObject___" quote-before-line="}// class"/>
       </inject-code>
