@@ -1,20 +1,4 @@
- 
-## Qt Lib name.
-set(lib_name QtGui)
-
-## Libraries linked to the cpp part (is active only if CPP_SHARED == true).
-set(link_cpp ${cpp_core_implib} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
-
-## Libraries linked to the d part (is active only if CPP_SHARED == true)..
-set(link_d libqtdcore.a)
-
-## Module specific cpp files.
-set(cpp_files)
-
-## Module specific d files.
-set(d_files)
-
-## Classes.
+set(link_cpp cpp_core ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
 set(classes
 	QPushButton
 	QFileIconProvider

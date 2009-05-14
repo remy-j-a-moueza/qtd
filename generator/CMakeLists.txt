@@ -187,14 +187,6 @@ foreach(package ${packages})
     set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml)
 endforeach(package ${packages})
 
-MACRO(MAKE_WINDOWS_PATH pathname)
-    # An extra \\ escape is necessary to get a \ through CMake's processing.
-    STRING(REPLACE "/" "\\" ${pathname} "${${pathname}}")
-    # Enclose with UNESCAPED quotes.  This means we need to escape our
-    # quotes once here, i.e. with \"
-    SET(${pathname} \"${${pathname}}\")
-ENDMACRO(MAKE_WINDOWS_PATH)
-    
 foreach(package ${packages})   
     set(dgen_impl ${CMAKE_BINARY_DIR}/cpp/qt_${package}/qt_${package}.pri)       
     break(package ${packages})  

@@ -1,7 +1,4 @@
-set(lib_name QtSvg)
-
-set(link_cpp qtdcore_cpp ${qt_core_lib_name} ${qt_gui_lib_name})
-set(link_d qtdcore)
+set(link_cpp cpp_core ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} )
 
 set(classes
 	QSvgWidget
