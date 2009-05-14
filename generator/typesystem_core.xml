@@ -1183,7 +1183,13 @@
   <interface-type name="QFactoryInterface" java-name="QAbstractFactory"/>
 
   <value-type name="QByteArray">
-
+    
+    <modify-function signature="at(int)const">
+        <modify-argument index="return">
+            <replace-type modified-type="ubyte"/>
+        </modify-argument>
+    </modify-function>
+    
     <extra-includes>
         <include file-name="QNoImplicitBoolCast" location="global"/>
     </extra-includes>

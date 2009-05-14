@@ -264,14 +264,19 @@ QByteArray jniName(const QString &name) {
 
 QString CppImplGenerator::jniReturnName(const AbstractMetaFunction *java_function, uint options, bool d_export)
 {
-    QString return_type = translateType(java_function->type(), EnumAsInts, d_export);
+    AbstractMetaType *f_type = java_function->type();
+
+    QString return_type = translateType(f_type, EnumAsInts, d_export);
     QString new_return_type = java_function->typeReplaced(0);
     if (!new_return_type.isEmpty()) {
-        return_type = jniName(new_return_type);
+        if(f_type && f_type->isPrimitive()) {
+            if (d_export)
+                return_type = new_return_type;
+        } else
+            return_type = jniName(new_return_type);
     }
 
     // qtd
-    AbstractMetaType *f_type = java_function->type();
     if (f_type) {
         if (f_type->name() == "QModelIndex")
             return_type = "void";
