@@ -11,6 +11,7 @@ include_directories(${QT_INCLUDES} include ${CMAKE_CURRENT_BINARY_DIR}/include)
 ## Options.
 option(BUILD_QT_OPENGL "Build QtOpenGL" "ON")
 option(BUILD_EXAMPLES "Build examples" "ON")
+option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
 
 ## Packages list.
 set(packages_big Core Gui)
@@ -58,9 +59,12 @@ else (DC)
 endif (DC)
 
 if(D_IS_MARS)
-    option(COMBINED_OBJECT_FILE "Build all d sources to one object file" "ON")
+    option(SINGLE_D_OBJECT "Build all d sources to one object file" "ON")
 elseif(D_IS_LLVM)
-    option(COMBINED_OBJECT_FILE "Build all d sources to one object file" "OFF")
+    option(SINGLE_D_OBJECT "Build all d sources to one object file" "OFF")
+    if(SINGLE_D_OBJECT)
+	set(D_FLAGS ${D_FLAGS} -singleobj)
+    endif(SINGLE_D_OBJECT)
 endif(D_IS_MARS)
 
 # Check D compiler version
@@ -69,8 +73,10 @@ if(D_VERSION EQUAL "1")
 	message(STATUS "Minimum required version of D compiler is 1.041 (or compiler based on this version)")
     endif(D_FRONTEND LESS "041")
     set(D_TARGET d1-tango)
+    #set(D_FLAGS ${D_FLAGS} -I${CMAKE_SOURCE_DIR}/qtd/d1)
 elseif(D_VERSION EQUAL "2")
     set(D_TARGET ) ## TODO: hm... I don`t known this parameter for D2 ^(
+    #set(D_FLAGS ${D_FLAGS} -I${CMAKE_SOURCE_DIR}/qtd/d2)
 endif(D_VERSION EQUAL "1")
 
 # Debug and release flags.
@@ -79,21 +85,21 @@ if (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
    #set( SUFFIXLIB "${SUFFIXLIB}-debug" )
    #set( SUFFIXBIN "${SUFFIXBIN}-debug" )
    add_definitions(-DDEBUG)
-   set(D_FLAGS -g -gc -debug)
+   set(D_FLAGS ${D_FLAGS} -g -gc -debug)
 else (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
    #set(CMAKE_BUILD_TYPE Release)
     add_definitions(-UNO_DEBUG)
-    set(D_FLAGS -O -release -inline)
+    set(D_FLAGS ${D_FLAGS} -O -release -inline)
     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
       set(D_FLAGS ${D_FLAGS} -L/subsystem:windows)
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)   
 endif (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])  
 set(D_FLAGS ${D_FLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR})
-if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows AND NOT D_IS_MARS)
+if(NOT (${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS))
     set(D_FLAGS ${D_FLAGS} -L-L${CMAKE_BINARY_DIR}/lib)
-endif(NOT ${CMAKE_SYSTEM_NAME} STREQUAL Windows AND NOT D_IS_MARS)
+endif(NOT (${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS))
 
-
+# System specifc settings.
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
     set(implib implib)
     find_program(IMPLIB ${implib})
@@ -151,7 +157,7 @@ endmacro(MAKE_NATIVE_PATH)
 ## Example output:
 ##	-- CMakeFiles/target.dir/main.d.obj
 macro(OBJ_PATH path)
-    unset(test)
+    set(test)
     string(REGEX MATCH "${CMAKE_CURRENT_BINARY_DIR}/.*" test "${${path}}")    
     if(NOT ${test} EQUAL "")
 	string(LENGTH "${CMAKE_CURRENT_BINARY_DIR}" first)
@@ -177,10 +183,10 @@ endmacro(OBJ_PATH)
 ## objects_list -- created object files.
 ## params -- sources files.
 macro(compile_d_files target objects_list)
-    unset(${objects_list})
+    set(${objects_list})
     set(tmp_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${target}.dir)
     file(MAKE_DIRECTORY ${tmp_dir})
-    if(NOT COMBINED_OBJECT_FILE)
+    if(NOT SINGLE_D_OBJECT)
 	foreach (d_source_p ${ARGN})
 	    ## TODO: why find_file command work wrong?
 	    find_file(d_source_p ${d_source_p} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
@@ -201,7 +207,7 @@ macro(compile_d_files target objects_list)
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		    )
 	endforeach(d_source_p)
-    else(NOT COMBINED_OBJECT_FILE)
+    else(NOT SINGLE_D_OBJECT)
 	set(${objects_list} ${tmp_dir}/${target}${D_OBJECT_SUFFIX})
 	set(d_obj_out ${${objects_list}})
 	obj_path(d_obj_out)
@@ -218,7 +224,7 @@ macro(compile_d_files target objects_list)
 		    DEPENDS ${ARGN}
 		    COMMENT ""
 		    )
-    endif(NOT COMBINED_OBJECT_FILE)
+    endif(NOT SINGLE_D_OBJECT)
     add_custom_target(${target} DEPENDS "${${objects_list}}")
 endmacro(compile_d_files objects_list)
 
@@ -231,17 +237,17 @@ endmacro(compile_d_files objects_list)
 ## Usage:
 ##	build_example(ExampleName PACKAGES QtCore QtGui QtXml  main.d another_d_file.d)
 macro(build_example name)
-    unset(is_sources)
-    unset(is_libs)
+    set(is_sources)
+    set(is_libs)
     set(qtd_libs ${core_lib_param} ${gui_lib_param})
     foreach(param ${ARGN})
 	if(is_libs)		
 	    string(REGEX REPLACE "Qt([A-Za-z0-9])" "\\1" param_package "${param}")	
 	    if(${param_package} STREQUAL ${param})
-		unset(is_libs)
+		set(is_libs)
 		set(is_sources 1)
 	    else(${param_package} STREQUAL ${param})
-		unset(is_founded)
+		set(is_founded)
 		foreach(package_big ${packages_big})
 		    string(TOLOWER ${package_big} package)  		
 		    if(${param_package} STREQUAL ${package_big})
@@ -277,12 +283,11 @@ macro(build_example name)
     ## Bug fix: Reverse libs for ldc.
     if(D_IS_LLVM)
       set(qtd_libs_tmp ${qtd_libs}) 
-      unset(qtd_libs)
+      set(qtd_libs)
       foreach(libs ${qtd_libs_tmp})
 	  set(qtd_libs ${libs} ${qtd_libs})
       endforeach(libs ${qtd_libs_tmp})
     endif(D_IS_LLVM)
-
     add_custom_command(OUTPUT "${output}"
 		    COMMAND "${DC}"
 		    ARGS ${D_FLAGS} ${libs_path} ${qtd_libs} ${objects} 
@@ -306,18 +311,18 @@ link_directories(${CMAKE_BINARY_DIR}/CMakeFiles)
 foreach(package_big ${packages_big}) 
     string(TOLOWER ${package_big} package) 
     ## Loading settings for package.
-    unset(d_objs)
-    unset(cpp_objs)
-    unset(d_sources)
-    unset(cpp_sources)
-    unset(lib_name)
-    unset(link_cpp)
-    unset(link_d)
-    unset(cpp_files)
-    unset(d_files)
-    unset(classes)
-    unset(d_generated_files)
-    unset(link_example)
+    set(d_objs)
+    set(cpp_objs)
+    set(d_sources)
+    set(cpp_sources)
+    set(lib_name)
+    set(link_cpp)
+    set(link_d)
+    set(cpp_files)
+    set(d_files)
+    set(classes)
+    set(d_generated_files)
+    set(link_example)
     include (${CMAKE_SOURCE_DIR}/build/${package}.txt)    
 
     ## Loading package sources list.
@@ -333,9 +338,10 @@ foreach(package_big ${packages_big})
     set(classes ArrayOps ${classes})
     foreach(class ${classes})
 	set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)	
-	set(cpp_sources ${cpp_sources} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp)	
+	set(cpp_sources ${cpp_sources} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp) 
+	add_sources_for_generating(${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp)	
+	add_sources_for_generating(${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)
     endforeach(class)
-    add_sources_for_generating(${cpp_sources})
 
     ## Link CPP library.
     set(lib_name ${D_LIB_PREFIX}qtd${package}${D_LIB_SUFFIX})    
@@ -411,7 +417,37 @@ foreach(package_big ${packages_big})
 	    set(${package}_lib_param ${${package}_lib_param} ${link})
 	endforeach(link ${link_example})
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
-endforeach(package_big ${packages_big}) 
+
+#     set(regexp_str "(${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
+#     foreach(source ${d_sources})
+# # 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
+# # 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+# 	string(REGEX REPLACE ${regexp_str} "\\2" inc_path "${source}")
+# 	string(REGEX REPLACE ${regexp_str} "\\3" file_name "${source}")
+# 	set(interface_file_path ${CMAKE_BINARY_DIR}/include/${inc_path})
+# 	set(interface_file "${interface_file_path}/${file_name}.di")
+# 	if(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+# 	    add_custom_command(OUTPUT "${interface_file}"
+# 			COMMAND "${DC}"
+# 			ARGS ${D_FLAGS} -o- -H -Hd${interface_file_path} ${source}
+# 			COMMENT "Generating header for ${source}"
+# 			DEPENDS ${source}
+# 			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+# 			)	    
+# 	else(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+# 	    add_custom_command(OUTPUT "${interface_file}"
+# 			COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
+# 			COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
+# 			COMMAND ${CMAKE_COMMAND} -E copy ${source} ${interface_file}
+# 			COMMENT ""
+# 			DEPENDS ${source}
+# 			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+# 			)	    
+# 	endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+# 	set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di)
+#     endforeach(source)
+ endforeach(package_big ${packages_big}) 
+# add_custom_target(generate_headers DEPENDS ${interfaces_list})
 
 ##--------------------------------------------
 ## Build other parts of the QtD.

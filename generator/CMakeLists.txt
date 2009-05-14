@@ -184,7 +184,8 @@ add_executable(generator ${all_srcs} )
 target_link_libraries(generator ${libs})
 
 foreach(package ${packages})   
-    set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml)
+    set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml
+	    ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}-java.java)
 endforeach(package ${packages})
 
 foreach(package ${packages})   
