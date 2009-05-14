@@ -212,15 +212,20 @@ macro(compile_d_files target objects_list)
 	set(${objects_list} ${tmp_dir}/${target}${D_OBJECT_SUFFIX})
 	set(d_obj_out ${${objects_list}})
 	obj_path(d_obj_out)
-	set(parameters_list_file ${tmp_dir}/parameters)
 	set(parameters ${D_FLAGS} -c ${ARGN} -of${${objects_list}})
-	file(REMOVE ${parameters_list_file})
-	foreach(arg ${parameters})
-	    file(APPEND ${parameters_list_file} "${arg}\n")
-	endforeach(arg)
+	set(parameters_list_file ${tmp_dir}/parameters)
+	if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)	
+	    file(REMOVE ${parameters_list_file})
+	    foreach(arg ${parameters})
+		file(APPEND ${parameters_list_file} "${arg}\n")
+	    endforeach(arg)
+	    set(param @${parameters_list_file})
+	elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+	    set(param ${parameters})
+	endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 	add_custom_command(OUTPUT "${${objects_list}}"
 		    COMMAND "${DC}"
-		    ARGS @${parameters_list_file}
+		    ARGS ${param}
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		    DEPENDS ${ARGN}
 		    COMMENT ""
