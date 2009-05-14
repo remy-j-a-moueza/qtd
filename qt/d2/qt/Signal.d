@@ -9,16 +9,19 @@
  *  (See accompanying file boost-license-1.0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
  *
  */
-module qt.d1.Signal;
+module qt.Signal;
 
 public import qt.QGlobal;
-import tango.core.Exception;
-import tango.core.Traits;
-import tango.core.Thread;
-import tango.stdc.stdlib : crealloc = realloc, cfree = free;
-import tango.stdc.string : memmove;
+public import std.metastrings;
+import core.stdc.stdlib : crealloc = realloc, cfree = free;
+import core.stdc.string : memmove;
+import
+    std.traits,
+    core.thread;
 
-debug import tango.io.Stdout;
+
+
+debug import std.stdio;
 
 private: // private by default
 
@@ -49,37 +52,6 @@ unittest
     cfree(a.ptr);
 }
 
-// TODO: This one should be replaced with an appropriate library function
-char[] __toString(long v)
-{
-    if (v == 0)
-        return "0";
-
-    char[] ret;
-
-    bool neg;
-    if (v < 0)
-    {
-        neg = true;
-        v = -v;
-    }
-
-    while (v != 0)
-    {
-        ret = cast(char)(v % 10 + '0') ~ ret;
-        v = cast(long)(v / 10);
-    }
-
-    if (neg)
-        ret = "-" ~ ret;
-
-    return ret;
-}
-
-template ToString(long i)
-{
-    const string ToString = __toString(i);
-}
 
 //TODO: should be in the standard library
 struct STuple(A...)
@@ -105,7 +77,7 @@ void move(T)(ref T[] a, size_t src, size_t dest, size_t length)
 
 public class SignalException : Exception
 {
-    this(char[] msg)
+    this(string msg)
     {
         super(msg);
     }
@@ -218,14 +190,6 @@ struct Slot(R)
     }
     else
         static const isDelegate = false;
-
-    static typeof(*this) opCall(Receiver r, Dg c)
-    {
-        typeof(*this) ret;
-        ret.receiver = r;
-        ret.invoker = c;
-        return ret;
-    }
 
     debug string toString()
     {
@@ -814,9 +778,13 @@ template CheckSlotImpl(Slot, int i, A...)
     alias ParameterTupleOf!(Slot) SlotArgs;
     static if (i < SlotArgs.length)
     {
-        static assert (is(SlotArgs[i] : A[i]), "Argument " ~ __toString(i) ~
+        static assert (is(SlotArgs[i] : A[i]), "Argument " ~ ToString!(i) ~
             ":" ~ A[i].stringof ~ " of signal " ~ A.stringof ~ " is not implicitly convertible to parameter "
-            ~ SlotArgs[i].stringof ~ " of slot " ~ SlotArgs.stringof);
+
+
+
+
+                       ~ SlotArgs[i].stringof ~ " of slot " ~ SlotArgs.stringof);
         alias CheckSlotImpl!(Slot, i + 1, A) next;
     }
 }
