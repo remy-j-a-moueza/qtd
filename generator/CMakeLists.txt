@@ -261,13 +261,24 @@ add_custom_target(dgen COMMENT "")
 
 macro(add_sources_for_generating)
     foreach(dgen_impl ${ARGN})
+	set(parameters ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
+							--source-directory=${CMAKE_SOURCE_DIR}/generator 
+							qtjambi_masterinclude.h  
+							${dgen_build_conf})
+	set(parameters_list_file ${CMAKE_BINARY_DIR}/CMakeFiles/dgen_parameters)
+	if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)	
+	    file(REMOVE ${parameters_list_file})
+	    foreach(arg ${parameters})
+		file(APPEND ${parameters_list_file} "${arg}\n")
+	    endforeach(arg)
+	    set(param @${parameters_list_file})
+	elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+	    set(param ${parameters})
+	endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 	add_custom_command(OUTPUT ${dgen_impl}
 			    COMMAND ${CMAKE_COMMAND} -E remove -f ${ARGN}
 			    COMMAND "generator"
-			    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
-							--source-directory=${CMAKE_SOURCE_DIR}/generator 
-							qtjambi_masterinclude.h  
-							build_opengl.txt 
+			    ARGS ${param}
 			    COMMENT "Generating binding..."
 			    DEPENDS  generator ${gen_typesystem} ${gen_sources} 
 			)
