@@ -98,7 +98,7 @@ protected:
 		QMimeData mimeData = event.mimeData();
 
 		if (mimeData.hasImage()) {
-		//TODO setPixmap(qvariant_cast<QPixmap>(mimeData.imageData());
+		setPixmap(new QPixmap(mimeData.imageData));
 		} else if (mimeData.hasHtml()) {
 			setText(mimeData.html());
 			setTextFormat(Qt.RichText);

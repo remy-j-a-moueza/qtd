@@ -1286,6 +1286,30 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <include file-name="QBitmap" location="global"/>
             <include file-name="QMatrix" location="global"/>
         </extra-includes>
+        
+    <inject-code class="java">
+    public this(QVariant arg__1) {
+        void* __qt_return_value = qtd_QPixmap_QPixmap_QPixmap(cast(void*) this, arg__1 is null ? null : arg__1.nativeId);
+        super(__qt_return_value);
+    }
+    </inject-code>
+    <inject-code class="java-free">
+private extern (C) void* qtd_QPixmap_QPixmap_QVariant(void *d_ptr,
+ void* arg__1);
+    </inject-code>
+    <inject-code class="native">
+// QPixmap from QVariant
+extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
+(void *d_ptr,
+ void* arg__1)
+{
+    const QVariant&amp;  __qt_arg__1 = (const QVariant&amp; ) *(QVariant *)arg__1;
+    QPixmap __qt_casted = qvariant_cast&lt;QPixmap&gt;(__qt_arg__1);
+    QPixmap_QtDShell *__qt_this = new QPixmap_QtDShell(d_ptr, (const QPixmap&amp; )__qt_casted);
+    return (void *) __qt_this;
+}
+    </inject-code>
+
         <modify-function signature="save(QIODevice *, const char *, int) const">
             <access modifier="private"/>
             <rename to="private_save"/>
