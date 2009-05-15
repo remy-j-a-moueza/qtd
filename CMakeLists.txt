@@ -9,21 +9,11 @@ FIND_PACKAGE(Qt4 REQUIRED)
 include_directories(${QT_INCLUDES} include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 ## Options.
-option(BUILD_QT_OPENGL "Build QtOpenGL" "ON")
 option(BUILD_EXAMPLES "Build examples" "ON")
 option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
 
-## Packages list.
-set(packages_big Core Gui)
-if(BUILD_QT_OPENGL)
-    set(packages_big ${packages_big} OpenGL)
-endif(BUILD_QT_OPENGL)
+set(all_packages Core Gui OpenGL) ## TODO: Loading.
 
-set(packages)
-foreach(package ${packages_big})
-    string(TOLOWER ${package} package)
-    set(packages ${packages} ${package})
-endforeach(package ${packages_big})
 
 ## Strip utility.
 find_program(STRIP strip)
@@ -264,6 +254,7 @@ macro(build_example name)
     set(is_sources)
     set(is_libs)
     set(qtd_libs ${core_lib_param} ${gui_lib_param})
+    set(reqs Core Gui)
     foreach(param ${ARGN})
 	if(is_libs)		
 	    string(REGEX REPLACE "Qt([A-Za-z0-9])" "\\1" param_package "${param}")	
@@ -271,26 +262,14 @@ macro(build_example name)
 		set(is_libs)
 		set(is_sources 1)
 	    else(${param_package} STREQUAL ${param})
-		set(is_founded)
-		foreach(package_big ${packages_big})
-		    string(TOLOWER ${package_big} package)  		
-		    if(${param_package} STREQUAL ${package_big})
-			set(qtd_libs ${qtd_libs} ${${package}_lib_param})
-			set(is_founded 1)
-			break(package_big ${packages_big})
-		    endif(${param_package} STREQUAL ${package_big})
-		endforeach(package_big ${packages_big})
-		if(NOT is_founded)
-		      message(STATUS "Module ${param_package} not founded for example ${name}")
-		      return(build_example name)
-		endif(NOT is_founded)
+		set(reqs ${reqs} ${param_package})
 	    endif(${param_package} STREQUAL ${param})
 	endif(is_libs)
 	if(NOT is_libs)
 	  if(NOT is_sources)	      
 	      if(${param} STREQUAL PACKAGES)
 		  set(is_libs 1)
-		  set(qtd_libs)
+		  set(reqs)
 	      else(${param} STREQUAL PACKAGES)
 		  set(is_sources 1)
 	      endif(${param} STREQUAL PACKAGES)	      
@@ -304,14 +283,22 @@ macro(build_example name)
     set(output ${CMAKE_CURRENT_BINARY_DIR}/${name}${CMAKE_EXECUTABLE_SUFFIX})
     set(output_native ${output})
     make_native_path(output_native)
-    ## Bug fix: Reverse libs for ldc.
-    if(D_IS_LLVM)
-      set(qtd_libs_tmp ${qtd_libs}) 
-      set(qtd_libs)
-      foreach(libs ${qtd_libs_tmp})
-	  set(qtd_libs ${libs} ${qtd_libs})
-      endforeach(libs ${qtd_libs_tmp})
-    endif(D_IS_LLVM)
+    foreach(req ${reqs})
+	set(is_founded)
+	foreach(package_big ${packages_big})
+	    string(TOLOWER ${package_big} package)  		
+	    if(${req} STREQUAL ${package_big})		
+		set(is_founded 1)
+		break(package_big ${packages_big})
+	    endif(${req} STREQUAL ${package_big})
+	endforeach(package_big ${packages_big})
+	if(NOT is_founded)
+	      message(STATUS "Example '${name}' required package '${req}', but its not active. Example will not build")
+	      return(build_example name)
+	else(NOT is_founded)
+	      set(qtd_libs ${${package}_lib_param} ${qtd_libs})
+	endif(NOT is_founded)	
+    endforeach(req ${reqs})
     add_custom_command(OUTPUT "${output}"
 		    COMMAND "${DC}"
 		    ARGS ${D_FLAGS} ${libs_path} ${qtd_libs} ${objects} 
@@ -331,14 +318,16 @@ endmacro(build_example sources)
 ##--------------------------------------------
 ## Build and install library.
 ##--------------------------------------------
-add_subdirectory(generator)
+
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 add_custom_target(allpackages ALL)
 link_directories(${CMAKE_BINARY_DIR}/CMakeFiles)
+#add_dgen_target(all ${packages})
 
-foreach(package_big ${packages_big}) 
+foreach(package_big ${all_packages})
     string(TOLOWER ${package_big} package) 
     ## Loading settings for package.
+    set(required)
     set(d_objs)
     set(cpp_objs)
     set(d_sources)
@@ -354,159 +343,215 @@ foreach(package_big ${packages_big})
     set(link_example)
     include (${CMAKE_SOURCE_DIR}/build/${package}.txt)    
 
-    ## Loading package sources list.
-    foreach(d_source ${d_version_files})
-	set(d_sources ${d_sources} ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}.d)
-	if(NOT GENERATE_DI_FILES)
-	    get_filename_component(path ${d_source}.d PATH)
-	    get_filename_component(name ${d_source}.d NAME_WE)
-	    install(FILES ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}.d DESTINATION include/d/qtd/${path} RENAME ${name}.di)
-	endif(NOT GENERATE_DI_FILES)
-    endforeach(d_source)
-    foreach(d_source ${d_files})
-	set(d_sources ${d_sources} ${CMAKE_SOURCE_DIR}/qt/${d_source}.d)
-	if(NOT GENERATE_DI_FILES)
-	    get_filename_component(path ${d_source}.d PATH)
-	    get_filename_component(name ${d_source}.d NAME_WE)
-	    install(FILES ${CMAKE_SOURCE_DIR}/qt/${d_source}.d DESTINATION include/d/qtd/${path} RENAME ${name}.di)
-	endif(NOT GENERATE_DI_FILES)
-    endforeach(d_source)
-    foreach(d_source ${d_generated_files})
-	set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${d_source}.d)
-	if(NOT GENERATE_DI_FILES)
-	    get_filename_component(path ${d_source}.d PATH)
-	    get_filename_component(name ${d_source}.d NAME_WE)
-	    install(FILES ${CMAKE_BINARY_DIR}/qt/${d_source}.d DESTINATION include/d/qtd/${path} RENAME ${name}.di)
-	endif(NOT GENERATE_DI_FILES)
-    endforeach(d_source)
-    foreach (cpp_source ${cpp_files})
-	set(cpp_sources ${cpp_sources} ${CMAKE_SOURCE_DIR}/cpp/${cpp_source}.cpp)
-    endforeach(cpp_source)
-    set(classes ArrayOps ${classes})
-    foreach(class ${classes})
-	set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)	
-	set(cpp_sources ${cpp_sources} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp) 
-	add_sources_for_generating(${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp)	
-	add_sources_for_generating(${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)
-	if(NOT GENERATE_DI_FILES)
-	    install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d DESTINATION include/d/qtd/${package} RENAME ${class}.di)
-	    install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}_enum.d DESTINATION include/d/qtd/${package} RENAME ${class}_enum.di OPTIONAL)
-	endif(NOT GENERATE_DI_FILES)
-    endforeach(class)
+    set(all_req_found 1)
+    string(TOUPPER ${package} package_upper)
+    option(BUILD_QT_${package_upper} "Build Qt${package}" "ON")
+    if(BUILD_QT_${package_upper})
+	foreach(req ${required})
+	    set(req_found)
+	    foreach(pack ${packages_big})
+		if(${pack} STREQUAL ${req})
+		    set(req_found 1)
+		endif(${pack} STREQUAL ${req})
+	    endforeach(pack ${packages})	
+	    if(NOT req_found)
+		set(req_found)
+		foreach(pack ${all_packages})
+		    if(${pack} STREQUAL ${req})
+			set(req_found 1)
+		    endif(${pack} STREQUAL ${req})
+		endforeach(pack ${all_packages})
+		if(req_found)
+		    message(STATUS "Package '${package_big}' required '${req}', but its not active")
+		else(req_found)
+		    message(STATUS "Package '${package_big}' required '${req}', but its not found")
+		endif(req_found)
+		set(all_req_found)
+	    endif(NOT req_found)
+	endforeach(req ${required})
+    else(BUILD_QT_${package_upper})
+	set(all_req_found)
+    endif(BUILD_QT_${package_upper})
 
-    ## Link CPP library.
-    add_library(cpp_${package} SHARED ${cpp_sources})
+    if("${all_req_found}" EQUAL 1)
+	set(packages_big ${packages_big} ${package_big})
+	set(packages ${packages} ${package})
+	## Loading package sources list.
+	foreach(d_source ${d_version_files})
+	    set(d_sources ${d_sources} ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}.d)
+	    if(NOT GENERATE_DI_FILES)
+		get_filename_component(path ${d_source}.d PATH)
+		get_filename_component(name ${d_source}.d NAME_WE)
+		install(FILES ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}.d DESTINATION include/d/qtd/${path} RENAME ${name}.di)
+	    endif(NOT GENERATE_DI_FILES)
+	endforeach(d_source)
+	foreach(d_source ${d_files})
+	    set(d_sources ${d_sources} ${CMAKE_SOURCE_DIR}/qt/${d_source}.d)
+	    if(NOT GENERATE_DI_FILES)
+		get_filename_component(path ${d_source}.d PATH)
+		get_filename_component(name ${d_source}.d NAME_WE)
+		install(FILES ${CMAKE_SOURCE_DIR}/qt/${d_source}.d DESTINATION include/d/qtd/${path} RENAME ${name}.di)
+	    endif(NOT GENERATE_DI_FILES)
+	endforeach(d_source)
+	foreach(d_source ${d_generated_files})
+	    set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${d_source}.d)
+	    if(NOT GENERATE_DI_FILES)
+		get_filename_component(path ${d_source}.d PATH)
+		get_filename_component(name ${d_source}.d NAME_WE)
+		install(FILES ${CMAKE_BINARY_DIR}/qt/${d_source}.d DESTINATION include/d/qtd/${path} RENAME ${name}.di)
+	    endif(NOT GENERATE_DI_FILES)
+	endforeach(d_source)
+	foreach (cpp_source ${cpp_files})
+	    set(cpp_sources ${cpp_sources} ${CMAKE_SOURCE_DIR}/cpp/${cpp_source}.cpp)
+	endforeach(cpp_source)
+	set(classes ArrayOps ${classes})
+	foreach(class ${classes})
+	    set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)	
+	    set(cpp_sources ${cpp_sources} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp) 
+	    set(files_for_gen ${files_for_gen} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp
+		  ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)
+	    if(NOT GENERATE_DI_FILES)
+		install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d DESTINATION include/d/qtd/${package} RENAME ${class}.di)
+		install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}_enum.d DESTINATION include/d/qtd/${package} RENAME ${class}_enum.di OPTIONAL)
+	    endif(NOT GENERATE_DI_FILES)
+	endforeach(class)
 
-    ## Link D library.
-    set(lib_name ${D_LIB_PREFIX}qtd${package}${D_LIB_SUFFIX})    
-    set(lib lib/${lib_name})  
-    compile_d_files(${package}_dobjs objects  ${d_sources})
-    set(d_objs ${d_objs} ${objects}) 
-    if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-	set_property(TARGET cpp_${package} PROPERTY RUNTIME_OUTPUT_DIRECTORY lib)
-	set_property(TARGET cpp_${package} PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)	
-	target_link_libraries(cpp_${package} ${link_cpp} )
-	set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.dll)
-	set(cpp_lib_native ${cpp_lib})
-	make_native_path(cpp_lib_native)
-	set(d_implib ${CMAKE_BINARY_DIR}/CMakeFiles/${package}.dir/cpp_${package}.lib)
-	set(d_implib_native ${d_implib})
-	make_native_path(d_implib_native)
-	add_custom_command(
-			OUTPUT "${d_implib}"
-			COMMAND "${IMPLIB}"
-			ARGS /system /PAGESIZE:32 ${d_implib_native} ${cpp_lib_native}
-			DEPENDS  "cpp_${package}"
-			COMMENT "Creating implib ${lib_name}"
-		    )
-	add_custom_command(
-			OUTPUT "${lib}"
-			COMMAND "${DC}"
-			ARGS -lib ${d_objs} ${d_implib} -of${lib}
-			DEPENDS ${d_objs} ${d_implib}
-			COMMENT "Linking ${lib_name}"
-		    )
-	install(FILES ${cpp_lib} DESTINATION lib)
-    else(${CMAKE_SYSTEM_NAME} STREQUAL Linux)   
-	set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
-	foreach(cpp_source ${cpp_sources})
-	    set(cpp_source ${cpp_source})
-	    obj_path(cpp_source)
-	    set(cpp_objs ${cpp_objs} CMakeFiles/cpp_${package}.dir/${cpp_source}${CMAKE_CXX_OUTPUT_EXTENSION})
-	endforeach(cpp_source)	
-	add_custom_command(
-			OUTPUT "${lib}"
-			COMMAND "${CMAKE_AR}"
-			ARGS rcs ${lib} ${d_objs} ${cpp_objs}
-			DEPENDS ${d_objs} cpp_${package}
-			COMMENT "Linking ${lib_name}"
-		    )
-    endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows) 
-    install(FILES ${CMAKE_BINARY_DIR}/${lib} DESTINATION lib)
+	## Link CPP library.
+	add_library(cpp_${package} SHARED ${cpp_sources})
 
-    ## Dependences.
-    add_dependencies(cpp_${package} dgen)
-    add_custom_target(${package} DEPENDS ${lib})
-    foreach(depend ${depends})
-	add_dependencies(cpp_${package} cpp_${depend})
-	add_dependencies(${package} ${depend})
-    endforeach(depend ${depends})
-    add_dependencies(allpackages ${package})
-    set(depends ${depends} ${package})
+	## Link D library.
+	set(lib_name ${D_LIB_PREFIX}qtd${package}${D_LIB_SUFFIX})    
+	set(lib lib/${lib_name})  
+	compile_d_files(${package}_dobjs objects  ${d_sources})
+	set(d_objs ${d_objs} ${objects}) 
+	if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+	    set_property(TARGET cpp_${package} PROPERTY RUNTIME_OUTPUT_DIRECTORY lib)
+	    set_property(TARGET cpp_${package} PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)	
+	    foreach(req ${required})
+		set(is_found)
+		foreach(pack ${packages_big})
+		    if("${pack}" STREQUAL "${req}")
+			set(is_found 1)
+			break(pack ${packages_big})
+		    endif("${pack}" STREQUAL "${req}")
+		endforeach(pack ${packages_big})
+		if(NOT is_found)
+		    message(FATAL_ERROR "Package ${package_big} required ${req}, but its not found")
+		endif(NOT is_found)
+		string(TOUPPER ${req} req_upper)
+		string(TOLOWER ${req} req_lower)
+		set(link_cpp ${link_cpp} cpp_${req_lower} ${QT_QT${req_upper}_LIBRARY})
+	    endforeach(req ${require})
+	    string(TOUPPER ${package} package_upper)
+	    set(link_cpp ${link_cpp} ${QT_QT${package_upper}_LIBRARY})
+	    target_link_libraries(cpp_${package} ${link_cpp} )
+	    set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.dll)
+	    set(cpp_lib_native ${cpp_lib})
+	    make_native_path(cpp_lib_native)
+	    set(d_implib ${CMAKE_BINARY_DIR}/CMakeFiles/${package}.dir/cpp_${package}.lib)
+	    set(d_implib_native ${d_implib})
+	    make_native_path(d_implib_native)
+	    add_custom_command(
+			    OUTPUT "${d_implib}"
+			    COMMAND "${IMPLIB}"
+			    ARGS /system /PAGESIZE:32 ${d_implib_native} ${cpp_lib_native}
+			    DEPENDS  "cpp_${package}"
+			    COMMENT "Creating implib ${lib_name}"
+			)
+	    add_custom_command(
+			    OUTPUT "${lib}"
+			    COMMAND "${DC}"
+			    ARGS -lib ${d_objs} ${d_implib} -of${lib}
+			    DEPENDS ${d_objs} ${d_implib}
+			    COMMENT "Linking ${lib_name}"
+			)
+	    install(FILES ${cpp_lib} DESTINATION lib)
+	else(${CMAKE_SYSTEM_NAME} STREQUAL Linux)   
+	    set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
+	    foreach(cpp_source ${cpp_sources})
+		set(cpp_source ${cpp_source})
+		obj_path(cpp_source)
+		set(cpp_objs ${cpp_objs} CMakeFiles/cpp_${package}.dir/${cpp_source}${CMAKE_CXX_OUTPUT_EXTENSION})
+	    endforeach(cpp_source)	
+	    add_custom_command(
+			    OUTPUT "${lib}"
+			    COMMAND "${CMAKE_AR}"
+			    ARGS rcs ${lib} ${d_objs} ${cpp_objs}
+			    DEPENDS ${d_objs} cpp_${package}
+			    COMMENT "Linking ${lib_name}"
+			)
+	endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows) 
+	install(FILES ${CMAKE_BINARY_DIR}/${lib} DESTINATION lib)
 
-    ## Paths for QtD libs. Needed by examples.
-    if(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
-	set(libs_path ${CMAKE_BINARY_DIR}/lib/qtd${package}.lib)
-	make_native_path(libs_path)
-	set(${package}_lib_param -L+${libs_path})
-	foreach(link ${link_example})
-	    set(link ${CMAKE_SOURCE_DIR}/lib/${link}.lib)
-	    make_native_path(link)
-	    set(link -L+${link})
-	    set(${package}_lib_param ${${package}_lib_param} ${link})
-	endforeach(link ${link_example})
-    else (${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
-	set(${package}_lib_param -L-lqtd${package} -L-lQt${package_big})
-	foreach(link ${link_example})
-	    set(${package}_lib_param ${${package}_lib_param} ${link})
-	endforeach(link ${link_example})
-    endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
+	## Paths for QtD libs. Needed by examples.
+	if(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
+	    set(libs_path ${CMAKE_BINARY_DIR}/lib/qtd${package}.lib)
+	    make_native_path(libs_path)
+	    set(${package}_lib_param -L+${libs_path})
+	    foreach(link ${link_example})
+		set(link ${CMAKE_SOURCE_DIR}/lib/${link}.lib)
+		make_native_path(link)
+		set(link -L+${link})
+		set(${package}_lib_param ${${package}_lib_param} ${link})
+	    endforeach(link ${link_example})
+	else (${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
+	    set(${package}_lib_param -L-lqtd${package} -L-lQt${package_big})
+	    foreach(link ${link_example})
+		set(${package}_lib_param ${${package}_lib_param} ${link})
+	    endforeach(link ${link_example})
+	endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
 
-    if(GENERATE_DI_FILES)
-      set(regexp_str "(${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}|${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
-      foreach(source ${d_sources})
-  # 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
-  # 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
-	  string(REGEX REPLACE ${regexp_str} "\\2" inc_path "${source}")
-	  string(REGEX REPLACE ${regexp_str} "\\3" file_name "${source}")
-	  set(interface_file_path ${CMAKE_BINARY_DIR}/d/${inc_path})
-	  set(interface_file "${interface_file_path}/${file_name}.di")
-	  if(NOT "${file_name}" STREQUAL "QGlobal")
-	      add_custom_command(OUTPUT "${interface_file}"
-			  COMMAND "${DC}"
-			  ARGS ${D_FLAGS} -o- -H -Hd${interface_file_path} ${source}
-			  COMMENT "Generating header for ${source}"
-			  DEPENDS ${source}
-			  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-			  )		   
-	  else(NOT "${file_name}" STREQUAL "QGlobal") ## DMD frontend crash on this file.
-	      add_custom_command(OUTPUT "${interface_file}"
-			  COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
-			  COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
-			  COMMAND ${CMAKE_COMMAND} -E copy ${source} ${interface_file}
-			  COMMENT ""
-			  DEPENDS ${source}
-			  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-			  )	    
-	  endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
-	  set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di) 
-	  install(FILES ${interface_file} DESTINATION include/d/${inc_path})
-      endforeach(source)
-    endif(GENERATE_DI_FILES)
+	if(GENERATE_DI_FILES)
+	  set(regexp_str "(${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}|${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
+	  foreach(source ${d_sources})
+      # 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
+      # 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
+	      string(REGEX REPLACE ${regexp_str} "\\2" inc_path "${source}")
+	      string(REGEX REPLACE ${regexp_str} "\\3" file_name "${source}")
+	      set(interface_file_path ${CMAKE_BINARY_DIR}/d/${inc_path})
+	      set(interface_file "${interface_file_path}/${file_name}.di")
+	      if(NOT "${file_name}" STREQUAL "QGlobal")
+		  add_custom_command(OUTPUT "${interface_file}"
+			      COMMAND "${DC}"
+			      ARGS ${D_FLAGS} -o- -H -Hd${interface_file_path} ${source}
+			      COMMENT "Generating header for ${source}"
+			      DEPENDS ${source}
+			      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			      )		   
+	      else(NOT "${file_name}" STREQUAL "QGlobal") ## DMD frontend crash on this file.
+		  add_custom_command(OUTPUT "${interface_file}"
+			      COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
+			      COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
+			      COMMAND ${CMAKE_COMMAND} -E copy ${source} ${interface_file}
+			      COMMENT ""
+			      DEPENDS ${source}
+			      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			      )	    
+	      endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
+	      set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di) 
+	      install(FILES ${interface_file} DESTINATION include/d/${inc_path})
+	  endforeach(source)
+	endif(GENERATE_DI_FILES)
+    endif("${all_req_found}" EQUAL 1)
 endforeach(package_big ${packages_big})
 if(GENERATE_DI_FILES) 
     add_custom_target(generate_headers ALL DEPENDS ${interfaces_list})
 endif(GENERATE_DI_FILES)
+
+## Dependences.
+foreach(package ${packages})
+    add_dependencies(cpp_${package} dgen)
+    add_custom_target(${package} DEPENDS ${lib})
+    foreach(depend ${required})
+	string(TOLOWER ${depend} depend)
+	add_dependencies(cpp_${package} cpp_${depend})
+	add_dependencies(${package} ${depend})
+    endforeach(depend ${required})
+    add_dependencies(allpackages ${package})
+endforeach(package ${packages})
+
+add_subdirectory(generator)
+add_sources_for_generating(${files_for_gen})	
 
 ##--------------------------------------------
 ## Build other parts of the QtD.

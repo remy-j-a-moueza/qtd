@@ -1,4 +1,4 @@
-set(link_cpp cpp_core cpp_gui ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${QT_QTOPENGL_LIBRARY})
+set(required Core Gui)
 set(classes 
 	QGLWidget
 	QGLContext

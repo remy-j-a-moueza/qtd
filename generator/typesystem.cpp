@@ -1517,11 +1517,13 @@ TypeDatabase::TypeDatabase() : m_suppressWarnings(true), m_includeEclipseWarning
 
 bool TypeDatabase::parseFile(const QString &filename, const QString &source_dir, bool generate)
 {
-    QString name;
-    if (source_dir.isEmpty())
-	name = filename;
-    else
+    QString name(filename);
+    QFileInfo info(name);
+    if(!info.exists())
+    {
+        Q_ASSERT(!source_dir.isEmpty());
         name = source_dir + "/" + filename;
+    }
     QFile file(name);
     Q_ASSERT(file.exists());
     QXmlInputSource source(&file);

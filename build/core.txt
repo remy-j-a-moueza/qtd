@@ -1,5 +1,3 @@
-## Libraries linked to the cpp part (is active only if CPP_SHARED == true).
-set (link_cpp  ${QT_QTCORE_LIBRARY})
 ## Module specific cpp files.
 set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
     qt_core/QPoint_shell qt_core/QPointF_shell

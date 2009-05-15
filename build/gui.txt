@@ -1,4 +1,4 @@
-set(link_cpp cpp_core ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY})
+set(required Core)
 set(classes
 	QPushButton
 	QFileIconProvider
