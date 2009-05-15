@@ -233,15 +233,9 @@ macro(add_dgen_target package)
 endmacro(add_dgen_target target package required)
 
 foreach(pack ${packages})   
-    set(dgen_impl ${CMAKE_BINARY_DIR}/cpp/qt_${pack}/qt_${pack}.pri) 
-    break(pack ${packages})  
-endforeach(pack ${packages})
-
-foreach(pack ${packages})   
     set(gen_typesystem ${gen_typesystem} ${CMAKE_SOURCE_DIR}/generator/typesystem_${pack}.xml)
     set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${pack}-java.java)
 endforeach(pack ${packages})
-
 
 set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/built.txt)
 file(REMOVE ${dgen_build_conf})
@@ -251,25 +245,33 @@ foreach(package ${packages})
 endforeach(package ${packages})
 file(APPEND ${dgen_build_conf} "</typesystem>\n")
 
-add_custom_command(OUTPUT ${dgen_impl}
-		    COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
-		    COMMAND "generator"
-		    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
-			--source-directory=${CMAKE_SOURCE_DIR}/generator
-			qtjambi_masterinclude.h 
-			${dgen_build_conf}
-		    COMMENT "Generating binding..."
-		    DEPENDS  generator ${gen_typesystem} ${gen_sources} 
-		)
-add_custom_target(dgen DEPENDS ${dgen_impl} COMMENT "")
+# foreach(dgen_impl ${files_for_gen})
+#     add_custom_command(OUTPUT ${dgen_impl}
+# 			COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
+# 			COMMAND "generator"
+# 			ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
+# 			    --source-directory=${CMAKE_SOURCE_DIR}/generator
+# 			    qtjambi_masterinclude.h 
+# 			    ${dgen_build_conf}
+# 			COMMENT "Generating binding..."
+# 			DEPENDS  generator ${gen_typesystem} ${gen_sources} 
+# 		    )
+# endforeach(dgen_impl ${files_for_gen})
+add_custom_target(dgen COMMENT "")
 
 macro(add_sources_for_generating)
-    foreach(source ${ARGN})
-	add_custom_command(OUTPUT "${source}"
-			COMMAND ""
-			ARGS ""
-			DEPENDS ${dgen_impl}
-			COMMENT ""
+    foreach(dgen_impl ${ARGN})
+	add_custom_command(OUTPUT ${dgen_impl}
+			    COMMAND ${CMAKE_COMMAND} -E remove -f ${ARGN}
+			    COMMAND "generator"
+			    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=../  
+							--source-directory=${CMAKE_SOURCE_DIR}/generator 
+							qtjambi_masterinclude.h  
+							build_opengl.txt 
+			    COMMENT "Generating binding..."
+			    DEPENDS  generator ${gen_typesystem} ${gen_sources} 
 			)
-    endforeach(source ${allcppsources})
+	#add_custom_target(${target_name} DEPENDS ${dgen_impl})
+	#add_dependencies(dgen ${target_name})
+    endforeach(dgen_impl ${ARGN})
 endmacro(add_sources_for_generating)

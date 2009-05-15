@@ -483,6 +483,15 @@ foreach(package_big ${all_packages})
 	endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows) 
 	install(FILES ${CMAKE_BINARY_DIR}/${lib} DESTINATION lib)
 
+	## Dependences.
+	add_custom_target(${package} DEPENDS ${lib})
+	foreach(depend ${required})
+	    string(TOLOWER ${depend} depend)
+	    add_dependencies(cpp_${package} cpp_${depend})
+	    add_dependencies(${package} ${depend})
+	endforeach(depend ${required})
+	add_dependencies(allpackages ${package})
+
 	## Paths for QtD libs. Needed by examples.
 	if(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
 	    set(libs_path ${CMAKE_BINARY_DIR}/lib/qtd${package}.lib)
@@ -541,13 +550,6 @@ endif(GENERATE_DI_FILES)
 ## Dependences.
 foreach(package ${packages})
     add_dependencies(cpp_${package} dgen)
-    add_custom_target(${package} DEPENDS ${lib})
-    foreach(depend ${required})
-	string(TOLOWER ${depend} depend)
-	add_dependencies(cpp_${package} cpp_${depend})
-	add_dependencies(${package} ${depend})
-    endforeach(depend ${required})
-    add_dependencies(allpackages ${package})
 endforeach(package ${packages})
 
 add_subdirectory(generator)
