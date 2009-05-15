@@ -470,17 +470,10 @@ bool CppImplGenerator::hasCustomDestructor(const AbstractMetaClass *java_class) 
 
 void writeQtdEntityFunction(QTextStream &s, const AbstractMetaClass *java_class)
 {
-/*    if(java_class->baseClass())
-        return; */
-    if (!(java_class->typeEntry()->isObject() || java_class->typeEntry()->isQObject()))
-        return;
+//    if (!(java_class->typeEntry()->isObject() || java_class->typeEntry()->isQObject()))
+//        return;
     if (!java_class->hasVirtualFunctions())
         return;
-/*    if (java_class->name() == "QPainterPath_Element") {
-        foreach (AbstractMetaFunction *function, java_class->virtualOverrideFunctions()) {
-            s << function->name() << endl;
-        }
-    }*/
 
     s << "extern \"C\" DLL_PUBLIC void *__" << java_class->name() << "_entity(void *q_ptr)" << endl;
     s << "{" << endl;
@@ -1762,22 +1755,23 @@ void CppImplGenerator::writeVirtualFunctionOverride(QTextStream &s,
     // The write a public override version of this function to be used by native functions
     writeFunctionSignature(s, java_function, implementor, "__override_",
                            options,
-                           QString());
+                           QString(), // the class prefix
+                           QStringList() << "bool static_call");
     s << endl
       << "{" << endl;
     Indentation indent(INDENT);
-/* qtd    s << INDENT << "if (static_call) {" << endl;
+    s << INDENT << "if (static_call) {" << endl;
     {
-        Indentation indent(INDENT); */
+        Indentation indent(INDENT);
         writeBaseClassFunctionCall(s, java_function, implementor);
-/* qtd   }
+    }
     s << INDENT << "} else {" << endl;
     {
         Indentation indent(INDENT);
         writeBaseClassFunctionCall(s, java_function, implementor, VirtualCall);
     }
 
-    s << INDENT << "}" << endl */
+    s << INDENT << "}" << endl;
     s << "}" << endl << endl;
 }
 
@@ -2076,11 +2070,11 @@ void CppImplGenerator::writeFinalFunction(QTextStream &s, const AbstractMetaFunc
                 function_prefix = "__public_";
             } else if (!java_function->isFinalInCpp() && !java_function->isStatic() && hasShell) {
                 function_prefix = "__override_";
-/* qtd                extra_param.append("__do_static_call");
+                extra_param.append("__do_static_call");
                 s << INDENT
-                  << "bool __do_static_call = __this_nativeId ? ((QtJambiLink *) "
-                  << "__this_nativeId)->createdByJava() : false;" << endl;
-*/            } else {
+                  << "bool __do_static_call = __this_nativeId ? "
+                  << "__" << java_class->name() << "_entity(__this_nativeId) : false;" << endl;
+            } else {
                 option = OriginalName;
             }
 

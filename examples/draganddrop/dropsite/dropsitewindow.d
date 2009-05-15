@@ -107,8 +107,8 @@ public:
 		formatsTable.setRowCount(0);
 		if (!mimeData)
 			return;
-		
-		foreach (char[] format; mimeData.formats()) {
+
+        foreach (char[] format; mimeData.formats()) {
 			QTableWidgetItem formatItem = new QTableWidgetItem(format);
 			formatItem.setFlags(Qt.ItemIsEnabled);
 			formatItem.setTextAlignment(Qt.AlignTop | Qt.AlignLeft);

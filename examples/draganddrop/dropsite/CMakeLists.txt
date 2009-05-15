@@ -1,0 +1,1 @@
+build_example(dropsite main.d droparea.d dropsitewindow.d)

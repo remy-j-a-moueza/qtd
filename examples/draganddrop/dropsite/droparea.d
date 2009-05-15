@@ -77,7 +77,7 @@ protected:
 	{
 		setText(tr("<drop content>"));
 		setBackgroundRole(QPalette.Highlight);
-	
+
 		event.acceptProposedAction();
 		changed.emit(event.mimeData);
 	}

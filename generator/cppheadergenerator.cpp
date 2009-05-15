@@ -281,7 +281,7 @@ void CppHeaderGenerator::writeVirtualFunctionOverride(QTextStream &s,
         return;
 
     s << "    ";
-    writeFunctionSignature(s, java_function, 0, "__override_", Option(EnumAsInts | ShowStatic | UnderscoreSpaces), QString());
+    writeFunctionSignature(s, java_function, 0, "__override_", Option(EnumAsInts | ShowStatic | UnderscoreSpaces), QString(), QStringList() << "bool static_call");
     s << ";" << endl;
 }
 

@@ -1,3 +1,4 @@
+add_subdirectory(draganddrop)
 add_subdirectory(itemviews)
 add_subdirectory(mainwindows)
 add_subdirectory(opengl)
