@@ -73,6 +73,7 @@ D_VERSION = 1
 else
 D_VERSION = 2
 endif
+D_CFLAGS += -Iqt/d$(D_VERSION)
 
 #End. Main settings.
 
