@@ -264,7 +264,7 @@ macro(add_sources_for_generating)
 	add_custom_command(OUTPUT ${dgen_impl}
 			    COMMAND ${CMAKE_COMMAND} -E remove -f ${ARGN}
 			    COMMAND "generator"
-			    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=../  
+			    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
 							--source-directory=${CMAKE_SOURCE_DIR}/generator 
 							qtjambi_masterinclude.h  
 							build_opengl.txt 
