@@ -25,6 +25,9 @@ foreach(package ${packages_big})
     set(packages ${packages} ${package})
 endforeach(package ${packages_big})
 
+## Strip utility.
+find_program(STRIP strip)
+
 ## Find D compiler and parsing its version.
 find_program(DC dmd ldc)
 if (DC)   
@@ -83,15 +86,21 @@ endif(D_VERSION EQUAL "1")
 set(D_FLAGS ${D_FLAGS} -I${CMAKE_SOURCE_DIR}/qt/d${D_VERSION})
 
 # Debug and release flags.
-if (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
-   #set(CMAKE_BUILD_TYPE Debug)
-   #set( SUFFIXLIB "${SUFFIXLIB}-debug" )
-   #set( SUFFIXBIN "${SUFFIXBIN}-debug" )
-   add_definitions(-DDEBUG)
-   set(D_FLAGS ${D_FLAGS} -g -gc -debug)
-else (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
-   #set(CMAKE_BUILD_TYPE Release)
-    add_definitions(-UNO_DEBUG)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif (NOT CMAKE_BUILD_TYPE)
+if(${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
+    set(CMAKE_BUILD_TYPE Debug)
+    #set( SUFFIXLIB "${SUFFIXLIB}-debug" )
+    #set( SUFFIXBIN "${SUFFIXBIN}-debug" )
+    add_definitions(-DDEBUG)
+    set(D_FLAGS ${D_FLAGS} -g -gc -debug)
+elseif (NOT ${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS])
+    message(STATUS "Only debug and release configuration are now supproted. Configuration changed to 'Release'")
+    set(CMAKE_BUILD_TYPE Release)
+endif (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])  
+if (${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS])
+    #add_definitions(-UNO_DEBUG)
     set(D_FLAGS ${D_FLAGS} -O -release -inline)
     if(D_IS_MARS)
 	set(D_FLAGS ${D_FLAGS} -inline)
@@ -101,7 +110,8 @@ else (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
       set(D_FLAGS ${D_FLAGS} -L/subsystem:windows)
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)   
-endif (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])  
+endif(${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS] )
+
 set(D_FLAGS ${D_FLAGS} -I${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR})
 if(D_IS_MARS AND ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 else(D_IS_MARS AND ${CMAKE_SYSTEM_NAME} STREQUAL Windows)
@@ -311,11 +321,15 @@ macro(build_example name)
 		    COMMENT "Building example ${name}"
 		    )
     add_custom_target(example_${name} ALL DEPENDS "${output}")
+    ## TODO: Enable on windows too.
+    if(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND ${CMAKE_SYSTEM_NAME} STREQUAL Linux) ##
+	add_custom_command(TARGET example_${name} POST_BUILD COMMAND "${STRIP}" ARGS "${output}")
+    endif(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND ${CMAKE_SYSTEM_NAME} STREQUAL Linux)
     add_dependencies(example_${name} allpackages)
 endmacro(build_example sources)
 
 ##--------------------------------------------
-## Build library.
+## Build and install library.
 ##--------------------------------------------
 add_subdirectory(generator)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

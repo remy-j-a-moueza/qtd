@@ -5,6 +5,7 @@ set(classes
 	QGLFormat
 	QGLColormap
     )
-if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-  set(link_example opengl32 glu32)
-endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+if(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
+    set(link_example opengl32 glu32)
+    install(FILES ${link_example} DESTINATION lib)
+endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)

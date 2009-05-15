@@ -145,11 +145,11 @@ set(res_files
 
 ## Includes path.
 set(inc_paths
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../common
+    ${CMAKE_CURRENT_SOURCE_DIR}/../common 
     ${CMAKE_CURRENT_SOURCE_DIR}/parser
-    ${CMAKE_CURRENT_SOURCE_DIR}/parser/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp   
+    #${CMAKE_CURRENT_SOURCE_DIR}/parser/include  
 )
 
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
