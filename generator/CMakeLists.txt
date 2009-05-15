@@ -237,7 +237,7 @@ foreach(pack ${packages})
     set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${pack}-java.java)
 endforeach(pack ${packages})
 
-set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/built.txt)
+set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt)
 file(REMOVE ${dgen_build_conf})
 file(APPEND ${dgen_build_conf} "<typesystem>\n")
 foreach(package ${packages})
@@ -264,7 +264,7 @@ macro(add_sources_for_generating)
 	set(parameters ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
 							--source-directory=${CMAKE_SOURCE_DIR}/generator 
 							qtjambi_masterinclude.h  
-							${dgen_build_conf})
+							${CMAKE_BINARY_DIR}/CMakeFiles/build.txt)
 	set(parameters_list_file ${CMAKE_BINARY_DIR}/CMakeFiles/dgen_parameters)
 	if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)	
 	    file(REMOVE ${parameters_list_file})
