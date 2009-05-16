@@ -501,14 +501,6 @@ void CppImplGenerator::writeInterfaceCasts(QTextStream &s, const AbstractMetaCla
                 InterfaceTypeEntry *ite = static_cast<InterfaceTypeEntry*>(iface->typeEntry());
                 QString real_name = ite->origin()->qualifiedCppName();
 
-
-
-                /*const TypeEntry* te = TypeDatabase::instance()->findType();
-                if(te)
-                    real_name = te->qualifiedCppName();
-                else
-                    real_name = iface->qualifiedCppName();*/
-
                 s << "extern \"C\" DLL_PUBLIC " << real_name << "* qtd_" << java_class->name() << "_cast_to_" << iface->qualifiedCppName()
                   << "(" << java_class->qualifiedCppName() << " *ptr)" << endl << "{" << endl;
                 Indentation indent(INDENT);

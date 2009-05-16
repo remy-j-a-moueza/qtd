@@ -1,9 +1,11 @@
 set(required Core Gui)
 set(classes 
-	QGLWidget
-	QGLContext
-	QGLFormat
-	QGLColormap
+    QGLColormap
+    QGLContext
+    QGLFormat
+    QGLFramebufferObject
+    QGLPixelBuffer
+    QGLWidget
     )
 if(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
     set(link_example opengl32 glu32)
