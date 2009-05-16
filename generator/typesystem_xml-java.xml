@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<typesystem package="com.trolltech.qt.xml" default-superclass="com.trolltech.qt.QtJambiObject">
+<typesystem package="qt.xml" default-superclass="qt.QtJambiObject">
     <inject-code>
-        com.trolltech.qt.Utilities.loadQtLibrary("QtXml");
+        qt.Utilities.loadQtLibrary("QtXml");
     </inject-code>
 
 
@@ -10,9 +10,9 @@
             <import-file name="typesystem_xml-java.java" quote-after-line="class QDomDocument___" quote-before-line="}// class"/>
         </inject-code>
         <extra-includes>
-            <include file-name="com.trolltech.qt.QNativePointer.Type" location="java"/>
-            <include file-name="com.trolltech.qt.core.QIODevice" location="java"/>
-            <include file-name="com.trolltech.qt.core.QByteArray" location="java"/>
+            <include file-name="qt.QNativePointer.Type" location="java"/>
+            <include file-name="qt.core.QIODevice" location="java"/>
+            <include file-name="qt.core.QByteArray" location="java"/>
         </extra-includes>
 
 
@@ -188,7 +188,7 @@
             <import-file name="typesystem_xml-java.java" quote-after-line="class QXmlNamespaceSupport___" quote-before-line="}// class"/>
         </inject-code>
         <extra-includes>
-            <include file-name="com.trolltech.qt.QNativePointer" location="java"/>
+            <include file-name="qt.QNativePointer" location="java"/>
         </extra-includes>
         <modify-function signature="processName(QString,bool,QString&amp;,QString&amp;)const">
             <access modifier="private"/>
@@ -343,7 +343,7 @@
                 </conversion-rule>
             </modify-argument>
             <modify-argument index="return">
-                <replace-type modified-type="com.trolltech.qt.xml.QXmlEntityResolver$ResolvedEntity" />
+                <replace-type modified-type="qt.xml.QXmlEntityResolver$ResolvedEntity" />
                 <conversion-rule class="native">
                     jobject %out = qtjambi_to_resolvedentity(__jni_env, %in, inputSourceHolder);
                 </conversion-rule>

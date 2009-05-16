@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="qt.svg" default-superclass="qt.QtJambiObject">
+<typesystem package="qt.svg" default-superclass="QtDObject">
 <inject-code>
         qt.Utilities.loadQtLibrary("QtXml");
         qt.Utilities.loadQtLibrary("QtGui");
@@ -48,7 +48,7 @@
     <modify-function signature="resetMatrix()" remove="all"/>
     <modify-function signature="sceneMatrix()const" remove="all"/>
     <modify-function signature="setMatrix(QMatrix, bool)" remove="all"/>
-  
+ 
         <modify-function signature="setGroup(QGraphicsItemGroup*)">
             <modify-argument index="1">
                 <!-- Handled by injected code in QGraphicsItem -->
@@ -61,7 +61,7 @@
                 <reference-count action="ignore"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="setSharedRenderer(QSvgRenderer*)">
+<!--        <modify-function signature="setSharedRenderer(QSvgRenderer*)">
             <modify-argument index="1">
                 <define-ownership class="java" owner="c++"/>
             </modify-argument>
@@ -69,23 +69,23 @@
                 QSvgRenderer oldRenderer = renderer();
             </inject-code>
             <inject-code position="end">
-            if (oldRenderer != null)
+            if (oldRenderer !is null)
                 oldRenderer.reenableGarbageCollection();
             </inject-code>
         </modify-function>
         <modify-function signature="QGraphicsSvgItem(QGraphicsItem*)">
             <inject-code position="end">
                 <argument-map index="1" meta-name="%1"/>
-            if (%1 != null) disableGarbageCollection();
+            if (%1 !is null) disableGarbageCollection();
             </inject-code>
         </modify-function>
         <modify-function signature="QGraphicsSvgItem(const QString &amp;,QGraphicsItem*)">
             <inject-code position="end">
                 <argument-map index="2" meta-name="%2"/>
-            if (%2 != null) disableGarbageCollection();
+            if (%2 !is null) disableGarbageCollection();
             </inject-code>
         </modify-function>
-
+-->
     </object-type>
 
 </typesystem>

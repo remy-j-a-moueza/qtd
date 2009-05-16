@@ -595,7 +595,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
       << "#include \"ArrayOps_qt_core.h\"" << endl;
 
     // qtd2 hack!!
-    if (java_class->package() == "qt.gui")
+    if (java_class->package() == "qt.svg")
         s << "#include \"ArrayOps_qt_gui.h\"" << endl;
 
     QString pkg_name = QString(java_class->package()).replace(".", "_");

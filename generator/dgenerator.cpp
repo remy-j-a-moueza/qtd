@@ -3222,16 +3222,20 @@ void DGenerator::writeConstructorContents(QTextStream &s, const AbstractMetaFunc
         {
             bool hasParentArg = false;
             AbstractMetaArgumentList arguments = d_function->arguments();
+            int arg_index = 0;
             for (int i=0; i<arguments.count(); ++i) {
                 const AbstractMetaArgument *arg = arguments.at(i);
-                if (arg->argumentName() == "parent_")
+                if (arg->argumentName().contains("parent", Qt::CaseInsensitive)) {
+                    arg_index = i;
                     hasParentArg = true;
+                }
             }
 
+            const AbstractMetaArgument *arg = arguments.at(arg_index);
 //            QString ctor_call = d_function->implementingClass()->name() == "QObject"? "this" : "super";
             QString ctor_call = "this";
             if (hasParentArg) {
-                s << INDENT << "bool gc_managed = parent_ is null ? true : false;" << endl
+                s << INDENT << "bool gc_managed = " << arg->argumentName() << " is null ? true : false;" << endl
                   << INDENT << ctor_call << "(__qt_return_value, gc_managed);" << endl;
             } else {
                 s << INDENT << ctor_call << "(__qt_return_value, true);" << endl;

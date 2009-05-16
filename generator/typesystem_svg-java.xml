@@ -1,4 +1,4 @@
-<typesystem package="qt.svg" default-superclass="qt.QtJambiObject">
+<typesystem package="qt.svg" default-superclass="QtDObject">
     <inject-code>
         qt.Utilities.loadQtLibrary("QtXml");
         qt.Utilities.loadQtLibrary("QtGui");
