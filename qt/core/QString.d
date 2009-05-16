@@ -9,8 +9,14 @@ else
     import std.utf : toString = toUTF8;
 }
 
-class QString
+struct QString
 {
+    public static QString opCall(void* ptr, bool proxy) {
+        QString str;
+        str.native_id = ptr;
+        return str;
+    }
+    
     private void* native_id;
     
     public static final char[] toNativeString(void* qstring) {
@@ -21,10 +27,6 @@ class QString
     
     public final char[] toNativeString() {
         return toNativeString(native_id);
-    }
-    
-    public this(void* ptr, bool proxy) {
-        native_id = ptr;
     }
     
     public void assign(char[] text) {

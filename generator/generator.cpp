@@ -161,7 +161,8 @@ bool skipType(const AbstractMetaType *d_type)
         if (c_entry->type() == ContainerTypeEntry::MapContainer ||
             c_entry->type() == ContainerTypeEntry::MultiMapContainer ||
             c_entry->type() == ContainerTypeEntry::MapContainer ||
-            c_entry->type() == ContainerTypeEntry::MultiHashContainer)
+            c_entry->type() == ContainerTypeEntry::MultiHashContainer ||
+            c_entry->type() == ContainerTypeEntry::SetContainer)
             return true;
 
         QList<AbstractMetaType *> args = d_type->instantiations();

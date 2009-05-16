@@ -135,7 +135,7 @@ make_gen:
 	cd generator && qmake && $(MAKE)
 
 dgen:  make_gen
-	cd generator && $(GEN) $(GEN_OPT) --d-target=$(D_TARGET) --output-directory=../ qtjambi_masterinclude.h build_opengl.txt
+	cd generator && $(GEN) $(GEN_OPT) --d-target=$(D_TARGET) --output-directory=../ qtjambi_masterinclude.h build_gui.txt
 ## DGenerator ## end
 
 mkdir:

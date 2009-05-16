@@ -26,40 +26,47 @@ core_d_files += $(QTD_CORE:%=qt/%.d)
 ## Classes.
 ## TODO: use list that genareted by dgen.
 core_classes =  \
-	ArrayOps \
-	QChildEvent \
-	QCoreApplication \
-	QEvent \
-	QEventLoop \
-	QObject \
-	QTimerEvent \
-	QTranslator \
-	QPoint \
+    ArrayOps \
+    QChildEvent \
+    QCoreApplication \
+    QEvent \
+    QEventLoop \
+    QObject \
+    QTimerEvent \
+    QTranslator \
+    QPoint \
     QPointF \
     QRect \
     QRectF \
     QByteArray \
-	QLocale \
-	QSize \
-	QSizeF \
-	QDataStream \
+    QLocale \
+    QSize \
+    QSizeF \
+    QDataStream \
     QLine \
     QLineF \
-	QMimeData \
-	QIODevice \
-	QDateTime \
-	QDate \
-	QTime \
-	QVariant \
-	QBitArray \
-	QRegExp \
-	QUrl \
-	QModelIndex \
-	QAbstractItemModel \
-	QAbstractFileEngine \
-	QFile \
-	QDir \
-	QFileInfo \
-	QTextStream \
-	QString \
-	QTimer 
+    QMimeData \
+    QIODevice \
+    QDateTime \
+    QDate \
+    QTime \
+    QVariant \
+    QBitArray \
+    QRegExp \
+    QUrl \
+    QModelIndex \
+    QAbstractItemModel \
+    QAbstractFileEngine \
+    QFile \
+    QDir \
+    QFileInfo \
+    QTextStream \
+    QString \
+    QTimer \
+    QTextCodec \
+    QTextCodec_ConverterState \
+    QTextEncoder \
+    QTextDecoder \
+    QTimeLine \
+    QAbstractFactory \
+    QAbstractListModel

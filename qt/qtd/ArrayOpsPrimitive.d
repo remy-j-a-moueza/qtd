@@ -75,11 +75,17 @@ private extern(C) void* qtd_string_from_array(string[]* arr, size_t pos)
 {
     return &((*arr)[pos]);
 }
-
+/*
 private extern(C) void qtd_get_string_from_array(string* arr, size_t pos, char** elem, size_t* elem_size)
 {
     *elem = arr[pos].ptr;
     *elem_size = arr[pos].length;
+}
+*/
+
+private extern(C) void qtd_get_string_from_array(string* arr, size_t pos, string* elem)
+{
+    *elem = arr[pos];
 }
 
 version(Windows)

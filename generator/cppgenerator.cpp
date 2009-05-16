@@ -123,7 +123,7 @@ void CppGenerator::writeTypeInfo(QTextStream &s, const AbstractMetaType *type, O
     // values because wrapper actually contains pointers
     if ((options & ForcePointer) && actual_indirections == 0
         && !type->isPrimitive() && !type->typeEntry()->isStructInD()
-        && type->name() != "QModelIndex")
+        && type->name() != "QModelIndex" && !type->isEnum())
         actual_indirections = 1;
 
     s << QString(actual_indirections, '*');

@@ -71,7 +71,8 @@ DGenerator::DGenerator()
                   << "QLatin1String" << "unsigned long long" << "signed int"
                   << "signed short" << "Array" << "GLuint" << "GLenum" << "GLint"
                   << "unsigned long" << "ulong" << "long" << "QByteRef"
-                  << "QStringList" << "QList" << "QVector" << "QPair";
+                  << "QStringList" << "QList" << "QVector" << "QPair"
+                  << "QSet";
 }
 
 QString DGenerator::fileNameForClass(const AbstractMetaClass *d_class) const
@@ -125,7 +126,9 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
 
     if (!d_type) {
         s = "void";
-    } else if (d_type->typeEntry() && d_type->typeEntry()->qualifiedCppName() == "QString") {
+    } else if (d_type->typeEntry()->qualifiedCppName() == "QChar")
+        s = "wchar" + QString(d_type->actualIndirections(), '*');
+    else if (d_type->typeEntry() && d_type->typeEntry()->qualifiedCppName() == "QString") {
         s = "string";
     } else if (d_type->isArray()) {
         s = translateType(d_type->arrayElementType(), context) + "[]";
@@ -455,10 +458,11 @@ void DGenerator::writePrivateNativeFunction(QTextStream &s, const AbstractMetaFu
     CppImplGenerator::writeFinalFunctionArguments(s, d_function, true); // qtd
 
     // Make sure people don't call the private functions
+    // qtd remember name QNoImplementationException
     if (d_function->isEmptyFunction()) {
         s << endl
           << INDENT << "{" << endl
-          << INDENT << "// qtd2    throw new qt.QNoImplementationException();" << endl
+          << INDENT << "    throw new Exception(\"No Implementation Exception\");" << endl
           << INDENT << "}" << endl << endl;
     } else {
         s << ";" << endl;
@@ -658,14 +662,14 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
 //    bool needs_return_variable = has_return_type
 //        && (owner != TypeSystem::InvalidOwnership || referenceCounts.size() > 0 || has_code_injections_at_the_end);
 
-    if(d_function->type()) { // qtd
-        if (d_function->type()->isTargetLangString())
+    if(return_type) { // qtd
+        if (return_type->isTargetLangString())
             s << INDENT << "string res;" << endl;
 
-        if(d_function->type()->name() == "QModelIndex")
+        if(return_type->name() == "QModelIndex")
             s << INDENT << "QModelIndex res;" << endl;
 
-        if(d_function->type()->isContainer())
+        if(return_type->isContainer())
             s << INDENT << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << " res;" << endl;
     }
 
@@ -686,14 +690,16 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
             s << " __qt_return_value = ";
         }*/ else if (d_function->isConstructor()) { // qtd
             s << "void* __qt_return_value = ";
-        } else if (d_function->type() && d_function->type()->isValue()  && !d_function->type()->typeEntry()->isStructInD()) {
+        } else if (return_type && return_type->isValue()  && !return_type->typeEntry()->isStructInD()) {
             s << "void* __qt_return_value = ";
-        } else if (d_function->type() && d_function->type()->isVariant())
+        } else if (return_type && return_type->isVariant()) {
             s << "void* __qt_return_value = ";
-        else if ( d_function->type() && ( d_function->type()->isObject() ||
-                   (d_function->type()->isNativePointer() && d_function->type()->typeEntry()->isValue()) ||
-                    d_function->type()->typeEntry()->isInterface()) ) {
+        } else if (return_type && ( return_type->isObject() ||
+                  (return_type->isNativePointer() && return_type->typeEntry()->isValue()) ||
+                   return_type->typeEntry()->isInterface()) ) {
             s << "void* __qt_return_value = ";
+        } else if (return_type && return_type->isArray()) {
+            s << return_type->arrayElementType()->name() + "* __qt_return_value = ";
         } else {
             s << "return ";
         }
@@ -788,13 +794,17 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                 s << arg_name << " is null ? null : " << arg_name << ".__ptr_" << te->designatedInterface()->name();
             else if (modified_type == "string" /* && type->fullName() == "char" */) {
                 s << "toStringz(" << arg_name << ")";
-            } else if(type->isContainer()) {
+            } else if (type->isArray())
+                s << arg_name << ".ptr";
+            else if(type->isContainer()) {
                 const ContainerTypeEntry *cte =
                         static_cast<const ContainerTypeEntry *>(te);
                 if(isLinearContainer(cte))
                     s << QString("%1.ptr, %1.length").arg(arg_name);
-            } else if (type->isTargetLangString() || (te && te->qualifiedCppName() == "QString"))
-                s << QString("%1.ptr, %1.length").arg(arg_name);
+            } else if (type->typeEntry()->qualifiedCppName() == "QChar")
+                s << arg_name;
+            else if (type->isTargetLangString() || (te && te->qualifiedCppName() == "QString"))
+                s << arg_name;
             else if (type->isTargetLangEnum() || type->isTargetLangFlags()) {
                 s << arg_name;
 // qtd                s << arg->argumentName() << ".value()";
@@ -841,7 +851,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
     s << ";" << endl;
 
     // return value marschalling
-    if(d_function->type()) {
+    if(return_type) {
         if ( ( has_return_type && d_function->argumentReplaced(0).isEmpty() )/* || d_function->isConstructor()*/) // qtd
             if(d_function->type()->isQObject()) {
 
@@ -862,27 +872,27 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         }
 
 
-        if (d_function->type()->isValue() && !d_function->type()->typeEntry()->isStructInD())
+        if (return_type->isValue() && !return_type->typeEntry()->isStructInD())
             s << INDENT << "return new " << d_function->type()->name() << "(__qt_return_value, false);" << endl;
 
-        if (d_function->type()->isVariant())
+        if (return_type->isVariant())
             s << INDENT << "return new QVariant(__qt_return_value, false);" << endl;
 
-        if (d_function->type()->isNativePointer() && d_function->type()->typeEntry()->isValue())
-            s << INDENT << "return new " << d_function->type()->name() << "(__qt_return_value, true);" << endl;
+        if (return_type->isNativePointer() && return_type->typeEntry()->isValue())
+            s << INDENT << "return new " << return_type->name() << "(__qt_return_value, true);" << endl;
 
-        if (d_function->type()->isObject()) {
+        if (return_type->isObject()) {
             if(d_function->storeResult())
                 s << INDENT << QString("__m_%1.nativeId = __qt_return_value;").arg(d_function->name()) << endl
                         << INDENT << QString("return __m_%1;").arg(d_function->name()) << endl;
             else {
-                QString type_name = d_function->type()->name();
+                QString type_name = return_type->name();
                 const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(d_function->type()->typeEntry());
                 if(ctype->isAbstract())
                     type_name = type_name + "_ConcreteWrapper";
 
                 QString return_type_name = d_function->type()->name();
-                if(d_function->type()->typeEntry()->designatedInterface())
+                if(return_type->typeEntry()->designatedInterface())
                     return_type_name = d_function->type()->typeEntry()->designatedInterface()->name();
 
                 AbstractMetaClass *classForTypeEntry = NULL;
@@ -899,7 +909,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                 // if class has virtual functions then it has classname_entity function so
                 // we can look for D Object pointer. otherwise create new wrapper
                 if (classForTypeEntry != NULL && classForTypeEntry->hasVirtualFunctions()) {
-                    s << INDENT << "void* d_obj = __" << d_function->type()->name() << "_entity(__qt_return_value);" << endl
+                    s << INDENT << "void* d_obj = __" << return_type->name() << "_entity(__qt_return_value);" << endl
                             << INDENT << "if (d_obj !is null) {" << endl
                             << INDENT << "    auto d_obj_ref = cast (Object) d_obj;" << endl
                             << INDENT << "    return cast(" << return_type_name << ") d_obj_ref;" << endl
@@ -915,6 +925,10 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                 }
             }
             s << endl;
+        }
+
+        if (return_type->isArray()) {
+            s << INDENT << "return __qt_return_value[0 .. " << return_type->arrayElementCount() << "];" << endl;
         }
     }
     writeInjectedCode(s, d_function, CodeSnip::End);
@@ -1044,12 +1058,14 @@ void DGenerator::writeReferenceCount(QTextStream &s, const ReferenceCount &refCo
         Indentation indent(INDENT);
         switch (refCount.action) {
         case ReferenceCount::Add:
+            s << INDENT << refCountVariableName << " ~= cast(Object) " << argumentName << ";" << endl;
+            break;
         case ReferenceCount::AddAll:
             s << INDENT << refCountVariableName << " ~= " << argumentName << ";" << endl;
             break;
         case ReferenceCount::Remove:
             s << INDENT << "remove(" << refCountVariableName
-              << ", " << argumentName << ");" << endl;
+              << ", cast(Object) " << argumentName << ");" << endl;
             break;
         case ReferenceCount::Set:
             {
@@ -1532,7 +1548,8 @@ const TypeEntry* DGenerator::fixedTypeEntry(const TypeEntry *type)
     else if (type->isEnum()) {
         const EnumTypeEntry *te = static_cast<const EnumTypeEntry *>(type);
         TypeEntry *ownerTe = TypeDatabase::instance()->findType(te->qualifier());
-        typeEntriesEnums << ownerTe;
+        if(ownerTe)
+            typeEntriesEnums << ownerTe;
         return NULL;
 //        return ownerTe;
     } else if (type->isFlags()) {
@@ -1661,7 +1678,7 @@ void DGenerator::writeImportString(QTextStream &s, const TypeEntry* typeEntry)
     if(d_class->baseClass() && d_class->baseClass()->typeEntry() == typeEntry)
         visibility = "public";*/
     QString visibility = "public";
-    s << QString("%1 import ").arg(visibility) << typeEntry->javaPackage() << "." << typeEntry->name() << ";" << endl;
+    s << QString("%1 import ").arg(visibility) << typeEntry->javaPackage() << "." << typeEntry->targetLangName() << ";" << endl;
 }
 
 void DGenerator::writeRequiredImports(QTextStream &s, const AbstractMetaClass *d_class)
@@ -2096,10 +2113,10 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                 s << "protected"; // friendly
             }
 
+            } // qtd2
+
             if (isStatic)
                 s << "static ";
-
-            } // qtd2
 
             if (actions != ReferenceCount::Set && actions != ReferenceCount::Ignore) {
                 s << "Object[] " << variableName << ";" << endl;
@@ -2801,11 +2818,14 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                 if(type->isEnum())
                     s << INDENT << "auto " << arg_name << "_enum = cast("
                                 << type->typeEntry()->qualifiedTargetLangName() << ") " << arg_name << ";";
+                else if (type->typeEntry()->qualifiedCppName() == "QChar")
+                    s << INDENT << "auto " << arg_name << "_d_ref = cast(wchar" << QString(type->actualIndirections(), '*')
+                                << ") " << arg_name << ";";
                 else if (type->isTargetLangString())
                     s << INDENT << "string " << arg_name << "_d_ref = toString("
                                 << arg_name << "[0.." << arg_name << "_size]);";
                 else if (type->typeEntry()->isValue() && type->isNativePointer() && type->typeEntry()->name() == "QString") {
-                    s << INDENT << "scope " << arg_name << "_d_qstr = new QString(" << arg_name << ", true);" << endl
+                    s << INDENT << "auto " << arg_name << "_d_qstr = QString(" << arg_name << ", true);" << endl
                       << INDENT << "string " << arg_name << "_d_ref = " << arg_name << "_d_qstr.toNativeString();";
                 } else if(type->isVariant())
                     s << INDENT << "scope " << arg_name << "_d_ref = new QVariant(" << arg_name << ", true);";

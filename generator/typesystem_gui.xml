@@ -2,7 +2,81 @@
 <typesystem package="qt.gui" default-superclass="QtDObject">
 <inject-code>
         qt.Utilities.loadQtLibrary("QtGui");
+</inject-code>
+
+<template name="gui.class_from_variant_java">
+    public this(QVariant arg__1) {
+        void* __qt_return_value = qtd_%CLASS_NAME_%CLASS_NAME_QVariant(cast(void*) this, arg__1 is null ? null : arg__1.nativeId);
+        super(__qt_return_value);
+    }
+</template>
+
+<template name="gui.class_from_variant_java_free">
+private extern (C) void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant(void *d_ptr,
+ void* arg__1);
+</template>
+
+<template name="gui.class_from_variant_native">
+// %CLASS_NAME from QVariant
+extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
+(void *d_ptr,
+ void* arg__1)
+{
+    const QVariant&amp;  __qt_arg__1 = (const QVariant&amp; ) *(QVariant *)arg__1;
+    %CLASS_NAME __qt_casted = qvariant_cast&lt;%CLASS_NAME&gt;(__qt_arg__1);
+    %CLASS_NAME *__qt_this = new %CLASS_NAME((const %CLASS_NAME&amp; )__qt_casted);
+    return (void *) __qt_this;
+}
+</template>
+
+<template name="gui.class_from_variant_native_shell">
+// %CLASS_NAME from QVariant
+extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
+(void *d_ptr,
+ void* arg__1)
+{
+    const QVariant&amp;  __qt_arg__1 = (const QVariant&amp; ) *(QVariant *)arg__1;
+    %CLASS_NAME __qt_casted = qvariant_cast&lt;%CLASS_NAME&gt;(__qt_arg__1);
+    %CLASS_NAME_QtDShell *__qt_this = new %CLASS_NAME_QtDShell(d_ptr, (const %CLASS_NAME&amp; )__qt_casted);
+    return (void *) __qt_this;
+}
+</template>
+<!-- without shell
+    <inject-code class="java">
+        <insert-template name="gui.class_from_variant_java">
+            <replace from="%CLASS_NAME" to=""/>
+        </insert-template>
+    </inject-code>   
+    <inject-code class="java-free">
+        <insert-template name="gui.class_from_variant_java_free">
+            <replace from="%CLASS_NAME" to=""/>
+        </insert-template>
     </inject-code>
+    <inject-code class="native">
+        <insert-template name="gui.class_from_variant_native">
+            <replace from="%CLASS_NAME" to=""/>
+        </insert-template>
+    </inject-code>
+    
+  with shell
+    <inject-code class="java">
+        <insert-template name="gui.class_from_variant_java">
+            <replace from="%CLASS_NAME" to=""/>
+        </insert-template>
+    </inject-code>   
+    <inject-code class="java-free">
+        <insert-template name="gui.class_from_variant_java_free">
+            <replace from="%CLASS_NAME" to=""/>
+        </insert-template>
+    </inject-code>
+    <inject-code class="native">
+        <insert-template name="gui.class_from_variant_native_shell">
+            <replace from="%CLASS_NAME" to=""/>
+        </insert-template>
+    </inject-code>
+-->
+
+        
 <template name="gui.getter_returning_nativepointer">
         public final %RETURN_TYPE %FUNCTION_NAME() {
             QNativePointer np = %FUNCTION_NAME_private();
@@ -147,7 +221,9 @@
 
   <rejection class="*" field-name="d_ptr"/>
   <rejection class="*" field-name="d"/>
-
+  
+  <rejection class="QAccessibleTableInterface"/>
+  
   <rejection class="QWindowsCEStyle"/>
   <rejection class="QWindowsMobileStyle"/>
   <rejection class="QAbstractUndoItem"/>
@@ -1189,6 +1265,24 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </value-type>
 
   <value-type name="QIcon" delete-in-main-thread="yes">
+
+    <inject-code class="java">
+        <insert-template name="gui.class_from_variant_java">
+            <replace from="%CLASS_NAME" to="QIcon"/>
+        </insert-template>
+
+    </inject-code>   
+    <inject-code class="java-free">
+        <insert-template name="gui.class_from_variant_java_free">
+            <replace from="%CLASS_NAME" to="QIcon"/>
+        </insert-template>
+    </inject-code>
+    <inject-code class="native">
+        <insert-template name="gui.class_from_variant_native">
+            <replace from="%CLASS_NAME" to="QIcon"/>
+        </insert-template>
+    </inject-code>
+
     <modify-function signature="operator=(QIcon)" remove="all"/>
     <modify-function signature="serialNumber()const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="QIcon(QIconEngineV2 *)">
@@ -1288,26 +1382,19 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         </extra-includes>
         
     <inject-code class="java">
-    public this(QVariant arg__1) {
-        void* __qt_return_value = qtd_QPixmap_QPixmap_QPixmap(cast(void*) this, arg__1 is null ? null : arg__1.nativeId);
-        super(__qt_return_value);
-    }
-    </inject-code>
+        <insert-template name="gui.class_from_variant_java">
+            <replace from="%CLASS_NAME" to="QPixmap"/>
+        </insert-template>
+    </inject-code>   
     <inject-code class="java-free">
-private extern (C) void* qtd_QPixmap_QPixmap_QVariant(void *d_ptr,
- void* arg__1);
+        <insert-template name="gui.class_from_variant_java_free">
+            <replace from="%CLASS_NAME" to="QPixmap"/>
+        </insert-template>
     </inject-code>
     <inject-code class="native">
-// QPixmap from QVariant
-extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
-(void *d_ptr,
- void* arg__1)
-{
-    const QVariant&amp;  __qt_arg__1 = (const QVariant&amp; ) *(QVariant *)arg__1;
-    QPixmap __qt_casted = qvariant_cast&lt;QPixmap&gt;(__qt_arg__1);
-    QPixmap_QtDShell *__qt_this = new QPixmap_QtDShell(d_ptr, (const QPixmap&amp; )__qt_casted);
-    return (void *) __qt_this;
-}
+        <insert-template name="gui.class_from_variant_native_shell">
+            <replace from="%CLASS_NAME" to="QPixmap"/>
+        </insert-template>
     </inject-code>
 
         <modify-function signature="save(QIODevice *, const char *, int) const">
@@ -1894,13 +1981,14 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
         </inject-code>
     </value-type>
 
-  <value-type name="QFontMetricsF" delete-in-main-thread="yes" expense-cost="1" expense-limit="1000">
-    <custom-constructor>
+  <value-type name="QFontMetricsF" delete-in-main-thread="yes"> <!-- expense-cost="1" expense-limit="1000"> -->
+<!--    <custom-constructor>
         return new QFontMetricsF(*copy);
     </custom-constructor>
     <custom-destructor>
         delete copy;
     </custom-destructor>
+    -->
     <modify-function signature="operator!=(const QFontMetricsF &amp;)">
         <remove/>
     </modify-function>
@@ -2399,7 +2487,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     </modify-function>
   </object-type>
   <object-type name="QAccessible2Interface"/>
-  <object-type name="QAccessibleTableInterface">
+<!--  <object-type name="QAccessibleTableInterface">
     <modify-function signature="qAccessibleTableCastHelper()" remove="all"/>
   
         <inject-code>
@@ -2605,7 +2693,8 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
             </conversion-rule>
         </modify-argument>
         </modify-function>
-    </object-type>
+
+    </object-type>         -->
 
   <object-type name="QAccessibleInterface">
     <modify-function signature="indexOfChild(const QAccessibleInterface*)const">
@@ -2614,7 +2703,10 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     <modify-function signature="relationTo(int,const QAccessibleInterface*,int)const">
         <modify-argument invalidate-after-use="yes" index="2"/>
     </modify-function>
-  
+    
+<!--    <modify-function signature="navigate(QAccessible::RelationFlag,int,QAccessibleInterface**)const" remove="all"/> --><!-- TODO -->
+
+<!--  
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QAccessibleInterface___" quote-before-line="}// class"/>
         </inject-code>
@@ -2673,6 +2765,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
                 </conversion-rule>
             </modify-argument>
         </modify-function>
+        -->
     </object-type>
   <object-type name="QAccessibleInterfaceEx"/>
   <object-type name="QAccessibleObject"/>
@@ -2766,6 +2859,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
 
     <modify-function signature="setExtension(QWidget*)" remove="all"/>
     <modify-function signature="exec()" access="non-final"/>
+    <modify-function signature="open()" virtual-slot="yes" />
     <modify-function signature="extension()const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="orientation()const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="setOrientation(Qt::Orientation)" remove="all"/> <!--### Obsolete in 4.3-->
@@ -2834,23 +2928,25 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
 
     </object-type>
   <object-type name="QFocusFrame">
-    <modify-function signature="initStyleOption(QStyleOption*)const">
+<!--    <modify-function signature="initStyleOption(QStyleOption*)const">
         <access modifier="private"/>
-    </modify-function>
+    </modify-function> -->
     <modify-function signature="setWidget(QWidget*)">
         <modify-argument index="1">
             <reference-count action="set" variable-name="__rcWidget"/>
         </modify-argument>
     </modify-function>
-    <inject-code>
+<!--    <inject-code>
         <insert-template name="gui.init_style_option">
             <replace from="%TYPE" to="QStyleOption"/>
         </insert-template>
-    </inject-code>
+    </inject-code> -->
   </object-type>
   <object-type name="QFontComboBox"/>
   <object-type name="QFontDialog">
-        <inject-code>
+      <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
+
+<!--        <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QFontDialog___" quote-before-line="}// class"/>
         </inject-code>
 
@@ -2912,6 +3008,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
                 <replace from="%FONT_CALL_ARGUMENT" to="initial"/>
             </insert-template>
         </inject-code>
+        -->
     </object-type>
   <object-type name="QGraphicsEllipseItem" delete-in-main-thread="yes">
   	<modify-function signature="setExtension(QGraphicsItem::Extension,QVariant)" remove="all"/>
@@ -3542,16 +3639,14 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     </modify-function>
 
   
-        <extra-includes>
-            <include file-name="qt.QNativePointer" location="java"/>
-        </extra-includes>
         <inject-code>
-        public QPictureIO(qt.core.QIODevice ioDevice, String format) {
-            this(ioDevice, QNativePointer.createCharPointer(format));
-        }
 
-        public QPictureIO(String fileName, String format) {
-            this(fileName, QNativePointer.createCharPointer(format));
+        public this(QIODevice ioDevice, string format) {
+            this(ioDevice, toStringz(format));
+        }
+        
+        public this(string fileName, string format) {
+            this(fileName, toStringz(format));
         }
 
             <insert-template name="core.return_string_instead_of_char*">
@@ -3575,7 +3670,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     <modify-function signature="find(QString)">
         <remove/>
     </modify-function>
-
+<!--
     <modify-function signature="find(QString,QPixmap&amp;)">
         <access modifier="private"/>
     </modify-function>
@@ -3583,17 +3678,24 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPixmapCache___" quote-before-line="}// class"/>
         </inject-code>
-
+-->
     </object-type>
   <object-type name="QPlastiqueStyle">
     <modify-function signature="standardPixmap(QStyle::StandardPixmap, const QStyleOption*, const QWidget*)const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="standardIconImplementation(QStyle::StandardPixmap, const QStyleOption *, const QWidget *)const" virtual-slot="yes"/>
     <modify-function signature="layoutSpacingImplementation(QSizePolicy::ControlType, QSizePolicy::ControlType, Qt::Orientation, const QStyleOption *, const QWidget *) const" virtual-slot="yes"/>
   </object-type>
-  <object-type name="QPrintDialog"/>
+  <object-type name="QPrintDialog">
+      <modify-function signature="accepted(QPrinter *)">
+          <rename to="accepted_printer"/>
+      </modify-function>
+      <modify-function signature="accepted()" remove="all"/>
+      <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
+
+  </object-type>
   <object-type name="QPrintEngine"/>
   <object-type name="QProgressBar">
-    <modify-function signature="initStyleOption(QStyleOptionProgressBar*)const">
+<!--    <modify-function signature="initStyleOption(QStyleOptionProgressBar*)const">
         <access modifier="private"/>
     </modify-function>
   
@@ -3601,7 +3703,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionProgressBar"/>
             </insert-template>
-        </inject-code>
+        </inject-code> -->
     </object-type>
   <object-type name="QPushButton">
 <!--    <modify-function signature="initStyleOption(QStyleOptionButton*)const">
@@ -4414,9 +4516,11 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     </object-type>
 
   <object-type name="QColorDialog">
+    <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
+
     <modify-function signature="getColor(const QColor &amp;, QWidget *)">
       <modify-argument index="1">
-        <replace-default-expression with="QColor.white"/>
+        <replace-default-expression with="QColor.White"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="getRgba(uint,bool*,QWidget*)">
@@ -4731,172 +4835,35 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   </object-type>
 
   <object-type name="QInputDialog">
+    <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
+
     <modify-function signature="getDouble(QWidget *, const QString &amp;, const QString &amp;, double, double, double, int, bool *, QFlags&lt;Qt::WindowType&gt;)">
-        <rename to="getDouble_internal"/>
+        <rename to="getDouble_private"/>
         <access modifier="private"/>
-        <modify-argument index="4">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="5">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="6">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="7">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="8">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="9">
-            <remove-default-expression/>
-        </modify-argument>
     </modify-function>
 
     <modify-function signature="getInteger(QWidget *, const QString &amp;, const QString &amp;, int, int, int, int, bool *, QFlags&lt;Qt::WindowType&gt;)">
-        <rename to="getInteger_internal"/>
-        <access modifier="private"/>
-        <modify-argument index="4">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="5">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="6">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="7">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="8">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="9">
-            <remove-default-expression/>
-        </modify-argument>
+        <remove/>
+    </modify-function>
+
+    <modify-function signature="getInt(QWidget*,QString,QString,int,int,int,int,bool*,QFlags&lt;Qt::WindowType&gt;)">
+        <rename to="getInt_private" />
+        <access modifier="private" />
     </modify-function>
 
     <modify-function signature="getItem(QWidget *, const QString &amp;, const QString &amp;, const QStringList&lt;QString&gt; &amp;, int, bool, bool *, QFlags&lt;Qt::WindowType&gt;)">
-        <rename to="getItem_internal"/>
+        <rename to="getItem_private"/>
         <access modifier="private"/>
-        <modify-argument index="4">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="5">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="6">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="7">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="8">
-            <remove-default-expression/>
-        </modify-argument>
     </modify-function>
 
     <modify-function signature="getText(QWidget *, const QString &amp;, const QString &amp;, QLineEdit::EchoMode, const QString &amp;, bool *, QFlags&lt;Qt::WindowType&gt;)">
-        <rename to="getText_internal"/>
+        <rename to="getText_private"/>
         <access modifier="private"/>
-        <modify-argument index="4">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="5">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="6">
-            <remove-default-expression/>
-        </modify-argument>
-        <modify-argument index="7">
-            <remove-default-expression/>
-        </modify-argument>
     </modify-function>
-  
-        <inject-code>
-        <insert-template name="gui.inputDialog_get_input">
-            <replace from="%RETURN_TYPE" to="Double"/>
-            <replace from="%EXTRA" to="double value, double minValue, double maxValue, int decimals"/>
-            <replace from="%FUNCTION_NAME" to="getDouble"/>
-            <replace from="%CALL" to="value, minValue, maxValue, decimals"/>
-        </insert-template>
 
-        public static Double getDouble(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, double value, double minValue, double maxValue) {
-            return getDouble(parent, title, label, value, minValue, maxValue, 1);
-        }
-
-        public static Double getDouble(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, double value, double minValue) {
-            return getDouble(parent, title, label, value, minValue, (double)2147483647);
-        }
-
-
-        public static Double getDouble(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, double value) {
-            return getDouble(parent, title, label, value, (double)-2147483647);
-        }
-
-        public static Double getDouble(qt.gui.QWidget parent, java.lang.String title, java.lang.String label) {
-            return getDouble(parent, title, label, 0.0);
-        }
-        </inject-code>
-
-        <inject-code>
-            <insert-template name="gui.inputDialog_get_input">
-                <replace from="%RETURN_TYPE" to="Integer"/>
-                <replace from="%EXTRA" to="int value, int minValue, int maxValue, int step"/>
-                <replace from="%FUNCTION_NAME" to="getInteger"/>
-                <replace from="%CALL" to="value, minValue, maxValue, step"/>
-            </insert-template>
-
-        public static Integer getInteger(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, int value, int minValue, int maxValue) {
-            return getInteger(parent, title, label, value, minValue, maxValue, 1);
-        }
-
-        public static Integer getInteger(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, int value, int minValue) {
-            return getInteger(parent, title, label, value, minValue, (int)2147483647);
-        }
-
-        public static Integer getInteger(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, int value) {
-            return getInteger(parent, title, label, value, (int)-2147483647);
-        }
-
-        public static Integer getInteger(qt.gui.QWidget parent, java.lang.String title, java.lang.String label) {
-            return getInteger(parent, title, label, 0);
-        }
-        </inject-code>
-
-        <inject-code>
-            <insert-template name="gui.inputDialog_get_input">
-                <replace from="%RETURN_TYPE" to="String"/>
-                <replace from="%EXTRA" to="java.util.List&lt;java.lang.String&gt; list, int current, boolean editable"/>
-                <replace from="%FUNCTION_NAME" to="getItem"/>
-                <replace from="%CALL" to="list, current, editable"/>
-            </insert-template>
-
-        public static java.lang.String getItem(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, java.util.List&lt;java.lang.String&gt; list, int current) {
-            return getItem(parent, title, label, list, current, true);
-        }
-
-        public static java.lang.String getItem(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, java.util.List&lt;java.lang.String&gt; list) {
-            return getItem(parent, title, label, list, 0);
-        }
-        </inject-code>
-        <inject-code>
-            <insert-template name="gui.inputDialog_get_input">
-                <replace from="%RETURN_TYPE" to="String"/>
-                <replace from="%EXTRA" to="qt.gui.QLineEdit.EchoMode echo, java.lang.String text"/>
-                <replace from="%FUNCTION_NAME" to="getText"/>
-                <replace from="%CALL" to="echo, text"/>
-            </insert-template>
-
-        public static java.lang.String getText(qt.gui.QWidget parent, java.lang.String title, java.lang.String label, qt.gui.QLineEdit.EchoMode echo) {
-            return getText(parent, title, label, echo, "");
-        }
-
-        public static java.lang.String getText(qt.gui.QWidget parent, java.lang.String title, java.lang.String label) {
-            return getText(parent, title, label, qt.gui.QLineEdit.EchoMode.Normal);
-        }
-        </inject-code>
+    <inject-code>
+        <import-file name="typesystem_gui-java.java" quote-after-line="class QInputDialog___" quote-before-line="}// class"/>
+    </inject-code>
     </object-type>
 
 
@@ -5854,7 +5821,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
             <no-null-pointer/>
         </modify-argument>
     </modify-function>
-  
+<!--  
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionSpinBox"/>
@@ -5924,7 +5891,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
                     QValidator::State %out = (QValidator::State) qtjambi_to_enumerator(__jni_env, %in);
                 </conversion-rule>
             </modify-argument>
-        </modify-function>
+        </modify-function>-->
     </object-type>
 
   <object-type name="QTextFrame" delete-in-main-thread="yes">
@@ -6020,6 +5987,8 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   </object-type>
 
   <object-type name="QPageSetupDialog">
+      <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
+
   </object-type>
 
   <object-type name="QTabWidget">
@@ -6082,21 +6051,12 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   </object-type>
 
   <object-type name="QDateTimeEdit">
-    <modify-function signature="initStyleOption(QStyleOptionSpinBox*)const" access="private" rename="initDateTimeEditStyleOption"/>
     <modify-function signature="setCalendarWidget(QCalendarWidget*)">
         <modify-argument index="1">
             <!-- Safe to ignore because widget is reparented -->
             <reference-count action="ignore"/>
         </modify-argument>
     </modify-function>
-
-  
-        <inject-code>
-            <insert-template name="gui.init_style_option">
-                <replace from="%TYPE" to="QStyleOptionSpinBox"/>
-                <replace from="initStyleOption" to="initDateTimeEditStyleOption"/>
-            </insert-template>
-        </inject-code>
     </object-type>
 
   <object-type name="QSortFilterProxyModel">
@@ -6118,7 +6078,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   
         <modify-function signature="match(QModelIndex, int, QVariant, int, QFlags&lt;Qt::MatchFlag&gt;) const">
             <modify-argument index="5">
-                <replace-default-expression with="Qt.MatchFlag.MatchStartsWith, Qt.MatchFlag.MatchWrap"/>
+                <replace-default-expression with="Qt.MatchFlag.MatchStartsWith | Qt.MatchFlag.MatchWrap"/>
             </modify-argument>
         </modify-function>
     </object-type>
@@ -6152,6 +6112,8 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   </object-type>
 
   <object-type name="QProgressDialog">
+        <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
+
     <modify-function signature="setBar(QProgressBar*)">
         <modify-argument index="1">
             <define-ownership class="java" owner="c++"/>
@@ -6567,9 +6529,9 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   </object-type>
 
   <object-type name="QRubberBand">
-    <modify-function signature="initStyleOption(QStyleOptionRubberBand*)const">
+<!--    <modify-function signature="initStyleOption(QStyleOptionRubberBand*)const">
         <access modifier="private"/>
-    </modify-function>
+    </modify-function>-->
     <modify-function signature="move(int,int)" rename="moveRubberBand"/>
     <modify-function signature="move(const QPoint &amp;)" rename="moveRubberBand"/>
     <modify-function signature="resize(int,int)" rename="resizeRubberBand"/>
@@ -6577,11 +6539,11 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     <modify-function signature="setGeometry(int,int,int,int)" rename="setRubberBandGeometry"/>
     <modify-function signature="setGeometry(const QRect &amp;)" rename="setRubberBandGeometry"/>
   
-        <inject-code>
+<!--        <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionRubberBand"/>
             </insert-template>
-        </inject-code>
+        </inject-code> -->
     </object-type>
 
   <object-type name="QTextLayout">
@@ -6699,7 +6661,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     </object-type>
 
   <object-type name="QGroupBox">
-    <modify-function signature="initStyleOption(QStyleOptionGroupBox*)const">
+<!--    <modify-function signature="initStyleOption(QStyleOptionGroupBox*)const">
         <access modifier="private"/>
     </modify-function>
   
@@ -6707,7 +6669,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionGroupBox"/>
             </insert-template>
-        </inject-code>
+        </inject-code>-->
     </object-type>
 
   <object-type name="QStackedWidget">
@@ -6775,7 +6737,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   <object-type name="QSplashScreen">
     <modify-function signature="showMessage(const QString &amp;, int, const QColor &amp;)">
       <modify-argument index="3">
-        <replace-default-expression with="QColor.black"/>
+        <replace-default-expression with="QColor.Black"/>
       </modify-argument>
     </modify-function>
     <modify-function signature="repaint()" remove="all"/>
@@ -7184,6 +7146,8 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
     </object-type>
 
   <object-type name="QAbstractTableModel">
+<!--  <modify-function signature="parent(const QModelIndex &amp;)const" remove="all"/>
+  <modify-function signature="hasChildren(const QModelIndex &amp;)const" remove="all"/> -->
     <extra-includes>
         <include file-name="QStringList" location="global"/>
         <include file-name="QSize" location="global"/>
@@ -7962,7 +7926,9 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
         </modify-argument>
     </modify-function>
   </object-type>
-  <object-type name="QPrintPreviewDialog"/>
+  <object-type name="QPrintPreviewDialog">
+        <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
+  </object-type>
   <object-type name="QPrintPreviewWidget"/>
   <object-type name="QStyledItemDelegate">
     <modify-function signature="setItemEditorFactory(QItemEditorFactory*)">
@@ -7980,7 +7946,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
             <reference-count action="ignore"/>
         </modify-argument>
     </modify-function>
-  
+<!--  
         <modify-function signature="initStyleOption(QStyleOptionViewItem*,QModelIndex)const">
             <modify-argument index="1">
                 <conversion-rule class="shell">
@@ -7992,6 +7958,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
                 <replace-type modified-type="qt.gui.QStyleOptionViewItem"/>
             </modify-argument>
         </modify-function>
+        -->
     </object-type>
 
   <interface-type name="QAccessibleFactoryInterface" java-name="QAbstractAccessibleFactory"/>
@@ -8001,9 +7968,9 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
   <interface-type name="QStyleFactoryInterface" java-name="QAbstractStyleFactory"/>
   <interface-type name="QTextCodecFactoryInterface" java-name="QAbstractTextCodecFactory"/>
   <interface-type name="QPictureFormatInterface" java-name="QAbstractPictureFormat">
-        <modify-function signature="loadPicture(QString,QString,QPicture*)">
+<!--        <modify-function signature="loadPicture(QString,QString,QPicture*)">
             <modify-argument index="3">
-                <replace-type modified-type="qt.gui.QPicture"/>
+                <replace-type modified-type="QPicture"/>
                 <conversion-rule class="shell">
                     jobject %out = qtjambi_from_object(__jni_env, %in, "QPicture", "com/trolltech/qt/gui/", false);
                     jobject __tmp = %out;
@@ -8024,7 +7991,7 @@ extern "C" DLL_PUBLIC void* qtd_QPixmap_QPixmap_QVariant
                     jboolean %out = (jboolean) %in;
                 </conversion-rule>
             </modify-argument>
-        </modify-function>
+        </modify-function>-->
     </interface-type>
 
   <object-type name="QIconEnginePluginV2"/>

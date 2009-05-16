@@ -223,27 +223,22 @@ class QPolygonF___ extends QPolygonF {
 }// class
 
 class QTreeWidgetItemIterator___ extends QTreeWidgetItemIterator {
-    @QtBlockedSlot
-    public final void next(int i) {
-        operator_add_assign(i);
+    public final QTreeWidgetItemIterator opAddAssign(int i) {
+        return operator_add_assign(i);
     }
 
-    @QtBlockedSlot
-    public final void previous(int i) {
-        operator_subtract_assign(i);
+    public final QTreeWidgetItemIterator opSubAssign(int i) {
+        return operator_subtract_assign(i);
     }
 
-    @QtBlockedSlot
-    public final void next() {
-        operator_increment();
+    public final QTreeWidgetItemIterator next() {
+        return operator_increment();
     }
 
-    @QtBlockedSlot
-    public final void previous() {
-        operator_decrement();
+    public final QTreeWidgetItemIterator previous() {
+        return operator_decrement();
     }
 
-    @QtBlockedSlot
     public final QTreeWidgetItem current() {
         return operator_multiply();
     }
@@ -593,7 +588,7 @@ class QAccessibleInterface___ extends QAccessibleInterface {
 }// class
 
 class QDesktopServices___ extends QDesktopServices {
-
+/*
     private static java.util.Hashtable<String, InternalUrlHandler> __rcUrlHandlers = new java.util.Hashtable<String, InternalUrlHandler>();
 
     public static interface UrlHandler {
@@ -623,17 +618,13 @@ class QDesktopServices___ extends QDesktopServices {
             __rcUrlHandlers.put(scheme, receiver);
         setUrlHandler(scheme, receiver, QNativePointer.createCharPointer("handleUrl"));
     }
-
+*/
 }// class
 
 class QWizardPage___ extends QWizardPage {
 
-    protected final void registerField(String name, QWidget widget) {
-        registerField(name, widget, (qt.QNativePointer) null, (qt.QNativePointer) null);
-    }
-
-    protected final void registerField(String name, QWidget widget, String property) {
-        registerField(name, widget, QNativePointer.createCharPointer(property), null);
+    protected final void registerField(string name, QWidget widget, string property = null) {
+        registerField(name, widget, property is null ? null : toStringz(property), null);
     }
 
     /**
@@ -675,7 +666,7 @@ class QWizardPage___ extends QWizardPage {
      * @see qt.gui.QWizardPage#field
      * @see qt.gui.QWizardPage#setField
      */
-    protected final void registerField(String name, QWidget widget, String property, String changedSignal) {
+/*    protected final void registerField(String name, QWidget widget, String property, String changedSignal) {
         String signalSignature = qt.internal.MetaObjectTools.cppSignalSignature(widget, changedSignal);
         if (signalSignature.length() == 0)
             throw new QNoSuchSignalException("Signal '" + changedSignal
@@ -683,7 +674,7 @@ class QWizardPage___ extends QWizardPage {
         registerField(name, widget, qt.QNativePointer.createCharPointer(property), qt.QNativePointer
                 .createCharPointer(qt.internal.QtJambiInternal.SignalPrefix + signalSignature));
     }
-
+*/
 }// class
 
 class QFontDialog___ extends QFontDialog {
@@ -733,11 +724,7 @@ class QPixmapCache___ extends QPixmapCache {
 
 class QShortcut___ extends QShortcut {
 
-    public QShortcut(QKeySequence key, QWidget parent) {
-        this(key, parent, null, null, qt.core.Qt.ShortcutContext.WindowShortcut);
-    }
-
-    public QShortcut(QKeySequence key, QWidget parent, qt.core.Qt.ShortcutContext context) {
+    public this(QKeySequence key, QWidget parent, Qt.ShortcutContext context = Qt.WindowShortcut) {
         this(key, parent, null, null, context);
     }
 
@@ -891,14 +878,14 @@ class QFileDialog___ extends QFileDialog {
     public static string getOpenFileName(QWidget _parent, string caption = null, string dir = null, string filter = null) {
         string res;
         string _selectedFilter = "";
-        qtd_QFileDialog_getOpenFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.nativeId, caption.ptr, caption.length, dir.ptr, dir.length, filter.ptr, filter.length, _selectedFilter.ptr, _selectedFilter.length, 0);
+        qtd_QFileDialog_getOpenFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.nativeId, caption, dir, filter, _selectedFilter, 0);
         return res;
     }
     
     public static string getSaveFileName(QWidget _parent, string caption = null, string dir = null, string filter = null) {
         string res;
         string _selectedFilter = "";
-        qtd_QFileDialog_getSaveFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.nativeId, caption.ptr, caption.length, dir.ptr, dir.length, filter.ptr, filter.length, _selectedFilter.ptr, _selectedFilter.length, 0);
+        qtd_QFileDialog_getSaveFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.nativeId, caption, dir, filter, _selectedFilter, 0);
         return res;
     }
     
@@ -1717,4 +1704,26 @@ class QGraphicsScene___ extends QGraphicsScene {
         return item;
     }*/
 
+}// class
+
+class QInputDialog___ extends QInputDialog {
+    private static double getDouble(QWidget _parent, string title, string label, double value = 0, double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1, ref bool ok = false, int flags = 0) {
+        return qtd_QInputDialog_getDouble_private_QWidget_string_string_double_double_double_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.nativeId, title, label, value, minValue, maxValue, decimals, &ok, flags);
+    }
+
+    private static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, ref bool ok = false, int flags = 0) {
+        return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.nativeId, title, label, value, minValue, maxValue, step, &ok, flags);
+    }
+
+    private static string getItem(QWidget _parent, string title, string label, string[] items, int current = 0, bool editable = true, ref bool ok = false, int flags = 0) {
+        string res;
+        qtd_QInputDialog_getItem_private_QWidget_string_string_List_int_bool_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.nativeId, title, label, items.ptr, items.length, current, editable, &ok, flags);
+        return res;
+    }
+
+    private static string getText(QWidget _parent, string title, string label, QLineEdit_EchoMode echo = QLineEdit_EchoMode.Normal, string text = null, ref bool ok = false, int flags = 0) {
+        string res;
+        qtd_QInputDialog_getText_private_QWidget_string_string_EchoMode_string_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.nativeId, title, label, echo, text, &ok, flags);
+        return res;
+    }
 }// class

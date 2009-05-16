@@ -46,6 +46,9 @@ struct DArray {
     void* ptr;
 };
 
+#define string DArray
+#define Array DArray
+
 #ifdef CPP_SHARED
 typedef void (*pfunc_abstr)();
 #endif

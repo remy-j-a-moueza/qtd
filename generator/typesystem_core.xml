@@ -4,17 +4,13 @@
     qt.Utilities.loadQtLibrary("QtCore");
     </inject-code>
 <template name="core.return_string_instead_of_char*">
-        public final String %FUNCTION_NAME() {
-            QNativePointer np = %FUNCTION_NAME_private();
-            String returned = "";
-            int i=0;
-            while (np.byteAt(i) != 0) returned += (char) np.byteAt(i++);
-            return returned;
+        public final string %FUNCTION_NAME() {
+            return fromStringz(%FUNCTION_NAME_private());
         }
     </template>
 <template name="core.call_with_string_instead_of_char*">
-        public final void %FUNCTION_NAME(String %ARG_NAME) {
-            %FUNCTION_NAME(QNativePointer.createCharPointer(%ARG_NAME));
+        public final void %FUNCTION_NAME(string %ARG_NAME) {
+            %FUNCTION_NAME(%ARG_NAME is null? null : toStringz(%ARG_NAME));
         }
     </template>
 <template name="core.private_function_return_self">
@@ -2012,7 +2008,7 @@
         </inject-code>
 
         <modify-function signature="convertFromUnicode(const QChar*,int,QTextCodec::ConverterState*)const">
-            <modify-argument index="3" invalidate-after-use="yes"/>
+<!--            <modify-argument index="3" invalidate-after-use="yes"/>
             <modify-argument index="1">
                 <replace-type modified-type="string"/>
                 <conversion-rule class="shell">
@@ -2041,9 +2037,9 @@
                         <replace from="%JAVATYPE" to="Char"/>
                     </insert-template>
                 </conversion-rule>
-            </modify-argument>
+            </modify-argument> -->
         </modify-function>
-
+<!--
         <modify-function signature="convertToUnicode(const char*,int,QTextCodec::ConverterState*)const">
             <modify-argument index="3" invalidate-after-use="yes"/>
             <modify-argument index="1">
@@ -2074,7 +2070,7 @@
                 </conversion-rule>
             </modify-argument>
         </modify-function>
-
+-->
         <modify-function signature="codecForName(const char*)  ">
             <access modifier="private"/>
         </modify-function>

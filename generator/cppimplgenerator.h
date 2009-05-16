@@ -211,7 +211,7 @@ public:
     void writeSignalsHandling(QTextStream &s, const AbstractMetaClass *java_class);
     void writeSignalHandler(QTextStream &s, const AbstractMetaClass *java_class, AbstractMetaFunction *signal);
     static void writeInitCallbacks(QTextStream &s, const AbstractMetaClass *java_class);
-
+    void writeRefArguments(QTextStream &s, const AbstractMetaFunction *java_function);
 
 private:
     void writeDefaultConstructedValues_helper(QSet<QString> &values,
