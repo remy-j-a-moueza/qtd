@@ -33,7 +33,7 @@ QTD_EXPORT(void, qtd_get_double_from_array, (void* arr, size_t pos, double* elem
 QTD_EXPORT(void, qtd_allocate_string_array, (void* arr, size_t len))
 QTD_EXPORT(void, qtd_assign_string_array_element, (void* arr, size_t pos, void* elem))
 QTD_EXPORT(void*, qtd_string_from_array, (void* arr, size_t pos))
-QTD_EXPORT(void, qtd_get_string_from_array, (void* arr, size_t pos, string* elem))
+QTD_EXPORT(void, qtd_get_string_from_array, (void* arr, size_t pos, DArray* elem))
 
 #ifdef CPP_SHARED
 

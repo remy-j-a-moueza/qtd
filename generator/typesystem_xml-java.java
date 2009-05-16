@@ -1,37 +1,38 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2008 Nokia. All rights reserved.
+** Copyright (C) 1992-2009 Nokia. All rights reserved.
 **
 ** This file is part of Qt Jambi.
 **
-** * Commercial Usage
-* Licensees holding valid Qt Commercial licenses may use this file in
-* accordance with the Qt Commercial License Agreement provided with the
-* Software or, alternatively, in accordance with the terms contained in
-* a written agreement between you and Nokia.
-*
-*
-* GNU General Public License Usage
-* Alternatively, this file may be used under the terms of the GNU
-* General Public License versions 2.0 or 3.0 as published by the Free
-* Software Foundation and appearing in the file LICENSE.GPL included in
-* the packaging of this file.  Please review the following information
-* to ensure GNU General Public Licensing requirements will be met:
-* http://www.fsf.org/licensing/licenses/info/GPLv2.html and
-* http://www.gnu.org/copyleft/gpl.html.  In addition, as a special
-* exception, Nokia gives you certain additional rights. These rights
-* are described in the Nokia Qt GPL Exception version 1.2, included in
-* the file GPL_EXCEPTION.txt in this package.
-* 
-* Qt for Windows(R) Licensees
-* As a special exception, Nokia, as the sole copyright holder for Qt
-* Designer, grants users of the Qt/Eclipse Integration plug-in the
-* right for the Qt/Eclipse Integration to link to functionality
-* provided by Qt Designer and its related libraries.
-*
-*
-* If you are unsure which license is appropriate for your use, please
-* contact the sales department at qt-sales@nokia.com.
+** Commercial Usage
+Licensees holding valid Qt Commercial licenses may use this file in
+accordance with the Qt Commercial License Agreement provided with the
+Software or, alternatively, in accordance with the terms contained in
+a written agreement between you and Nokia.
+
+GNU Lesser General Public License Usage
+Alternatively, this file may be used under the terms of the GNU Lesser
+General Public License version 2.1 as published by the Free Software
+Foundation and appearing in the file LICENSE.LGPL included in the
+packaging of this file.  Please review the following information to
+ensure the GNU Lesser General Public License version 2.1 requirements
+will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+
+In addition, as a special exception, Nokia gives you certain
+additional rights. These rights are described in the Nokia Qt LGPL
+Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
+package.
+
+GNU General Public License Usage
+Alternatively, this file may be used under the terms of the GNU
+General Public License version 3.0 as published by the Free Software
+Foundation and appearing in the file LICENSE.GPL included in the
+packaging of this file.  Please review the following information to
+ensure the GNU General Public License version 3.0 requirements will be
+met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please
+contact the sales department at qt-sales@nokia.com.
 
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -41,8 +42,8 @@
 
 package generator;
 
-import qt.*;
-import qt.xml.*;
+import com.trolltech.qt.*;
+import com.trolltech.qt.xml.*;
 
 class QDomDocument___ extends QDomDocument {
 
@@ -59,6 +60,17 @@ class QDomDocument___ extends QDomDocument {
         public int errorLine;
         public int errorColumn;
 
+    }
+
+    public final Result setContent(QXmlInputSource source, boolean namespaceProcessing)
+    {
+        QNativePointer errorStr = new QNativePointer(QNativePointer.Type.String);
+        QNativePointer errorLine = new QNativePointer(QNativePointer.Type.Int);
+        QNativePointer errorColumn = new QNativePointer(QNativePointer.Type.Int);
+
+        boolean success = setContent(source, namespaceProcessing, errorStr, errorLine, errorColumn);
+
+        return new Result(success, errorStr, errorLine, errorColumn);
     }
 
 }// class
@@ -105,7 +117,7 @@ class QXmlNamespaceSupport___ extends QXmlNamespaceSupport {
 
 class QXmlStreamWriter___ extends QXmlStreamWriter {
 
-    public QXmlStreamWriter(qt.core.QByteArray array) {
+    public QXmlStreamWriter(com.trolltech.qt.core.QByteArray array) {
         this(array.nativePointer());
         __rcDevice = array;
     }
@@ -134,3 +146,5 @@ interface QXmlEntityResolver___ extends QXmlEntityResolver {
     }
 
 }// class
+
+

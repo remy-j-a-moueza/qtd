@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="merge.xsl"?>
 
-<typesystem package="qt.xml" default-superclass="qt.QtJambiObject">
+<typesystem package="qt.xml" default-superclass="QtDObject">
 <inject-code>
-        qt.Utilities.loadQtLibrary("QtXml");
+        com.trolltech.qt.Utilities.loadQtLibrary("QtXml");
     </inject-code>
 <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QDomNodeList' has equals operators but no qHash() function"/>
 <suppress-warning text="WARNING(MetaJavaBuilder) :: Class 'QXmlStreamNamespaceDeclaration' has equals operators but no qHash() function"/>
@@ -55,12 +55,17 @@
             </modify-argument>
         </modify-function>
 
-
         <modify-function signature="setContent(QXmlInputSource*,QXmlReader*,QString*,int*,int*)">
             <modify-argument index="1">
                 <reference-count action="set" variable-name="__rcContent"/>
             </modify-argument>
         </modify-function>
+                
+        <modify-function signature="setContent(QXmlInputSource*,bool,QString*,int*,int*)">
+            <modify-argument index="1">
+                <reference-count action="set" variable-name="__rcContent"/>
+            </modify-argument>
+        </modify-function>        
 
         <modify-function signature="setContent(QIODevice*,QString*,int*,int*)">
             <modify-argument index="1">
@@ -68,16 +73,10 @@
             </modify-argument>
         </modify-function>
 
-    
+<!--    
         <inject-code>
             <import-file name="typesystem_xml-java.java" quote-after-line="class QDomDocument___" quote-before-line="}// class"/>
         </inject-code>
-        <extra-includes>
-            <include file-name="qt.QNativePointer.Type" location="java"/>
-            <include file-name="qt.core.QIODevice" location="java"/>
-            <include file-name="qt.core.QByteArray" location="java"/>
-        </extra-includes>
-
 
 
         <template name="xml.domdocument_setContent">
@@ -91,8 +90,22 @@
             }
         </template>
 
+
+        <modify-function signature="setContent(QXmlInputSource*,bool,QString*,int*,int*)">
+            <access modifier="private"/>
+            <modify-argument index="3">
+                <remove-default-expression/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-default-expression/>
+            </modify-argument>
+            <modify-argument index="5">
+                <remove-default-expression/>
+            </modify-argument>
+        </modify-function>
+-->
         <!--bool setContent(QIODevice* dev, bool namespaceProcessing, QString *errorMsg=0, int *errorLine=0, int *errorColumn=0 ); -->
-        <modify-function signature="setContent(QIODevice*, bool, QString*, int*, int*)">
+<!--        <modify-function signature="setContent(QIODevice*, bool, QString*, int*, int*)">
             <access modifier="private"/>
             <modify-argument index="3">
                 <remove-default-expression/>
@@ -110,9 +123,9 @@
                 <replace from="%CALL_ARGUMENTS" to="dev, namespaceProcessing"/>
             </insert-template>
         </inject-code>
-
+-->
         <!--bool setContent(const QByteArray& text, bool namespaceProcessing, QString *errorMsg=0, int *errorLine=0, int *errorColumn=0 ); -->
-        <modify-function signature="setContent(QByteArray, bool, QString*, int*, int*)">
+<!--        <modify-function signature="setContent(QByteArray, bool, QString*, int*, int*)">
             <access modifier="private"/>
             <modify-argument index="3">
                 <remove-default-expression/>
@@ -131,9 +144,9 @@
                 <replace from="%CALL_ARGUMENTS" to="text, namespaceProcessing"/>
             </insert-template>
         </inject-code>
-
+-->
         <!--bool setContent(const QString& text, bool namespaceProcessing, QString *errorMsg=0, int *errorLine=0, int *errorColumn=0 );-->
-        <modify-function signature="setContent(QString, bool, QString*, int*, int*)">
+<!--        <modify-function signature="setContent(QString, bool, QString*, int*, int*)">
             <access modifier="private"/>
             <modify-argument index="3">
                 <remove-default-expression/>
@@ -227,7 +240,7 @@
                 <replace from="%CALL_ARGUMENTS" to="dev"/>
             </insert-template>
         </inject-code>
-
+-->
     </value-type>
 
     <value-type name="QDomDocumentFragment">
@@ -306,6 +319,9 @@
         <modify-function signature="value(const QLatin1String &amp;)const">
             <remove/>
         </modify-function>
+        <modify-function signature="hasAttribute(const QLatin1String &amp;)const">
+            <remove/>
+        </modify-function>
     </value-type>
 
     <value-type name="QXmlStreamNamespaceDeclaration">
@@ -330,7 +346,7 @@
     </value-type>
 
     <value-type name="QXmlNamespaceSupport">
-        <custom-constructor>
+<!--        <custom-constructor>
             QXmlNamespaceSupport *clone = new QXmlNamespaceSupport;
             clone-&gt;setPrefix("", copy-&gt;uri(""));
 
@@ -349,9 +365,6 @@
         <inject-code>
             <import-file name="typesystem_xml-java.java" quote-after-line="class QXmlNamespaceSupport___" quote-before-line="}// class"/>
         </inject-code>
-        <extra-includes>
-            <include file-name="qt.QNativePointer" location="java"/>
-        </extra-includes>
         <modify-function signature="processName(QString,bool,QString&amp;,QString&amp;)const">
             <access modifier="private"/>
         </modify-function>
@@ -360,7 +373,7 @@
         <modify-function signature="splitName(QString,QString&amp;,QString&amp;)const">
             <access modifier="private"/>
         </modify-function>
-
+-->
     </value-type>
 
     <value-type name="QDomElement">
@@ -381,7 +394,7 @@
         </modify-function>
 
     
-
+<!--
         <template name="xml.constQString_to_constQStringRef">
             QString %out = qtjambi_to_qstring(__jni_env, (jstring) %in);
         </template>
@@ -435,7 +448,7 @@
                 </conversion-rule>
             </modify-argument>
         </modify-function>
-
+-->
     </value-type>
 
     <interface-type name="QXmlContentHandler">
@@ -448,7 +461,7 @@
     <interface-type name="QXmlDTDHandler"/>
     <interface-type name="QXmlDeclHandler"/>
     <interface-type name="QXmlEntityResolver">
-        <inject-code>
+<!--        <inject-code>
             <import-file name="typesystem_xml-java.java" quote-after-line="interface QXmlEntityResolver___" quote-before-line="}// class"/>
         </inject-code>
         <modify-function signature="resolveEntity(QString,QString,QXmlInputSource&amp;*)">
@@ -463,7 +476,7 @@
                 </conversion-rule>
             </modify-argument>
             <modify-argument index="return">
-                <replace-type modified-type="qt.xml.QXmlEntityResolver$ResolvedEntity"/>
+                <replace-type modified-type="com.trolltech.qt.xml.QXmlEntityResolver$ResolvedEntity"/>
                 <conversion-rule class="native">
                     jobject %out = qtjambi_to_resolvedentity(__jni_env, %in, inputSourceHolder);
                 </conversion-rule>
@@ -472,7 +485,7 @@
                 </conversion-rule>
             </modify-argument>
         </modify-function>
-
+-->
     </interface-type>
     <interface-type name="QXmlErrorHandler"/>
     <interface-type name="QXmlLexicalHandler"/>
@@ -547,7 +560,7 @@
         <modify-function signature="QXmlStreamWriter(QString *)">
             <remove/>
         </modify-function>
-    
+<!--    
         <inject-code>
             <import-file name="typesystem_xml-java.java" quote-after-line="class QXmlStreamWriter___" quote-before-line="}// class"/>
         </inject-code>
@@ -569,6 +582,7 @@
                 <reference-count action="set" variable-name="__rcDevice"/>
             </modify-argument>
         </modify-function>
+        -->
     </object-type>
 
     <object-type name="QXmlReader">

@@ -232,7 +232,11 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
 
 void ContainerGenerator::writeHeaderContent(QTextStream &s, AbstractMetaClass *cls)
 {
-    s << "#include <cstring>" << endl
+    QString file_upper = "ArrayOps_" + QString(cls->package()).replace(".", "_") + "_h";
+    file_upper = file_upper.toUpper();
+    s << "#ifndef " << file_upper << endl
+      << "#define " << file_upper << endl << endl
+      << "#include <cstring>" << endl
       << "#include \"qtd_core.h\"" << endl << endl;
 
     foreach (const TypeEntry *te, containerTypes) {
@@ -244,6 +248,8 @@ void ContainerGenerator::writeHeaderContent(QTextStream &s, AbstractMetaClass *c
             writeHeaderArrayFunctions(s, typeEntry);
         }
     }
+
+    s << "#endif // " << file_upper << endl;
 }
 
 void ContainerGenerator::setFuncNames(const QString& cls_name)

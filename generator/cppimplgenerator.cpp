@@ -598,6 +598,9 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     if (java_class->package() == "qt.gui")
         s << "#include \"ArrayOps_qt_gui.h\"" << endl;
 
+    QString pkg_name = QString(java_class->package()).replace(".", "_");
+    s << QString("#include \"ArrayOps_%1.h\"").arg(pkg_name) << endl;
+
     s << endl;
 
     writeInterfaceCasts(s, java_class);
@@ -1921,9 +1924,12 @@ void CppImplGenerator::writeFinalFunctionArguments(QTextStream &s, const Abstrac
             if (nativeArgCount > 0)
                 s << "," << endl << " ";
             // if QString argument we have to pass DArrat
-            if ((te && te->qualifiedCppName() == "QString") || d_type->isTargetLangString())
-                s << "string " << arg_name;
-            else if (d_type->isContainer()) {
+            if ((te && te->qualifiedCppName() == "QString") || d_type->isTargetLangString()) {
+                if (d_export)
+                    s << "string " << arg_name;
+                else
+                    s << "DArray " << arg_name;
+            } else if (d_type->isContainer()) {
                 const ContainerTypeEntry *cte =
                         static_cast<const ContainerTypeEntry *>(te);
                 if(isLinearContainer(cte))
@@ -3023,11 +3029,17 @@ void CppImplGenerator::writeQtToJava(QTextStream &s,
           << " = new QVariant(" << qt_name << ");" << endl;
 
     } else if (java_type->isTargetLangString()) {
-
-//        if (option & BoxedPrimitive)
-        s << INDENT << "_d_toUtf8(" << qt_name << ".utf16(), "
-          << qt_name << ".size(), " << java_name << ");" << endl;
-
+        if(java_type->typeEntry()->qualifiedCppName() == "QStringRef") {
+            s << INDENT << "const QString *str_ref = " << qt_name << ".string();" << endl
+              << INDENT << "if(str_ref)" << endl
+              << INDENT << "    _d_toUtf8(str_ref->utf16(), str_ref->size(), " << java_name << ");" << endl
+              << INDENT << "else {" << endl
+              << INDENT << "    QString empty_str;" << endl
+              << INDENT << "    _d_toUtf8(empty_str.utf16(), empty_str.size(), " << java_name << ");" << endl
+              << INDENT << "}" << endl;
+        } else {
+            s << INDENT << QString("_d_toUtf8(%1.utf16(), %1.size(), %2);").arg(qt_name, java_name) << endl;
+        }
     } else if (java_type->isTargetLangChar()) {
         s << INDENT << "jchar " << java_name << " = " << qt_name << ".unicode();" << endl;
 
@@ -3381,7 +3393,7 @@ void CppImplGenerator::writeJavaToQtContainer(QTextStream &s,
             {
                 Indentation indent(INDENT);
                 if(targ->isTargetLangString())
-                    s << INDENT << "string __d_element;" << endl
+                    s << INDENT << "DArray __d_element;" << endl
                       << INDENT << "qtd_get_string_from_array(" << java_name << ", i, &__d_element);" << endl;
                 else {
                     s << INDENT;

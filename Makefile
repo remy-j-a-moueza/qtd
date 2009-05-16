@@ -53,7 +53,7 @@ ifndef $(NAME_PREFIX)
 NAME_PREFIX = qtd
 endif
 ifndef $(PACKAGES)
-PACKAGES = core gui opengl
+PACKAGES = core gui opengl xml
 endif
 LIB_PREFIX = lib
 CC_INCLUDE += include $(QTDIR_INC) $(QTDIR_INC)$(SL)Qt $(QTDIR_INC)$(SL)QtCore $(QTDIR_INC)$(SL)QtGui $(QTDIR_INC)$(SL)QtOpenGL $(QTDIR_INC)$(SL)QtSvg
@@ -135,7 +135,7 @@ make_gen:
 	cd generator && qmake && $(MAKE)
 
 dgen:  make_gen
-	cd generator && $(GEN) $(GEN_OPT) --d-target=$(D_TARGET) --output-directory=../ qtjambi_masterinclude.h build_opengl.txt
+	cd generator && $(GEN) $(GEN_OPT) --d-target=$(D_TARGET) --output-directory=../ qtjambi_masterinclude.h build_xml.txt
 ## DGenerator ## end
 
 mkdir:

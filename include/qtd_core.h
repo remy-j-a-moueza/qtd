@@ -46,7 +46,6 @@ struct DArray {
     void* ptr;
 };
 
-#define string DArray
 #define Array DArray
 
 #ifdef CPP_SHARED

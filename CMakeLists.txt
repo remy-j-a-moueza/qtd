@@ -12,7 +12,7 @@ include_directories(${QT_INCLUDES} include ${CMAKE_CURRENT_BINARY_DIR}/include)
 option(BUILD_EXAMPLES "Build examples" "ON")
 option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
 
-set(all_packages Core Gui OpenGL) ## TODO: Loading.
+set(all_packages Core Xml) ## TODO: Loading.
 
 
 ## Strip utility.

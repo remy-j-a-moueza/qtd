@@ -72,7 +72,7 @@ DGenerator::DGenerator()
                   << "signed short" << "Array" << "GLuint" << "GLenum" << "GLint"
                   << "unsigned long" << "ulong" << "long" << "QByteRef"
                   << "QStringList" << "QList" << "QVector" << "QPair"
-                  << "QSet";
+                  << "QSet" << "QStringRef";
 }
 
 QString DGenerator::fileNameForClass(const AbstractMetaClass *d_class) const
@@ -3238,7 +3238,7 @@ void DGenerator::writeConstructorContents(QTextStream &s, const AbstractMetaFunc
             }
         }
         else
-            s << INDENT << "super(__qt_return_value);" << endl;
+            s << INDENT << "this(__qt_return_value);" << endl;
     }
     s << INDENT << "}" << endl << endl;
 
