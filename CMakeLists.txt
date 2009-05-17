@@ -63,7 +63,6 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STRE
     get_filename_component(dc_parent_dir ${dc_path} NAME)
     if("${dc_parent_dir}" STREQUAL "bin")    	
 	get_filename_component(dc_path ${dc_path} PATH)
-	messagE(${dc_path})
     endif("${dc_parent_dir}" STREQUAL "bin")
     set(CMAKE_INSTALL_PREFIX
 	${dc_path} CACHE PATH "QtD install prefix" FORCE

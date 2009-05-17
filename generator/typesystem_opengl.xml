@@ -2,8 +2,8 @@
 <?xml-stylesheet type="text/xsl" href="merge.xsl"?>
 
 <typesystem package="qt.opengl" default-superclass="QtDObject">
-<package-depend package="qt.core" />
-<package-depend package="qt.gui" />
+<depend package="qt.core" />
+<depend package="qt.gui" />
 <inject-code>
     qt.Utilities.loadQtLibrary("QtGui");
     qt.Utilities.loadQtLibrary("QtOpenGL");

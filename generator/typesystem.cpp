@@ -183,7 +183,7 @@ public:
         tagNames["add-class"] = StackElement::AddClass;
         tagNames["store-result"] = StackElement::StoreResult;
 
-        tagNames["package-depend"] = StackElement::PackageDepend;
+        tagNames["depend"] = StackElement::PackageDepend;
     }
 
     bool startElement(const QString &namespaceURI, const QString &localName,
