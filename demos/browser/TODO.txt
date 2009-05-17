@@ -1,0 +1,13 @@
+This is a very coarse port of ./demos/browser from the QT 4.5.1 linux sources.
+
+Done:
+- *.cpp and *.h files have been merged into *.d files
+- C preprocessor include lines where replaced by import lines.
+- const from function headers were removed.
+- some '::' and most '->' have been replaced by '.'
+
+Todo:
+- *.ui files need to converted to source files and translated to D
+- imports need to be corrected
+- module declarations are probably missing
+- everything else...
