@@ -1,0 +1,2 @@
+QtD is licensed under the Boost Software License (qt/boost-license.txt)
+QtD source code generator, duic and examples and demos are licensed under GPL (generator/LICENSE.GPL)
