@@ -42,7 +42,6 @@
 #include "cppimplgenerator.h"
 #include "dgenerator.h"
 #include "reporthandler.h"
-#include <qnativepointer.h>
 
 #include <QDir>
 #include <QtDebug>
@@ -2914,36 +2913,6 @@ void CppImplGenerator::writeJavaToQt(QTextStream &s,
         }
     }
 // qtd    s << INDENT << "QTJAMBI_EXCEPTION_CHECK(__jni_env);" << endl;
-}
-
-static int nativePointerType(const AbstractMetaType *java_type)
-{
-    Q_ASSERT(java_type);
-    Q_ASSERT(java_type->isNativePointer());
-
-    if (!java_type->typeEntry()->isPrimitive())
-        return PointerType;
-
-    if (java_type->indirections() > 1)
-        return PointerType;
-
-    static QHash<QString, int> types;
-    if (types.isEmpty()) {
-        types["boolean"] = BooleanType;
-        types["byte"] = ByteType;
-        types["char"] = CharType;
-        types["short"] = ShortType;
-        types["int"] = IntType;
-        types["long"] = LongType;
-        types["float"] = FloatType;
-        types["double"] = DoubleType;
-    }
-
-    QString targetLangName = java_type->typeEntry()->targetLangName();
-    if (!types.contains(targetLangName))
-        return PointerType;
-
-    return types[targetLangName];
 }
 
 void CppImplGenerator::writeQtToJava(QTextStream &s,
