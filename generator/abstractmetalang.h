@@ -843,6 +843,7 @@ public:
     void setTypeAlias(bool typeAlias) { m_is_type_alias = typeAlias; }
     bool isTypeAlias() const { return m_is_type_alias; }
 
+    const QStringList &depends() { return m_type_entry->depends(); }
 private:
     uint m_namespace : 1;
     uint m_qobject : 1;

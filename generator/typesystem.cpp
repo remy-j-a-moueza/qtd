@@ -95,6 +95,7 @@ class StackElement
         SimpleMask                  = 0xf00,
         // qtd stuff
         AddClass                    = 0x1100,
+        PackageDepend               = 0x1200,
 
         // Code snip tags (0x1000, 0x2000, ... , 0xf000)
         InjectCode =           0x1000,
@@ -181,6 +182,8 @@ public:
         // qtd
         tagNames["add-class"] = StackElement::AddClass;
         tagNames["store-result"] = StackElement::StoreResult;
+
+        tagNames["package-depend"] = StackElement::PackageDepend;
     }
 
     bool startElement(const QString &namespaceURI, const QString &localName,
@@ -217,6 +220,7 @@ private:
     QHash<QString, StackElement::ElementType> tagNames;
 
     QString m_source_dir;
+    QStringList m_defaultDepends;
 };
 
 bool Handler::error(const QXmlParseException &e)
@@ -565,6 +569,7 @@ bool Handler::startElement(const QString &, const QString &n,
             element->entry = m_current_enum;
             m_current_enum->setCodeGeneration(m_generate);
             m_current_enum->setTargetLangPackage(m_defaultPackage);
+            //m_current_enum->setDepends(m_defaultDepends); // For enums its not needed?
             m_current_enum->setUpperBound(attributes["upper-bound"]);
             m_current_enum->setLowerBound(attributes["lower-bound"]);
             m_current_enum->setForceInteger(convertBoolean(attributes["force-integer"], "force-integer", false));
@@ -633,6 +638,7 @@ bool Handler::startElement(const QString &, const QString &n,
 
                 ComplexTypeEntry *ctype = static_cast<ComplexTypeEntry *>(element->entry);
                 ctype->setTargetLangPackage(attributes["package"]);
+                //ctype->setDepends(m_defaultDepends);
                 ctype->setDefaultSuperclass(attributes["default-superclass"]);
                 ctype->setGenericClass(convertBoolean(attributes["generic-class"], "generic-class", false));
 
@@ -683,7 +689,10 @@ bool Handler::startElement(const QString &, const QString &n,
                 // ctype->setInclude(Include(Include::IncludePath, ctype->name()));
                 ctype = ctype->designatedInterface();
                 if (ctype != 0)
+                {
                     ctype->setTargetLangPackage(attributes["package"]);
+                    ctype->setDepends(m_defaultDepends);
+                }
             }
             break;
         default:
@@ -701,7 +710,8 @@ bool Handler::startElement(const QString &, const QString &n,
       || element->type == StackElement::Rejection
       || element->type == StackElement::LoadTypesystem
       || element->type == StackElement::InjectCode
-      || element->type == StackElement::Template;
+      || element->type == StackElement::Template
+      || element->type == StackElement::PackageDepend;
 
         if (!topLevel && current->type == StackElement::Root) {
             m_error = QString("Tag requires parent: '%1'").arg(tagName);
@@ -818,6 +828,9 @@ bool Handler::startElement(const QString &, const QString &n,
             // qtd
         case StackElement::AddClass:
             attributes["name"] = QString();
+            break;
+        case StackElement::PackageDepend:
+            attributes["package"] = QString();
             break;
         default:
             ; // nada
@@ -1443,6 +1456,16 @@ bool Handler::startElement(const QString &, const QString &n,
                 return false;
             }
             element->parent->value.templateInstance->addReplaceRule(attributes["from"],attributes["to"]);
+            break;
+        case StackElement::PackageDepend:
+            {
+                QString package = attributes["package"];
+                if (package.isEmpty()) {
+                    m_error = "bad package depend entry";
+                    return false;
+                }
+                m_defaultDepends << package;
+            }
             break;
         default:
             break; // nada

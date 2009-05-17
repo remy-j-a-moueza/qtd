@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="qt.gui" default-superclass="QtDObject">
+<package-depend package="qt.core" />
 <inject-code>
         qt.Utilities.loadQtLibrary("QtGui");
 </inject-code>

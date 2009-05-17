@@ -53,6 +53,13 @@ else (DC)
     message(FATAL_ERROR "D compliler not founded")
 endif (DC)
 
+# find_program(DC_TMP ${DC})
+# mark_as_advanced(DC_TMP)
+# string(REGEX MATCH "([A-Za-z\\.0-9/_\\ ]+)(/bin)/[A-Za-z\\.0-9/_\\ ]+" "\\1" dc_path "${DC_PATH}")
+# if(NOT "${DC_TMP}" STREQUAL "${dc_path}")
+#     set(CMAKE_INSTALL_PREFIX ${dc_path})
+# endif(NOT "${DC_TMP}" STREQUAL "${dc_path}")
+
 if(D_IS_MARS)
     option(SINGLE_D_OBJECT "Build all d sources to one object file" "ON")
 elseif(D_IS_LLVM)
@@ -322,7 +329,6 @@ endmacro(build_example sources)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 add_custom_target(allpackages ALL)
 link_directories(${CMAKE_BINARY_DIR}/CMakeFiles)
-#add_dgen_target(all ${packages})
 
 foreach(package_big ${all_packages})
     string(TOLOWER ${package_big} package) 
@@ -345,7 +351,7 @@ foreach(package_big ${all_packages})
 
     set(all_req_found 1)
     string(TOUPPER ${package} package_upper)
-    option(BUILD_QT_${package_upper} "Build Qt${package}" "ON")
+    option(BUILD_QT_${package_upper} "Build Qt${package_big}" "ON")
     if(BUILD_QT_${package_upper})
 	foreach(req ${required})
 	    set(req_found)
@@ -547,12 +553,11 @@ if(GENERATE_DI_FILES)
     add_custom_target(generate_headers ALL DEPENDS ${interfaces_list})
 endif(GENERATE_DI_FILES)
 
+add_subdirectory(generator)
 ## Dependences.
 foreach(package ${packages})
     add_dependencies(cpp_${package} dgen)
 endforeach(package ${packages})
-
-add_subdirectory(generator)
 add_sources_for_generating(${files_for_gen})	
 
 ##--------------------------------------------

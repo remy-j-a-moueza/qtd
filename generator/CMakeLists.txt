@@ -245,44 +245,67 @@ foreach(package ${packages})
 endforeach(package ${packages})
 file(APPEND ${dgen_build_conf} "</typesystem>\n")
 
-# foreach(dgen_impl ${files_for_gen})
-#     add_custom_command(OUTPUT ${dgen_impl}
-# 			COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
-# 			COMMAND "generator"
-# 			ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
-# 			    --source-directory=${CMAKE_SOURCE_DIR}/generator
-# 			    qtjambi_masterinclude.h 
-# 			    ${dgen_build_conf}
-# 			COMMENT "Generating binding..."
-# 			DEPENDS  generator ${gen_typesystem} ${gen_sources} 
-# 		    )
-# endforeach(dgen_impl ${files_for_gen})
-add_custom_target(dgen COMMENT "")
+# macro(add_sources_for_generating)	
+#     set(parameters_list_file ${CMAKE_BINARY_DIR}/CMakeFiles/dgen_parameters)
+#     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)	
+# 	file(REMOVE ${parameters_list_file})
+# 	foreach(arg ${ARGN})
+# 	    file(APPEND ${parameters_list_file} "${arg}\n")
+# 	endforeach(arg)
+# 	set(param @${parameters_list_file})
+#     elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+# 	set(param ${parameters})
+#     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+#     foreach(dgen_impl ${ARGN})
+# 	add_custom_command(OUTPUT ${dgen_impl}
+# 			    COMMAND ${CMAKE_COMMAND} -E remove -f ${param}
+# 			    COMMAND "generator"
+# 			    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
+# 							--source-directory=${CMAKE_SOURCE_DIR}/generator 
+# 							qtjambi_masterinclude.h  
+# 							${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
+# 			    COMMENT "Generating binding..."
+# 			    DEPENDS  generator ${gen_typesystem} ${gen_sources} 
+# 			)
+#     endforeach(dgen_impl ${ARGN})
+#     add_custom_target(dgen DEPENDS ${ARGN})
+# endmacro(add_sources_for_generating)
 
-macro(add_sources_for_generating)	
-    set(parameters_list_file ${CMAKE_BINARY_DIR}/CMakeFiles/dgen_parameters)
-    if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)	
-	file(REMOVE ${parameters_list_file})
-	foreach(arg ${ARGN})
-	    file(APPEND ${parameters_list_file} "${arg}\n")
-	endforeach(arg)
-	set(param @${parameters_list_file})
-    elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-	set(param ${parameters})
-    endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-    foreach(dgen_impl ${ARGN})
+set(gen_sources)
+foreach(package ${packages})   
+    set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml)
+    find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_SOURCE_DIR}/generator/) 
+    if(d_inc_file_found)
+	set(${CMAKE_SOURCE_DIR}/generator/typesystem_${package}-java.java)
+    endif(d_inc_file_found)
+endforeach(package ${packages})
+mark_as_advanced(d_inc_file_found)
+set(d_inc_file_found 1)
+	
+foreach(package ${packages})   
+    set(dgen_impl ${CMAKE_BINARY_DIR}/cpp/qt_${package}/qt_${package}.pri) 
+    break(package ${packages}) 
+endforeach(package ${packages})    
 
-	add_custom_command(OUTPUT ${dgen_impl}
-			    COMMAND ${CMAKE_COMMAND} -E remove -f ${param}
-			    COMMAND "generator"
-			    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
-							--source-directory=${CMAKE_SOURCE_DIR}/generator 
-							qtjambi_masterinclude.h  
-							${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
-			    COMMENT "Generating binding..."
-			    DEPENDS  generator ${gen_typesystem} ${gen_sources} 
-			)
-	#add_custom_target(${target_name} DEPENDS ${dgen_impl})
-	#add_dependencies(dgen ${target_name})
-    endforeach(dgen_impl ${ARGN})
+add_custom_command(OUTPUT ${dgen_impl}
+	COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
+	COMMAND "generator"
+	ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
+	    --source-directory=${CMAKE_SOURCE_DIR}/generator 
+	    qtjambi_masterinclude.h  
+	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
+	COMMENT "Generating binding..."
+	DEPENDS  generator ${gen_sources}
+	)       
+add_custom_target(dgen DEPENDS ${dgen_impl} COMMENT "")
+
+macro(add_sources_for_generating)
+    foreach(source ${ARGN})
+	add_custom_command(OUTPUT "${source}"
+		COMMAND ""
+		ARGS ""
+		DEPENDS ${dgen_impl}
+		COMMENT ""
+		)
+    endforeach(source ${ARGN})
 endmacro(add_sources_for_generating)

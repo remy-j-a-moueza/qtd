@@ -879,6 +879,9 @@ public:
     bool isAbstract() const { return m_isAbstract; }
     void setAbstract(bool isAbstract) { m_isAbstract = isAbstract; }
 
+    void setDepends(const QStringList &depends) {m_depends = depends; }
+    const QStringList &depends() {return m_depends; }
+
     QString addedTo;
     QStringList includedClasses;
 
@@ -908,6 +911,7 @@ private:
     // qtd
     bool m_isStructInD;
     bool m_isAbstract;
+    QStringList m_depends;
 };
 
 class ContainerTypeEntry : public ComplexTypeEntry
