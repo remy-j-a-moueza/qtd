@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="qt.webkit" default-superclass="qt.QtJambiObject">
+<typesystem package="qt.webkit" default-superclass="QtDObject">
 <inject-code>
     qt.Utilities.loadQtLibrary("QtGui");
     qt.Utilities.loadQtLibrary("QtNetwork");
@@ -34,12 +34,13 @@
     <object-type name="QWebHistory"/>
     <object-type name="QWebSettings"/>
     <object-type name="QWebPage">
-        <inject-code class="java">
+<!--        <inject-code class="java">
             <import-file name="typesystem_webkit-java.java" quote-after-line="class QWebPage___" quote-before-line="}// class"/>
         </inject-code>
         <modify-function signature="javaScriptPrompt(QWebFrame*,QString,QString,QString*)">
             <access modifier="private"/>
         </modify-function>
+        -->
         <modify-function signature="setView(QWidget*)">
             <modify-argument index="1">
                 <reference-count action="set" variable-name="__rcView"/>

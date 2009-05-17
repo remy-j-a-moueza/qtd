@@ -943,7 +943,7 @@ void CppImplGenerator::writeVirtualDispatchArguments(QTextStream &s, const Abstr
                         s << d_name + "_ConcreteWrapper" + QString(d_type->indirections(),'*');
                    }
                    else
-                        s << translateType(d_type, EnumAsInts);
+                        s << translateType(d_type, EnumAsInts, d_export);
                 }
                 else
                     s << "void*";
@@ -3190,6 +3190,7 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
         cls_name.remove("_ConcreteWrapper");
 
         s << endl
+          << INDENT << "{" << endl // qtd2 hack, additional scope for avoiding duplicating of "i"
           << INDENT;
 
         switch (type->type()) {
@@ -3235,7 +3236,8 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
             s << INDENT << "qtd_assign_" << cls_name << "_array_element(" << java_name << ", i, __java_tmp);" << endl;
             s << INDENT << "++i;" << endl;
         }
-        s << INDENT << "}" << endl;
+        s << INDENT << "}" << endl
+          << INDENT << "}" << endl;
 
     } else if (type->type() == ContainerTypeEntry::PairContainer) {
         QList<AbstractMetaType *> args = java_type->instantiations();
@@ -3651,7 +3653,10 @@ QString CppImplGenerator::translateType(const AbstractMetaType *java_type, Optio
         || java_type->isTargetLangChar()) {
         return d_name;
     } else if (java_type->isArray()) {
-        return java_type->arrayElementType()->name() + "*";
+        if (d_export)
+            return java_type->arrayElementType()->name() + "*";
+        else
+            return java_type->arrayElementType()->typeEntry()->qualifiedCppName() + "*";
     } else if (java_type->isIntegerEnum() || java_type->isIntegerFlags()
         || ((option & EnumAsInts) && (java_type->isEnum() || java_type->isFlags()))) {
         return "int";

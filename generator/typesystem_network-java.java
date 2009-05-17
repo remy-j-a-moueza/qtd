@@ -1,37 +1,38 @@
 /****************************************************************************
 **
-** Copyright (C) 1992-2008 Nokia. All rights reserved.
+** Copyright (C) 1992-2009 Nokia. All rights reserved.
 **
 ** This file is part of Qt Jambi.
 **
-** * Commercial Usage
-* Licensees holding valid Qt Commercial licenses may use this file in
-* accordance with the Qt Commercial License Agreement provided with the
-* Software or, alternatively, in accordance with the terms contained in
-* a written agreement between you and Nokia.
-*
-*
-* GNU General Public License Usage
-* Alternatively, this file may be used under the terms of the GNU
-* General Public License versions 2.0 or 3.0 as published by the Free
-* Software Foundation and appearing in the file LICENSE.GPL included in
-* the packaging of this file.  Please review the following information
-* to ensure GNU General Public Licensing requirements will be met:
-* http://www.fsf.org/licensing/licenses/info/GPLv2.html and
-* http://www.gnu.org/copyleft/gpl.html.  In addition, as a special
-* exception, Nokia gives you certain additional rights. These rights
-* are described in the Nokia Qt GPL Exception version 1.2, included in
-* the file GPL_EXCEPTION.txt in this package.
-* 
-* Qt for Windows(R) Licensees
-* As a special exception, Nokia, as the sole copyright holder for Qt
-* Designer, grants users of the Qt/Eclipse Integration plug-in the
-* right for the Qt/Eclipse Integration to link to functionality
-* provided by Qt Designer and its related libraries.
-*
-*
-* If you are unsure which license is appropriate for your use, please
-* contact the sales department at qt-sales@nokia.com.
+** Commercial Usage
+Licensees holding valid Qt Commercial licenses may use this file in
+accordance with the Qt Commercial License Agreement provided with the
+Software or, alternatively, in accordance with the terms contained in
+a written agreement between you and Nokia.
+
+GNU Lesser General Public License Usage
+Alternatively, this file may be used under the terms of the GNU Lesser
+General Public License version 2.1 as published by the Free Software
+Foundation and appearing in the file LICENSE.LGPL included in the
+packaging of this file.  Please review the following information to
+ensure the GNU Lesser General Public License version 2.1 requirements
+will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+
+In addition, as a special exception, Nokia gives you certain
+additional rights. These rights are described in the Nokia Qt LGPL
+Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
+package.
+
+GNU General Public License Usage
+Alternatively, this file may be used under the terms of the GNU
+General Public License version 3.0 as published by the Free Software
+Foundation and appearing in the file LICENSE.GPL included in the
+packaging of this file.  Please review the following information to
+ensure the GNU General Public License version 3.0 requirements will be
+met: http://www.gnu.org/copyleft/gpl.html.
+
+If you are unsure which license is appropriate for your use, please
+contact the sales department at qt-sales@nokia.com.
 
 **
 ** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
@@ -41,8 +42,8 @@
 
 package generator;
 
-import qt.*;
-import qt.network.*;
+import com.trolltech.qt.*;
+import com.trolltech.qt.network.*;
 
 class QHostInfo___ extends QHostInfo {
     /**
@@ -56,10 +57,10 @@ class QHostInfo___ extends QHostInfo {
      * @param receiver The object on which the method will be called.
      * @param methodName The name of a method which takes a single <code>QHostInfo</code> argument.
      */
-    public static int lookupHost(String name, qt.core.QObject receiver, String methodName)
+    public static int lookupHost(String name, com.trolltech.qt.core.QObject receiver, String methodName)
     {
-        methodName = qt.internal.QtJambiInternal.SlotPrefix + methodName + "(QHostInfo)";
-        return lookupHost(name, receiver, qt.QNativePointer.createCharPointer(methodName));
+        methodName = com.trolltech.qt.internal.QtJambiInternal.SlotPrefix + methodName + "(QHostInfo)";
+        return lookupHost(name, receiver, com.trolltech.qt.QNativePointer.createCharPointer(methodName));
     }
 
     /**
@@ -74,16 +75,16 @@ class QHostInfo___ extends QHostInfo {
      *               argument, and must be contained in a <code>QObject</code>
      *               subclass.
      */
-    public static int lookupHost(String name, qt.QSignalEmitter.Signal1<QHostInfo> signal)
+    public static int lookupHost(String name, com.trolltech.qt.QSignalEmitter.Signal1<QHostInfo> signal)
     {
-        if (!(signal.containingObject() instanceof qt.core.QObject)) {
+        if (!(signal.containingObject() instanceof com.trolltech.qt.core.QObject)) {
             throw new IllegalArgumentException("Only signals contained in QObject subclasses are supported. "
                                              + "Signal's class is '" + signal.containingObject().getClass() + "'.");
         }
 
-        String methodName = qt.internal.QtJambiInternal.SignalPrefix + signal.name() + "(QHostInfo)";
-        return lookupHost(name, (qt.core.QObject)signal.containingObject(),
-                          qt.QNativePointer.createCharPointer(methodName));
+        String methodName = com.trolltech.qt.internal.QtJambiInternal.SignalPrefix + signal.name() + "(QHostInfo)";
+        return lookupHost(name, (com.trolltech.qt.core.QObject)signal.containingObject(),
+                          com.trolltech.qt.QNativePointer.createCharPointer(methodName));
     }
 }// class
 
@@ -108,11 +109,11 @@ class QAbstractSocket___ extends QAbstractSocket {
         }
     }
 
-    public final void connectToHost(String host, int port, qt.core.QIODevice.OpenMode mode) {
+    public final void connectToHost(String host, int port, com.trolltech.qt.core.QIODevice.OpenMode mode) {
         connectToHost(host, (char) port, mode);
     }
 
-    public final void connectToHost(String host, int port, qt.core.QIODevice.OpenModeFlag ... mode) {
+    public final void connectToHost(String host, int port, com.trolltech.qt.core.QIODevice.OpenModeFlag ... mode) {
         connectToHost(host, (char) port, mode);
     }
 
@@ -120,11 +121,11 @@ class QAbstractSocket___ extends QAbstractSocket {
         connectToHost(host, (char) port);
     }
 
-    public final void connectToHost(QHostAddress host, int port, qt.core.QIODevice.OpenMode mode) {
+    public final void connectToHost(QHostAddress host, int port, com.trolltech.qt.core.QIODevice.OpenMode mode) {
         connectToHost(host, (char) port, mode);
     }
 
-    public final void connectToHost(QHostAddress host, int port, qt.core.QIODevice.OpenModeFlag ... mode) {
+    public final void connectToHost(QHostAddress host, int port, com.trolltech.qt.core.QIODevice.OpenModeFlag ... mode) {
         connectToHost(host, (char) port, mode);
     }
 
@@ -133,11 +134,11 @@ class QAbstractSocket___ extends QAbstractSocket {
         connectToHost(host, (char) port);
     }
 
-    protected void connectToHostImplementation(String host, int port, qt.core.QIODevice.OpenMode mode) {
+    protected void connectToHostImplementation(String host, int port, com.trolltech.qt.core.QIODevice.OpenMode mode) {
         connectToHostImplementation(host, (char) port, mode);
     }
 
-    protected void connectToHostImplementation(String host, int port, qt.core.QIODevice.OpenModeFlag ... mode) {
+    protected void connectToHostImplementation(String host, int port, com.trolltech.qt.core.QIODevice.OpenModeFlag ... mode) {
         connectToHostImplementation(host, (char) port, mode);
     }
 
@@ -166,11 +167,11 @@ class QAbstractSocket___ extends QAbstractSocket {
 
 class QSslSocket___ extends QSslSocket {
 
-    protected void connectToHostImplementation(String host, int port, qt.core.QIODevice.OpenMode mode) {
+    protected void connectToHostImplementation(String host, int port, com.trolltech.qt.core.QIODevice.OpenMode mode) {
         connectToHostImplementation(host, (char) port, mode);
     }
 
-    protected void connectToHostImplementation(String host, int port, qt.core.QIODevice.OpenModeFlag ... mode) {
+    protected void connectToHostImplementation(String host, int port, com.trolltech.qt.core.QIODevice.OpenModeFlag ... mode) {
         connectToHostImplementation(host, (char) port, mode);
     }
 
@@ -227,11 +228,11 @@ class QHttp___ extends QHttp {
         this(hostname, (char) port);
     }
 
-    public QHttp(String hostname, int port, qt.core.QObject parent) {
+    public QHttp(String hostname, int port, com.trolltech.qt.core.QObject parent) {
         this(hostname, (char) port, parent);
     }
 
-    public QHttp(java.lang.String hostname, qt.network.QHttp.ConnectionMode mode) {
+    public QHttp(java.lang.String hostname, com.trolltech.qt.network.QHttp.ConnectionMode mode) {
         this(hostname, mode, '\0');
     }
 
@@ -239,7 +240,7 @@ class QHttp___ extends QHttp {
         this(hostname, mode, (char) port);
     }
 
-    public QHttp(String hostname, QHttp.ConnectionMode mode, int port, qt.core.QObject parent) {
+    public QHttp(String hostname, QHttp.ConnectionMode mode, int port, com.trolltech.qt.core.QObject parent) {
         this(hostname, mode, (char) port, parent);
     }
 
@@ -272,7 +273,7 @@ class QTcpServer___ extends QTcpServer {
     }
 
     public final boolean listen() {
-        return listen(new qt.network.QHostAddress(qt.network.QHostAddress.SpecialAddress.Any));
+        return listen(new com.trolltech.qt.network.QHostAddress(com.trolltech.qt.network.QHostAddress.SpecialAddress.Any));
     }
 
     public final int serverPort() {
@@ -355,11 +356,11 @@ class QUdpSocket___ extends QUdpSocket {
     }
 
     public final int writeDatagram(byte data[], QHostAddress address, int port) {
-        QNativePointer np = qt.internal.QtJambiInternal.byteArrayToNativePointer(data);
+        QNativePointer np = com.trolltech.qt.internal.QtJambiInternal.byteArrayToNativePointer(data);
         return (int) writeDatagram(np, data.length, address, (char) port);
     }
 
-    public final int writeDatagram(qt.core.QByteArray data, QHostAddress address, int port) {
+    public final int writeDatagram(com.trolltech.qt.core.QByteArray data, QHostAddress address, int port) {
         return (int) writeDatagram(data, address, (char) port);
     }
 

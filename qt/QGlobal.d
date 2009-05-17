@@ -75,6 +75,17 @@ alias uint quint32;      /* 32 bit unsigned */
 alias long qint64;            /* 64 bit signed */
 alias ulong quint64;  /* 64 bit unsigned */
 
+version (X86)
+{
+    alias quint32 quintptr;
+    alias qint32 qptrdiff;
+}
+else version (X86_64)
+{
+    alias quint64 quintptr;
+    alias qint64 qptrdiff;
+}
+
 const byte QT_POINTER_SIZE = 8;
 
 alias int QNoImplicitBoolCast;

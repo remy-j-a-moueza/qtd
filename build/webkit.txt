@@ -1,0 +1,12 @@
+set(required Core Gui Network)
+
+set(classes
+    QWebFrame
+    QWebHistoryInterface
+    QWebHistoryItem
+    QWebHistory
+    QWebHitTestResult
+    QWebPage
+    QWebSettings
+    QWebView
+  )

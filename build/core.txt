@@ -50,5 +50,6 @@ set (classes
     QTimeLine
     QAbstractFactory
     QAbstractListModel
+    QCryptographicHash
     )
 	

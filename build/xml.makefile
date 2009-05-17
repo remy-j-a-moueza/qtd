@@ -1,5 +1,5 @@
 ## Qt Lib name.
-qt_svg_name = QtXml
+qt_xml_name = QtXml
 
 ## Libraries linked to the cpp part (is active only when  CPP_SHARED == true).
 xml_link_cpp += qtdcore_cpp $(qt_core_lib_name)

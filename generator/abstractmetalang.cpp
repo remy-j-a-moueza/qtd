@@ -2024,6 +2024,7 @@ void ArgumentReplace::init()
     m_instance->data["out"] = "_out";
     m_instance->data["scope"] = "_scope";
     m_instance->data["default"] = "_default";
+    m_instance->data["body"] = "_body";
 }
 
 QString ArgumentReplace::translate(QString arg)

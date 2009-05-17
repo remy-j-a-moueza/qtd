@@ -69,4 +69,5 @@ core_classes =  \
     QTextDecoder \
     QTimeLine \
     QAbstractFactory \
-    QAbstractListModel
+    QAbstractListModel \
+    QCryptographicHash

@@ -104,7 +104,7 @@
     <primitive-type name="unsigned __int64" java-name="long" preferred-conversion="no" jni-name="jlong"/>
     <primitive-type name="unsigned long long" java-name="ulong" preferred-conversion="no" jni-name="jlong"/>
     <primitive-type name="long long" java-name="long" preferred-conversion="no" jni-name="jlong"/>
-    <primitive-type name="quintptr" preferred-conversion="no" java-name="ulong" jni-name="jlong" />
+    <primitive-type name="quintptr" preferred-conversion="no" java-name="quintptr" jni-name="quintptr" />
 
     <primitive-type name="short" preferred-conversion="no" java-name="short" jni-name="jchar"/>
     <primitive-type name="short" preferred-java-type="no" java-name="short" jni-name="jshort" />
@@ -1939,13 +1939,13 @@
     </value-type>
 
   <object-type name="QCryptographicHash">
-        <inject-code>
+<!--        <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QCryptographicHash___" quote-before-line="}// class"/>
         </inject-code>
         <modify-function signature="addData(const char*,int)">
             <access modifier="private"/>
         </modify-function>
-
+-->
     </object-type>
   <object-type name="QLibraryInfo"/>
   <object-type name="QMutex"/>

@@ -72,7 +72,7 @@ DGenerator::DGenerator()
                   << "signed short" << "Array" << "GLuint" << "GLenum" << "GLint"
                   << "unsigned long" << "ulong" << "long" << "QByteRef"
                   << "QStringList" << "QList" << "QVector" << "QPair"
-                  << "QSet" << "QStringRef";
+                  << "QSet" << "QStringRef" << "quintptr";
 }
 
 QString DGenerator::fileNameForClass(const AbstractMetaClass *d_class) const
@@ -1831,7 +1831,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     if (!m_isRecursive)
         s << "module " << d_class->package() << "." << d_class->name() <<";" << endl << endl;
 
-
+/*
     s << "// some type info" << endl;
     QString hasVirtuals = d_class->hasVirtualFunctions() ? "has" : "doesn't have";
     QString isFinal = d_class->isFinal() ? "is" : "is not";
@@ -1844,7 +1844,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
       << "// " << d_class->hasProtectedFunctions() << endl
       << "// " << d_class->hasFieldAccessors() << endl
       << "// " << d_class->typeEntry()->isObject() << endl;
-
+*/
 
     const ComplexTypeEntry *ctype = d_class->typeEntry();
     if (!ctype->addedTo.isEmpty() && !m_isRecursive) {
