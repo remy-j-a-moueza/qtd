@@ -142,7 +142,7 @@ public class QVariant : QtDObject
     }
 
 
-    public this(char[] str) {
+    public this(string str) {
         void* __qt_return_value = qtd_QVariant_QVariant_String(str.ptr, str.length);
         super(__qt_return_value);
     }
@@ -396,9 +396,9 @@ public class QVariant : QtDObject
     }
 
     public final string toString() {
-        char[] res;
+        string res;
         qtd_QVariant_toString(nativeId, &res);
-        return cast(string)res;
+        return res;
     }
 
     public final QTime toTime() {

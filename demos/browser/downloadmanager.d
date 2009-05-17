@@ -71,10 +71,8 @@ import QtWebKit.QWebSettings;
 
 class DownloadItem : public QWidget, public Ui_DownloadItem
 {
-    Q_OBJECT
 
-signals:
-    void statusChanged();
+    mixin Signal!("statusChanged");
 
 public:
  
@@ -83,37 +81,37 @@ public:
     It moves the data from the QNetworkReply into the QFile as well
     as update the information/progressbar and report errors.
  */
-   DownloadItem(QNetworkReply *reply = 0, bool requestFileName = false, QWidget *parent = 0)
-    : QWidget(parent)
-{
-	m_reply = reply;
-m_requestFileName = requestFileName;
-m_bytesReceived = 0;
-	
-    setupUi(this);
-    QPalette p = downloadInfoLabel.palette();
-    p.setColor(QPalette::Text, Qt.darkGray);
-    downloadInfoLabel.setPalette(p);
-    progressBar.setMaximum(0);
-    tryAgainButton.hide();
-    connect(stopButton, SIGNAL(clicked()), this, SLOT(stop()));
-    connect(openButton, SIGNAL(clicked()), this, SLOT(open()));
-    connect(tryAgainButton, SIGNAL(clicked()), this, SLOT(tryAgain()));
+    this(QNetworkReply reply = null, bool requestFileName = false, QWidget parent = null)
+    {
+        super(parent);
+        m_reply = reply;
+        m_requestFileName = requestFileName;
+        m_bytesReceived = 0;
+        
+        setupUi(this);
+        QPalette p = downloadInfoLabel.palette();
+        p.setColor(QPalette.Text, Qt.darkGray);
+        downloadInfoLabel.setPalette(p);
+        progressBar.setMaximum(0);
+        tryAgainButton.hide();
+        stopButton.clicked.connect(&this.stop);
+        openButton.clicked.connect(&this.open);
+        tryAgainButton.clicked.connect(&this.tryAgain);
 
-    init();
-}
+        init();
+    }
 
 
     bool downloading()
-{
-    return (progressBar.isVisible());
-}
+    {
+        return (progressBar.isVisible());
+    }
 
 
     bool downloadedSuccessfully()
-{
-    return (stopButton.isHidden() && tryAgainButton.isHidden());
-}
+    {
+        return (stopButton.isHidden() && tryAgainButton.isHidden());
+    }
 
 
     QUrl m_url;
@@ -121,248 +119,248 @@ m_bytesReceived = 0;
     QFile m_output;
     QNetworkReply *m_reply;
 
-private slots:
+private: // slots:
     void stop()
-{
-    setUpdatesEnabled(false);
-    stopButton.setEnabled(false);
-    stopButton.hide();
-    tryAgainButton.setEnabled(true);
-    tryAgainButton.show();
-    setUpdatesEnabled(true);
-    m_reply.abort();
-}
+    {
+        setUpdatesEnabled(false);
+        stopButton.setEnabled(false);
+        stopButton.hide();
+        tryAgainButton.setEnabled(true);
+        tryAgainButton.show();
+        setUpdatesEnabled(true);
+        m_reply.abort();
+    }
 
     void tryAgain()
-{
-    if (!tryAgainButton.isEnabled())
-        return;
-
-    tryAgainButton.setEnabled(false);
-    tryAgainButton.setVisible(false);
-    stopButton.setEnabled(true);
-    stopButton.setVisible(true);
-    progressBar.setVisible(true);
-
-    QNetworkReply *r = BrowserApplication::networkAccessManager().get(QNetworkRequest(m_url));
-    if (m_reply)
-        m_reply.deleteLater();
-    if (m_output.exists())
-        m_output.remove();
-    m_reply = r;
-    init();
-    emit statusChanged();
-}
-
-    void open()
-{
-    QFileInfo info(m_output);
-    QUrl url = QUrl::fromLocalFile(info.absolutePath());
-    QDesktopServices::openUrl(url);
-}
-
-    void downloadReadyRead()
-{
-    if (m_requestFileName && m_output.fileName().isEmpty())
-        return;
-    if (!m_output.isOpen()) {
-        // in case someone else has already put a file there
-        if (!m_requestFileName)
-            getFileName();
-        if (!m_output.open(QIODevice::WriteOnly)) {
-            downloadInfoLabel.setText(tr("Error opening save file: %1")
-                    .arg(m_output.errorString()));
-            stopButton.click();
-            emit statusChanged();
+    {
+        if (!tryAgainButton.isEnabled())
             return;
-        }
+
+        tryAgainButton.setEnabled(false);
+        tryAgainButton.setVisible(false);
+        stopButton.setEnabled(true);
+        stopButton.setVisible(true);
+        progressBar.setVisible(true);
+
+        QNetworkReply *r = BrowserApplication.networkAccessManager().get(QNetworkRequest(m_url));
+        if (m_reply)
+            m_reply.deleteLater();
+        if (m_output.exists())
+            m_output.remove();
+        m_reply = r;
+        init();
         emit statusChanged();
     }
-    if (-1 == m_output.write(m_reply.readAll())) {
-        downloadInfoLabel.setText(tr("Error saving: %1")
-                .arg(m_output.errorString()));
-        stopButton.click();
-    }
-}
 
-    void error(QNetworkReply::NetworkError code)
-{
-    qDebug() << "DownloadItem::error" << m_reply.errorString() << m_url;
-    downloadInfoLabel.setText(tr("Network Error: %1").arg(m_reply.errorString()));
-    tryAgainButton.setEnabled(true);
-    tryAgainButton.setVisible(true);
-}
+    void open()
+    {
+        QFileInfo info(m_output);
+        QUrl url = QUrl.fromLocalFile(info.absolutePath());
+        QDesktopServices.openUrl(url);
+    }
+
+    void downloadReadyRead()
+    {
+        if (m_requestFileName && m_output.fileName().isEmpty())
+            return;
+        if (!m_output.isOpen()) {
+            // in case someone else has already put a file there
+            if (!m_requestFileName)
+                getFileName();
+            if (!m_output.open(QIODevice.WriteOnly)) {
+                downloadInfoLabel.setText(tr("Error opening save file: %1")
+                        .arg(m_output.errorString()));
+                stopButton.click();
+                emit statusChanged();
+                return;
+            }
+            emit statusChanged();
+        }
+        if (-1 == m_output.write(m_reply.readAll())) {
+            downloadInfoLabel.setText(tr("Error saving: %1")
+                    .arg(m_output.errorString()));
+            stopButton.click();
+        }
+    }
+
+    void error(QNetworkReply.NetworkError code)
+    {
+        qDebug() << "DownloadItem::error" << m_reply.errorString() << m_url;
+        downloadInfoLabel.setText(tr("Network Error: %1").arg(m_reply.errorString()));
+        tryAgainButton.setEnabled(true);
+        tryAgainButton.setVisible(true);
+    }
 
 
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
-{
-    m_bytesReceived = bytesReceived;
-    if (bytesTotal == -1) {
-        progressBar.setValue(0);
-        progressBar.setMaximum(0);
-    } else {
-        progressBar.setValue(bytesReceived);
-        progressBar.setMaximum(bytesTotal);
+    {
+        m_bytesReceived = bytesReceived;
+        if (bytesTotal == -1) {
+            progressBar.setValue(0);
+            progressBar.setMaximum(0);
+        } else {
+            progressBar.setValue(bytesReceived);
+            progressBar.setMaximum(bytesTotal);
+        }
+        updateInfoLabel();
     }
-    updateInfoLabel();
-}
 
 
     void metaDataChanged()
-{
-    qDebug() << "DownloadItem::metaDataChanged: not handled.";
-}
+    {
+        qDebug() << "DownloadItem::metaDataChanged: not handled.";
+    }
 
     void finished()
-{
-    progressBar.hide();
-    stopButton.setEnabled(false);
-    stopButton.hide();
-    m_output.close();
-    updateInfoLabel();
-    emit statusChanged();
-}
+    {
+        progressBar.hide();
+        stopButton.setEnabled(false);
+        stopButton.hide();
+        m_output.close();
+        updateInfoLabel();
+        emit statusChanged();
+    }
 
 private:
     void getFileName()
-{
-    QSettings settings;
-    settings.beginGroup(QLatin1String("downloadmanager"));
-    QString defaultLocation = QDesktopServices::storageLocation(QDesktopServices::DesktopLocation);
-    QString downloadDirectory = settings.value(QLatin1String("downloadDirectory"), defaultLocation).toString();
-    if (!downloadDirectory.isEmpty())
-        downloadDirectory += QLatin1Char('/');
+    {
+        QSettings settings;
+        settings.beginGroup(QLatin1String("downloadmanager"));
+        QString defaultLocation = QDesktopServices.storageLocation(QDesktopServices.DesktopLocation);
+        QString downloadDirectory = settings.value(QLatin1String("downloadDirectory"), defaultLocation).toString();
+        if (!downloadDirectory.isEmpty())
+            downloadDirectory += QLatin1Char('/');
 
-    QString defaultFileName = saveFileName(downloadDirectory);
-    QString fileName = defaultFileName;
-    if (m_requestFileName) {
-        fileName = QFileDialog::getSaveFileName(this, tr("Save File"), defaultFileName);
-        if (fileName.isEmpty()) {
-            m_reply.close();
-            fileNameLabel.setText(tr("Download canceled: %1").arg(QFileInfo(defaultFileName).fileName()));
-            return;
+        QString defaultFileName = saveFileName(downloadDirectory);
+        QString fileName = defaultFileName;
+        if (m_requestFileName) {
+            fileName = QFileDialog.getSaveFileName(this, tr("Save File"), defaultFileName);
+            if (fileName.isEmpty()) {
+                m_reply.close();
+                fileNameLabel.setText(tr("Download canceled: %1").arg(QFileInfo(defaultFileName).fileName()));
+                return;
+            }
         }
+        m_output.setFileName(fileName);
+        fileNameLabel.setText(QFileInfo(m_output.fileName()).fileName());
+        if (m_requestFileName)
+            downloadReadyRead();
     }
-    m_output.setFileName(fileName);
-    fileNameLabel.setText(QFileInfo(m_output.fileName()).fileName());
-    if (m_requestFileName)
-        downloadReadyRead();
-}
 
     void init()
-{
-    if (!m_reply)
-        return;
+    {
+        if (!m_reply)
+            return;
 
-    // attach to the m_reply
-    m_url = m_reply.url();
-    m_reply.setParent(this);
-    connect(m_reply, SIGNAL(readyRead()), this, SLOT(downloadReadyRead()));
-    connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
-            this, SLOT(error(QNetworkReply::NetworkError)));
-    connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)),
-            this, SLOT(downloadProgress(qint64, qint64)));
-    connect(m_reply, SIGNAL(metaDataChanged()),
-            this, SLOT(metaDataChanged()));
-    connect(m_reply, SIGNAL(finished()),
-            this, SLOT(finished()));
+        // attach to the m_reply
+        m_url = m_reply.url();
+        m_reply.setParent(this);
+        connect(m_reply, SIGNAL(readyRead()), this, SLOT(downloadReadyRead()));
+        connect(m_reply, SIGNAL(error(QNetworkReply.NetworkError)),
+                this, SLOT(error(QNetworkReply.NetworkError)));
+        connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)),
+                this, SLOT(downloadProgress(qint64, qint64)));
+        connect(m_reply, SIGNAL(metaDataChanged()),
+                this, SLOT(metaDataChanged()));
+        connect(m_reply, SIGNAL(finished()),
+                this, SLOT(finished()));
 
-    // reset info
-    downloadInfoLabel.clear();
-    progressBar.setValue(0);
-    getFileName();
+        // reset info
+        downloadInfoLabel.clear();
+        progressBar.setValue(0);
+        getFileName();
 
-    // start timer for the download estimation
-    m_downloadTime.start();
+        // start timer for the download estimation
+        m_downloadTime.start();
 
-    if (m_reply.error() != QNetworkReply::NoError) {
-        error(m_reply.error());
-        finished();
+        if (m_reply.error() != QNetworkReply.NoError) {
+            error(m_reply.error());
+            finished();
+        }
     }
-}
 
     void updateInfoLabel()
-{
-    if (m_reply.error() == QNetworkReply::NoError)
-        return;
+    {
+        if (m_reply.error() == QNetworkReply.NoError)
+            return;
 
-    qint64 bytesTotal = progressBar.maximum();
-    bool running = !downloadedSuccessfully();
+        qint64 bytesTotal = progressBar.maximum();
+        bool running = !downloadedSuccessfully();
 
-    // update info label
-    double speed = m_bytesReceived * 1000.0 / m_downloadTime.elapsed();
-    double timeRemaining = ((double)(bytesTotal - m_bytesReceived)) / speed;
-    QString timeRemainingString = tr("seconds");
-    if (timeRemaining > 60) {
-        timeRemaining = timeRemaining / 60;
-        timeRemainingString = tr("minutes");
-    }
-    timeRemaining = floor(timeRemaining);
+        // update info label
+        double speed = m_bytesReceived * 1000.0 / m_downloadTime.elapsed();
+        double timeRemaining = ((double)(bytesTotal - m_bytesReceived)) / speed;
+        QString timeRemainingString = tr("seconds");
+        if (timeRemaining > 60) {
+            timeRemaining = timeRemaining / 60;
+            timeRemainingString = tr("minutes");
+        }
+        timeRemaining = floor(timeRemaining);
 
-    // When downloading the eta should never be 0
-    if (timeRemaining == 0)
-        timeRemaining = 1;
+        // When downloading the eta should never be 0
+        if (timeRemaining == 0)
+            timeRemaining = 1;
 
-    QString info;
-    if (running) {
-        QString remaining;
-        if (bytesTotal != 0)
-            remaining = tr("- %4 %5 remaining")
-            .arg(timeRemaining)
-            .arg(timeRemainingString);
-        info = QString(tr("%1 of %2 (%3/sec) %4"))
-            .arg(dataString(m_bytesReceived))
-            .arg(bytesTotal == 0 ? tr("?") : dataString(bytesTotal))
-            .arg(dataString((int)speed))
-            .arg(remaining);
-    } else {
-        if (m_bytesReceived == bytesTotal)
-            info = dataString(m_output.size());
-        else
-            info = tr("%1 of %2 - Stopped")
+        QString info;
+        if (running) {
+            QString remaining;
+            if (bytesTotal != 0)
+                remaining = tr("- %4 %5 remaining")
+                .arg(timeRemaining)
+                .arg(timeRemainingString);
+            info = QString(tr("%1 of %2 (%3/sec) %4"))
                 .arg(dataString(m_bytesReceived))
-                .arg(dataString(bytesTotal));
+                .arg(bytesTotal == 0 ? tr("?") : dataString(bytesTotal))
+                .arg(dataString((int)speed))
+                .arg(remaining);
+        } else {
+            if (m_bytesReceived == bytesTotal)
+                info = dataString(m_output.size());
+            else
+                info = tr("%1 of %2 - Stopped")
+                    .arg(dataString(m_bytesReceived))
+                    .arg(dataString(bytesTotal));
+        }
+        downloadInfoLabel.setText(info);
     }
-    downloadInfoLabel.setText(info);
-}
 
     QString dataString(int size)
-{
-    QString unit;
-    if (size < 1024) {
-        unit = tr("bytes");
-    } else if (size < 1024*1024) {
-        size /= 1024;
-        unit = tr("kB");
-    } else {
-        size /= 1024*1024;
-        unit = tr("MB");
+    {
+        QString unit;
+        if (size < 1024) {
+            unit = tr("bytes");
+        } else if (size < 1024*1024) {
+            size /= 1024;
+            unit = tr("kB");
+        } else {
+            size /= 1024*1024;
+            unit = tr("MB");
+        }
+        return QString(QLatin1String("%1 %2")).arg(size).arg(unit);
     }
-    return QString(QLatin1String("%1 %2")).arg(size).arg(unit);
-}
 
     QString saveFileName(const QString &directory);
-{
-    // Move this function into QNetworkReply to also get file name sent from the server
-    QString path = m_url.path();
-    QFileInfo info(path);
-    QString baseName = info.completeBaseName();
-    QString endName = info.suffix();
+    {
+        // Move this function into QNetworkReply to also get file name sent from the server
+        QString path = m_url.path();
+        QFileInfo info(path);
+        QString baseName = info.completeBaseName();
+        QString endName = info.suffix();
 
-    if (baseName.isEmpty()) {
-        baseName = QLatin1String("unnamed_download");
-        qDebug() << "DownloadManager:: downloading unknown file:" << m_url;
+        if (baseName.isEmpty()) {
+            baseName = QLatin1String("unnamed_download");
+            qDebug() << "DownloadManager:: downloading unknown file:" << m_url;
+        }
+        QString name = directory + baseName + QLatin1Char('.') + endName;
+        if (QFile.exists(name)) {
+            // already exists, don't overwrite
+            int i = 1;
+            do {
+                name = directory + baseName + QLatin1Char('-') + QString.number(i++) + QLatin1Char('.') + endName;
+            } while (QFile.exists(name));
+        }
+        return name;
     }
-    QString name = directory + baseName + QLatin1Char('.') + endName;
-    if (QFile::exists(name)) {
-        // already exists, don't overwrite
-        int i = 1;
-        do {
-            name = directory + baseName + QLatin1Char('-') + QString::number(i++) + QLatin1Char('.') + endName;
-        } while (QFile::exists(name));
-    }
-    return name;
-}
 
     bool m_requestFileName;
     qint64 m_bytesReceived;
@@ -397,7 +395,7 @@ public:
 this(QWidget *parent = null)
     : QDialog(parent)
     , m_autoSaver(new AutoSaver(this))
-    , m_manager(BrowserApplication::networkAccessManager())
+    , m_manager(BrowserApplication.networkAccessManager())
     , m_iconProvider(0)
     , m_removePolicy(Never)
 {
@@ -460,7 +458,7 @@ public slots:
 {
     if (!reply || reply.url().isEmpty())
         return;
-    QVariant header = reply.header(QNetworkRequest::ContentLengthHeader);
+    QVariant header = reply.header(QNetworkRequest.ContentLengthHeader);
     bool ok;
     int size = header.toInt(&ok);
     if (ok && size == 0)
@@ -521,18 +519,18 @@ private slots:
         m_iconProvider = new QFileIconProvider();
     QIcon icon = m_iconProvider.icon(item.m_output.fileName());
     if (icon.isNull())
-        icon = style().standardIcon(QStyle::SP_FileIcon);
+        icon = style().standardIcon(QStyle.SP_FileIcon);
     item.fileIcon.setPixmap(icon.pixmap(48, 48));
     downloadsView.setRowHeight(row, item.minimumSizeHint().height());
 
     bool remove = false;
-    QWebSettings *globalSettings = QWebSettings::globalSettings();
+    QWebSettings *globalSettings = QWebSettings.globalSettings();
     if (!item.downloading()
-        && globalSettings.testAttribute(QWebSettings::PrivateBrowsingEnabled))
+        && globalSettings.testAttribute(QWebSettings.PrivateBrowsingEnabled))
         remove = true;
 
     if (item.downloadedSuccessfully()
-        && removePolicy() == DownloadManager::SuccessFullDownload) {
+        && removePolicy() == DownloadManager.SuccessFullDownload) {
         remove = true;
     }
     if (remove)
@@ -553,7 +551,7 @@ private:
     if (row == 0)
         show();
     downloadsView.setIndexWidget(m_model.index(row, 0), item);
-    QIcon icon = style().standardIcon(QStyle::SP_FileIcon);
+    QIcon icon = style().standardIcon(QStyle.SP_FileIcon);
     item.fileIcon.setPixmap(icon.pixmap(48, 48));
     downloadsView.setRowHeight(row, item.sizeHint().height());
 }
@@ -565,7 +563,7 @@ private:
     itemCount.setText(count == 1 ? tr("1 Download") : tr("%1 Downloads").arg(count));
 }
 
-DownloadModel::DownloadModel(DownloadManager *downloadManager, QObject *parent)
+DownloadModel.DownloadModel(DownloadManager *downloadManager, QObject *parent)
     : QAbstractListModel(parent)
     , m_downloadManager(downloadManager)
 {
