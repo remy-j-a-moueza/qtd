@@ -179,7 +179,14 @@ macro(MAKE_NATIVE_PATH pathname)
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows) 
 endmacro(MAKE_NATIVE_PATH)
 
-macro(regexseafestring outvariable)
+##
+## Example:
+##	set(path 24.3+23.bin)
+##	obj_path(path)
+##	message(STATUS ${path})
+## Example output:
+##	-- 24\.3\+23\.bin
+macro(regex_safe_string outvariable)
     set(${outvariable} ${ARGN})
     set(__regex_chars__ ^ $ . ] [ - * + ? | \( \))
     foreach(__regex_char__ ${__regex_chars__})
@@ -187,9 +194,9 @@ macro(regexseafestring outvariable)
 	    "\\${__regex_char__}" ${outvariable} ${${outvariable}}
 	    )
     endforeach(__regex_char__ ${__regex_chars__})
-endmacro(regexseafestring outvariable)
+endmacro(regex_safe_string outvariable)
 
-## Remove unnecessary travel to the object file.
+## Remove unnecessary path to the object file.
 ## path -- path to object file.
 ## Example:
 ##	set(path ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/target.dir/main.d.obj)
@@ -198,12 +205,11 @@ endmacro(regexseafestring outvariable)
 ## Example output:
 ##	-- CMakeFiles/target.dir/main.d.obj
 macro(OBJ_PATH path)
-    regexseafestring(__cbd_safe__ ${CMAKE_CURRENT_BINARY_DIR})
-    regexseafestring(__csd_safe__ ${CMAKE_CURRENT_SOURCE_DIR})
+    regex_safe_string(__cbd_safe__ ${CMAKE_CURRENT_BINARY_DIR})
+    regex_safe_string(__csd_safe__ ${CMAKE_CURRENT_SOURCE_DIR})
     set(regexp_str "(${__cbd_safe__}/|${__csd_safe__}/|)(.+)")
     string(REGEX REPLACE ${regexp_str} "\\2" ${path} "${${path}}") 
 endmacro(OBJ_PATH)
-
 
 ## Compile d files.
 ## target -- name of a new target.
@@ -389,7 +395,8 @@ foreach(package_big ${all_packages})
     else(BUILD_QT_${package_upper})
 	set(all_req_found)
     endif(BUILD_QT_${package_upper})
-
+    
+    ## TODO: cleanup. 
     if("${all_req_found}" EQUAL 1)
 	set(packages_big ${packages_big} ${package_big})
 	set(packages ${packages} ${package})
@@ -399,7 +406,8 @@ foreach(package_big ${all_packages})
 	    if(NOT GENERATE_DI_FILES)
 		get_filename_component(path ${d_source}.d PATH)
 		get_filename_component(name ${d_source}.d NAME_WE)
-		install(FILES ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}.d DESTINATION include/d/qt/${path} RENAME ${name}.di)
+		install(FILES ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}.d COMPONENT qtd DESTINATION include/d/qt/${path} RENAME ${name}.di)
+		install(FILES ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}_enum.d COMPONENT qtd DESTINATION include/d/qt/${path} RENAME ${name}_enum.di OPTIONAL)
 	    endif(NOT GENERATE_DI_FILES)
 	endforeach(d_source)
 	foreach(d_source ${d_files})
@@ -407,7 +415,8 @@ foreach(package_big ${all_packages})
 	    if(NOT GENERATE_DI_FILES)
 		get_filename_component(path ${d_source}.d PATH)
 		get_filename_component(name ${d_source}.d NAME_WE)
-		install(FILES ${CMAKE_SOURCE_DIR}/qt/${d_source}.d DESTINATION include/d/qt/${path} RENAME ${name}.di)
+		install(FILES ${CMAKE_SOURCE_DIR}/qt/${d_source}.d DESTINATION include/d/qt/${path} COMPONENT qtd RENAME ${name}.di)
+		install(FILES ${CMAKE_SOURCE_DIR}/qt/${d_source}_enum.d DESTINATION include/d/qt/${path} COMPONENT qtd RENAME ${name}_enum.di OPTIONAL)
 	    endif(NOT GENERATE_DI_FILES)
 	endforeach(d_source)
 	foreach(d_source ${d_generated_files})
@@ -415,7 +424,8 @@ foreach(package_big ${all_packages})
 	    if(NOT GENERATE_DI_FILES)
 		get_filename_component(path ${d_source}.d PATH)
 		get_filename_component(name ${d_source}.d NAME_WE)
-		install(FILES ${CMAKE_BINARY_DIR}/qt/${d_source}.d DESTINATION include/d/qt/${path} RENAME ${name}.di)
+		install(FILES ${CMAKE_BINARY_DIR}/qt/${d_source}.d DESTINATION include/d/qt/${path} COMPONENT qtd RENAME ${name}.di)
+		install(FILES ${CMAKE_BINARY_DIR}/qt/${d_source}_enum.d DESTINATION include/d/qt/${path} COMPONENT qtd RENAME ${name}_enum.di OPTIONAL)
 	    endif(NOT GENERATE_DI_FILES)
 	endforeach(d_source)
 	foreach (cpp_source ${cpp_files})
@@ -428,8 +438,8 @@ foreach(package_big ${all_packages})
 	    set(files_for_gen ${files_for_gen} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp
 		  ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)
 	    if(NOT GENERATE_DI_FILES)
-		install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d DESTINATION include/d/qt/${package} RENAME ${class}.di)
-		install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}_enum.d DESTINATION include/d/qt/${package} RENAME ${class}_enum.di OPTIONAL)
+		install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d DESTINATION include/d/qt/${package} COMPONENT qtd RENAME ${class}.di)
+		install(FILES ${CMAKE_BINARY_DIR}/qt/${package}/${class}_enum.d DESTINATION include/d/qt/${package} COMPONENT qtd RENAME ${class}_enum.di OPTIONAL)
 	    endif(NOT GENERATE_DI_FILES)
 	endforeach(class)
 
@@ -482,14 +492,14 @@ foreach(package_big ${all_packages})
 			    DEPENDS ${d_objs} ${d_implib}
 			    COMMENT "Linking ${lib_name}"
 			)
-	    install(FILES ${cpp_lib} DESTINATION lib)
+	    install(FILES ${cpp_lib} COMPONENT qtd DESTINATION lib)
 	else(${CMAKE_SYSTEM_NAME} STREQUAL Linux)   
 	    set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
 	    foreach(cpp_source ${cpp_sources})
 		set(cpp_source ${cpp_source})
 		obj_path(cpp_source)
 		set(cpp_objs ${cpp_objs} CMakeFiles/cpp_${package}.dir/${cpp_source}${CMAKE_CXX_OUTPUT_EXTENSION})
-	    endforeach(cpp_source)	
+	    endforeach(cpp_source)
 	    add_custom_command(
 			    OUTPUT "${lib}"
 			    COMMAND "${CMAKE_AR}"
@@ -498,7 +508,7 @@ foreach(package_big ${all_packages})
 			    COMMENT "Linking ${lib_name}"
 			)
 	endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows) 
-	install(FILES ${CMAKE_BINARY_DIR}/${lib} DESTINATION lib)
+	install(FILES ${CMAKE_BINARY_DIR}/${lib} COMPONENT qtd DESTINATION lib)
 
 	## Dependences.
 	add_custom_target(${package} DEPENDS ${lib})
@@ -557,7 +567,7 @@ foreach(package_big ${all_packages})
 			      )	    
 	      endif(NOT "${file_name}" STREQUAL "QGlobal" AND GENERATE_DI_FILES)
 	      set(interfaces_list ${interfaces_list} ${interface_file_path}/${file_name}.di) 
-	      install(FILES ${interface_file} DESTINATION include/d/${inc_path})
+	      install(FILES ${interface_file} COMPONENT qtd DESTINATION include/d/${inc_path})
 	  endforeach(source)
 	endif(GENERATE_DI_FILES)
     endif("${all_req_found}" EQUAL 1)
@@ -573,6 +583,9 @@ foreach(package ${packages})
 endforeach(package ${packages})
 add_sources_for_generating(${files_for_gen})	
 
+set(CPACK_COMPONENTS_ALL qtd)
+
+
 ##--------------------------------------------
 ## Build other parts of the QtD.
 ##--------------------------------------------
@@ -582,11 +595,17 @@ if(BUILD_EXAMPLES)
 endif(BUILD_EXAMPLES)
 
 
+
 ##--------------------------------------------
 ## CPack.
 ##--------------------------------------------
 set(CPACK_PACKAGE_VERSION_PATCH 1)
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application and UI framework. 
+QtD is a D binding to the Qt application and UI framework. 
+This package installs binding and static library for qt port on D programming language.
+")
+#SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
 set(CPACK_PACKAGE_VENDOR "QtD team")
 set(CPACK_PACKAGE_CONTACT "e@mail.ru" )
 SET(CPACK_PACKAGE_VERSION "0.1")
