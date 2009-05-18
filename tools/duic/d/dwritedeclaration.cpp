@@ -153,7 +153,7 @@ void WriteDeclaration::acceptUI(DomUI *node)
     if (namespaceList.count())
         m_output << "\n";
 
-    m_output << "template " << exportMacro << m_option.prefix << className << "\n"
+    m_output << "template " << exportMacro << m_option.prefix << className << "()\n"
            << "{\n"
            << "public:\n";
 
