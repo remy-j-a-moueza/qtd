@@ -127,6 +127,19 @@ class QCoreApplication___ extends QCoreApplication {
 	
 	private int argc;
 	private char **argv;
+/*
+    public static string translate(string context, string key, string disambiguation, QCoreApplication_Encoding encoding) {
+        string res;
+        qtd_QCoreApplication_translate_nativepointerchar_nativepointerchar_nativepointerchar_Encoding(&res, toStringz(context), toStringz(key), toStringz(disambiguation), encoding);
+        return res;
+    }
+
+    public static string translate(string context, string key, string disambiguation, QCoreApplication_Encoding encoding, int n) {
+        string res;
+        qtd_QCoreApplication_translate_nativepointerchar_nativepointerchar_nativepointerchar_Encoding_int(&res, toStringz(context), toStringz(key), toStringz(disambiguation), encoding, n);
+        return res;
+    }
+    */
 }// class
 
 class QTranslator___ extends QTranslator {

@@ -2458,7 +2458,7 @@
               // qtjambi_register_variant_handler();
           </inject-code>
       </modify-function>
-      <modify-function signature="translate(const char*,const char*,const char*,QCoreApplication::Encoding)">
+<!--      <modify-function signature="translate(const char*,const char*,const char*,QCoreApplication::Encoding)">
           <access modifier="private"/>
           <modify-argument index="3">
               <remove-default-expression/>
@@ -2466,14 +2466,14 @@
           <modify-argument index="4">
               <remove-default-expression/>
           </modify-argument>
-      </modify-function>
+      </modify-function> -->
       <inject-code>
           <import-file name="typesystem_core-java.java" quote-after-line="class QCoreApplication___" quote-before-line="}// class"/>
       </inject-code>
-
+<!--
       <modify-function signature="translate(const char*,const char*,const char*,QCoreApplication::Encoding,int)">
           <access modifier="private"/>
-      </modify-function>
+      </modify-function>-->
   </object-type>
 
   <object-type name="QSettings">

@@ -701,7 +701,7 @@ class QMenu___ extends QMenu {
 }// class
 
 class QMenuBar___ extends QMenuBar {
-
+    alias QWidget.addAction addAction;
 
 }// class
 

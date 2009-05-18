@@ -1,5 +1,7 @@
 module qt.core.QString;
 
+import qt.QGlobal;
+
 version (Tango)
 {
     import tango.text.convert.Utf : toString;
@@ -31,6 +33,10 @@ struct QString
     
     public void assign(char[] text) {
         __qtd_QString_operatorAssign(native_id, text.ptr, text.length);
+    }
+    
+    public static string fromUtf8(string source) {
+        return source;
     }
 }
 

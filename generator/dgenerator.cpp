@@ -1909,9 +1909,9 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     if (!m_isRecursive) {
         s << "public import qt.QGlobal;" << endl
           << "public import qt.core.Qt;" << endl
-          << "import qt.QtDObject;" << endl
-          << "import qt.core.QString;" << endl
-          << "import qt.qtd.Array;" << endl;
+          << "private import qt.QtDObject;" << endl
+          << "private import qt.qtd.Array;" << endl
+          << "private import qt.core.QString;" << endl;
         if (d_class->isQObject()) {
             s << "public import qt.Signal;" << endl;
             if (d_class->name() != "QObject")

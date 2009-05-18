@@ -99,6 +99,7 @@ void WriteIncludes::acceptUI(DomUI *node)
     add(QLatin1String("QApplication"));
     add(QLatin1String("QVariant"));
     add(QLatin1String("QAction"));
+    add(QLatin1String("QString"));
 
     add(QLatin1String("QButtonGroup")); // ### only if it is really necessary
 
@@ -120,7 +121,7 @@ void WriteIncludes::acceptUI(DomUI *node)
     TreeWalker::acceptUI(node);
 
     QString qualifiedClassName = node->elementClass();
-    m_output << "module ui." << qualifiedClassName << ";\n\n";
+    m_output << "module ui_" << qualifiedClassName.toLower() << ";\n\n";
 
     writeHeaders(m_globalIncludes, true);
     writeHeaders(m_localIncludes, false);
@@ -291,7 +292,7 @@ void WriteIncludes::writeHeaders(const OrderedSet &headers, bool global)
         const bool mapped =  hit != m_oldHeaderToNewHeader.constEnd();
         const  QString header =  mapped ? hit.value() : sit.key();
         if (!header.trimmed().isEmpty()) {
-            m_output << "import " << header << QLatin1Char(';') << QLatin1Char('\n');
+            m_output << "public import " << header << QLatin1Char(';') << QLatin1Char('\n');
         }
     }
 }

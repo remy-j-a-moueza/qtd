@@ -1,38 +1,39 @@
 /********************************************************************************
 ** Form generated from reading ui file 'mainwindow.ui'
 **
-** Created: Mon May 18 06:38:11 2009
+** Created: Tue May 19 04:13:07 2009
 **      by: QtD User Interface Compiler version 4.5.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
 ********************************************************************************/
 
-module ui.MainWindow;
+module ui_mainwindow;
 
-import qt.core.QVariant;
-import qt.gui.QAction;
-import qt.gui.QApplication;
-import qt.gui.QButtonGroup;
-import qt.gui.QDockWidget;
-import qt.gui.QDoubleSpinBox;
-import qt.gui.QFontComboBox;
-import qt.gui.QFrame;
-import qt.gui.QGroupBox;
-import qt.gui.QHBoxLayout;
-import qt.gui.QListView;
-import qt.gui.QMainWindow;
-import qt.gui.QMenu;
-import qt.gui.QMenuBar;
-import qt.gui.QRadioButton;
-import qt.gui.QStatusBar;
-import qt.gui.QToolBar;
-import qt.gui.QTreeView;
-import qt.gui.QVBoxLayout;
-import qt.gui.QWidget;
+public import qt.core.QString;
+public import qt.core.QVariant;
+public import qt.gui.QAction;
+public import qt.gui.QApplication;
+public import qt.gui.QButtonGroup;
+public import qt.gui.QDockWidget;
+public import qt.gui.QDoubleSpinBox;
+public import qt.gui.QFontComboBox;
+public import qt.gui.QFrame;
+public import qt.gui.QGroupBox;
+public import qt.gui.QHBoxLayout;
+public import qt.gui.QListView;
+public import qt.gui.QMainWindow;
+public import qt.gui.QMenu;
+public import qt.gui.QMenuBar;
+public import qt.gui.QRadioButton;
+public import qt.gui.QStatusBar;
+public import qt.gui.QToolBar;
+public import qt.gui.QTreeView;
+public import qt.gui.QVBoxLayout;
+public import qt.gui.QWidget;
 
 mixin QT_BEGIN_NAMESPACE;
 
-template Ui_MainWindow
+template Ui_MainWindow()
 {
 public:
     QAction actionOpen;
@@ -65,9 +66,9 @@ public:
     QRadioButton radioButton_2;
     QRadioButton radioButton_3;
 
-    void setupUi(QMainWindow *MainWindow)
+    void setupUi(QMainWindow MainWindow)
     {
-    if (MainWindow.objectName().isEmpty())
+    if (MainWindow.objectName().length == 0)
         MainWindow.setObjectName(QString.fromUtf8("MainWindow"));
     MainWindow.resize(800, 600);
     actionOpen = new QAction(MainWindow);
@@ -105,8 +106,8 @@ public:
 
     frame = new QFrame(centralwidget);
     frame.setObjectName(QString.fromUtf8("frame"));
-    frame.setFrameShape(QFrame.QFrame::StyledPanel);
-    frame.setFrameShadow(QFrame.QFrame::Raised);
+    frame.setFrameShape(QFrame.StyledPanel);
+    frame.setFrameShadow(QFrame.Raised);
     verticalLayout_2 = new QVBoxLayout(frame);
     verticalLayout_2.setObjectName(QString.fromUtf8("verticalLayout_2"));
     listView = new QListView(frame);
@@ -125,7 +126,7 @@ public:
     MainWindow.setCentralWidget(centralwidget);
     menubar = new QMenuBar(MainWindow);
     menubar.setObjectName(QString.fromUtf8("menubar"));
-    menubar.setGeometry(QRect(0, 0, 800, 27));
+    menubar.setGeometry(QRect(0, 0, 800, 24));
     menuFile = new QMenu(menubar);
     menuFile.setObjectName(QString.fromUtf8("menuFile"));
     menuEdit = new QMenu(menubar);
@@ -180,27 +181,27 @@ public:
     toolBar.addAction(actionQuit);
 
     retranslateUi(MainWindow);
-    QObject.connect(actionQuit, SIGNAL(activated(int)), MainWindow, SLOT(close()));
+    actionQuit.triggered.connect(&MainWindow.close);
 
-    QMetaObject.connectSlotsByName(MainWindow);
+    // QMetaObject.connectSlotsByName(MainWindow);
     } // setupUi
 
-    void retranslateUi(QMainWindow *MainWindow)
+    void retranslateUi(QMainWindow MainWindow)
     {
-    MainWindow.setWindowTitle(QApplication.translate("MainWindow", "MainWindow", 0, QApplication.UnicodeUTF8));
-    actionOpen.setText(QApplication.translate("MainWindow", "Open", 0, QApplication.UnicodeUTF8));
-    actionClose.setText(QApplication.translate("MainWindow", "Close", 0, QApplication.UnicodeUTF8));
-    actionQuit.setText(QApplication.translate("MainWindow", "Quit", 0, QApplication.UnicodeUTF8));
-    actionCopy.setText(QApplication.translate("MainWindow", "Copy", 0, QApplication.UnicodeUTF8));
-    actionPaste.setText(QApplication.translate("MainWindow", "Paste", 0, QApplication.UnicodeUTF8));
-    actionCut.setText(QApplication.translate("MainWindow", "Cut", 0, QApplication.UnicodeUTF8));
-    menuFile.setTitle(QApplication.translate("MainWindow", "File", 0, QApplication.UnicodeUTF8));
-    menuEdit.setTitle(QApplication.translate("MainWindow", "Edit", 0, QApplication.UnicodeUTF8));
-    toolBar.setWindowTitle(QApplication.translate("MainWindow", "toolBar", 0, QApplication.UnicodeUTF8));
-    groupBox.setTitle(QApplication.translate("MainWindow", "Some options", 0, QApplication.UnicodeUTF8));
-    radioButton.setText(QApplication.translate("MainWindow", "Option 1", 0, QApplication.UnicodeUTF8));
-    radioButton_2.setText(QApplication.translate("MainWindow", "Option 2", 0, QApplication.UnicodeUTF8));
-    radioButton_3.setText(QApplication.translate("MainWindow", "Option 3", 0, QApplication.UnicodeUTF8));
+    MainWindow.setWindowTitle(QApplication.translate("MainWindow", "MainWindow", null, QApplication.UnicodeUTF8));
+    actionOpen.setText(QApplication.translate("MainWindow", "Open", null, QApplication.UnicodeUTF8));
+    actionClose.setText(QApplication.translate("MainWindow", "Close", null, QApplication.UnicodeUTF8));
+    actionQuit.setText(QApplication.translate("MainWindow", "Quit", null, QApplication.UnicodeUTF8));
+    actionCopy.setText(QApplication.translate("MainWindow", "Copy", null, QApplication.UnicodeUTF8));
+    actionPaste.setText(QApplication.translate("MainWindow", "Paste", null, QApplication.UnicodeUTF8));
+    actionCut.setText(QApplication.translate("MainWindow", "Cut", null, QApplication.UnicodeUTF8));
+    menuFile.setTitle(QApplication.translate("MainWindow", "File", null, QApplication.UnicodeUTF8));
+    menuEdit.setTitle(QApplication.translate("MainWindow", "Edit", null, QApplication.UnicodeUTF8));
+    toolBar.setWindowTitle(QApplication.translate("MainWindow", "toolBar", null, QApplication.UnicodeUTF8));
+    groupBox.setTitle(QApplication.translate("MainWindow", "Some options", null, QApplication.UnicodeUTF8));
+    radioButton.setText(QApplication.translate("MainWindow", "Option 1", null, QApplication.UnicodeUTF8));
+    radioButton_2.setText(QApplication.translate("MainWindow", "Option 2", null, QApplication.UnicodeUTF8));
+    radioButton_3.setText(QApplication.translate("MainWindow", "Option 3", null, QApplication.UnicodeUTF8));
     } // retranslateUi
 
 }

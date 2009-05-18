@@ -480,7 +480,7 @@ void WriteInitialization::acceptUI(DomUI *node)
 
     const QString widgetClassName = node->elementWidget()->attributeClass();
 
-    m_output << m_option.indent << "void " << "setupUi(" << widgetClassName << " *" << varName << ")\n"
+    m_output << m_option.indent << "void " << "setupUi(" << widgetClassName << " " << varName << ")\n"
            << m_option.indent << "{\n";
 
     if (m_activateScripts)
@@ -532,7 +532,7 @@ void WriteInitialization::acceptUI(DomUI *node)
         m_output << "\n" << m_delayedInitialization << "\n";
 
     if (m_option.autoConnection)
-        m_output << "\n" << m_option.indent << "QMetaObject.connectSlotsByName(" << varName << ");\n";
+        m_output << "\n" << m_option.indent << "// QMetaObject.connectSlotsByName(" << varName << ");\n";
 
     m_output << m_option.indent << "} // setupUi\n\n";
 
@@ -543,7 +543,7 @@ void WriteInitialization::acceptUI(DomUI *node)
         m_refreshInitialization +=QLatin1String(");\n");
     }
 
-    m_output << m_option.indent << "void " << "retranslateUi(" << widgetClassName << " *" << varName << ")\n"
+    m_output << m_option.indent << "void " << "retranslateUi(" << widgetClassName << " " << varName << ")\n"
            << m_option.indent << "{\n"
            << m_refreshInitialization
            << m_option.indent << "} // retranslateUi\n\n";
@@ -1035,7 +1035,7 @@ void WriteInitialization::writeProperties(const QString &varName,
     QString indent;
     if (!m_widgetChain.top()) {
         indent = QLatin1String("    ");
-        m_output << m_option.indent << "if (" << varName << ".objectName().isEmpty())\n";
+        m_output << m_option.indent << "if (" << varName << ".objectName().length == 0)\n";
     }
     m_output << m_option.indent << indent << varName << ".setObjectName(QString.fromUtf8(" << fixString(varName, m_option.indent) << "));\n";
 
@@ -1172,11 +1172,12 @@ void WriteInitialization::writeProperties(const QString &varName,
             break;
         case DomProperty::Enum:
             propertyValue = p->elementEnum();
-            if (!propertyValue.contains(QLatin1String("."))) {
+            if (!propertyValue.contains(QLatin1String("::"))) {
                 QString scope  = className;
-                scope += QLatin1String(".");
+                scope += QLatin1String("::");
                 propertyValue.prepend(scope);
             }
+            propertyValue = propertyValue.replace("::", "."); // qtd
             break;
         case DomProperty::Set:
             propertyValue = p->elementSet();
@@ -2271,7 +2272,7 @@ QString WriteInitialization::trCall(const QString &str, const QString &commentHi
         return QLatin1String("QString()");
 
     QString result;
-    const QString comment = commentHint.isEmpty() ? QString(QLatin1Char('0')) : fixString(commentHint, m_option.indent);
+    const QString comment = commentHint.isEmpty() ? QString("null") : fixString(commentHint, m_option.indent);
 
     if (m_option.translateFunction.isEmpty()) {
         result = QLatin1String("QApplication.translate(\"");
@@ -2417,16 +2418,16 @@ void WriteInitialization::acceptConnection(DomConnection *connection)
 
     if (sender.isEmpty() || receiver.isEmpty())
         return;
-
-    m_output << m_option.indent << "QObject.connect("
+    // qtd signal
+    QRegExp excl_brackets("\\((.*)\\)");
+    QString stripped_signal = connection->elementSignal().remove(excl_brackets);
+    QString stripped_slot = connection->elementSlot().remove(excl_brackets);
+    m_output << m_option.indent
         << sender
-        << ", "
-        << "SIGNAL(" << connection->elementSignal() << ')'
-        << ", "
-        << receiver
-        << ", "
-        << "SLOT(" << connection->elementSlot() << ')'
-        << ");\n";
+        << "." << stripped_signal
+        << ".connect"
+        << "(&" << receiver << "."
+        << stripped_slot << ");\n";
 }
 
 DomImage *WriteInitialization::findImage(const QString &name) const
