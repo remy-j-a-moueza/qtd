@@ -179,6 +179,16 @@ macro(MAKE_NATIVE_PATH pathname)
     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows) 
 endmacro(MAKE_NATIVE_PATH)
 
+macro(regexseafestring outvariable)
+    set(${outvariable} ${ARGN})
+    set(__regex_chars__ ^ $ . ] [ - * + ? | \( \))
+    foreach(__regex_char__ ${__regex_chars__})
+	string(REPLACE "${__regex_char__}"
+	    "\\${__regex_char__}" ${outvariable} ${${outvariable}}
+	    )
+    endforeach(__regex_char__ ${__regex_chars__})
+endmacro(regexseafestring outvariable)
+
 ## Remove unnecessary travel to the object file.
 ## path -- path to object file.
 ## Example:
@@ -188,24 +198,10 @@ endmacro(MAKE_NATIVE_PATH)
 ## Example output:
 ##	-- CMakeFiles/target.dir/main.d.obj
 macro(OBJ_PATH path)
-    set(test)
-    string(REGEX MATCH "${CMAKE_CURRENT_BINARY_DIR}/.*" test "${${path}}")    
-    if(NOT ${test} EQUAL "")
-	string(LENGTH "${CMAKE_CURRENT_BINARY_DIR}" first)
-	string(LENGTH "${${path}}" last)
-	math(EXPR first "${first} + 1")
-	math(EXPR len "${last} - ${first}")	
-	string(SUBSTRING "${${path}}" ${first} ${len} ${path})
-    else(NOT ${test} EQUAL "")
-	string(REGEX MATCH "${CMAKE_CURRENT_SOURCE_DIR}/.*" test "${${path}}")    
-	if(NOT ${test} EQUAL "")
-	    string(LENGTH "${CMAKE_CURRENT_SOURCE_DIR}" first)
-	    string(LENGTH "${${path}}" last)
-	    math(EXPR first "${first} + 1")
-	    math(EXPR len "${last} - ${first}")	
-	    string(SUBSTRING "${${path}}" ${first} ${len} ${path})
-	endif(NOT ${test} EQUAL "")
-    endif(NOT ${test} EQUAL "")
+    regexseafestring(__cbd_safe__ ${CMAKE_CURRENT_BINARY_DIR})
+    regexseafestring(__csd_safe__ ${CMAKE_CURRENT_SOURCE_DIR})
+    set(regexp_str "(${__cbd_safe__}/|${__csd_safe__}/|)(.+)")
+    string(REGEX REPLACE ${regexp_str} "\\2" ${path} "${${path}}") 
 endmacro(OBJ_PATH)
 
 
@@ -532,7 +528,9 @@ foreach(package_big ${all_packages})
 	endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows AND D_IS_MARS)
 
 	if(GENERATE_DI_FILES)
-	  set(regexp_str "(${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}|${CMAKE_BINARY_DIR}|${CMAKE_SOURCE_DIR})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
+	  regexseafestring(cbd_safe ${CMAKE_BINARY_DIR})
+	  regexseafestring(csd_safe ${CMAKE_SOURCE_DIR})
+	  set(regexp_str "(${csd}/qt/d${D_VERSION}|${csd_safe}|${cbd_safe})/([A-Za-z0-9\\-_\\\\/]+)[/]+([A-Za-z0-9\\-_\\\\]+).d")
 	  foreach(source ${d_sources})
       # 	find_file(source ${source} PATHS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}
       # 		  ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
