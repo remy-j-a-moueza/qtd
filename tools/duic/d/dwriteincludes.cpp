@@ -120,7 +120,7 @@ void WriteIncludes::acceptUI(DomUI *node)
     TreeWalker::acceptUI(node);
 
     QString qualifiedClassName = node->elementClass();
-    m_output << "module ui." << qualifiedClassName << "\n\n";
+    m_output << "module ui." << qualifiedClassName << ";\n\n";
 
     writeHeaders(m_globalIncludes, true);
     writeHeaders(m_localIncludes, false);

@@ -104,7 +104,7 @@ namespace {
              << indent << "        return error.toString();\n"
              << indent << "    }\n\n"
              << indent << "    QScriptEngine scriptEngine;\n"
-             << indent << "};\n\n";
+             << indent << "}\n\n";
     }
 }
 
@@ -153,7 +153,7 @@ void WriteDeclaration::acceptUI(DomUI *node)
     if (namespaceList.count())
         m_output << "\n";
 
-    m_output << "class " << exportMacro << m_option.prefix << className << "\n"
+    m_output << "template " << exportMacro << m_option.prefix << className << "\n"
            << "{\n"
            << "public:\n";
 
@@ -184,7 +184,7 @@ void WriteDeclaration::acceptUI(DomUI *node)
             WriteIconDeclaration(m_uic).acceptUI(node);
 
             m_output << m_option.indent << m_option.indent << "unknown_ID\n"
-                << m_option.indent << "};\n";
+                << m_option.indent << "}\n";
 
             WriteIconInitialization(m_uic).acceptUI(node);
         }
@@ -195,12 +195,18 @@ void WriteDeclaration::acceptUI(DomUI *node)
         writeScriptContextClass(m_option.indent, m_output);
     }
 
-    m_output << "};\n\n";
+    m_output << "}\n\n";
 
     closeNameSpaces(namespaceList, m_output);
 
     if (namespaceList.count())
         m_output << "\n";
+
+    // qtd
+    m_output << "struct " << className << " {\n"
+             << "    mixin " << m_option.prefix << className << ";\n"
+             << "}\n";
+    // ---
 
     if (m_option.generateNamespace && !m_option.prefix.isEmpty()) {
         namespaceList.append(QLatin1String("Ui"));
@@ -225,14 +231,14 @@ void WriteDeclaration::acceptWidget(DomWidget *node)
     if (node->hasAttributeClass())
         className = node->attributeClass();
 
-    m_output << m_option.indent << m_uic->customWidgetsInfo()->realClassName(className) << " *" << m_driver->findOrInsertWidget(node) << ";\n";
+    m_output << m_option.indent << m_uic->customWidgetsInfo()->realClassName(className) << " " << m_driver->findOrInsertWidget(node) << ";\n";
 
     TreeWalker::acceptWidget(node);
 }
 
 void WriteDeclaration::acceptSpacer(DomSpacer *node)
 {
-     m_output << m_option.indent << "QSpacerItem *" << m_driver->findOrInsertSpacer(node) << ";\n";
+     m_output << m_option.indent << "QSpacerItem " << m_driver->findOrInsertSpacer(node) << ";\n";
      TreeWalker::acceptSpacer(node);
 }
 
@@ -242,21 +248,21 @@ void WriteDeclaration::acceptLayout(DomLayout *node)
     if (node->hasAttributeClass())
         className = node->attributeClass();
 
-    m_output << m_option.indent << className << " *" << m_driver->findOrInsertLayout(node) << ";\n";
+    m_output << m_option.indent << className << " " << m_driver->findOrInsertLayout(node) << ";\n";
 
     TreeWalker::acceptLayout(node);
 }
 
 void WriteDeclaration::acceptActionGroup(DomActionGroup *node)
 {
-    m_output << m_option.indent << "QActionGroup *" << m_driver->findOrInsertActionGroup(node) << ";\n";
+    m_output << m_option.indent << "QActionGroup " << m_driver->findOrInsertActionGroup(node) << ";\n";
 
     TreeWalker::acceptActionGroup(node);
 }
 
 void WriteDeclaration::acceptAction(DomAction *node)
 {
-    m_output << m_option.indent << "QAction *" << m_driver->findOrInsertAction(node) << ";\n";
+    m_output << m_option.indent << "QAction " << m_driver->findOrInsertAction(node) << ";\n";
 
     TreeWalker::acceptAction(node);
 }
