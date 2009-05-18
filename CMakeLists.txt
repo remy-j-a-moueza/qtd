@@ -19,8 +19,13 @@ set(all_packages Core Gui OpenGL Xml Svg Network WebKit) ## TODO: Loading.
 find_program(STRIP strip)
 
 ## Find D compiler and parsing its version.
+
 find_program(DC dmd ldc)
 if (DC)   
+    get_filename_component(dc_path ${DC} PATH)
+    if("${dc_path}" STREQUAL ${CMAKE_BINARY_DIR})
+	get_filename_component(DC ${DC} NAME)
+    endif("${dc_path}" STREQUAL ${CMAKE_BINARY_DIR})
     exec_program(${DC} ARGS "" OUTPUT_VARIABLE d_output)   
     string(REGEX MATCH "Digital Mars D Compiler v[0-9]\\.[0-9]+" dmd_version "${d_output}")
     if (dmd_version)
