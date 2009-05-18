@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'mainwindow.ui'
 **
-** Created: Mon May 18 06:21:12 2009
+** Created: Mon May 18 06:38:11 2009
 **      by: QtD User Interface Compiler version 4.5.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -208,5 +208,6 @@ public:
 struct MainWindow {
     mixin Ui_MainWindow;
 }
+
 mixin QT_END_NAMESPACE;
 

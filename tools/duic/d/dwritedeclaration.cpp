@@ -205,7 +205,7 @@ void WriteDeclaration::acceptUI(DomUI *node)
     // qtd
     m_output << "struct " << className << " {\n"
              << "    mixin " << m_option.prefix << className << ";\n"
-             << "}\n";
+             << "}\n\n";
     // ---
 
     if (m_option.generateNamespace && !m_option.prefix.isEmpty()) {
