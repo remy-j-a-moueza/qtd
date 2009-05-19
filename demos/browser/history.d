@@ -282,6 +282,7 @@ private:
 				}
 			}
 		}
+		
 		if (first == m_history.count() - 1)
 			saveAll = true;
 
@@ -482,7 +483,6 @@ public:
 	{
 		super(parent);
 		m_history = history;
-
 		assert(m_history);
 		
 		m_history.historyReset.connect(&this.historyReset);
@@ -573,7 +573,9 @@ private:
 	HistoryManager m_history;
 }
 
+
 const uint MOVEDROWS = 15;
+
 
 /*!
 Proxy model that will remove any duplicate entries.
@@ -931,17 +933,16 @@ public:
 	{
 		super(parent);
 		m_history = 0;
-		connect(this, SIGNAL(activated(QModelIndex )),
-		this, SLOT(activated(QModelIndex )));
+		activated.connect(&this.activated);
 		setHoverRole(HistoryModel.UrlStringRole);
 	}
 
-void setInitialActions(QList<QAction> actions)
-{
-	m_initialActions = actions;
-	for (int i = 0; i < m_initialActions.count(); ++i)
-		addAction(m_initialActions.at(i));
-}
+	void setInitialActions(QList<QAction> actions)
+	{
+		m_initialActions = actions;
+		for (int i = 0; i < m_initialActions.count(); ++i)
+			addAction(m_initialActions.at(i));
+	}
 
 protected:
 
@@ -996,6 +997,7 @@ private:
 	HistoryMenuModel m_historyMenuModel;
 	QList<QAction> m_initialActions;
 }
+
 
 // proxy model for the history model that
 // exposes each url http://www.foo.com and it url starting at the host www.foo.com
@@ -1138,7 +1140,6 @@ public:
 		return sourceModel().columnCount(mapToSource(parent));
 	}
 
-
 	int rowCount(QModelIndex parent = QModelIndex())
 	{
 		if ( parent.internalId() != 0 || parent.column() > 0 || !sourceModel())
@@ -1177,12 +1178,12 @@ public:
 			return QModelIndex();
 
 		if (m_sourceRowCache.isEmpty())
-		rowCount(QModelIndex());
+			rowCount(QModelIndex());
 
 		QList<int>.iterator it;
 		it = qLowerBound(m_sourceRowCache.begin(), m_sourceRowCache.end(), sourceIndex.row());
 		if (*it != sourceIndex.row())
-		--it;
+			--it;
 		int dateRow = qMax(0, it - m_sourceRowCache.begin());
 		int row = sourceIndex.row() - m_sourceRowCache.at(dateRow);
 		return createIndex(row, sourceIndex.column(), dateRow + 1);
