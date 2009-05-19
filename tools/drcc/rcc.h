@@ -97,6 +97,9 @@ public:
     void setUseNameSpace(bool v) { m_useNameSpace = v; }
     bool useNameSpace() const { return m_useNameSpace; }
     
+    void setStaticInitialize(bool v) { m_staticInitialize = v; }
+    bool staticInitialize() const { return m_staticInitialize; }
+
     QStringList failedResources() const { return m_failedResources; }
 
 private:
@@ -143,6 +146,7 @@ private:
     int m_namesOffset;
     int m_dataOffset;
     bool m_useNameSpace;
+    bool m_staticInitialize;
     QStringList m_failedResources;
     QIODevice *m_errorDevice;
     QByteArray m_out;

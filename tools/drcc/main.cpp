@@ -57,18 +57,19 @@ void showHelp(const QString &argv0, const QString &error)
         fprintf(stderr, "%s: %s\n", qPrintable(argv0), qPrintable(error));
     fprintf(stderr, "Usage: %s  [options] <inputs>\n\n"
         "Options:\n"
-        "  -o file              write output to file rather than stdout\n"
-        "  -name name           create an external initialization function with name\n"
-        "  -threshold level     threshold to consider compressing files\n"
-        "  -compress level      compress input files by level\n"
-        "  -root path           prefix resource access path with root path\n"
-        "  -no-compress         disable all compression\n"
-        "  -binary              output a binary file for use as a dynamic resource\n"
-        "  -namespace           turn off namespace macros\n"
-        "  -project             Output a resource file containing all\n"
-        "                       files from the current directory\n"
-        "  -version             display version\n"
-        "  -help                display this information\n",
+        "  -o file                write output to file rather than stdout\n"
+        "  -name name             create an external initialization function with name\n"
+        "  -threshold level       threshold to consider compressing files\n"
+        "  -compress level        compress input files by level\n"
+        "  -root path             prefix resource access path with root path\n"
+        "  -no-compress           disable all compression\n"
+	"  -no-static-initialize  disable automatic initialization of resources with program start\n"
+        "  -binary                output a binary file for use as a dynamic resource\n"
+        "  -namespace             turn off namespace macros\n"
+        "  -project               Output a resource file containing all\n"
+        "                         files from the current directory\n"
+        "  -version               display version\n"
+        "  -help                  display this information\n",
         qPrintable(argv0));
 }
 
@@ -190,6 +191,8 @@ int runRcc(int argc, char *argv[])
                 helpRequested = true;
             } else if (opt == QLatin1String("-no-compress")) {
                 library.setCompressLevel(-2);
+            } else if (opt == QLatin1String("-no-static-initialize")) {
+                library.setStaticInitialize(false);
             } else if (opt == QLatin1String("-project")) {
                 projectRequested = true;
             } else {

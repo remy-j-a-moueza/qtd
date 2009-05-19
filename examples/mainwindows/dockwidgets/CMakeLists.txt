@@ -1,1 +1,1 @@
-build_example(dockwidgets main.d mainwindow.d)
+build_example(dockwidgets main.d mainwindow.d RESOURCES dockwidgets.qrc)

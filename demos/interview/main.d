@@ -48,11 +48,6 @@ import qt.gui.QListView;
 import qt.gui.QIcon;
 import qt.gui.QPixmap;
 
-extern(C) int qtd_init_resources_interview();
-static this() {
-    qtd_init_resources_interview();
-}
-
 int main(char[][] args)
 {
     scope app = new QApplication(args);

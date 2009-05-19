@@ -42,7 +42,6 @@ import mainwindow;
 int main(char[][] args)
 {
     scope app = new QApplication(args);
-    //    Q_INIT_RESOURCE(dockwidgets);
     scope mainWin = new MainWindow;
     mainWin.show();
     return app.exec();

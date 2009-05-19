@@ -215,22 +215,22 @@ class MainWindow : public QMainWindow
     private:
         void createActions()
         {
-            newLetterAct = new QAction(new QIcon("images/new.png"), tr("&New Letter"), this);
+            newLetterAct = new QAction(new QIcon(":images/new.png"), tr("&New Letter"), this);
             newLetterAct.setShortcut(tr("Ctrl+N"));
             newLetterAct.setStatusTip(tr("Create a new form letter"));
             newLetterAct.triggered.connect(&this.newLetter);
 
-            saveAct = new QAction(new QIcon("images/save.png"), tr("&Save..."), this);
+            saveAct = new QAction(new QIcon(":images/save.png"), tr("&Save..."), this);
             saveAct.setShortcut(tr("Ctrl+S"));
             saveAct.setStatusTip(tr("Save the current form letter"));
             // saveAct.triggered.connect(&save);
 
-            printAct = new QAction(new QIcon("images/print.png"), tr("&Print..."), this);
+            printAct = new QAction(new QIcon(":images/print.png"), tr("&Print..."), this);
             printAct.setShortcut(tr("Ctrl+P"));
             printAct.setStatusTip(tr("Print the current form letter"));
             // printAct.triggered.connect(&print);
 
-            undoAct = new QAction(new QIcon("images/undo.png"), tr("&Undo"), this);
+            undoAct = new QAction(new QIcon(":images/undo.png"), tr("&Undo"), this);
             undoAct.setShortcut(tr("Ctrl+Z"));
             undoAct.setStatusTip(tr("Undo the last editing action"));
             undoAct.triggered.connect(&undo);

@@ -346,7 +346,8 @@ RCCResourceLibrary::RCCResourceLibrary()
     m_namesOffset(0),
     m_dataOffset(0),
     m_useNameSpace(CONSTANT_USENAMESPACE),
-    m_errorDevice(0)
+    m_errorDevice(0),
+    m_staticInitialize(true)
 {
     m_out.reserve(30 * 1000 * 1000);
 }
@@ -925,6 +926,17 @@ bool RCCResourceLibrary::writeInitializer()
         }
         writeString("    return 1;\n");
         writeString("}\n\n");
+	
+        if(staticInitialize())
+        {
+            writeString("static this() \n{\n    ");
+            writeMangleNamespaceFunction(initResources.toLatin1());
+            writeString("();\n}\n\n");
+
+            writeString("static ~this() \n{\n    ");
+            writeMangleNamespaceFunction(cleanResources.toLatin1());
+            writeString("();\n}\n\n");
+        }
     } else if (m_format == Binary) {
         int i = 4;
         char *p = m_out.data();
