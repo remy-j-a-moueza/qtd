@@ -613,8 +613,7 @@ foreach(package ${packages})
 endforeach(package ${packages})
 add_sources_for_generating(${files_for_gen})	
 
-set(CPACK_COMPONENTS_ALL qtd)
-
+set(CPACK_COMPONENTS_ALL qtd qtd_tools)
 
 ##--------------------------------------------
 ## Build other parts of the QtD.
@@ -629,8 +628,6 @@ if(BUILD_EXAMPLES)
     add_subdirectory(demos)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLES)
-
-
 
 ##--------------------------------------------
 ## CPack.
