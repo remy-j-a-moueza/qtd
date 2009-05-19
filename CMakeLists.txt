@@ -10,6 +10,7 @@ include_directories(${QT_INCLUDES} include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 ## Options.
 option(BUILD_EXAMPLES "Build examples" "ON")
+option(BUILD_TOOLS "Build tools" "ON")
 option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
 
 set(all_packages Core Gui OpenGL Xml Svg Network WebKit) ## TODO: Loading.
@@ -157,6 +158,9 @@ endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ./)
 set(GEN_OPT ${GEN_OPT} --d-target=${D_TARGET})
 
+## Bootstrap settings for tools.
+set(DRCC ${CMAKE_BINARY_DIR}/tools/drcc/drcc)
+
 ##--------------------------------------------
 ## Macroses and functions.
 ##--------------------------------------------
@@ -266,6 +270,28 @@ macro(compile_d_files target objects_list)
     add_custom_target(${target} DEPENDS "${${objects_list}}")
 endmacro(compile_d_files objects_list)
 
+macro(qtd_add_resource name output)
+    set(${output})
+    foreach(res "${ARGN}")
+	## Test input file exists.
+	get_filename_component(res_path ${res} PATH)
+	get_filename_component(res_name ${res} NAME_WE)
+	get_filename_component(res_ext ${res} EXT)
+	#if(NOT ${req_ext} STREQUAL "qrc")	
+	#    get_filename_component(res_name ${res} NAME_WE)
+	#endif(NOT ${req_ext} STREQUAL "qrc")
+	set(out ${CMAKE_CURRENT_BINARY_DIR}/${res_path}qrc_${res_name}.d)
+	add_custom_command(OUTPUT "${out}"
+		    COMMAND "${DRCC}"
+		    ARGS  -name ${name} ${res} -o ${out} 
+		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+		    DEPENDS ${res}
+		    COMMENT "Compile QtD resource ${res}"
+		    )
+	set(${output} ${${output}} ${out})
+    endforeach(res "${ARGN}") 
+endmacro(qtd_add_resource output)
+
 ## Build example macro.
 ## name -- example name.
 ## Options:
@@ -275,39 +301,43 @@ endmacro(compile_d_files objects_list)
 ## Usage:
 ##	build_example(ExampleName PACKAGES QtCore QtGui QtXml  main.d another_d_file.d)
 macro(build_example name)
-    set(is_sources)
-    set(is_libs)
     set(qtd_libs ${core_lib_param} ${gui_lib_param})
-    set(reqs Core Gui)
-    foreach(param ${ARGN})
-	if(is_libs)		
-	    string(REGEX REPLACE "Qt([A-Za-z0-9])" "\\1" param_package "${param}")	
-	    if(${param_package} STREQUAL ${param})
-		set(is_libs)
-		set(is_sources 1)
-	    else(${param_package} STREQUAL ${param})
-		set(reqs ${reqs} ${param_package})
-	    endif(${param_package} STREQUAL ${param})
-	endif(is_libs)
-	if(NOT is_libs)
-	  if(NOT is_sources)	      
-	      if(${param} STREQUAL PACKAGES)
-		  set(is_libs 1)
-		  set(reqs)
-	      else(${param} STREQUAL PACKAGES)
-		  set(is_sources 1)
-	      endif(${param} STREQUAL PACKAGES)	      
-	  endif(NOT is_sources)	
-	  if(is_sources)
-	      set(sources ${sources} ${param})
-	  endif(is_sources)  
-	endif(NOT is_libs)
-    endforeach(param ${ARGN})
-    compile_d_files(${name}_dobjs objects ${sources} )
+    set(type_dat SOURCES)
+    set(RESOURCES)
+    set(SOURCES)
+    set(PACKAGES)
+    ## Parse parameters list.
+    set(params_dat RESOURCES SOURCES PACKAGES)
+    foreach(arg_dat ${ARGN})
+	set(founded_type_dat)
+	foreach(param_dat ${params_dat})
+	    if(${arg_dat} STREQUAL ${param_dat})		
+		set(type_dat ${param_dat})
+		set(founded_type_dat 1)
+		break(${arg_dat} STREQUAL ${param_dat})
+	    endif(${arg_dat} STREQUAL ${param_dat})
+	endforeach(param_dat ${params_dat})	
+	if(NOT founded_type_dat)
+	    set(${type_dat} ${${type_dat}} ${arg_dat})
+	endif(NOT founded_type_dat)
+    endforeach(arg_dat ${ARGN})
+    if(NOT PACKAGES)
+	set(PACKAGES QtCore QtGui)
+    endif(NOT PACKAGES)
+    ## TODO: Tools building is acitve???    
+    if(RESOURCES)
+	if(NOT BUILD_TOOLS)
+	    message(STATUS "Example '${name}' required drcc. Example will not build")
+	    return(build_example name)
+	endif(NOT BUILD_TOOLS)
+	qtd_add_resource(${name} res_sources ${RESOURCES})
+    endif(RESOURCES)
+    compile_d_files(${name}_dobjs objects ${SOURCES} ${res_sources})
     set(output ${CMAKE_CURRENT_BINARY_DIR}/${name}${CMAKE_EXECUTABLE_SUFFIX})
     set(output_native ${output})
     make_native_path(output_native)
-    foreach(req ${reqs})
+    foreach(package ${PACKAGES})
+	string(REGEX REPLACE "Qt([A-Za-z0-9])" "\\1" req "${package}")
 	set(is_founded)
 	foreach(package_big ${packages_big})
 	    string(TOLOWER ${package_big} package)  		
@@ -322,7 +352,7 @@ macro(build_example name)
 	else(NOT is_founded)
 	      set(qtd_libs ${${package}_lib_param} ${qtd_libs})
 	endif(NOT is_founded)	
-    endforeach(req ${reqs})
+    endforeach(package ${PACKAGES})
     add_custom_command(OUTPUT "${output}"
 		    COMMAND "${DC}"
 		    ARGS ${D_FLAGS} ${libs_path} ${qtd_libs} ${objects} 
@@ -344,7 +374,7 @@ endmacro(build_example sources)
 ##--------------------------------------------
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-add_custom_target(allpackages ALL)
+add_custom_target(allpackages)
 link_directories(${CMAKE_BINARY_DIR}/CMakeFiles)
 
 foreach(package_big ${all_packages})
@@ -589,6 +619,12 @@ set(CPACK_COMPONENTS_ALL qtd)
 ##--------------------------------------------
 ## Build other parts of the QtD.
 ##--------------------------------------------
+add_custom_target(tools ALL)
+if(BUILD_TOOLS)
+    add_subdirectory(tools)
+    add_dependencies(tools drcc duic)
+endif(BUILD_TOOLS)
+
 if(BUILD_EXAMPLES)
     add_subdirectory(demos)
     add_subdirectory(examples)

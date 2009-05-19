@@ -1,1 +1,1 @@
- build_example(interview main.d model.d)
+ build_example(interview main.d model.d RESOURCES interview.qrc)

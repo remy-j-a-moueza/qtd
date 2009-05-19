@@ -28,7 +28,7 @@ add_executable(duic ${uic_bin_SRCS})
 set_target_properties(duic PROPERTIES OUTPUT_NAME duic)
 set_target_properties(duic PROPERTIES COMPILE_FLAGS -DQT_UIC_D_GENERATOR)
 
-target_link_libraries(duic  ${QT_QTCORE_LIBRARY} ${QT_QTXML_LIBRARY} )
+target_link_libraries(duic  ${QT_QTCORE_LIBRARY} ${QT_QTXML_LIBRARY})
 
-install(TARGETS duic DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+install(TARGETS duic DESTINATION ${CMAKE_INSTALL_PREFIX}/bin  COMPONENT qtd_tools)
 
