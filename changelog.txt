@@ -8,3 +8,4 @@ changes since 0.1
  * API dealing with containers is now wrapped
  * building system is now based on CMake to be crossplatform and more flexible
  * all classes from Gui, OpenGL, Xml, Svg, Network and Webkit packages are wrapped
+ * ported duic, a tool for generating code out from xml representation

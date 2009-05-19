@@ -48,11 +48,13 @@ import qt.gui.QListView;
 import qt.gui.QIcon;
 import qt.gui.QPixmap;
 
+extern(C) int qtd_init_resources_interview();
+static this() {
+    qtd_init_resources_interview();
+}
 
 int main(char[][] args)
 {
-//    Q_INIT_RESOURCE(interview);
-
     scope app = new QApplication(args);
     scope page = new QSplitter;
 
@@ -88,7 +90,7 @@ int main(char[][] args)
     list.setAttribute(Qt.WA_MacShowFocusRect, false);
     page.addWidget(list);
 
-    page.setWindowIcon(new QIcon(new QPixmap("images/interview.png")));
+    page.setWindowIcon(new QIcon(new QPixmap(":/images/interview.png")));
     page.setWindowTitle("Interview");
     page.show();
 

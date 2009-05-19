@@ -39,3 +39,21 @@ extern "C" DLL_PUBLIC void __qtd_qtd_core_initCallBacks(pfunc_abstr d_func, pfun
 //    std::cout << _d_toUtf8 << "\n";
 }
 #endif
+
+extern bool qRegisterResourceData
+    (int, const unsigned char *, const unsigned char *, const unsigned char *);
+
+extern bool qUnregisterResourceData
+    (int, const unsigned char *, const unsigned char *, const unsigned char *);
+
+extern "C" DLL_PUBLIC bool qtd_register_resource_data(int version, const unsigned char *tree,
+                                         const unsigned char *name, const unsigned char *data)
+{
+    return qRegisterResourceData(version, tree, name, data);
+}
+
+extern "C" DLL_PUBLIC bool qtd_unregister_resource_data(int version, const unsigned char *tree,
+                                           const unsigned char *name, const unsigned char *data)
+{
+    return qUnregisterResourceData(version, tree, name, data);
+}

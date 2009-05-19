@@ -7,7 +7,7 @@
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
 ********************************************************************************/
 
-module ui_mainwindow;
+//module ui_mainwindow;
 
 public import qt.core.QString;
 public import qt.core.QVariant;

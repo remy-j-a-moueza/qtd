@@ -1,3 +1,4 @@
 #! /bin/bash
 
-dmd main.d model.d -L-L../../lib -L-lqtdgui -L-lqtdcore -I../../ -L-lQtGui -L-lQtCore
+./drcc -name interview interview.qrc -o qrc_interview.d
+dmd main.d model.d qrc_interview.d -L-L../../lib -L-lqtdgui -L-lqtdcore -I../../ -I../../qt/d1 -L-lQtGui -L-lQtCore

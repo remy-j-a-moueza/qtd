@@ -78,7 +78,7 @@ class Model : QAbstractItemModel
         
         folder = iconProvider.icon(QFileIconProvider.Folder);
         file = iconProvider.icon(QFileIconProvider.File);
-        services = new QIcon("images/services.png");
+        services = new QIcon(":/images/services.png");
     }
 
 
