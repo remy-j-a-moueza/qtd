@@ -4837,7 +4837,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
   <object-type name="QInputDialog">
     <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
-<!--
+
     <modify-function signature="getDouble(QWidget *, const QString &amp;, const QString &amp;, double, double, double, int, bool *, QFlags&lt;Qt::WindowType&gt;)">
         <rename to="getDouble_private"/>
         <access modifier="private"/>
@@ -4864,7 +4864,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <inject-code>
         <import-file name="typesystem_gui-java.java" quote-after-line="class QInputDialog___" quote-before-line="}// class"/>
     </inject-code>
--->
+
     </object-type>
 
 
