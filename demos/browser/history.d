@@ -38,39 +38,35 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+
 module history;
 
 
-import QtCore.QBuffer;
-import QtCore.QDir;
-import QtCore.QFile;
-import QtCore.QFileInfo;
-import QtCore.QSettings;
-import QtCore.QTemporaryFile;
-import QtCore.QTextStream;
+import qt.gui.QClipboard;
+import qt.gui.QDesktopServices;
+import qt.gui.QHeaderView;
+import qt.gui.QStyle;
+import qt.gui.QSortFilterProxyModel;
 
-import QtCore.QtAlgorithms;
-
-import QtGui.QClipboard;
-import QtGui.QDesktopServices;
-import QtGui.QHeaderView;
-import QtGui.QStyle;
+import qt.core.QtAlgorithms;
+import qt.core.QBuffer;
+import qt.core.QDir;
+import qt.core.QFile;
+import qt.core.QFileInfo;
+import qt.core.QSettings;
+import qt.core.QTemporaryFile;
+import qt.core.QTextStream;
+import qt.core.QDebug;
+import qt.core.QDateTime;
+import qt.core.QHash;
+import qt.core.QObject;
+import qt.core.QTimer;
+import qt.core.QUrl;
 
 import QtWebKit.QWebHistoryInterface;
 import QtWebKit.QWebSettings;
 
-import QtCore.QDebug;
-
-import QtCore.QDateTime;
-import QtCore.QHash;
-import QtCore.QObject;
-import QtCore.QTimer;
-import QtCore.QUrl;
-
-import QtGui.QSortFilterProxyModel;
-
 import QWebHistoryInterface;
-
 
 import autosaver
 import browserapplication;
