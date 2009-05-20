@@ -28,6 +28,7 @@ set(classes
 
 if(QT_QCONFIG MATCHES "openssl")
     set(classes 
+      ${classes}
       QSslCertificate
       QSslCipher
       QSslConfiguration
