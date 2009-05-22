@@ -60,7 +60,7 @@ public:
 		if ((event.key() == Qt.Key_Delete || event.key() == Qt.Key_Backspace) && model()) {
 			removeOne();
 		} else {
-			QAbstractItemView::keyPressEvent(event);
+			QAbstractItemView.keyPressEvent(event);
 		}
 	}
 

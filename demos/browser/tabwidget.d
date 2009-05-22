@@ -67,12 +67,12 @@ Tab bar with a few more features such as a context menu and shortcuts
 class TabBar : public QTabBar
 {
 	mixin Signal!("newTab");
-	mixin Signal!("cloneTab", int index);
-	mixin Signal!("closeTab", int index);
-	mixin Signal!("closeOtherTabs", int index);
-	mixin Signal!("reloadTab", int index);
+	mixin Signal!("cloneTab", int /*index*);
+	mixin Signal!("closeTab", int index*/);
+	mixin Signal!("closeOtherTabs", int /*index*/);
+	mixin Signal!("reloadTab", int /*index*/);
 	mixin Signal!("reloadAllTabs");
-	mixin Signal!("tabMoveRequested", int fromIndex, int toIndex);
+	mixin Signal!("tabMoveRequested", int /*fromIndex*/, int /*toIndex*/);
 
 public:
 
@@ -141,7 +141,7 @@ private:
 		}
 	}
 
-	void cloneTab();
+	void cloneTab()
 	{
 		if (QAction action = qobject_cast<QAction>(sender())) {
 			int index = action.data().toInt();
@@ -149,7 +149,7 @@ private:
 		}
 	}
 
-	void closeTab();
+	void closeTab()
 	{
 		if (QAction action = qobject_cast<QAction>(sender())) {
 			int index = action.data().toInt();
@@ -201,9 +201,9 @@ private:
 		menu.exec(QCursor.pos());
 	}
 
-	private:
-	QList<QShortcut> m_tabShortcuts;
-	friend class TabWidget;
+private:
+	
+	QShortcut[] m_tabShortcuts;
 
 	QPoint m_dragStartPos;
 	int m_dragCurrentIndex;
@@ -235,7 +235,7 @@ public:
 		root.setEnabled(false);
 	}
 
-	QWebPage.WebAction webAction() const
+	QWebPage.WebAction webAction()
 	{
 		return m_webAction;
 	}
@@ -317,20 +317,20 @@ to proxy the actions.
 class TabWidget : public QTabWidget
 {
 	// tab widget signals
-	mixin Singal!("loadPage", QString url);
+	mixin Singal!("loadPage", QString /*url*/);
 	mixin Singal!("tabsChanged");
 	mixin Singal!("lastTabClosed");
 
 	// current tab signals
-	mixin Singal!("setCurrentTitle", QString url);
-	mixin Singal!("showStatusBarMessage", QString message);
-	mixin Singal!("linkHovered", QString link);
-	mixin Singal!("loadProgress", int progress);
-	mixin Singal!("geometryChangeRequested", QRect geometry);
-	mixin Singal!("menuBarVisibilityChangeRequested", bool visible);
-	mixin Singal!("statusBarVisibilityChangeRequested", bool visible);
-	mixin Singal!("toolBarVisibilityChangeRequested", bool visible);
-	mixin Singal!("printRequested", QWebFrame frame);
+	mixin Singal!("setCurrentTitle", QString /*url*/);
+	mixin Singal!("showStatusBarMessage", QString /*message*/);
+	mixin Singal!("linkHovered", QString /*link*/);
+	mixin Singal!("loadProgress", int /*progress*/);
+	mixin Singal!("geometryChangeRequested", QRect /*geometry*/);
+	mixin Singal!("menuBarVisibilityChangeRequested", bool /*visible*/);
+	mixin Singal!("statusBarVisibilityChangeRequested", bool /*visible*/);
+	mixin Singal!("toolBarVisibilityChangeRequested", bool /*visible*/);
+	mixin Singal!("printRequested", QWebFrame /*frame*/);
 
 public:
 
@@ -418,50 +418,50 @@ public:
 		m_actions.append(new WebActionMapper(action, webAction, this));
 	}
 
-	QAction newTabAction() const;
+	QAction newTabAction()
 	{
 		return m_newTabAction;
 	}
 
-	QAction closeTabAction() const;
+	QAction closeTabAction()
 	{
 		return m_closeTabAction;
 	}
 	
-	QAction recentlyClosedTabsAction() const;
+	QAction recentlyClosedTabsAction()
 	{
 		return m_recentlyClosedTabsAction;
 	}
 
-	QAction nextTabAction() const
+	QAction nextTabAction()
 	{
 		return m_nextTabAction;
 	}
 
-	QAction previousTabAction() const
+	QAction previousTabAction()
 	{
 		return m_previousTabAction;
 	}
 
-	QWidget lineEditStack() const
+	QWidget lineEditStack()
 	{
 		return m_lineEdits;
 	}
 
-	QLineEdit currentLineEdit() const
+	QLineEdit currentLineEdit()
 	{
 		return lineEdit(m_lineEdits.currentIndex());
 	}
 
-	WebView currentWebView() const
+	WebView currentWebView()
 	{
 		return webView(currentIndex());
 	}
 
-	WebView webView(int index) const
+	WebView webView(int index)
 	{
 		QWidget widget = this.widget(index);
-		if (WebView webView = qobject_cast<WebView>(widget)) {
+		if (WebView webView = cast(WebView) widget) {
 			return webView;
 		} else {
 			// optimization to delay creating the first webview
@@ -477,7 +477,7 @@ public:
 		return 0;
 	}
 
-	QLineEdit lineEdit(int index) const
+	QLineEdit lineEdit(int index)
 	{
 		UrlLineEdit urlLineEdit = qobject_cast<UrlLineEdit>(m_lineEdits.widget(index));
 		if (urlLineEdit)
@@ -485,7 +485,7 @@ public:
 		return 0;
 	}
 
-	int webViewIndex(WebView webView) const
+	int webViewIndex(WebView webView)
 	{
 		int index = indexOf(webView);
 		return index;
@@ -494,7 +494,7 @@ public:
     
 static const qint32 TabWidgetMagic = 0xaa;
 
-	QByteArray saveState() const;
+	QByteArray saveState()
 	{
 		int version = 1;
 		QByteArray data;
@@ -505,7 +505,7 @@ static const qint32 TabWidgetMagic = 0xaa;
 
 		QStringList tabs;
 		for (int i = 0; i < count(); ++i) {
-			if (WebView tab = qobject_cast<WebView>(widget(i))) {
+			if (WebView tab = cast(WebView) widget(i))) {
 				tabs.append(tab.url().toString());
 			} else {
 				tabs.append(QString.null);
@@ -549,7 +549,7 @@ static const qint32 TabWidgetMagic = 0xaa;
 
 protected:
 
-	void mouseDoubleClickEvent(QMouseEvent event);
+	void mouseDoubleClickEvent(QMouseEvent event)
 	{
 		if (!childAt(event.pos())
 			// Remove the line below when QTabWidget does not have a one pixel frame
@@ -669,7 +669,7 @@ public:
 	}
 
 	// When index is -1 index chooses the current tab
-	void closeTab(int index = -1);
+	void closeTab(int index = -1)
 	{
 		if (index < 0)
 			index = currentIndex();
@@ -722,7 +722,7 @@ public:
 	}
 
 	// When index is -1 index chooses the current tab
-	void reloadTab(int index = -1);
+	void reloadTab(int index = -1)
 	{
 		if (index < 0)
 			index = currentIndex();
@@ -730,15 +730,15 @@ public:
 			return;
 
 		QWidget widget = this.widget(index);
-		if (WebView tab = qobject_cast<WebView>(widget))
+		if (WebView tab = cast(WebView) widget)
 			tab.reload();
 	}
 
-	void reloadAllTabs();
+	void reloadAllTabs()
 	{
 		for (int i = 0; i < count(); ++i) {
 			QWidget tabWidget = widget(i);
-			if (WebView tab = qobject_cast<WebView>(tabWidget)) {
+			if (WebView tab = cast(WebView) tabWidget) {
 				tab.reload();
 			}
 		}
@@ -816,7 +816,7 @@ private:
 
 	void webViewLoadStarted()
 	{
-		WebView webView = qobject_cast<WebView>(sender());
+		WebView webView = cast(WebView) sender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
 			QIcon icon(QLatin1String(":loading.gif"));
@@ -826,7 +826,7 @@ private:
 
 	void webViewIconChanged()
 	{
-		WebView webView = qobject_cast<WebView>(sender());
+		WebView webView = cast(WebView) sender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
 			QIcon icon = BrowserApplication.instance().icon(webView.url());
@@ -836,7 +836,7 @@ private:
 
 	void webViewTitleChanged(QString title)
 	{
-		WebView webView = qobject_cast<WebView>(sender());
+		WebView webView = cast(WebView) sender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
 			setTabText(index, title);
@@ -848,7 +848,7 @@ private:
 
 	void webViewUrlChanged(QUrl url)
 	{
-		WebView webView = qobject_cast<WebView>(sender());
+		WebView webView = cast(WebView) sender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
 			m_tabBar.setTabData(index, url);
@@ -858,7 +858,7 @@ private:
 
 	void lineEditReturnPressed()
 	{
-		if (QLineEdit lineEdit = qobject_cast<QLineEdit*>(sender())) {
+		if (QLineEdit lineEdit = cast(QLineEdit) sender()) {
 			emit loadPage(lineEdit.text());
 			if (m_lineEdits.currentWidget() == lineEdit)
 				currentWebView().setFocus();
@@ -867,8 +867,8 @@ private:
 
 	void windowCloseRequested()
 	{
-		WebPage webPage = qobject_cast<WebPage>(sender());
-		WebView webView = qobject_cast<WebView>(webPage.view());
+		WebPage webPage = cast(WebPage) sender();
+		WebView webView = cast(WebView) webPage.view();
 		int index = webViewIndex(webView);
 		if (index >= 0) {
 			if (count() == 1)
@@ -895,8 +895,8 @@ private:
 
 	QMenu m_recentlyClosedTabsMenu;
 	static const int m_recentlyClosedTabsSize = 10;
-	QList<QUrl> m_recentlyClosedTabs;
-	QList<WebActionMapper> m_actions;
+	QUrl[] m_recentlyClosedTabs;
+	WebActionMapper[] m_actions;
 
 	QCompleter m_lineEditCompleter;
 	QStackedWidget m_lineEdits;

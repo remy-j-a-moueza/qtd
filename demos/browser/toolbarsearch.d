@@ -56,9 +56,9 @@ import autosaver;
 
 class ToolbarSearch : public SearchLineEdit
 {
-	mixin Signal!("search", QUrl url)
+	mixin Signal!("search", QUrl /*url*/)
 
-	public:
+public:
 
 	/*
 	ToolbarSearch is a very basic search widget that also contains a small history.

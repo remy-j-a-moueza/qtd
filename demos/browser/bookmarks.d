@@ -79,9 +79,9 @@ Bookmark manager, owner of the bookmarks, loads, saves and basic tasks
 */
 class BookmarksManager : public QObject
 {
-	mixin Signal!("entryAdded", BookmarkNode item);
-	mixin Signal!("entryRemoved", BookmarkNode parent, int row, BookmarkNode item);
-	mixin Signal!("entryChanged", BookmarkNode item);
+	mixin Signal!("entryAdded", BookmarkNode /*item*/);
+	mixin Signal!("entryRemoved", BookmarkNode /*parent*/, int /*row*/, BookmarkNode /*item*/);
+	mixin Signal!("entryChanged", BookmarkNode /*item*/);
 
 public:
 
@@ -111,8 +111,7 @@ public:
 		m_commands.push(command);
 	}
 
-
-	void removeBookmark(BookmarkNode node);
+	void removeBookmark(BookmarkNode node)
 	{
 		if (!m_loaded)
 			return;
@@ -124,7 +123,7 @@ public:
 		m_commands.push(command);
 	}
 
-	void setTitle(BookmarkNode node, QString newTitle);
+	void setTitle(BookmarkNode node, QString newTitle)
 	{
 		if (!m_loaded)
 			return;
@@ -134,8 +133,7 @@ public:
 		m_commands.push(command);
 	}
 
-
-	void setUrl(BookmarkNode node, QString newUrl);
+	void setUrl(BookmarkNode node, QString newUrl)
 	{
 		if (!m_loaded)
 			return;
@@ -145,20 +143,19 @@ public:
 		m_commands.push(command);
 	}
 
-
 	void changeExpanded()
 	{
 		m_saveTimer.changeOccurred();
 	}
 
-	BookmarkNode bookmarks();
+	BookmarkNode bookmarks()
 	{
 		if (!m_loaded)
 			load();
 		return m_bookmarkRootNode;
 	}
 
-	BookmarkNode menu();
+	BookmarkNode menu()
 	{
 		if (!m_loaded)
 			load();
@@ -172,7 +169,7 @@ public:
 		return 0;
 	}
 
-	BookmarkNode toolbar();
+	BookmarkNode toolbar()
 	{
 		if (!m_loaded)
 			load();
@@ -267,7 +264,7 @@ private:
 
 		BookmarkNode toolbar = null;
 		BookmarkNode menu = null;
-		QList<BookmarkNode> others;
+		BookmarkNode[] others;
 		for (int i = m_bookmarkRootNode.children().count() - 1; i >= 0; --i) {
 			BookmarkNode node = m_bookmarkRootNode.children().at(i);
 			if (node.type() == BookmarkNode.Folder) {
@@ -323,7 +320,7 @@ public:
 
 	this(BookmarksManager m_bookmarkManagaer, BookmarkNode parent, int row)
 	{
-		super(BookmarksManager.tr("Remove Bookmark"))
+		super(BookmarksManager.tr("Remove Bookmark"));
 		m_row = row;
 		m_bookmarkManagaer = m_bookmarkManagaer;
 		m_node = parent.children().value(row);
@@ -341,14 +338,14 @@ public:
 	void undo()
 	{
 		m_parent.add(m_node, m_row);
-		emit m_bookmarkManagaer.entryAdded(m_node);
+		m_bookmarkManagaer.entryAdded.emit(m_node);
 		m_done = false;
 	}
 
 	void redo()
 	{
 		m_parent.remove(m_node);
-		emit m_bookmarkManagaer.entryRemoved(m_parent, m_row, m_node);
+		m_bookmarkManagaer.entryRemoved.emit(m_parent, m_row, m_node);
 		m_done = true;
 	}
 
@@ -402,7 +399,7 @@ public:
 			m_node.title = m_oldValue;
 		else
 			m_node.url = m_oldValue;
-		emit m_bookmarkManagaer.entryChanged(m_node);
+		m_bookmarkManagaer.entryChanged.emit(m_node);
 	}
 
 	void redo()
@@ -411,7 +408,7 @@ public:
 			m_node.title = m_newValue;
 		else
 			m_node.url = m_newValue;
-		emit m_bookmarkManagaer.entryChanged(m_node);
+		m_bookmarkManagaer.entryChanged.emit(m_node);
 	}
 
 private:
@@ -444,8 +441,7 @@ public:
 		endInsertRows();
 	}
 
-
-	void entryRemoved(BookmarkNode parent, int row, BookmarkNode item);
+	void entryRemoved(BookmarkNode parent, int row, BookmarkNode item)
 	{
 		// item was already removed, re-add so beginRemoveRows works
 		parent.add(item, row);
@@ -454,10 +450,10 @@ public:
 		endRemoveRows();
 	}
 
-	void entryChanged(BookmarkNode item);
+	void entryChanged(BookmarkNode item)
 	{
 		QModelIndex idx = index(item);
-		emit dataChanged(idx, idx);
+		dataChanged.emit(idx, idx);
 	}
 
 public:
@@ -467,11 +463,11 @@ public:
 		UrlRole = Qt.UserRole + 2,
 		UrlStringRole = Qt.UserRole + 3,
 		SeparatorRole = Qt.UserRole + 4
-	}
+	};
 
-	BookmarksModel(BookmarksManager bookmarkManager, QObject parent = null)
+	this(BookmarksManager bookmarkManager, QObject parent = null)
 	{
-		super(parent)
+		super(parent);
 		m_endMacro = false;
 		m_bookmarksManager = bookmarkManager;
 		bookmarkManager.entryAdded.connect(&this.entryAdded);
@@ -479,10 +475,12 @@ public:
 		bookmarkManager.entryChanged.connect(&this.entryChanged);
 	}
     
-    
-	BookmarksManager bookmarksManager() { return m_bookmarksManager; }
+	BookmarksManager bookmarksManager()
+	{
+		return m_bookmarksManager;
+	}
 
-	QVariant headerData(int section, Qt.Orientation orientation, int role = Qt.DisplayRole);
+	QVariant headerData(int section, Qt.Orientation orientation, int role = Qt.DisplayRole)
 	{
 		if (orientation == Qt.Horizontal && role == Qt.DisplayRole) {
 			switch (section) {
@@ -492,7 +490,6 @@ public:
 		}
 		return QAbstractItemModel.headerData(section, orientation, role);
 	}
-    
     
 	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
 	{
@@ -551,11 +548,11 @@ public:
 		if (!parent.isValid())
 			return m_bookmarksManager.bookmarks().children().count();
 
-		BookmarkNode item = static_cast<BookmarkNode>(parent.internalPointer());
+		BookmarkNode item = cast(BookmarkNode) parent.internalPointer();
 		return item.children().count();
 	}
 
-	QModelIndex index(int, int, QModelIndex& = QModelIndex())
+	QModelIndex index(int row, int column, QModelIndex parent = QModelIndex())
 	{
 		if (row < 0 || column < 0 || row >= rowCount(parent) || column >= columnCount(parent))
 			return QModelIndex();
@@ -565,7 +562,7 @@ public:
 		return createIndex(row, column, parentNode.children().at(row));
 	}
 
-	QModelIndex parent(QModelIndex& index= QModelIndex())
+	QModelIndex parent(QModelIndex index = QModelIndex())
 	{
 		if (!index.isValid())
 			return QModelIndex();
@@ -601,13 +598,12 @@ public:
 		return flags;
 	}
 
-	Qt.DropActions supportedDropActions ();
+	Qt.DropActions supportedDropActions()
 	{
 		return Qt.CopyAction | Qt.MoveAction;
 	}
 
-
-	bool removeRows(int row, int count, QModelIndex parent = QModelIndex());
+	bool removeRows(int row, int count, QModelIndex parent = QModelIndex())
 	{
 		if (row < 0 || count <= 0 || row + count > rowCount(parent))
 			return false;
@@ -660,13 +656,12 @@ public:
 		return true;
 	}
 
-
-	QMimeData mimeData(QModelIndexList indexes);
+	QMimeData mimeData(QModelIndexList indexes)
 	{
 		QMimeData mimeData = new QMimeData();
 		QByteArray data;
 		auto stream = new QDataStream(&data, QIODevice.WriteOnly);
-		foreach (QModelIndex index, indexes) {
+		foreach (QModelIndex index; indexes) {
 			if (index.column() != 0 || !index.isValid())
 				continue;
 			QByteArray encodedData;
@@ -681,8 +676,7 @@ public:
 		return mimeData;
 	}
 
-
-const char[] MIMETYPE = QLatin1String("application/bookmarks.xbel")
+	const char[] MIMETYPE = QLatin1String("application/bookmarks.xbel");
 
 	QStringList mimeTypes()
 	{
@@ -700,7 +694,7 @@ const char[] MIMETYPE = QLatin1String("application/bookmarks.xbel")
 			return false;
 
 		QByteArray ba = data.data(MIMETYPE);
-		QDataStream stream(&ba, QIODevice.ReadOnly);
+		QDataStream stream = new QDataStream(&ba, QIODevice.ReadOnly);
 		if (stream.atEnd())
 			return false;
 
@@ -710,12 +704,12 @@ const char[] MIMETYPE = QLatin1String("application/bookmarks.xbel")
 		while (!stream.atEnd()) {
 			QByteArray encodedData;
 			stream >> encodedData;
-			QBuffer buffer(&encodedData);
+			QBuffer buffer = new QBuffer(&encodedData);
 			buffer.open(QBuffer.ReadOnly);
 
 			XbelReader reader;
 			BookmarkNode rootNode = reader.read(&buffer);
-			QList<BookmarkNode> children = rootNode.children();
+			BookmarkNode[] children = rootNode.children();
 			for (int i = 0; i < children.count(); ++i) {
 				BookmarkNode bookmarkNode = children.at(i);
 				rootNode.remove(bookmarkNode);
@@ -739,7 +733,7 @@ const char[] MIMETYPE = QLatin1String("application/bookmarks.xbel")
 
 	BookmarkNode node(QModelIndex index)
 	{
-		BookmarkNode itemNode = static_cast<BookmarkNode>(index.internalPointer());
+		BookmarkNode itemNode = cast(BookmarkNode) index.internalPointer();
 		if (!itemNode)
 			return m_bookmarksManager.bookmarks();
 		return itemNode;
@@ -764,11 +758,11 @@ import modelmenu;
 
 class BookmarksMenu : public ModelMenu
 {
-	mixin Signal!("openUrl", QUrl url);
+	mixin Signal!("openUrl", QUrl /*url*/);
 
 public:
 
-	BookmarksMenu(QWidget parent = null)
+	this(QWidget parent = null)
 	{
 		super(parent);	
 		m_bookmarksManager = 0;
@@ -778,7 +772,7 @@ public:
 		setSeparatorRole(BookmarksModel.SeparatorRole);
 	}
 	
-	void setInitialActions(QList<QAction> actions);
+	void setInitialActions(QAction[] actions)
 	{
 		m_initialActions = actions;
 		for (int i = 0; i < m_initialActions.count(); ++i)
@@ -805,13 +799,13 @@ private:
 
 	void activated(QModelIndex index)
 	{
-		emit openUrl(index.data(BookmarksModel.UrlRole).toUrl());
+		openUrl.emit(index.data(BookmarksModel.UrlRole).toUrl());
 	}
 
 private:
 
 	BookmarksManager m_bookmarksManager;
-	QList<QAction> m_initialActions;
+	QAction[] m_initialActions;
 }
 
 /*
@@ -854,7 +848,7 @@ class AddBookmarkDialog : public QDialog, public Ui_AddBookmarkDialog
 public:
 
 	this(QString url, QString title, QWidget parent = null, BookmarksManager bookmarkManager = null)
-	: QDialog(parent)
+	//: QDialog(parent)
 	{
 		m_url = url;
 		m_bookmarksManager = bookmarkManager;
@@ -912,12 +906,12 @@ import ui_bookmarks;
 //class TreeProxyModel;
 class BookmarksDialog : public QDialog, public Ui_BookmarksDialog
 {
-	mixin Signal!("openUrl", QUrl url);
+	mixin Signal!("openUrl", QUrl /*url*/);
 
 public:
 
 	this(QWidget parent = null, BookmarksManager manager = null)
-	: QDialog(parent)
+	//: QDialog(parent)
 	{
 		m_bookmarksManager = manager;
 		if (!m_bookmarksManager)
@@ -975,7 +969,7 @@ private:
 		QModelIndex index = tree.currentIndex();
 		if (!index.parent().isValid())
 			return;
-		emit openUrl(index.sibling(index.row(), 1).data(BookmarksModel.UrlRole).toUrl());
+		openUrl.emit(index.sibling(index.row(), 1).data(BookmarksModel.UrlRole).toUrl());
 	}
 
 	void newFolder()
@@ -1031,11 +1025,13 @@ private:
 	TreeProxyModel m_proxyModel;
 }
 
+
 import qt.gui.QToolBar;
+
 
 class BookmarksToolBar : public QToolBar
 {
-mixin Signal!("openUrl", QUrl url);
+mixin Signal!("openUrl", QUrl /*url*/);
 
 public:
 
@@ -1052,7 +1048,7 @@ public:
 		setAcceptDrops(true);
 	}
 
-	void setRootIndex(QModelIndex index);
+	void setRootIndex(QModelIndex index)
 	{
 		m_root = index;
 		build();
@@ -1077,7 +1073,7 @@ protected:
 	{
 		const QMimeData mimeData = event.mimeData();
 		if (mimeData.hasUrls() && mimeData.hasText()) {
-			QList<QUrl> urls = mimeData.urls();
+			QUrl[] urls = mimeData.urls();
 			QAction action = actionAt(event.pos());
 			QString dropText;
 			if (action)
@@ -1113,14 +1109,14 @@ private:
 	void triggered(QAction action)
 	{
 		QVariant v = action.data();
-		if (v.canConvert<QUrl>()) {
-			emit openUrl(v.toUrl());
+		if (v.canConvert!(QUrl)()) {
+			openUrl.emit(v.toUrl());
 		}
 	}
 
 	void activated(QModelIndex index)
 	{
-		emit openUrl(index.data(BookmarksModel.UrlRole).toUrl());
+		openUrl.emit(index.data(BookmarksModel.UrlRole).toUrl());
 	}
 
 	void build()

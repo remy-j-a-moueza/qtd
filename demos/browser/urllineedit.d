@@ -326,7 +326,7 @@ protected:
 		}
 	}
 
-	void focusOutEvent(QFocusEvent event);
+	void focusOutEvent(QFocusEvent event)
 	{
 		if (m_lineEdit.text().isEmpty() && m_webView)
 			m_lineEdit.setText(QString.fromUtf8(m_webView.url().toEncoded()));
@@ -343,7 +343,7 @@ private:
 
 	void webViewIconChanged()
 	{
-		QUrl url = (m_webView)  ? m_webView.url() : QUrl();
+		QUrl url = (m_webView)  ? m_webView.url() : new QUrl();
 		QIcon icon = BrowserApplication.instance().icon(url);
 		QPixmap pixmap(icon.pixmap(16, 16));
 		m_iconLabel.setPixmap(pixmap);

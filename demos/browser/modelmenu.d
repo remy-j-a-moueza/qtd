@@ -52,8 +52,8 @@ import qdebug;
 class ModelMenu : public QMenu
 {
 	
-mixin Signal!("activated", QModelIndex index);
-mixin Signal!("hovered", QString text);
+mixin Signal!("activated", QModelIndex /*index*/);
+mixin Signal!("hovered", QString /*text*/);
 
 public:
 
@@ -129,9 +129,9 @@ public:
 		return m_separatorRole;
 	}
 
-	QAction makeAction(QIcon icon, QString text, QObject parent);
+	QAction makeAction(QIcon icon, QString text, QObject parent)
 	{
-		QFontMetrics fm(font());
+		auto fm = new QFontMetrics(font());
 		if (-1 == m_maxWidth)
 			m_maxWidth = fm.width(QLatin1Char('m')) * 30;
 		QString smallText = fm.elidedText(text, Qt.ElideMiddle, m_maxWidth);
@@ -235,9 +235,9 @@ private:
 
 private:
 
-	QAction makeAction(QModelIndex index);
+	QAction makeAction(QModelIndex index)
 	{
-		QIcon icon = qvariant_cast<QIcon>(index.data(Qt.DecorationRole));
+		QIcon icon = cast(QIcon) index.data(Qt.DecorationRole);
 		QAction action = makeAction(icon, index.data().toString(), this);
 		QVariant v;
 		v.setValue(index);

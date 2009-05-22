@@ -38,7 +38,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-module browsermainwindow:
+module browsermainwindow;
 
 
 import qt.core.QUrl;
@@ -87,7 +87,7 @@ static const qint32 BrowserMainWindowMagic = 0xba;
 
 public:
 
-	this(QWidget parent = null, Qt.WindowFlags flags = 0);
+	this(QWidget parent = null, Qt.WindowFlags flags = 0)
 	{
 		super(parent, flags);
 		m_tabWidget = new TabWidget(this);
@@ -165,10 +165,10 @@ public:
 
 public:
 
-	static QUrl guessUrlFromString(QString &string)
+	static QUrl guessUrlFromString(QString string)
 	{
 		QString urlStr = string.trimmed();
-		QRegExp test(QLatin1String("^[a-zA-Z]+\\:.*"));
+		auto test = new QRegExp(QLatin1String("^[a-zA-Z]+\\:.*"));
 
 		// Check if it looks like a qualified URL. Try parsing it and see.
 		bool hasSchema = test.exactMatch(urlStr);
@@ -218,12 +218,12 @@ public:
 
 	QByteArray saveState(bool withTabs)
 	{
-		int version = 2;
+		int version_ = 2;
 		QByteArray data;
-		QDataStream stream(&data, QIODevice.WriteOnly);
+		auto stream = new QDataStream(&data, QIODevice.WriteOnly);
 
 		stream << qint32(BrowserMainWindowMagic);
-		stream << qint32(version);
+		stream << qint32(version_);
 
 		stream << size();
 		stream << !m_navigationBar.isHidden();
@@ -241,7 +241,7 @@ public:
 	{
 		int version_ = 2;
 		QByteArray sd = state;
-		QDataStream stream(&sd, QIODevice.ReadOnly);
+		auto stream = new QDataStream(&sd, QIODevice.ReadOnly);
 		if (stream.atEnd())
 			return false;
 
@@ -289,7 +289,6 @@ public:
 		loadUrl(url);
 	}
 
-
 	void slotHome()
 	{
 		QSettings settings;
@@ -300,7 +299,7 @@ public:
 
 protected:
 
-	void closeEvent(QCloseEvent event);
+	void closeEvent(QCloseEvent event)
 	{
 		if (m_tabWidget.count() > 1) {
 			int ret = QMessageBox.warning(this, QString(),
@@ -349,12 +348,12 @@ private:
 		}
 	}
 
-	void slotUpdateStatusbar(QString &string);
+	void slotUpdateStatusbar(QString string)
 	{
 		statusBar().showMessage(string, 2000);
 	}
 
-	void slotUpdateWindowTitle(QString &title = QString())
+	void slotUpdateWindowTitle(QString title = QString())
 	{
 		if (title.isEmpty()) {
 			setWindowTitle(tr("Qt Demo Browser"));
@@ -368,7 +367,7 @@ private:
 		}
 	}
 
-	void loadUrl(QUrl &url);
+	void loadUrl(QUrl url)
 	{
 		if (!currentTab() || !url.isValid())
 			return;
@@ -401,7 +400,7 @@ private:
 		loadPage(file);
 	}
 
-	void slotFilePrintPreview();
+	void slotFilePrintPreview()
 	{
 		version(QT_NO_PRINTER)
 		{
@@ -428,11 +427,11 @@ private:
 			QString title = tr("Are you sure you want to turn on private browsing?");
 			QString text = tr("<b>%1</b><br><br>When private browsing in turned on,"
 			" webpages are not added to the history,"
-			" items are automatically removed from the Downloads window," \
-			" new cookies are not stored, current cookies can't be accessed," \
-			" site icons wont be stored, session wont be saved, " \
-			" and searches are not addded to the pop-up menu in the Google search box." \
-			"  Until you close the window, you can still click the Back and Forward buttons" \
+			" items are automatically removed from the Downloads window,"
+			" new cookies are not stored, current cookies can't be accessed,"
+			" site icons wont be stored, session wont be saved, "
+			" and searches are not addded to the pop-up menu in the Google search box."
+			"  Until you close the window, you can still click the Back and Forward buttons"
 			" to return to the webpages you have opened.").arg(title);
 
 			QMessageBox.StandardButton button = QMessageBox.question(this, QString(), text,
@@ -444,10 +443,10 @@ private:
 		} else {
 			settings.setAttribute(QWebSettings.PrivateBrowsingEnabled, false);
 
-			QList<BrowserMainWindow*> windows = BrowserApplication.instance().mainWindows();
+			BrowserMainWindow[] windows = BrowserApplication.instance().mainWindows();
 			for (int i = 0; i < windows.count(); ++i) {
 				BrowserMainWindow window = windows.at(i);
-				window.m_lastSearch = QString.null;
+				window.m_lastSearch = null; //QString::null
 				window.tabWidget().clear();
 			}
 		}
@@ -463,8 +462,7 @@ private:
 		if (!currentTab())
 			return;
 		bool ok;
-		QString search = QInputDialog.getText(this, tr("Find"),
-			tr("Text:"), QLineEdit.Normal, m_lastSearch, &ok);
+		QString search = QInputDialog.getText(this, tr("Find"), tr("Text:"), QLineEdit.Normal, m_lastSearch, &ok);
 		if (ok && !search.isEmpty()) {
 			m_lastSearch = search;
 			if (!currentTab().findText(m_lastSearch))
@@ -486,8 +484,7 @@ private:
 		currentTab().findText(m_lastSearch, QWebPage.FindBackward);
 	}
 
-
-	void slotShowBookmarksDialog();
+	void slotShowBookmarksDialog()
 	{
 		BookmarksDialog dialog = new BookmarksDialog(this);
 		dialog.openUrl.connect(&m_tabWidget.loadUrlInCurrentTab);
@@ -601,7 +598,7 @@ private:
 		m_toolbarSearch.lineEdit().setFocus();
 	}
 
-	void slotToggleInspector(bool enable);
+	void slotToggleInspector(bool enable)
 	{
 		QWebSettings.globalSettings().setAttribute(QWebSettings.DeveloperExtrasEnabled, enable);
 		if (enable) {
@@ -631,13 +628,13 @@ private:
 		BrowserApplication.downloadManager().show();
 	}
 
-	void slotSelectLineEdit();
+	void slotSelectLineEdit()
 	{
 		m_tabWidget.currentLineEdit().selectAll();
 		m_tabWidget.currentLineEdit().setFocus();
 	}
 
-	void slotAboutToShowBackMenu();
+	void slotAboutToShowBackMenu()
 	{
 		m_historyBackMenu.clear();
 		if (!currentTab())
@@ -655,8 +652,7 @@ private:
 		}
 	}
 
-
-	void slotAboutToShowForwardMenu();
+	void slotAboutToShowForwardMenu()
 	{
 		m_historyForwardMenu.clear();
 		if (!currentTab())
@@ -683,7 +679,7 @@ private:
 		m_windowMenu.addAction(tr("Downloads"), this, SLOT(slotDownloadManager()), QKeySequence(tr("Alt+Ctrl+L", "Download Manager")));
 
 		m_windowMenu.addSeparator();
-		QList<BrowserMainWindow*> windows = BrowserApplication.instance().mainWindows();
+		BrowserMainWindow[] windows = BrowserApplication.instance().mainWindows();
 		for (int i = 0; i < windows.count(); ++i) {
 			BrowserMainWindow window = windows.at(i);
 			QAction action = m_windowMenu.addAction(window.windowTitle(), this, SLOT(slotShowWindow()));
@@ -706,11 +702,11 @@ private:
 
 	void slotShowWindow()
 	{
-		if (QAction action = qobject_cast<QAction*>(sender())) {
+		if (QAction action = cast(QAction) sender()) {
 			QVariant v = action.data();
-			if (v.canConvert<int>()) {
-				int offset = qvariant_cast<int>(v);
-				QList<BrowserMainWindow*> windows = BrowserApplication.instance().mainWindows();
+			if (v.canConvert!(int)()) {
+				int offset = cast(int) v;
+				BrowserMainWindow[] windows = BrowserApplication.instance().mainWindows();
 				windows.at(offset).activateWindow();
 				windows.at(offset).currentTab().setFocus();
 			}
@@ -738,11 +734,10 @@ private:
 		}
 	}
 
-	void geometryChangeRequested(QRect &geometry)
+	void geometryChangeRequested(QRect geometry)
 	{
 		setGeometry(geometry);
 	}
-
 
 	void updateToolbarActionText(bool visible)
 	{
@@ -765,7 +760,7 @@ private:
 		settings.endGroup();
 	}
 
-	void setupMenu();
+	void setupMenu()
 	{
 		new QShortcut(QKeySequence(Qt.Key_F6), this, SLOT(slotSwapFocus()));
 
@@ -858,7 +853,7 @@ private:
 		viewMenu.addSeparator();
 
 		m_stop = viewMenu.addAction(tr("&Stop"));
-		QList<QKeySequence> shortcuts;
+		QKeySequence[] shortcuts;
 		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Period));
 		shortcuts.append(Qt.Key_Escape);
 		m_stop.setShortcuts(shortcuts);
@@ -878,7 +873,7 @@ private:
 
 		viewMenu.addSeparator();
 		viewMenu.addAction(tr("Page S&ource"), this, SLOT(slotViewPageSource()), tr("Ctrl+Alt+U"));
-		QAction a = viewMenu.addAction(tr("&Full Screen"), this, SLOT(slotViewFullScreen(bool)),  Qt.Key_F11);
+		QAction a = viewMenu.addAction(tr("&Full Screen"), this, SLOT(slotViewFullScreen),  Qt.Key_F11);
 		a.setCheckable(true);
 
 		// History
@@ -887,7 +882,7 @@ private:
 		historyMenu.hovered.connect(&this.slotUpdateStatusbar);
 		historyMenu.setTitle(tr("Hi&story"));
 		menuBar().addMenu(historyMenu);
-		QList<QAction> historyActions;
+		QAction[] historyActions;
 
 		m_historyBack = new QAction(tr("Back"), this);
 		m_tabWidget.addWebAction(m_historyBack, QWebPage.Back);
@@ -921,7 +916,7 @@ private:
 		bookmarksMenu.setTitle(tr("&Bookmarks"));
 		menuBar().addMenu(bookmarksMenu);
 
-		QList<QAction> bookmarksActions;
+		QAction[] bookmarksActions;
 
 		QAction showAllBookmarksAction = new QAction(tr("Show All Bookmarks"), this);
 		showAllBookmarksAction.triggered().connect(&this.slotShowBookmarksDialog);
@@ -944,7 +939,7 @@ private:
 		toolsMenu.addAction(tr("Web &Search"), this, SLOT(slotWebSearch()), QKeySequence(tr("Ctrl+K", "Web Search")));
 		version(Q_CC_MINGW)
 		{
-			a = toolsMenu.addAction(tr("Enable Web &Inspector"), this, SLOT(slotToggleInspector(bool)));
+			a = toolsMenu.addAction(tr("Enable Web &Inspector"), this, SLOT(slotToggleInspector));
 			a.setCheckable(true);
 		}
 

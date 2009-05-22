@@ -67,6 +67,7 @@ import ui_proxy;
 class NetworkAccessManager : public QNetworkAccessManager
 {
 public:
+
 	this(QObject parent = null)
 	{
 		super(parent);
@@ -85,7 +86,8 @@ public:
 	}
 
 private:
-    QList<QString> sslTrustedHostList;
+
+    QString[] sslTrustedHostList;
 
 public:
 
@@ -157,11 +159,12 @@ private:
 		}
 	}
 
-version(QT_NO_OPENSSL) {
-	void sslErrors(QNetworkReply reply, QList<QSslError> error)
+version(QT_NO_OPENSSL)
+{
+	void sslErrors(QNetworkReply reply, QSslError[] error)
 	{
 		// check if SSL certificate has been trusted already
-		QString replyHost = reply.url().host() + ":" + reply.url().port();
+		QString replyHost = reply.url().host() ~ ":" ~ reply.url().port();
 		if(! sslTrustedHostList.contains(replyHost)) {
 			BrowserMainWindow mainWindow = BrowserApplication.instance().mainWindow();
 

@@ -68,9 +68,9 @@ import cookiejar;
 import autosaver;
 
 
-static const unsigned int JAR_VERSION = 23;
+static const uint JAR_VERSION = 23;
 
-QDataStream &operator<<(QDataStream stream, QList<QNetworkCookie> list)
+QDataStream operator<<(QDataStream stream, QNetworkCookie[] list)
 {
 	stream << JAR_VERSION;
 	stream << quint32(list.size());
@@ -79,7 +79,7 @@ QDataStream &operator<<(QDataStream stream, QList<QNetworkCookie> list)
 	return stream;
 }
 
-QDataStream &operator>>(QDataStream stream, QList<QNetworkCookie> list)
+QDataStream operator>>(QDataStream stream, QNetworkCookie[] list)
 {
 	list.clear();
 
@@ -95,7 +95,7 @@ QDataStream &operator>>(QDataStream stream, QList<QNetworkCookie> list)
 	{
 		QByteArray value;
 		stream >> value;
-		QList<QNetworkCookie> newCookies = QNetworkCookie.parseCookies(value);
+		QNetworkCookie[] newCookies = QNetworkCookie.parseCookies(value);
 		if (newCookies.count() == 0 && value.length() != 0) {
 			qWarning() << "CookieJar: Unable to parse saved cookie:" << value;
 		}
@@ -142,7 +142,7 @@ public:
 		m_saveTimer.saveIfNeccessary();
 	}
 
-	QList<QNetworkCookie> cookiesForUrl(QUrl url)
+	QNetworkCookie[] cookiesForUrl(QUrl url)
 	{
 		CookieJar that = const_cast<CookieJar>(this);
 		if (!m_loaded)
@@ -150,14 +150,14 @@ public:
 
 		QWebSettings globalSettings = QWebSettings.globalSettings();
 		if (globalSettings.testAttribute(QWebSettings.PrivateBrowsingEnabled)) {
-			QList<QNetworkCookie> noCookies;
+			QNetworkCookie[] noCookies;
 			return noCookies;
 		}
 
 		return QNetworkCookieJar.cookiesForUrl(url);
 	}
 
-	bool setCookiesFromUrl(QList<QNetworkCookie> cookieList, QUrl url)
+	bool setCookiesFromUrl(QNetworkCookie[] cookieList, QUrl url)
 	{
 		if (!m_loaded)
 			load();
@@ -179,7 +179,7 @@ public:
 			QDateTime soon = QDateTime.currentDateTime();
 			soon = soon.addDays(90);
 			foreach(QNetworkCookie cookie, cookieList) {
-				QList<QNetworkCookie> lst;
+				QNetworkCookie[] lst;
 				if (m_keepCookies == KeepUntilTimeLimit && !cookie.isSessionCookie() && cookie.expirationDate() > soon) {
 					cookie.setExpirationDate(soon);
 				}
@@ -189,7 +189,7 @@ public:
 				} else {
 					// finally force it in if wanted
 					if (m_acceptCookies == AcceptAlways) {
-						QList<QNetworkCookie> cookies = allCookies();
+						QNetworkCookie[] cookies = allCookies();
 						cookies += cookie;
 						setAllCookies(cookies);
 						addedCookies = true;
@@ -296,7 +296,7 @@ public:
 
 	void clear()
 	{
-		setAllCookies(QList<QNetworkCookie>());
+		setAllCookies(QNetworkCookie[]());
 		m_saveTimer.changeOccurred();
 		emit cookiesChanged();
 	}
@@ -319,7 +319,7 @@ public:
 				static_cast<KeepPolicy>(keepPolicyEnum.keyToValue(value));
 
 		if (m_keepCookies == KeepUntilExit)
-		setAllCookies(QList<QNetworkCookie>());
+		setAllCookies(QNetworkCookie[]());
 
 		m_loaded = true;
 		emit cookiesChanged();
@@ -339,12 +339,12 @@ private:
 			dir.mkpath(directory);
 		}
 		QSettings cookieSettings(directory + QLatin1String("/cookies.ini"), QSettings.IniFormat);
-		QList<QNetworkCookie> cookies = allCookies();
+		QNetworkCookie[] cookies = allCookies();
 		for (int i = cookies.count() - 1; i >= 0; --i) {
 			if (cookies.at(i).isSessionCookie())
 			cookies.removeAt(i);
 		}
-		cookieSettings.setValue(QLatin1String("cookies"), qVariantFromValue<QList<QNetworkCookie> >(cookies));
+		cookieSettings.setValue(QLatin1String("cookies"), qVariantFromValue<QNetworkCookie[] >(cookies));
 		cookieSettings.beginGroup(QLatin1String("Exceptions"));
 		cookieSettings.setValue(QLatin1String("block"), m_exceptions_block);
 		cookieSettings.setValue(QLatin1String("allow"), m_exceptions_allow);
@@ -364,7 +364,7 @@ private:
 
 	void purgeOldCookies()
 	{
-		QList<QNetworkCookie> cookies = allCookies();
+		QNetworkCookie[] cookies = allCookies();
 		if (cookies.isEmpty())
 			return;
 		int oldCount = cookies.count();
@@ -384,9 +384,9 @@ private:
 		if (m_loaded)
 			return;
 		// load cookies and exceptions
-		qRegisterMetaTypeStreamOperators<QList<QNetworkCookie> >("QList<QNetworkCookie>");
+		qRegisterMetaTypeStreamOperators<QNetworkCookie[] >("QNetworkCookie[]");
 		auto cookieSettings = new QSettings(QDesktopServices.storageLocation(QDesktopServices.DataLocation) + QLatin1String("/cookies.ini"), QSettings.IniFormat);
-		setAllCookies(qvariant_cast<QList<QNetworkCookie> >(cookieSettings.value(QLatin1String("cookies"))));
+		setAllCookies(qvariant_cast<QNetworkCookie[] >(cookieSettings.value(QLatin1String("cookies"))));
 		cookieSettings.beginGroup(QLatin1String("Exceptions"));
 		m_exceptions_block = cookieSettings.value(QLatin1String("block")).toStringList();
 		m_exceptions_allow = cookieSettings.value(QLatin1String("allow")).toStringList();
@@ -459,7 +459,7 @@ public:
 
 	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
 	{
-		QList<QNetworkCookie> lst;
+		QNetworkCookie[] lst;
 		
 		if (m_cookieJar)
 			lst = m_cookieJar.allCookies();
@@ -507,14 +507,13 @@ public:
 		return (parent.isValid() || !m_cookieJar) ? 0 : m_cookieJar.allCookies().count();
 	}
 
-
 	bool removeRows(int row, int count, QModelIndex parent = QModelIndex())
 	{
 		if (parent.isValid() || !m_cookieJar)
 			return false;
 		int lastRow = row + count - 1;
 		beginRemoveRows(parent, row, lastRow);
-		QList<QNetworkCookie> lst = m_cookieJar.allCookies();
+		QNetworkCookie[] lst = m_cookieJar.allCookies();
 		for (int i = lastRow; i >= row; --i) {
 			lst.removeAt(i);
 		}

@@ -62,7 +62,7 @@ import tabwidget;
 
 class WebPage : public QWebPage
 {
-	mixin Signal!("loadingUrl", QUrl url);
+	mixin Signal!("loadingUrl", QUrl /*url*/);
 
 public:
 
@@ -89,7 +89,7 @@ public:
 
 protected:
 
-	bool acceptNavigationRequest(QWebFrame frame, QNetworkRequest request, NavigationType type);
+	bool acceptNavigationRequest(QWebFrame frame, QNetworkRequest request, NavigationType type)
 	{
 		// ctrl open in new tab
 		// ctrl-shift open in new tab and select
@@ -138,7 +138,7 @@ protected:
 
 	version(QT_NO_UITOOLS) {} else
 	{
-		QObject createPlugin(const QString &classId, const QUrl &url, const QStringList &paramNames, const QStringList &paramValues);
+		QObject createPlugin(QString classId, QUrl url, QStringList paramNames, QStringList paramValues);
 		{
 			//Q_UNUSED(url);
 			//Q_UNUSED(paramNames);
@@ -159,7 +159,7 @@ private:
 
 		QFile file(QLatin1String(":/notfound.html"));
 		bool isOpened = file.open(QIODevice.ReadOnly);
-		Q_ASSERT(isOpened);
+		assert(isOpened);
 		QString title = tr("Error loading page: %1").arg(reply.url().toString());
 		QString html = QString(QLatin1String(file.readAll()))
 			.arg(title)
@@ -175,7 +175,7 @@ private:
 			QString(QLatin1String(imageBuffer.buffer().toBase64())));
 		}
 
-		QList<QWebFrame*> frames;
+		QWebFrame[] frames;
 		frames.append(mainFrame());
 		while (!frames.isEmpty()) {
 			QWebFrame frame = frames.takeFirst();
@@ -183,8 +183,8 @@ private:
 				frame.setHtml(html, reply.url());
 				return;
 			}
-			QList<QWebFrame > children = frame.childFrames();
-			foreach(QWebFrame frame, children)
+			QWebFrame[] children = frame.childFrames();
+			foreach(QWebFrame frame; children)
 				frames.append(frame);
 		}
 		if (m_loadingUrl == reply.url()) {
@@ -227,7 +227,7 @@ public:
 		load(url);
 	}
 
-	QUrl url() const
+	QUrl url()
 	{
 		QUrl url = QWebView.url();
 		if (!url.isEmpty())
@@ -244,7 +244,7 @@ public:
 
 protected:
 
-	void mousePressEvent(QMouseEvent event);
+	void mousePressEvent(QMouseEvent event)
 	{
 		m_page.m_pressedButtons = event.buttons();
 		m_page.m_keyboardModifiers = event.modifiers();

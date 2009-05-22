@@ -51,8 +51,8 @@ import qt.core.QMetaObject;
 import QtDebug;
 
 
-const uint AUTOSAVE_IN  = 1000 * 3  // seconds
-const uint MAXWAIT = 1000 * 15 // seconds
+const uint AUTOSAVE_IN  = 1000 * 3;  // seconds
+const uint MAXWAIT = 1000 * 15; // seconds
 
 
 /*
@@ -71,7 +71,7 @@ public:
 		assert(parent);
 	}
 	
-	~this();
+	~this()
 	{
 		if (m_timer.isActive())
 			qWarning() << "AutoSaver: still active when destroyed, changes not saved.";
@@ -90,7 +90,7 @@ public:
 
 public:
 
-	void changeOccurred();
+	void changeOccurred()
 	{
 		if (m_firstChange.isNull())
 			m_firstChange.start();

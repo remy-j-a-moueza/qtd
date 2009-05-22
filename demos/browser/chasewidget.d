@@ -87,7 +87,7 @@ public:
 		update();
 	}
 
-	void setPixmapEnabled(bool enable);
+	void setPixmapEnabled(bool enable)
 	{
 		m_pixmapEnabled = enable;
 	}
@@ -112,7 +112,7 @@ protected:
 		int displ = extent / 4;
 		int ext = extent / 4 - 1;
 
-		p.setRenderHint(QPainter::Antialiasing, true);
+		p.setRenderHint(QPainter.Antialiasing, true);
 
 		if(m_animated)
 			p.setPen(Qt.gray);
@@ -122,7 +122,7 @@ protected:
 		p.translate(width() / 2, height() / 2); // center
 
 		for (int segment = 0; segment < segmentCount(); ++segment) {
-			p.rotate(QApplication::isRightToLeft() ? m_step : -m_step);
+			p.rotate(QApplication.isRightToLeft() ? m_step : -m_step);
 			if(m_animated)
 				p.setBrush(colorForSegment(segment));
 			else
@@ -131,9 +131,9 @@ protected:
 		}
 	}
 
-	void timerEvent(QTimerEvent *event)
+	void timerEvent(QTimerEvent event)
 	{
-		if (event->timerId() == m_timerId) {
+		if (event.timerId() == m_timerId) {
 			++m_segment;
 			update();
 		}

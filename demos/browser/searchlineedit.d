@@ -71,7 +71,7 @@ public:
 		setFocusPolicy(Qt.NoFocus);
 	}
 	
-	void paintEvent(QPaintEvent *event)
+	void paintEvent(QPaintEvent event)
 	{
 		//Q_UNUSED(event);
 		QPainter painter(this);
@@ -92,7 +92,7 @@ public:
 		painter.drawLine(border, height - border, width() - border, border);
 	}
 
-	void textChanged(QString &text)
+	void textChanged(QString text)
 	{
 		setVisible(!text.isEmpty());
 	}
@@ -171,7 +171,7 @@ protected:
 
 class SearchLineEdit : public ExLineEdit
 {
-    mixin Signal!("textChanged", QString &text);
+    mixin Signal!("textChanged", QString /*text*/);
 
 public:
 	
@@ -181,8 +181,9 @@ public:
 	- When there is no text and doesn't have focus an "inactive text" is displayed
 	- When there is text a clear button is displayed on the right hand side
 	*/
-	this(QWidget parent = null) : ExLineEdit(parent)
+	this(QWidget parent = null)
 	{
+		super(parent);
 		m_searchButton = new SearchButton(this);
 		lineEdit.textChanged.connect(&this.textChanged);
 		setLeftWidget(m_searchButton);
@@ -197,7 +198,7 @@ public:
 		return m_inactiveText;
 	}
 
-	void setInactiveText(QString &text)
+	void setInactiveText(QString text)
 	{
 		m_inactiveText = text;
 	}

@@ -46,7 +46,7 @@ import qt.core.QSettings;
 import qt.gui.qt.gui;
 import qt.gui.QDialog;
 
-import QtWebKit.QtWebKit;
+import qt.webkit.QtWebKit;
 
 import browserapplication;
 import browsermainwindow;
@@ -61,15 +61,15 @@ class SettingsDialog : public QDialog, public Ui_Settings
 {
 public:
 	
-	this(QWidget parent = null);
-	: QDialog(parent)
+	this(QWidget parent = null)
+	//: QDialog(parent)
 	{
 		setupUi(this);
-		connect(exceptionsButton, SIGNAL(clicked()), this, SLOT(showExceptions()));
-		connect(setHomeToCurrentPageButton, SIGNAL(clicked()), this, SLOT(setHomeToCurrentPage()));
-		connect(cookiesButton, SIGNAL(clicked()), this, SLOT(showCookies()));
-		connect(standardFontButton, SIGNAL(clicked()), this, SLOT(chooseFont()));
-		connect(fixedFontButton, SIGNAL(clicked()), this, SLOT(chooseFixedFont()));
+		exceptionsButton.clicked.connect(&this.showExceptions);
+		setHomeToCurrentPageButton.clicked.connect(&this.setHomeToCurrentPage);
+		cookiesButton.clicked.connect(&this.showCookies()));
+		standardFontButton.clicked.connect(this.chooseFont);
+		fixedFontButton.clicked.connect(&this.chooseFixedFont);
 
 		loadDefaults();
 		loadFromSettings();

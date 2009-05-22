@@ -7,7 +7,8 @@ Done:
 - some '::' and most '->' have been replaced by '.'
 
 Todo:
-- imports need to be corrected
-- module declarations are probably missing
 - what about Q_PROPERTY/Q_UNUSED?
+- resolve multiple inheritance
+- QString -> char[]
+- QList -> []
 - everything else...

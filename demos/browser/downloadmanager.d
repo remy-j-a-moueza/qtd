@@ -182,7 +182,7 @@ private:
 		tryAgainButton.setVisible(true);
 	}
 
-	void downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+	void downloadProgress(ulong bytesReceived, ulong bytesTotal)
 	{
 		m_bytesReceived = bytesReceived;
 		if (bytesTotal == -1) {
@@ -270,12 +270,12 @@ private:
 		if (m_reply.error() == QNetworkReply.NoError)
 			return;
 
-		qint64 bytesTotal = progressBar.maximum();
+		ulong bytesTotal = progressBar.maximum();
 		bool running = !downloadedSuccessfully();
 
 		// update info label
 		double speed = m_bytesReceived * 1000.0 / m_downloadTime.elapsed();
-		double timeRemaining = ((double)(bytesTotal - m_bytesReceived)) / speed;
+		double timeRemaining = (cast(double)(bytesTotal - m_bytesReceived)) / speed;
 		QString timeRemainingString = tr("seconds");
 		if (timeRemaining > 60) {
 			timeRemaining = timeRemaining / 60;
@@ -298,7 +298,7 @@ private:
 			info = QString(tr("%1 of %2 (%3/sec) %4"))
 				.arg(dataString(m_bytesReceived))
 				.arg(bytesTotal == 0 ? tr("?") : dataString(bytesTotal))
-				.arg(dataString((int)speed))
+				.arg(dataString(cast(int) speed))
 				.arg(remaining);
 		} else {
 			if (m_bytesReceived == bytesTotal)
@@ -326,7 +326,7 @@ private:
 		return QString(QLatin1String("%1 %2")).arg(size).arg(unit);
 	}
 
-	QString saveFileName(QString &directory);
+	QString saveFileName(QString directory)
 	{
 		// Move this function into QNetworkReply to also get file name sent from the server
 		QString path = m_url.path();
@@ -350,7 +350,7 @@ private:
 	}
 
 	bool m_requestFileName;
-	qint64 m_bytesReceived;
+	ulong m_bytesReceived;
 	QTime m_downloadTime;
 }
 
@@ -372,7 +372,8 @@ public:
 	It is a basic download manager.  It only downloads the file, doesn't do BitTorrent,
 	extract zipped files or anything fancy.
 	*/
-	this(QWidget parent = null) : QDialog(parent)
+	this(QWidget parent = null)
+	//: QDialog(parent)
 	{
 		m_autoSaver = new AutoSaver(this);
 		m_manager = BrowserApplication.networkAccessManager();
@@ -387,7 +388,7 @@ public:
 		downloadsView.horizontalHeader().setStretchLastSection(true);
 		m_model = new DownloadModel(this);
 		downloadsView.setModel(m_model);
-		connect(cleanupButton, SIGNAL(clicked()), this, SLOT(cleanup()));
+		cleanupButton.clicked.connect(&this.cleanup);
 		load();
 	}
 
@@ -424,20 +425,19 @@ public:
 
 public:
 
-	void download(QNetworkRequest request, bool requestFileName = false);
+	void download(QNetworkRequest request, bool requestFileName = false)
 	{
 		if (request.url().isEmpty())
 			return;
 		handleUnsupportedContent(m_manager.get(request), requestFileName);
 	}
 
-
 	void download(QUrl url, bool requestFileName = false)
         {
 		download(QNetworkRequest(url), requestFileName);
 	}
 	
-	void handleUnsupportedContent(QNetworkReply reply, bool requestFileName = false);
+	void handleUnsupportedContent(QNetworkReply reply, bool requestFileName = false)
 	{
 		if (!reply || reply.url().isEmpty())
 			return;
@@ -495,7 +495,7 @@ private:
 
 	void updateRow()
 	{
-		DownloadItem item = qobject_cast<DownloadItem*>(sender());
+		DownloadItem item = cast(DownloadItem) sender();
 		int row = m_downloads.indexOf(item);
 		if (-1 == row)
 			return;
@@ -556,7 +556,7 @@ private:
 		QByteArray value = settings.value(QLatin1String("removeDownloadsPolicy"), QLatin1String("Never")).toByteArray();
 		QMetaEnum removePolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("RemovePolicy"));
 		m_removePolicy = removePolicyEnum.keyToValue(value) == -1 ? Never :
-			static_cast<RemovePolicy>(removePolicyEnum.keyToValue(value));
+			cast(RemovePolicy) removePolicyEnum.keyToValue(value);
 
 		int i = 0;
 		QString key = QString(QLatin1String("download_%1_")).arg(i);
@@ -585,7 +585,7 @@ private:
 	DownloadModel m_model;
 	QNetworkAccessManager m_manager;
 	QFileIconProvider m_iconProvider;
-	QList<DownloadItem> m_downloads;
+	DownloadItem[] m_downloads;
 	RemovePolicy m_removePolicy;
 }
 

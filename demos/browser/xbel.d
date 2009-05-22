@@ -52,10 +52,10 @@ class BookmarkNode
 public:
 
 	enum Type {
-	Root,
-	Folder,
-	Bookmark,
-	Separator
+		Root,
+		Folder,
+		Bookmark,
+		Separator
 	};
 
 	this(Type type = Root, BookmarkNode parent = null)
@@ -89,7 +89,7 @@ public:
 		return true;
 	}
 
-	Type type() const
+	Type type()
 	{
 		return m_type;
 	}
@@ -99,7 +99,7 @@ public:
 		m_type = type;
 	}
 
-	QList<BookmarkNode > children() const
+	BookmarkNode[] children()
 	{
 		return m_children;
 	}
@@ -136,7 +136,7 @@ private:
 
 	BookmarkNode m_parent;
 	Type m_type;
-	QList<BookmarkNode> m_children;
+	BookmarkNode[] m_children;
 }
 
 class XbelReader : public QXmlStreamReader
@@ -149,7 +149,7 @@ public:
 
 	BookmarkNode read(QString fileName)
 	{
-		QFile file(fileName);
+		auto file = new QFile(fileName);
 		if (!file.exists()) {
 			return new BookmarkNode(BookmarkNode.Root);
 		}
@@ -176,6 +176,7 @@ public:
 	}
 
 private:
+
 	void skipUnknownElement()
 	{
 		assert(isStartElement());
@@ -298,7 +299,7 @@ public:
 		setAutoFormatting(true);
 	}
 	
-	bool write(QString fileName, BookmarkNode root);
+	bool write(QString fileName, BookmarkNode root)
 	{
 		QFile file(fileName);
 		if (!root || !file.open(QFile.WriteOnly))
@@ -306,7 +307,7 @@ public:
 		return write(&file, root);
 	}
 
-	bool write(QIODevice device, BookmarkNode root);
+	bool write(QIODevice device, BookmarkNode root)
 	{
 		setDevice(device);
 
