@@ -39,11 +39,21 @@
 **
 ****************************************************************************/
 
-import QtGui.QTabBar;
+module tabwidget;
 
-import QtGui.QShortcut;
+import qt.gui.QTabBar;
+import qt.gui.QShortcut;
+import qt.gui.QClipboard;
+import qt.gui.QCompleter;
+import qt.gui.QListView;
+import qt.gui.QMenu;
+import qt.gui.QMessageBox;
+import qt.gui.QMouseEvent;
+import qt.gui.QStackedWidget;
+import qt.gui.QStyle;
+import qt.gui.QToolButton;
 
-import tabwidget;
+import qt.core.QDebug;
 
 import browserapplication;
 import browsermainwindow;
@@ -51,902 +61,844 @@ import history;
 import urllineedit;
 import webview;
 
-import QtGui.QClipboard;
-import QtGui.QCompleter;
-import QtGui.QListView;
-import QtGui.QMenu;
-import QtGui.QMessageBox;
-import QtGui.QMouseEvent;
-import QtGui.QStackedWidget;
-import QtGui.QStyle;
-import QtGui.QToolButton;
-
-import QtCore.QDebug;
-
 /*
-    Tab bar with a few more features such as a context menu and shortcuts
+Tab bar with a few more features such as a context menu and shortcuts
  */
 class TabBar : public QTabBar
 {
-    Q_OBJECT
-
-signals:
-    void newTab();
-    void cloneTab(int index);
-    void closeTab(int index);
-    void closeOtherTabs(int index)
-{
-    if (-1 == index)
-        return;
-    for (int i = count() - 1; i > index; --i)
-        closeTab(i);
-    for (int i = index - 1; i >= 0; --i)
-        closeTab(i);
-}
-
-    void reloadTab(int index);
-    void reloadAllTabs();
-    void tabMoveRequested(int fromIndex, int toIndex);
+	mixin Signal!("newTab");
+	mixin Signal!("cloneTab", int index);
+	mixin Signal!("closeTab", int index);
+	mixin Signal!("closeOtherTabs", int index);
+	mixin Signal!("reloadTab", int index);
+	mixin Signal!("reloadAllTabs");
+	mixin Signal!("tabMoveRequested", int fromIndex, int toIndex);
 
 public:
-    this(QWidget *parent = null)
-{
-	super(parent);
-    setContextMenuPolicy(Qt.CustomContextMenu);
-    setAcceptDrops(true);
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-            this, SLOT(contextMenuRequested(const QPoint &)));
 
-    QString alt = QLatin1String("Alt+%1");
-    for (int i = 1; i <= 10; ++i) {
-        int key = i;
-        if (key == 10)
-            key = 0;
-        QShortcut *shortCut = new QShortcut(alt.arg(key), this);
-        m_tabShortcuts.append(shortCut);
-        connect(shortCut, SIGNAL(activated()), this, SLOT(selectTabAction()));
-    }
-    setTabsClosable(true);
-    connect(this, SIGNAL(tabCloseRequested(int)),
-            this, SIGNAL(closeTab(int)));
-    setSelectionBehaviorOnRemove(QTabBar::SelectPreviousTab);
-    setMovable(true);
-}
+	this(QWidget parent = null)
+	{
+		super(parent);
+		setContextMenuPolicy(Qt.CustomContextMenu);
+		setAcceptDrops(true);
+		this.customContextMenuRequested.connect(&this.contextMenuRequested);
+
+		QString alt = QLatin1String("Alt+%1");
+		for (int i = 1; i <= 10; ++i) {
+			int key = i;
+			if (key == 10)
+				key = 0;
+			QShortcut shortCut = new QShortcut(alt.arg(key), this);
+			m_tabShortcuts.append(shortCut);
+			shortCut.activated.connect(&this.selectTabAction);
+		}
+		setTabsClosable(true);
+		this.tabCloseRequested.connect(&this.closeTab);
+		setSelectionBehaviorOnRemove(QTabBar.SelectPreviousTab);
+		setMovable(true);
+	}
 
 protected:
-    void mousePressEvent(QMouseEvent* event)
-{
-    if (event.button() == Qt.LeftButton)
-        m_dragStartPos = event.pos();
-    QTabBar::mousePressEvent(event);
-}
 
-    void mouseMoveEvent(QMouseEvent* event)
-{
-    if (event.buttons() == Qt.LeftButton) {
-        int diffX = event.pos().x() - m_dragStartPos.x();
-        int diffY = event.pos().y() - m_dragStartPos.y();
-        if ((event.pos() - m_dragStartPos).manhattanLength() > QApplication::startDragDistance()
-            && diffX < 3 && diffX > -3
-            && diffY < -10) {
-            QDrag *drag = new QDrag(this);
-            QMimeData *mimeData = new QMimeData;
-            QList<QUrl> urls;
-            int index = tabAt(event.pos());
-            QUrl url = tabData(index).toUrl();
-            urls.append(url);
-            mimeData.setUrls(urls);
-            mimeData.setText(tabText(index));
-            mimeData.setData(QLatin1String("action"), "tab-reordering");
-            drag.setMimeData(mimeData);
-            drag.exec();
-        }
-    }
-    QTabBar::mouseMoveEvent(event);
-}
+	void mousePressEvent(QMouseEvent event)
+	{
+		if (event.button() == Qt.LeftButton)
+			m_dragStartPos = event.pos();
+		QTabBar.mousePressEvent(event);
+	}
 
-private slots:
-    void selectTabAction()
-{
-    if (QShortcut *shortCut = qobject_cast<QShortcut*>(sender())) {
-        int index = m_tabShortcuts.indexOf(shortCut);
-        if (index == 0)
-            index = 10;
-        setCurrentIndex(index);
-    }
-}
-    void cloneTab();
-{
-    if (QAction *action = qobject_cast<QAction*>(sender())) {
-        int index = action.data().toInt();
-        emit cloneTab(index);
-    }
-}
-
-    void closeTab();
-{
-    if (QAction *action = qobject_cast<QAction*>(sender())) {
-        int index = action.data().toInt();
-        emit closeTab(index);
-    }
-}
-
-    void closeOtherTabs()
-{
-    if (QAction *action = qobject_cast<QAction*>(sender())) {
-        int index = action.data().toInt();
-        emit closeOtherTabs(index);
-    }
-}
-
-void reloadTab()
-{
-    if (QAction *action = qobject_cast<QAction*>(sender())) {
-        int index = action.data().toInt();
-        emit reloadTab(index);
-    }
-}
-
-    void contextMenuRequested(const QPoint &position)
-{
-    QMenu menu;
-    menu.addAction(tr("New &Tab"), this, SIGNAL(newTab()), QKeySequence::AddTab);
-    int index = tabAt(position);
-    if (-1 != index) {
-        QAction *action = menu.addAction(tr("Clone Tab"),
-                this, SLOT(cloneTab()));
-        action.setData(index);
-
-        menu.addSeparator();
-
-        action = menu.addAction(tr("&Close Tab"),
-                this, SLOT(closeTab()), QKeySequence::Close);
-        action.setData(index);
-
-        action = menu.addAction(tr("Close &Other Tabs"),
-                this, SLOT(closeOtherTabs()));
-        action.setData(index);
-
-        menu.addSeparator();
-
-        action = menu.addAction(tr("Reload Tab"),
-                this, SLOT(reloadTab()), QKeySequence::Refresh);
-        action.setData(index);
-    } else {
-        menu.addSeparator();
-    }
-    menu.addAction(tr("Reload All Tabs"), this, SIGNAL(reloadAllTabs()));
-    menu.exec(QCursor::pos());
-}
+	void mouseMoveEvent(QMouseEvent event)
+	{
+		if (event.buttons() == Qt.LeftButton) {
+			int diffX = event.pos().x() - m_dragStartPos.x();
+			int diffY = event.pos().y() - m_dragStartPos.y();
+			if ((event.pos() - m_dragStartPos).manhattanLength() > QApplication.startDragDistance() && diffX < 3 && diffX > -3 && diffY < -10) {
+				QDrag drag = new QDrag(this);
+				QMimeData mimeData = new QMimeData;
+				QList<QUrl> urls;
+				int index = tabAt(event.pos());
+				QUrl url = tabData(index).toUrl();
+				urls.append(url);
+				mimeData.setUrls(urls);
+				mimeData.setText(tabText(index));
+				mimeData.setData(QLatin1String("action"), "tab-reordering");
+				drag.setMimeData(mimeData);
+				drag.exec();
+			}
+		}
+		QTabBar.mouseMoveEvent(event);
+	}
 
 private:
-    QList<QShortcut*> m_tabShortcuts;
-    friend class TabWidget;
 
-    QPoint m_dragStartPos;
-    int m_dragCurrentIndex;
+	void selectTabAction()
+	{
+		if (QShortcut shortCut = qobject_cast<QShortcut*>(sender())) {
+			int index = m_tabShortcuts.indexOf(shortCut);
+			if (index == 0)
+				index = 10;
+			setCurrentIndex(index);
+		}
+	}
+
+	void cloneTab();
+	{
+		if (QAction action = qobject_cast<QAction>(sender())) {
+			int index = action.data().toInt();
+			emit cloneTab(index);
+		}
+	}
+
+	void closeTab();
+	{
+		if (QAction action = qobject_cast<QAction>(sender())) {
+			int index = action.data().toInt();
+			emit closeTab(index);
+		}
+	}
+
+	void closeOtherTabs()
+	{
+		if (QAction action = qobject_cast<QAction>(sender())) {
+			int index = action.data().toInt();
+			emit closeOtherTabs(index);
+		}
+	}
+
+	void reloadTab()
+	{
+		if (QAction action = qobject_cast<QAction>(sender())) {
+			int index = action.data().toInt();
+			emit reloadTab(index);
+		}
+	}
+
+	void contextMenuRequested(QPoint position)
+	{
+		QMenu menu;
+		menu.addAction(tr("New &Tab"), this, SIGNAL(newTab()), QKeySequence.AddTab);
+		int index = tabAt(position);
+		if (-1 != index) {
+			QAction action = menu.addAction(tr("Clone Tab"), this, SLOT(cloneTab()));
+			action.setData(index);
+
+			menu.addSeparator();
+
+			action = menu.addAction(tr("&Close Tab"), this, SLOT(closeTab()), QKeySequence.Close);
+			action.setData(index);
+
+			action = menu.addAction(tr("Close &Other Tabs"), this, SLOT(closeOtherTabs()));
+			action.setData(index);
+
+			menu.addSeparator();
+
+			action = menu.addAction(tr("Reload Tab"), this, SLOT(reloadTab()), QKeySequence.Refresh);
+			action.setData(index);
+		} else {
+			menu.addSeparator();
+		}
+		menu.addAction(tr("Reload All Tabs"), this, SIGNAL(reloadAllTabs()));
+		menu.exec(QCursor.pos());
+	}
+
+	private:
+	QList<QShortcut> m_tabShortcuts;
+	friend class TabWidget;
+
+	QPoint m_dragStartPos;
+	int m_dragCurrentIndex;
 }
 
 import QtWebKit.QWebPage;
 
-/*
-QT_BEGIN_NAMESPACE
-class QAction;
-QT_END_NAMESPACE
-class WebView;
-*/
-
 /*!
-    A proxy object that connects a single browser action
-    to one child webpage action at a time.
+A proxy object that connects a single browser action
+to one child webpage action at a time.
 
-    Example usage: used to keep the main window stop action in sync with
-    the current tabs webview's stop action.
- */
+Example usage: used to keep the main window stop action in sync with
+the current tabs webview's stop action.
+*/
 class WebActionMapper : public QObject
 {
-    Q_OBJECT
-
 public:
-    this(QAction *root, QWebPage::WebAction webAction, QObject *parent)
-{
-super(parent);	
-	m_currentParent = 0;
-    m_root = root;
-    m_webAction = webAction;
-    if (!m_root)
-        return;
-    connect(m_root, SIGNAL(triggered()), this, SLOT(rootTriggered()));
-    connect(root, SIGNAL(destroyed(QObject *)), this, SLOT(rootDestroyed()));
-    root.setEnabled(false);
-}
 
-    QWebPage::WebAction webAction() const
-{
-    return m_webAction;
-}
+	this(QAction root, QWebPage.WebAction webAction, QObject parent)
+	{
+		super(parent);	
+		m_currentParent = 0;
+		m_root = root;
+		m_webAction = webAction;
+		if (!m_root)
+			return;
+		m_root.triggered.connect(&this.rootTriggered);
+		root.destroyed.connect(&this.rootDestroyed);
+		root.setEnabled(false);
+	}
 
-    void addChild(QAction *action)
-{
-    if (!action)
-        return;
-    connect(action, SIGNAL(changed()), this, SLOT(childChanged()));
-}
+	QWebPage.WebAction webAction() const
+	{
+		return m_webAction;
+	}
 
+	void addChild(QAction action)
+	{
+		if (!action)
+			return;
+		action.changed.connect(&this.childChanged);
+	}
 
-    void updateCurrent(QWebPage *currentParent)
-{
-    if (m_currentParent)
-        disconnect(m_currentParent, SIGNAL(destroyed(QObject *)),
-                   this, SLOT(currentDestroyed()));
+	void updateCurrent(QWebPage currentParent)
+	{
+		if (m_currentParent)
+			m_currentParent.destroyed.disconnect(&this.currentDestroyed);
 
-    m_currentParent = currentParent;
-    if (!m_root)
-        return;
-    if (!m_currentParent) {
-        m_root.setEnabled(false);
-        m_root.setChecked(false);
-        return;
-    }
-    QAction *source = m_currentParent.action(m_webAction);
-    m_root.setChecked(source.isChecked());
-    m_root.setEnabled(source.isEnabled());
-    connect(m_currentParent, SIGNAL(destroyed(QObject *)),
-            this, SLOT(currentDestroyed()));
-}
-
-private slots:
-    void rootTriggered()
-{
-    if (m_currentParent) {
-        QAction *gotoAction = m_currentParent.action(m_webAction);
-        gotoAction.trigger();
-    }
-}
-
-    void childChanged()
-{
-    if (QAction *source = qobject_cast<QAction*>(sender())) {
-        if (m_root
-            && m_currentParent
-            && source.parent() == m_currentParent) {
-            m_root.setChecked(source.isChecked());
-            m_root.setEnabled(source.isEnabled());
-        }
-    }
-}
-
-    void rootDestroyed()
-{
-    m_root = 0;
-}
-    void currentDestroyed()
-{
-    updateCurrent(0);
-}
+		m_currentParent = currentParent;
+		if (!m_root)
+			return;
+		if (!m_currentParent) {
+			m_root.setEnabled(false);
+			m_root.setChecked(false);
+			return;
+		}
+		QAction source = m_currentParent.action(m_webAction);
+		m_root.setChecked(source.isChecked());
+		m_root.setEnabled(source.isEnabled());
+		m_currentParent.destroyed.connect(&this.currentDestroyed);
+	}
 
 private:
-    QWebPage *m_currentParent;
-    QAction *m_root;
-    QWebPage::WebAction m_webAction;
-};
 
-import QtCore.QUrl;
-import QtGui.QTabWidget;
-/*
-QT_BEGIN_NAMESPACE
-class QCompleter;
-class QLineEdit;
-class QMenu;
-class QStackedWidget;
-QT_END_NAMESPACE
-*/
+	void rootTriggered()
+	{
+		if (m_currentParent) {
+			QAction gotoAction = m_currentParent.action(m_webAction);
+			gotoAction.trigger();
+		}
+	}
+
+	void childChanged()
+	{
+		if (QAction source = qobject_cast<QAction>(sender())) {
+			if (m_root && m_currentParent && source.parent() == m_currentParent) {
+					m_root.setChecked(source.isChecked());
+					m_root.setEnabled(source.isEnabled());
+			}
+		}
+	}
+
+	void rootDestroyed()
+	{
+		m_root = 0;
+	}
+	
+	void currentDestroyed()
+	{
+		updateCurrent(0);
+	}
+
+private:
+
+	QWebPage m_currentParent;
+	QAction m_root;
+	QWebPage.WebAction m_webAction;
+}
+
+
+import qt.core.QUrl;
+import qt.gui.QTabWidget;
+
 
 /*!
-    TabWidget that contains WebViews and a stack widget of associated line edits.
+TabWidget that contains WebViews and a stack widget of associated line edits.
 
-    Connects up the current tab's signals to this class's signal and uses WebActionMapper
-    to proxy the actions.
- */
+Connects up the current tab's signals to this class's signal and uses WebActionMapper
+to proxy the actions.
+*/
 class TabWidget : public QTabWidget
 {
-    Q_OBJECT
+	// tab widget signals
+	mixin Singal!("loadPage", QString url);
+	mixin Singal!("tabsChanged");
+	mixin Singal!("lastTabClosed");
 
-signals:
-    // tab widget signals
-    void loadPage(const QString &url);
-    void tabsChanged();
-    void lastTabClosed();
-
-    // current tab signals
-    void setCurrentTitle(const QString &url);
-    void showStatusBarMessage(const QString &message);
-    void linkHovered(const QString &link);
-    void loadProgress(int progress);
-    void geometryChangeRequested(const QRect &geometry);
-    void menuBarVisibilityChangeRequested(bool visible);
-    void statusBarVisibilityChangeRequested(bool visible);
-    void toolBarVisibilityChangeRequested(bool visible);
-    void printRequested(QWebFrame *frame);
+	// current tab signals
+	mixin Singal!("setCurrentTitle", QString url);
+	mixin Singal!("showStatusBarMessage", QString message);
+	mixin Singal!("linkHovered", QString link);
+	mixin Singal!("loadProgress", int progress);
+	mixin Singal!("geometryChangeRequested", QRect geometry);
+	mixin Singal!("menuBarVisibilityChangeRequested", bool visible);
+	mixin Singal!("statusBarVisibilityChangeRequested", bool visible);
+	mixin Singal!("toolBarVisibilityChangeRequested", bool visible);
+	mixin Singal!("printRequested", QWebFrame frame);
 
 public:
-    this(QWidget *parent = null)
-{
-	QTabWidget(parent)
-	m_recentlyClosedTabsAction = 0;
-	m_newTabAction = 0;
-	m_closeTabAction = 0;
-	m_nextTabAction = 0;
-	m_previousTabAction = 0;
-	m_recentlyClosedTabsMenu = 0;
-	m_lineEditCompleter = 0;
-	m_lineEdits = 0;
-	m_tabBar = new TabBar(this);
+
+	this(QWidget parent = null)
+	{
+		QTabWidget(parent)
+		m_recentlyClosedTabsAction = 0;
+		m_newTabAction = 0;
+		m_closeTabAction = 0;
+		m_nextTabAction = 0;
+		m_previousTabAction = 0;
+		m_recentlyClosedTabsMenu = 0;
+		m_lineEditCompleter = 0;
+		m_lineEdits = 0;
+		m_tabBar = new TabBar(this);
+
+		setElideMode(Qt.ElideRight);
+
+		m_tabBar.newTab.connect(&this.newTab);
+		m_tabBar.closeTab.connect(&this.closeTab(int)));
+		m_tabBar.cloneTab.connect(&this.cloneTab(int)));
+		m_tabBar.closeOtherTabs.connect(&this.closeOtherTabs(int)));
+		m_tabBar.reloadTab.connect(&this.reloadTab(int)));
+		m_tabBar.reloadAllTabs.connect(&this.reloadAllTabs()));
+		m_tabBar.tabMoved.connect(&this.moveTab(int, int)));
+		setTabBar(m_tabBar);
+		setDocumentMode(true);
+
+		// Actions
+		m_newTabAction = new QAction(QIcon(QLatin1String(":addtab.png")), tr("New &Tab"), this);
+		m_newTabAction.setShortcuts(QKeySequence.AddTab);
+		m_newTabAction.setIconVisibleInMenu(false);
+		m_newTabAction.triggered.connect(&this.newTab);
+
+		m_closeTabAction = new QAction(QIcon(QLatin1String(":closetab.png")), tr("&Close Tab"), this);
+		m_closeTabAction.setShortcuts(QKeySequence.Close);
+		m_closeTabAction.setIconVisibleInMenu(false);
+		m_closeTabAction.triggered.connect(&this.closeTab);
+
+		m_nextTabAction = new QAction(tr("Show Next Tab"), this);
+		QList<QKeySequence> shortcuts;
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceRight));
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageDown));
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketRight));
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Less));
+		m_nextTabAction.setShortcuts(shortcuts);
+		m_nextTabAction.triggered.connect(&this.nextTab);
+
+		m_previousTabAction = new QAction(tr("Show Previous Tab"), this);
+		shortcuts.clear();
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceLeft));
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageUp));
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketLeft));
+		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Greater));
+		m_previousTabAction.setShortcuts(shortcuts);
+		m_previousTabAction.triggered.connect(&this.previousTab);
+
+		m_recentlyClosedTabsMenu = new QMenu(this);
+		m_recentlyClosedTabsMenu.aboutToShow.connect(&this.aboutToShowRecentTabsMenu);
+		m_recentlyClosedTabsMenu.triggered.connect(&this.aboutToShowRecentTriggeredAction);
+		m_recentlyClosedTabsAction = new QAction(tr("Recently Closed Tabs"), this);
+		m_recentlyClosedTabsAction.setMenu(m_recentlyClosedTabsMenu);
+		m_recentlyClosedTabsAction.setEnabled(false);
+
+		this.currentChanged.connect(&this.currentChanged);
+
+		m_lineEdits = new QStackedWidget(this);
+	}
+
+	void clear()
+	{
+		// clear the recently closed tabs
+		m_recentlyClosedTabs.clear();
+		// clear the line edit history
+		for (int i = 0; i < m_lineEdits.count(); ++i) {
+			QLineEdit qLineEdit = lineEdit(i);
+			qLineEdit.setText(qLineEdit.text());
+		}
+	}
+
+	void addWebAction(QAction action, QWebPage.WebAction webAction)
+	{
+		if (!action)
+			return;
+		m_actions.append(new WebActionMapper(action, webAction, this));
+	}
+
+	QAction newTabAction() const;
+	{
+		return m_newTabAction;
+	}
+
+	QAction closeTabAction() const;
+	{
+		return m_closeTabAction;
+	}
 	
-	
-    setElideMode(Qt.ElideRight);
+	QAction recentlyClosedTabsAction() const;
+	{
+		return m_recentlyClosedTabsAction;
+	}
 
-    connect(m_tabBar, SIGNAL(newTab()), this, SLOT(newTab()));
-    connect(m_tabBar, SIGNAL(closeTab(int)), this, SLOT(closeTab(int)));
-    connect(m_tabBar, SIGNAL(cloneTab(int)), this, SLOT(cloneTab(int)));
-    connect(m_tabBar, SIGNAL(closeOtherTabs(int)), this, SLOT(closeOtherTabs(int)));
-    connect(m_tabBar, SIGNAL(reloadTab(int)), this, SLOT(reloadTab(int)));
-    connect(m_tabBar, SIGNAL(reloadAllTabs()), this, SLOT(reloadAllTabs()));
-    connect(m_tabBar, SIGNAL(tabMoved(int, int)), this, SLOT(moveTab(int, int)));
-    setTabBar(m_tabBar);
-    setDocumentMode(true);
+	QAction nextTabAction() const
+	{
+		return m_nextTabAction;
+	}
 
-    // Actions
-    m_newTabAction = new QAction(QIcon(QLatin1String(":addtab.png")), tr("New &Tab"), this);
-    m_newTabAction.setShortcuts(QKeySequence::AddTab);
-    m_newTabAction.setIconVisibleInMenu(false);
-    connect(m_newTabAction, SIGNAL(triggered()), this, SLOT(newTab()));
+	QAction previousTabAction() const
+	{
+		return m_previousTabAction;
+	}
 
-    m_closeTabAction = new QAction(QIcon(QLatin1String(":closetab.png")), tr("&Close Tab"), this);
-    m_closeTabAction.setShortcuts(QKeySequence::Close);
-    m_closeTabAction.setIconVisibleInMenu(false);
-    connect(m_closeTabAction, SIGNAL(triggered()), this, SLOT(closeTab()));
+	QWidget lineEditStack() const
+	{
+		return m_lineEdits;
+	}
 
-    m_nextTabAction = new QAction(tr("Show Next Tab"), this);
-    QList<QKeySequence> shortcuts;
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceRight));
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageDown));
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketRight));
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Less));
-    m_nextTabAction.setShortcuts(shortcuts);
-    connect(m_nextTabAction, SIGNAL(triggered()), this, SLOT(nextTab()));
+	QLineEdit currentLineEdit() const
+	{
+		return lineEdit(m_lineEdits.currentIndex());
+	}
 
-    m_previousTabAction = new QAction(tr("Show Previous Tab"), this);
-    shortcuts.clear();
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceLeft));
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageUp));
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketLeft));
-    shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Greater));
-    m_previousTabAction.setShortcuts(shortcuts);
-    connect(m_previousTabAction, SIGNAL(triggered()), this, SLOT(previousTab()));
+	WebView currentWebView() const
+	{
+		return webView(currentIndex());
+	}
 
-    m_recentlyClosedTabsMenu = new QMenu(this);
-    connect(m_recentlyClosedTabsMenu, SIGNAL(aboutToShow()),
-            this, SLOT(aboutToShowRecentTabsMenu()));
-    connect(m_recentlyClosedTabsMenu, SIGNAL(triggered(QAction *)),
-            this, SLOT(aboutToShowRecentTriggeredAction(QAction *)));
-    m_recentlyClosedTabsAction = new QAction(tr("Recently Closed Tabs"), this);
-    m_recentlyClosedTabsAction.setMenu(m_recentlyClosedTabsMenu);
-    m_recentlyClosedTabsAction.setEnabled(false);
+	WebView webView(int index) const
+	{
+		QWidget widget = this.widget(index);
+		if (WebView webView = qobject_cast<WebView>(widget)) {
+			return webView;
+		} else {
+			// optimization to delay creating the first webview
+			if (count() == 1) {
+				TabWidget that = const_cast<TabWidget>(this);
+				that.setUpdatesEnabled(false);
+				that.newTab();
+				that.closeTab(0);
+				that.setUpdatesEnabled(true);
+				return currentWebView();
+			}
+		}
+		return 0;
+	}
 
-    connect(this, SIGNAL(currentChanged(int)),
-            this, SLOT(currentChanged(int)));
+	QLineEdit lineEdit(int index) const
+	{
+		UrlLineEdit urlLineEdit = qobject_cast<UrlLineEdit>(m_lineEdits.widget(index));
+		if (urlLineEdit)
+			return urlLineEdit.lineEdit();
+		return 0;
+	}
 
-    m_lineEdits = new QStackedWidget(this);
-}
-
-    void clear()
-{
-    // clear the recently closed tabs
-    m_recentlyClosedTabs.clear();
-    // clear the line edit history
-    for (int i = 0; i < m_lineEdits.count(); ++i) {
-        QLineEdit *qLineEdit = lineEdit(i);
-        qLineEdit.setText(qLineEdit.text());
-    }
-}
-
-    void addWebAction(QAction *action, QWebPage::WebAction webAction)
-{
-    if (!action)
-        return;
-    m_actions.append(new WebActionMapper(action, webAction, this));
-}
-
-
-    QAction *newTabAction() const;
-{
-    return m_newTabAction;
-}
-
-    QAction *closeTabAction() const;
-{
-    return m_closeTabAction;
-}
-    QAction *recentlyClosedTabsAction() const;
-{
-    return m_recentlyClosedTabsAction;
-}
-
-    QAction *nextTabAction() const
-{
-    return m_nextTabAction;
-}
-    QAction *previousTabAction() const
-{
-    return m_previousTabAction;
-}
-
-    QWidget *lineEditStack() const
-{
-    return m_lineEdits;
-}
-
-    QLineEdit *currentLineEdit() const
-{
-    return lineEdit(m_lineEdits.currentIndex());
-}
-
-    WebView *currentWebView() const
-{
-    return webView(currentIndex());
-}
-
-    WebView *webView(int index) const
-{
-    QWidget *widget = this.widget(index);
-    if (WebView *webView = qobject_cast<WebView*>(widget)) {
-        return webView;
-    } else {
-        // optimization to delay creating the first webview
-        if (count() == 1) {
-            TabWidget *that = const_cast<TabWidget*>(this);
-            that.setUpdatesEnabled(false);
-            that.newTab();
-            that.closeTab(0);
-            that.setUpdatesEnabled(true);
-            return currentWebView();
-        }
-    }
-    return 0;
-}
-
-    QLineEdit *lineEdit(int index) const
-{
-    UrlLineEdit *urlLineEdit = qobject_cast<UrlLineEdit*>(m_lineEdits.widget(index));
-    if (urlLineEdit)
-        return urlLineEdit.lineEdit();
-    return 0;
-}
-
-    int webViewIndex(WebView *webView) const
-{
-    int index = indexOf(webView);
-    return index;
-}
+	int webViewIndex(WebView webView) const
+	{
+		int index = indexOf(webView);
+		return index;
+	}
 
     
 static const qint32 TabWidgetMagic = 0xaa;
 
-QByteArray saveState() const;
-{
-    int version = 1;
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::WriteOnly);
+	QByteArray saveState() const;
+	{
+		int version = 1;
+		QByteArray data;
+		QDataStream stream(data, QIODevice.WriteOnly);
 
-    stream << qint32(TabWidgetMagic);
-    stream << qint32(version);
+		stream << qint32(TabWidgetMagic);
+		stream << qint32(version);
 
-    QStringList tabs;
-    for (int i = 0; i < count(); ++i) {
-        if (WebView *tab = qobject_cast<WebView*>(widget(i))) {
-            tabs.append(tab.url().toString());
-        } else {
-            tabs.append(QString::null);
-        }
-    }
-    stream << tabs;
-    stream << currentIndex();
-    return data;
-}
+		QStringList tabs;
+		for (int i = 0; i < count(); ++i) {
+			if (WebView tab = qobject_cast<WebView>(widget(i))) {
+				tabs.append(tab.url().toString());
+			} else {
+				tabs.append(QString.null);
+			}
+		}
+		stream << tabs;
+		stream << currentIndex();
+		return data;
+	}
 
-    bool restoreState(const QByteArray &state)
-{
-    int version = 1;
-    QByteArray sd = state;
-    QDataStream stream(&sd, QIODevice::ReadOnly);
-    if (stream.atEnd())
-        return false;
+	bool restoreState(QByteArray state)
+	{
+		int version_ = 1;
+		QByteArray sd = state;
+		QDataStream stream(sd, QIODevice.ReadOnly);
+		if (stream.atEnd())
+			return false;
 
-    qint32 marker;
-    qint32 v;
-    stream >> marker;
-    stream >> v;
-    if (marker != TabWidgetMagic || v != version)
-        return false;
+		qint32 marker;
+		qint32 v;
+		stream >> marker;
+		stream >> v;
+		if (marker != TabWidgetMagic || v != version_)
+			return false;
 
-    QStringList openTabs;
-    stream >> openTabs;
+		QStringList openTabs;
+		stream >> openTabs;
 
-    for (int i = 0; i < openTabs.count(); ++i) {
-        if (i != 0)
-            newTab();
-        loadPage(openTabs.at(i));
-    }
+		for (int i = 0; i < openTabs.count(); ++i) {
+			if (i != 0)
+				newTab();
+			loadPage(openTabs.at(i));
+		}
 
-    int currentTab;
-    stream >> currentTab;
-    setCurrentIndex(currentTab);
+		int currentTab;
+		stream >> currentTab;
+		setCurrentIndex(currentTab);
 
-    return true;
-}
+		return true;
+	}
 
 protected:
-    void mouseDoubleClickEvent(QMouseEvent *event);
-{
-    if (!childAt(event.pos())
-            // Remove the line below when QTabWidget does not have a one pixel frame
-            && event.pos().y() < (tabBar().y() + tabBar().height())) {
-        newTab();
-        return;
-    }
-    QTabWidget::mouseDoubleClickEvent(event);
-}
+
+	void mouseDoubleClickEvent(QMouseEvent event);
+	{
+		if (!childAt(event.pos())
+			// Remove the line below when QTabWidget does not have a one pixel frame
+			&& event.pos().y() < (tabBar().y() + tabBar().height())) {
+			newTab();
+			return;
+		}
+		QTabWidget.mouseDoubleClickEvent(event);
+	}
 
 
-    void contextMenuEvent(QContextMenuEvent *event)
-{
-    if (!childAt(event.pos())) {
-        m_tabBar.contextMenuRequested(event.pos());
-        return;
-    }
-    QTabWidget::contextMenuEvent(event);
-}
+	void contextMenuEvent(QContextMenuEvent event)
+	{
+		if (!childAt(event.pos())) {
+			m_tabBar.contextMenuRequested(event.pos());
+			return;
+		}
+		QTabWidget.contextMenuEvent(event);
+	}
 
-    void mouseReleaseEvent(QMouseEvent *event)
-{
-    if (event.button() == Qt.MidButton && !childAt(event.pos())
-            // Remove the line below when QTabWidget does not have a one pixel frame
-            && event.pos().y() < (tabBar().y() + tabBar().height())) {
-        QUrl url(QApplication::clipboard().text(QClipboard::Selection));
-        if (!url.isEmpty() && url.isValid() && !url.scheme().isEmpty()) {
-            WebView *webView = newTab();
-            webView.setUrl(url);
-        }
-    }
-}
+	void mouseReleaseEvent(QMouseEvent event)
+	{
+		if (event.button() == Qt.MidButton && !childAt(event.pos())
+		// Remove the line below when QTabWidget does not have a one pixel frame
+		&& event.pos().y() < (tabBar().y() + tabBar().height())) {
+			QUrl url(QApplication.clipboard().text(QClipboard.Selection));
+			if (!url.isEmpty() && url.isValid() && !url.scheme().isEmpty()) {
+				WebView webView = newTab();
+				webView.setUrl(url);
+			}
+		}
+	}
 
-public slots:
-    void loadUrlInCurrentTab(const QUrl &url)
-{
-    WebView *webView = currentWebView();
-    if (webView) {
-        webView.loadUrl(url);
-        webView.setFocus();
-    }
-}
+public:
 
-    WebView *newTab(bool makeCurrent = true)
-{
-    // line edit
-    UrlLineEdit *urlLineEdit = new UrlLineEdit;
-    QLineEdit *lineEdit = urlLineEdit.lineEdit();
-    if (!m_lineEditCompleter && count() > 0) {
-        HistoryCompletionModel *completionModel = new HistoryCompletionModel(this);
-        completionModel.setSourceModel(BrowserApplication::historyManager().historyFilterModel());
-        m_lineEditCompleter = new QCompleter(completionModel, this);
-        // Should this be in Qt by default?
-        QAbstractItemView *popup = m_lineEditCompleter.popup();
-        QListView *listView = qobject_cast<QListView*>(popup);
-        if (listView)
-            listView.setUniformItemSizes(true);
-    }
-    lineEdit.setCompleter(m_lineEditCompleter);
-    connect(lineEdit, SIGNAL(returnPressed()), this, SLOT(lineEditReturnPressed()));
-    m_lineEdits.addWidget(urlLineEdit);
-    m_lineEdits.setSizePolicy(lineEdit.sizePolicy());
+	void loadUrlInCurrentTab(QUrl url)
+	{
+		WebView webView = currentWebView();
+		if (webView) {
+			webView.loadUrl(url);
+			webView.setFocus();
+		}
+	}
 
-    // optimization to delay creating the more expensive WebView, history, etc
-    if (count() == 0) {
-        QWidget *emptyWidget = new QWidget;
-        QPalette p = emptyWidget.palette();
-        p.setColor(QPalette::Window, palette().color(QPalette::Base));
-        emptyWidget.setPalette(p);
-        emptyWidget.setAutoFillBackground(true);
-        disconnect(this, SIGNAL(currentChanged(int)),
-            this, SLOT(currentChanged(int)));
-        addTab(emptyWidget, tr("(Untitled)"));
-        connect(this, SIGNAL(currentChanged(int)),
-            this, SLOT(currentChanged(int)));
-        return 0;
-    }
+	WebView newTab(bool makeCurrent = true)
+	{
+		// line edit
+		UrlLineEdit urlLineEdit = new UrlLineEdit;
+		QLineEdit lineEdit = urlLineEdit.lineEdit();
+		if (!m_lineEditCompleter && count() > 0) {
+			HistoryCompletionModel completionModel = new HistoryCompletionModel(this);
+			completionModel.setSourceModel(BrowserApplication.historyManager().historyFilterModel());
+			m_lineEditCompleter = new QCompleter(completionModel, this);
+			// Should this be in Qt by default?
+			QAbstractItemView popup = m_lineEditCompleter.popup();
+			QListView listView = qobject_cast<QListView*>(popup);
+			if (listView)
+				listView.setUniformItemSizes(true);
+		}
+		lineEdit.setCompleter(m_lineEditCompleter);
+		lineEdit.returnPressed.connect(&this.lineEditReturnPressed);
+		m_lineEdits.addWidget(urlLineEdit);
+		m_lineEdits.setSizePolicy(lineEdit.sizePolicy());
 
-    // webview
-    WebView *webView = new WebView;
-    urlLineEdit.setWebView(webView);
-    connect(webView, SIGNAL(loadStarted()),
-            this, SLOT(webViewLoadStarted()));
-    connect(webView, SIGNAL(loadFinished(bool)),
-            this, SLOT(webViewIconChanged()));
-    connect(webView, SIGNAL(iconChanged()),
-            this, SLOT(webViewIconChanged()));
-    connect(webView, SIGNAL(titleChanged(const QString &)),
-            this, SLOT(webViewTitleChanged(const QString &)));
-    connect(webView, SIGNAL(urlChanged(const QUrl &)),
-            this, SLOT(webViewUrlChanged(const QUrl &)));
-    connect(webView.page(), SIGNAL(windowCloseRequested()),
-            this, SLOT(windowCloseRequested()));
-    connect(webView.page(), SIGNAL(geometryChangeRequested(const QRect &)),
-            this, SIGNAL(geometryChangeRequested(const QRect &)));
-    connect(webView.page(), SIGNAL(printRequested(QWebFrame *)),
-            this, SIGNAL(printRequested(QWebFrame *)));
-    connect(webView.page(), SIGNAL(menuBarVisibilityChangeRequested(bool)),
-            this, SIGNAL(menuBarVisibilityChangeRequested(bool)));
-    connect(webView.page(), SIGNAL(statusBarVisibilityChangeRequested(bool)),
-            this, SIGNAL(statusBarVisibilityChangeRequested(bool)));
-    connect(webView.page(), SIGNAL(toolBarVisibilityChangeRequested(bool)),
-            this, SIGNAL(toolBarVisibilityChangeRequested(bool)));
-    addTab(webView, tr("(Untitled)"));
-    if (makeCurrent)
-        setCurrentWidget(webView);
+		// optimization to delay creating the more expensive WebView, history, etc
+		if (count() == 0) {
+			QWidget emptyWidget = new QWidget;
+			QPalette p = emptyWidget.palette();
+			p.setColor(QPalette.Window, palette().color(QPalette.Base));
+			emptyWidget.setPalette(p);
+			emptyWidget.setAutoFillBackground(true);
+			this.currentChanged.disconnect(&this.currentChanged);
+			addTab(emptyWidget, tr("(Untitled)"));
+			this.currentChanged.connect(&this.currentChanged);
+			return 0;
+		}
 
-    // webview actions
-    for (int i = 0; i < m_actions.count(); ++i) {
-        WebActionMapper *mapper = m_actions[i];
-        mapper.addChild(webView.page().action(mapper.webAction()));
-    }
+		// webview
+		WebView webView = new WebView;
+		urlLineEdit.setWebView(webView);
+		webView.loadStarted().connect(&this.webViewLoadStarted);
+		webView.loadFinished.connect(&this.webViewIconChanged);
+		webView.iconChanged.connect(&this.webViewIconChanged);
+		webView.titleChanged.connect(&this.webViewTitleChanged);
+		webView.urlChanged.connect(&this.webViewUrlChanged);
+		webView.page().windowCloseRequested.connect(&this.windowCloseRequested);
+		webView.page().geometryChangeRequested.connect(&this.geometryChangeRequested);
+		webView.page().printRequested.connect(&this.printRequested);
+		webView.page().menuBarVisibilityChangeRequested.connect(&this.menuBarVisibilityChangeRequested);
+		webView.page().statusBarVisibilityChangeRequested.connect(&this.statusBarVisibilityChangeRequested);
+		webView.page().toolBarVisibilityChangeRequested.connect(&this.toolBarVisibilityChangeRequested);
+		addTab(webView, tr("(Untitled)"));
+		if (makeCurrent)
+			setCurrentWidget(webView);
 
-    if (count() == 1)
-        currentChanged(currentIndex());
-    emit tabsChanged();
-    return webView;
-}
+		// webview actions
+		for (int i = 0; i < m_actions.count(); ++i) {
+			WebActionMapper mapper = m_actions[i];
+			mapper.addChild(webView.page().action(mapper.webAction()));
+		}
 
+		if (count() == 1)
+			currentChanged(currentIndex());
+		emit tabsChanged();
+		return webView;
+	}
 
-// When index is -1 index chooses the current tab
-    void cloneTab(int index = -1)
-{
-    if (index < 0)
-        index = currentIndex();
-    if (index < 0 || index >= count())
-        return;
-    WebView *tab = newTab(false);
-    tab.setUrl(webView(index).url());
-}
+	// When index is -1 index chooses the current tab
+	void cloneTab(int index = -1)
+	{
+		if (index < 0)
+			index = currentIndex();
+		if (index < 0 || index >= count())
+			return;
+		WebView tab = newTab(false);
+		tab.setUrl(webView(index).url());
+	}
 
+	// When index is -1 index chooses the current tab
+	void closeTab(int index = -1);
+	{
+		if (index < 0)
+			index = currentIndex();
+		if (index < 0 || index >= count())
+			return;
 
+		bool hasFocus = false;
+		if (WebView tab = webView(index)) {
+			if (tab.isModified()) {
+				QMessageBox closeConfirmation(tab);
+				closeConfirmation.setWindowFlags(Qt.Sheet);
+				closeConfirmation.setWindowTitle(tr("Do you really want to close this page?"));
+				closeConfirmation.setInformativeText(tr("You have modified this page and when closing it you would lose the modification.\n"
+							     "Do you really want to close this page?\n"));
+				closeConfirmation.setIcon(QMessageBox.Question);
+				closeConfirmation.addButton(QMessageBox.Yes);
+				closeConfirmation.addButton(QMessageBox.No);
+				closeConfirmation.setEscapeButton(QMessageBox.No);
+				if (closeConfirmation.exec() == QMessageBox.No)
+				return;
+			}
+			hasFocus = tab.hasFocus();
 
-// When index is -1 index chooses the current tab
-void closeTab(int index = -1);
-{
-    if (index < 0)
-        index = currentIndex();
-    if (index < 0 || index >= count())
-        return;
+			m_recentlyClosedTabsAction.setEnabled(true);
+			m_recentlyClosedTabs.prepend(tab.url());
+			if (m_recentlyClosedTabs.size() >= TabWidget.m_recentlyClosedTabsSize)
+				m_recentlyClosedTabs.removeLast();
+		}
+		QWidget lineEdit = m_lineEdits.widget(index);
+		m_lineEdits.removeWidget(lineEdit);
+		lineEdit.deleteLater();
+		QWidget webView = widget(index);
+		removeTab(index);
+		webView.deleteLater();
+		emit tabsChanged();
+		if (hasFocus && count() > 0)
+			currentWebView().setFocus();
+		if (count() == 0)
+			emit lastTabClosed();
+	}
 
-    bool hasFocus = false;
-    if (WebView *tab = webView(index)) {
-        if (tab.isModified()) {
-            QMessageBox closeConfirmation(tab);
-            closeConfirmation.setWindowFlags(Qt.Sheet);
-            closeConfirmation.setWindowTitle(tr("Do you really want to close this page?"));
-            closeConfirmation.setInformativeText(tr("You have modified this page and when closing it you would lose the modification.\n"
-                                                     "Do you really want to close this page?\n"));
-            closeConfirmation.setIcon(QMessageBox::Question);
-            closeConfirmation.addButton(QMessageBox::Yes);
-            closeConfirmation.addButton(QMessageBox::No);
-            closeConfirmation.setEscapeButton(QMessageBox::No);
-            if (closeConfirmation.exec() == QMessageBox::No)
-                return;
-        }
-        hasFocus = tab.hasFocus();
+	void closeOtherTabs(int index)
+	{
+		if (-1 == index)
+			return;
+		for (int i = count() - 1; i > index; --i)
+			closeTab(i);
+		for (int i = index - 1; i >= 0; --i)
+			closeTab(i);
+	}
 
-        m_recentlyClosedTabsAction.setEnabled(true);
-        m_recentlyClosedTabs.prepend(tab.url());
-        if (m_recentlyClosedTabs.size() >= TabWidget::m_recentlyClosedTabsSize)
-            m_recentlyClosedTabs.removeLast();
-    }
-    QWidget *lineEdit = m_lineEdits.widget(index);
-    m_lineEdits.removeWidget(lineEdit);
-    lineEdit.deleteLater();
-    QWidget *webView = widget(index);
-    removeTab(index);
-    webView.deleteLater();
-    emit tabsChanged();
-    if (hasFocus && count() > 0)
-        currentWebView().setFocus();
-    if (count() == 0)
-        emit lastTabClosed();
-}
+	// When index is -1 index chooses the current tab
+	void reloadTab(int index = -1);
+	{
+		if (index < 0)
+			index = currentIndex();
+		if (index < 0 || index >= count())
+			return;
 
-    void closeOtherTabs(int index);
-// When index is -1 index chooses the current tab
-    void reloadTab(int index = -1);
-{
-    if (index < 0)
-        index = currentIndex();
-    if (index < 0 || index >= count())
-        return;
+		QWidget widget = this.widget(index);
+		if (WebView tab = qobject_cast<WebView>(widget))
+			tab.reload();
+	}
 
-    QWidget *widget = this.widget(index);
-    if (WebView *tab = qobject_cast<WebView*>(widget))
-        tab.reload();
-}
+	void reloadAllTabs();
+	{
+		for (int i = 0; i < count(); ++i) {
+			QWidget tabWidget = widget(i);
+			if (WebView tab = qobject_cast<WebView>(tabWidget)) {
+				tab.reload();
+			}
+		}
+	}
+	
+	void nextTab()
+	{
+		int next = currentIndex() + 1;
+		if (next == count())
+			next = 0;
+		setCurrentIndex(next);
+	}
 
-    void reloadAllTabs();
-{
-    for (int i = 0; i < count(); ++i) {
-        QWidget *tabWidget = widget(i);
-        if (WebView *tab = qobject_cast<WebView*>(tabWidget)) {
-            tab.reload();
-        }
-    }
-}
-    void nextTab()
-{
-    int next = currentIndex() + 1;
-    if (next == count())
-        next = 0;
-    setCurrentIndex(next);
-}
-
-
-    void previousTab()
-{
-    int next = currentIndex() - 1;
-    if (next < 0)
-        next = count() - 1;
-    setCurrentIndex(next);
-}
-
-private slots:
-    void currentChanged(int index)
-{
-    WebView *webView = this.webView(index);
-    if (!webView)
-        return;
-
-    assert(m_lineEdits.count() == count());
-
-    WebView *oldWebView = this.webView(m_lineEdits.currentIndex());
-    if (oldWebView) {
-        disconnect(oldWebView, SIGNAL(statusBarMessage(const QString&)),
-                this, SIGNAL(showStatusBarMessage(const QString&)));
-        disconnect(oldWebView.page(), SIGNAL(linkHovered(const QString&, const QString&, const QString&)),
-                this, SIGNAL(linkHovered(const QString&)));
-        disconnect(oldWebView, SIGNAL(loadProgress(int)),
-                this, SIGNAL(loadProgress(int)));
-    }
-
-    connect(webView, SIGNAL(statusBarMessage(const QString&)),
-            this, SIGNAL(showStatusBarMessage(const QString&)));
-    connect(webView.page(), SIGNAL(linkHovered(const QString&, const QString&, const QString&)),
-            this, SIGNAL(linkHovered(const QString&)));
-    connect(webView, SIGNAL(loadProgress(int)),
-            this, SIGNAL(loadProgress(int)));
-
-    for (int i = 0; i < m_actions.count(); ++i) {
-        WebActionMapper *mapper = m_actions[i];
-        mapper.updateCurrent(webView.page());
-    }
-    emit setCurrentTitle(webView.title());
-    m_lineEdits.setCurrentIndex(index);
-    emit loadProgress(webView.progress());
-    emit showStatusBarMessage(webView.lastStatusBarText());
-    if (webView.url().isEmpty())
-        m_lineEdits.currentWidget().setFocus();
-    else
-        webView.setFocus();
-}
-
-    void aboutToShowRecentTabsMenu()
-{
-    m_recentlyClosedTabsMenu.clear();
-    for (int i = 0; i < m_recentlyClosedTabs.count(); ++i) {
-        QAction *action = new QAction(m_recentlyClosedTabsMenu);
-        action.setData(m_recentlyClosedTabs.at(i));
-        QIcon icon = BrowserApplication::instance().icon(m_recentlyClosedTabs.at(i));
-        action.setIcon(icon);
-        action.setText(m_recentlyClosedTabs.at(i).toString());
-        m_recentlyClosedTabsMenu.addAction(action);
-    }
-}
-
-    void aboutToShowRecentTriggeredAction(QAction *action)
-{
-    QUrl url = action.data().toUrl();
-    loadUrlInCurrentTab(url);
-}
-
-    void webViewLoadStarted()
-{
-    WebView *webView = qobject_cast<WebView*>(sender());
-    int index = webViewIndex(webView);
-    if (-1 != index) {
-        QIcon icon(QLatin1String(":loading.gif"));
-        setTabIcon(index, icon);
-    }
-}
-
-    void webViewIconChanged()
-{
-    WebView *webView = qobject_cast<WebView*>(sender());
-    int index = webViewIndex(webView);
-    if (-1 != index) {
-        QIcon icon = BrowserApplication::instance().icon(webView.url());
-        setTabIcon(index, icon);
-    }
-}
-
-    void webViewTitleChanged(const QString &title)
-{
-    WebView *webView = qobject_cast<WebView*>(sender());
-    int index = webViewIndex(webView);
-    if (-1 != index) {
-        setTabText(index, title);
-    }
-    if (currentIndex() == index)
-        emit setCurrentTitle(title);
-    BrowserApplication::historyManager().updateHistoryItem(webView.url(), title);
-}
-
-    void webViewUrlChanged(const QUrl &url)
-{
-    WebView *webView = qobject_cast<WebView*>(sender());
-    int index = webViewIndex(webView);
-    if (-1 != index) {
-        m_tabBar.setTabData(index, url);
-    }
-    emit tabsChanged();
-}
-
-    void lineEditReturnPressed()
-{
-    if (QLineEdit *lineEdit = qobject_cast<QLineEdit*>(sender())) {
-        emit loadPage(lineEdit.text());
-        if (m_lineEdits.currentWidget() == lineEdit)
-            currentWebView().setFocus();
-    }
-}
-
-    void windowCloseRequested()
-{
-    WebPage *webPage = qobject_cast<WebPage*>(sender());
-    WebView *webView = qobject_cast<WebView*>(webPage.view());
-    int index = webViewIndex(webView);
-    if (index >= 0) {
-        if (count() == 1)
-            webView.webPage().mainWindow().close();
-        else
-            closeTab(index);
-    }
-}
-
-    void moveTab(int fromIndex, int toIndex)
-{
-    QWidget *lineEdit = m_lineEdits.widget(fromIndex);
-    m_lineEdits.removeWidget(lineEdit);
-    m_lineEdits.insertWidget(toIndex, lineEdit);
-}
+	void previousTab()
+	{
+		int next = currentIndex() - 1;
+		if (next < 0)
+			next = count() - 1;
+		setCurrentIndex(next);
+	}
 
 private:
-    QAction *m_recentlyClosedTabsAction;
-    QAction *m_newTabAction;
-    QAction *m_closeTabAction;
-    QAction *m_nextTabAction;
-    QAction *m_previousTabAction;
 
-    QMenu *m_recentlyClosedTabsMenu;
-    static const int m_recentlyClosedTabsSize = 10;
-    QList<QUrl> m_recentlyClosedTabs;
-    QList<WebActionMapper*> m_actions;
+	void currentChanged(int index)
+	{
+		WebView webView = this.webView(index);
+		if (!webView)
+			return;
 
-    QCompleter *m_lineEditCompleter;
-    QStackedWidget *m_lineEdits;
-    TabBar *m_tabBar;
+		assert(m_lineEdits.count() == count());
+
+		WebView oldWebView = this.webView(m_lineEdits.currentIndex());
+		if (oldWebView) {
+			oldWebView.statusBarMessage.disconnect(&this.showStatusBarMessage);
+			oldWebView.page().linkHovered.disconnect(&this.linkHovered);
+			oldWebView.loadProgress().disconnect(&this.loadProgress);
+		}
+
+		webView.statusBarMessage.connect(&this.showStatusBarMessage);
+		webView.page().linkHovered.connect(&this.linkHovered);
+		webView.loadProgress.connect(&this.loadProgress);
+
+		for (int i = 0; i < m_actions.count(); ++i) {
+			WebActionMapper mapper = m_actions[i];
+			mapper.updateCurrent(webView.page());
+		}
+		emit setCurrentTitle(webView.title());
+		m_lineEdits.setCurrentIndex(index);
+		emit loadProgress(webView.progress());
+		emit showStatusBarMessage(webView.lastStatusBarText());
+		if (webView.url().isEmpty())
+			m_lineEdits.currentWidget().setFocus();
+		else
+			webView.setFocus();
+	}
+
+	void aboutToShowRecentTabsMenu()
+	{
+		m_recentlyClosedTabsMenu.clear();
+		for (int i = 0; i < m_recentlyClosedTabs.count(); ++i) {
+			QAction action = new QAction(m_recentlyClosedTabsMenu);
+			action.setData(m_recentlyClosedTabs.at(i));
+			QIcon icon = BrowserApplication.instance().icon(m_recentlyClosedTabs.at(i));
+			action.setIcon(icon);
+			action.setText(m_recentlyClosedTabs.at(i).toString());
+			m_recentlyClosedTabsMenu.addAction(action);
+		}
+	}
+
+	void aboutToShowRecentTriggeredAction(QAction action)
+	{
+		QUrl url = action.data().toUrl();
+		loadUrlInCurrentTab(url);
+	}
+
+	void webViewLoadStarted()
+	{
+		WebView webView = qobject_cast<WebView>(sender());
+		int index = webViewIndex(webView);
+		if (-1 != index) {
+			QIcon icon(QLatin1String(":loading.gif"));
+			setTabIcon(index, icon);
+		}
+	}
+
+	void webViewIconChanged()
+	{
+		WebView webView = qobject_cast<WebView>(sender());
+		int index = webViewIndex(webView);
+		if (-1 != index) {
+			QIcon icon = BrowserApplication.instance().icon(webView.url());
+			setTabIcon(index, icon);
+		}
+	}
+
+	void webViewTitleChanged(QString title)
+	{
+		WebView webView = qobject_cast<WebView>(sender());
+		int index = webViewIndex(webView);
+		if (-1 != index) {
+			setTabText(index, title);
+		}
+		if (currentIndex() == index)
+			emit setCurrentTitle(title);
+		BrowserApplication.historyManager().updateHistoryItem(webView.url(), title);
+	}
+
+	void webViewUrlChanged(QUrl url)
+	{
+		WebView webView = qobject_cast<WebView>(sender());
+		int index = webViewIndex(webView);
+		if (-1 != index) {
+			m_tabBar.setTabData(index, url);
+		}
+		emit tabsChanged();
+	}
+
+	void lineEditReturnPressed()
+	{
+		if (QLineEdit lineEdit = qobject_cast<QLineEdit*>(sender())) {
+			emit loadPage(lineEdit.text());
+			if (m_lineEdits.currentWidget() == lineEdit)
+				currentWebView().setFocus();
+		}
+	}
+
+	void windowCloseRequested()
+	{
+		WebPage webPage = qobject_cast<WebPage>(sender());
+		WebView webView = qobject_cast<WebView>(webPage.view());
+		int index = webViewIndex(webView);
+		if (index >= 0) {
+			if (count() == 1)
+				webView.webPage().mainWindow().close();
+			else
+				closeTab(index);
+		}
+	}
+
+	void moveTab(int fromIndex, int toIndex)
+	{
+		QWidget lineEdit = m_lineEdits.widget(fromIndex);
+		m_lineEdits.removeWidget(lineEdit);
+		m_lineEdits.insertWidget(toIndex, lineEdit);
+	}
+
+private:
+
+	QAction m_recentlyClosedTabsAction;
+	QAction m_newTabAction;
+	QAction m_closeTabAction;
+	QAction m_nextTabAction;
+	QAction m_previousTabAction;
+
+	QMenu m_recentlyClosedTabsMenu;
+	static const int m_recentlyClosedTabsSize = 10;
+	QList<QUrl> m_recentlyClosedTabs;
+	QList<WebActionMapper> m_actions;
+
+	QCompleter m_lineEditCompleter;
+	QStackedWidget m_lineEdits;
+	TabBar m_tabBar;
 }

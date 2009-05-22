@@ -7,7 +7,7 @@ Done:
 - some '::' and most '->' have been replaced by '.'
 
 Todo:
-- *.ui files need to converted to source files and translated to D
 - imports need to be corrected
 - module declarations are probably missing
+- what about Q_PROPERTY/Q_UNUSED?
 - everything else...

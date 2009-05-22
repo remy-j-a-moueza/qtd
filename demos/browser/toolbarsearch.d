@@ -40,152 +40,143 @@
 ****************************************************************************/
 module toolbarsearch;
 
-import searchlineedit;
 
+import qt.core.QSettings;
+import qt.core.QUrl;
+
+import qt.gui.QCompleter;
+import qt.gui.QMenu;
+import qt.gui.QStringListModel;
+
+import QtWebKit.QWebSettings;
+
+import searchlineedit;
 import autosaver;
 
-import QtCore.QSettings;
-import QtCore.QUrl;
-
-import QtGui.QCompleter;
-import QtGui.QMenu;
-import QtGui.QStringListModel;
-
-import QtWebKit/QWebSettings;
-
-/*
-QT_BEGIN_NAMESPACE
-class QUrl;
-class QAction;
-class QStringListModel;
-QT_END_NAMESPACE
-
-class AutoSaver;
-*/
 
 class ToolbarSearch : public SearchLineEdit
 {
-    Q_OBJECT
+	mixin Signal!("search", QUrl url)
 
-signals:
-    void search(const QUrl &url);
+	public:
+
+	/*
+	ToolbarSearch is a very basic search widget that also contains a small history.
+	Searches are turned into urls that use Google to perform search
+	*/
+	this(QWidget parent = null)
+	{
+		super(parent)
+		m_autosaver = new AutoSaver(this);
+		m_maxSavedSearches = 10;
+		m_stringListModel = new QStringListModel(this);
+
+		QMenu m = menu();
+		m.aboutToShow().connect(&this.aboutToShowMenu);
+		m.triggered.connect(&this.triggeredMenuAction);
+
+		QCompleter completer = new QCompleter(m_stringListModel, this);
+		completer.setCompletionMode(QCompleter::InlineCompletion);
+		lineEdit().setCompleter(completer);
+
+		lineEdit().returnPressed.connect(&searchNow);
+		setInactiveText(tr("Google"));
+		load();
+	}
+	
+	~this()
+	{
+		m_autosaver.saveIfNeccessary();
+	}
 
 public:
-	
-/*
-    ToolbarSearch is a very basic search widget that also contains a small history.
-    Searches are turned into urls that use Google to perform search
- */
-this(QWidget *parent = null)
- 
-{
-	super(parent)
-     m_autosaver = new AutoSaver(this);
-     m_maxSavedSearches = 10;
-     m_stringListModel = new QStringListModel(this);
-	
-    QMenu *m = menu();
-    connect(m, SIGNAL(aboutToShow()), this, SLOT(aboutToShowMenu()));
-    connect(m, SIGNAL(triggered(QAction*)), this, SLOT(triggeredMenuAction(QAction*)));
 
-    QCompleter *completer = new QCompleter(m_stringListModel, this);
-    completer.setCompletionMode(QCompleter::InlineCompletion);
-    lineEdit().setCompleter(completer);
+	void clear()
+	{
+		m_stringListModel.setStringList(QStringList());
+		m_autosaver.changeOccurred();
+	}
 
-    connect(lineEdit(), SIGNAL(returnPressed()), SLOT(searchNow()));
-    setInactiveText(tr("Google"));
-    load();
-}
-    ~this()
-{
-    m_autosaver.saveIfNeccessary();
-}
+	void searchNow()
+	{
+		QString searchText = lineEdit().text();
+		QStringList newList = m_stringListModel.stringList();
+		if (newList.contains(searchText))
+			newList.removeAt(newList.indexOf(searchText));
+		newList.prepend(searchText);
+		if (newList.size() >= m_maxSavedSearches)
+			newList.removeLast();
 
-public slots:
-    void clear()
-{
-    m_stringListModel.setStringList(QStringList());
-    m_autosaver.changeOccurred();;
-}
+		QWebSettings globalSettings = QWebSettings::globalSettings();
+		if (!globalSettings.testAttribute(QWebSettings::PrivateBrowsingEnabled)) {
+			m_stringListModel.setStringList(newList);
+			m_autosaver.changeOccurred();
+		}
 
-    void searchNow()
-{
-    QString searchText = lineEdit().text();
-    QStringList newList = m_stringListModel.stringList();
-    if (newList.contains(searchText))
-        newList.removeAt(newList.indexOf(searchText));
-    newList.prepend(searchText);
-    if (newList.size() >= m_maxSavedSearches)
-        newList.removeLast();
-
-    QWebSettings *globalSettings = QWebSettings::globalSettings();
-    if (!globalSettings.testAttribute(QWebSettings::PrivateBrowsingEnabled)) {
-        m_stringListModel.setStringList(newList);
-        m_autosaver.changeOccurred();
-    }
-
-    QUrl url(QLatin1String("http://www.google.com/search"));
-    url.addQueryItem(QLatin1String("q"), searchText);
-    url.addQueryItem(QLatin1String("ie"), QLatin1String("UTF-8"));
-    url.addQueryItem(QLatin1String("oe"), QLatin1String("UTF-8"));
-    url.addQueryItem(QLatin1String("client"), QLatin1String("qtdemobrowser"));
-    emit search(url);
-}
-
-private slots:
-    void save()
-{
-    QSettings settings;
-    settings.beginGroup(QLatin1String("toolbarsearch"));
-    settings.setValue(QLatin1String("recentSearches"), m_stringListModel.stringList());
-    settings.setValue(QLatin1String("maximumSaved"), m_maxSavedSearches);
-    settings.endGroup();
-}
-
-
-    void aboutToShowMenu()
-{
-    lineEdit().selectAll();
-    QMenu *m = menu();
-    m.clear();
-    QStringList list = m_stringListModel.stringList();
-    if (list.isEmpty()) {
-        m.addAction(tr("No Recent Searches"));
-        return;
-    }
-
-    QAction *recent = m.addAction(tr("Recent Searches"));
-    recent.setEnabled(false);
-    for (int i = 0; i < list.count(); ++i) {
-        QString text = list.at(i);
-        m.addAction(text).setData(text);
-    }
-    m.addSeparator();
-    m.addAction(tr("Clear Recent Searches"), this, SLOT(clear()));
-}
-
-    void triggeredMenuAction(QAction *action)
-{
-    QVariant v = action.data();
-    if (v.canConvert<QString>()) {
-        QString text = v.toString();
-        lineEdit().setText(text);
-        searchNow();
-    }
-}
+		QUrl url(QLatin1String("http://www.google.com/search"));
+		url.addQueryItem(QLatin1String("q"), searchText);
+		url.addQueryItem(QLatin1String("ie"), QLatin1String("UTF-8"));
+		url.addQueryItem(QLatin1String("oe"), QLatin1String("UTF-8"));
+		url.addQueryItem(QLatin1String("client"), QLatin1String("qtdemobrowser"));
+		emit search(url);
+	}
 
 private:
-    void load()
-{
-    QSettings settings;
-    settings.beginGroup(QLatin1String("toolbarsearch"));
-    QStringList list = settings.value(QLatin1String("recentSearches")).toStringList();
-    m_maxSavedSearches = settings.value(QLatin1String("maximumSaved"), m_maxSavedSearches).toInt();
-    m_stringListModel.setStringList(list);
-    settings.endGroup();
-}
 
-    AutoSaver *m_autosaver;
-    int m_maxSavedSearches;
-    QStringListModel *m_stringListModel;
+	void save()
+	{
+		QSettings settings;
+		settings.beginGroup(QLatin1String("toolbarsearch"));
+		settings.setValue(QLatin1String("recentSearches"), m_stringListModel.stringList());
+		settings.setValue(QLatin1String("maximumSaved"), m_maxSavedSearches);
+		settings.endGroup();
+	}
+
+
+	void aboutToShowMenu()
+	{
+		lineEdit().selectAll();
+		QMenu m = menu();
+		m.clear();
+		QStringList list = m_stringListModel.stringList();
+		if (list.isEmpty()) {
+			m.addAction(tr("No Recent Searches"));
+			return;
+		}
+
+		QAction recent = m.addAction(tr("Recent Searches"));
+		recent.setEnabled(false);
+		for (int i = 0; i < list.count(); ++i) {
+			QString text = list.at(i);
+			m.addAction(text).setData(text);
+		}
+		m.addSeparator();
+		m.addAction(tr("Clear Recent Searches"), this, SLOT(clear()));
+	}
+
+	void triggeredMenuAction(QAction action)
+	{
+		QVariant v = action.data();
+		if (v.canConvert<QString>()) {
+			QString text = v.toString();
+			lineEdit().setText(text);
+			searchNow();
+		}
+	}
+
+private:
+
+	void load()
+	{
+		QSettings settings;
+		settings.beginGroup(QLatin1String("toolbarsearch"));
+		QStringList list = settings.value(QLatin1String("recentSearches")).toStringList();
+		m_maxSavedSearches = settings.value(QLatin1String("maximumSaved"), m_maxSavedSearches).toInt();
+		m_stringListModel.setStringList(list);
+		settings.endGroup();
+	}
+
+	AutoSaver m_autosaver;
+	int m_maxSavedSearches;
+	QStringListModel m_stringListModel;
 }

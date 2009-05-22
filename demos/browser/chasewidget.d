@@ -42,133 +42,123 @@
 module chasewidget;
 
 
-import QtGui.QWidget;
+import qt.core.QSize;
+import qt.core.QPoint;
 
-import QtCore.QSize;
-import QtGui.QColor;
-import QtGui.QPixmap;
+import qt.gui.QColor;
+import qt.gui.QPixmap;
+import qt.gui.QWidget;
+import qt.gui.QApplication;
+import qt.gui.QHideEvent;
+import qt.gui.QPainter;
+import qt.gui.QPaintEvent;
+import qt.gui.QShowEvent;
 
-import QtCore.QPoint;
-
-import QtGui.QApplication;
-import QtGui.QHideEvent;
-import QtGui.QPainter;
-import QtGui.QPaintEvent;
-import QtGui.QShowEvent;
-
-/*
-QT_BEGIN_NAMESPACE
-class QHideEvent;
-class QShowEvent;
-class QPaintEvent;
-class QTimerEvent;
-QT_END_NAMESPACE
-*/
 
 class ChaseWidget : public QWidget
 {
-    Q_OBJECT
 public:
-    this(QWidget *parent = 0, QPixmap pixmap = QPixmap(), bool pixmapEnabled = false)
-{
-	super(parent);
-	m_segment = 0;
-     m_delay = 100;
-     m_step = 40;
-     m_timerId = -1;
-	 m_animated = false;
- m_pixmap = pixmap;
-     m_pixmapEnabled = pixmapEnabled;
-}
 
-    void setAnimated(bool value)
-{
-    if (m_animated == value)
-        return;
-    m_animated = value;
-    if (m_timerId != -1) {
-        killTimer(m_timerId);
-        m_timerId = -1;
-    }
-    if (m_animated) {
-        m_segment = 0;
-        m_timerId = startTimer(m_delay);
-    }
-    update();
-}
+	this(QWidget parent = null, QPixmap pixmap = QPixmap(), bool pixmapEnabled = false)
+	{
+		super(parent);
+		m_segment = 0;
+		m_delay = 100;
+		m_step = 40;
+		m_timerId = -1;
+		m_animated = false;
+		m_pixmap = pixmap;
+		m_pixmapEnabled = pixmapEnabled;
+	}
 
-    void setPixmapEnabled(bool enable);
-{
-    m_pixmapEnabled = enable;
-}
+	void setAnimated(bool value)
+	{
+		if (m_animated == value)
+			return;
+		m_animated = value;
+		if (m_timerId != -1) {
+			killTimer(m_timerId);
+			m_timerId = -1;
+		}
+		if (m_animated) {
+			m_segment = 0;
+			m_timerId = startTimer(m_delay);
+		}
+		update();
+	}
 
-
-    QSize sizeHint()
-{
-    return QSize(32, 32);
-}
+	void setPixmapEnabled(bool enable);
+	{
+		m_pixmapEnabled = enable;
+	}
+	
+	QSize sizeHint()
+	{
+		return QSize(32, 32);
+	}
 
 protected:
-    void paintEvent(QPaintEvent *event)
-{
-    Q_UNUSED(event);
-    QPainter p(this);
-    if (m_pixmapEnabled && !m_pixmap.isNull()) {
-        p.drawPixmap(0, 0, m_pixmap);
-        return;
-    }
 
-    int extent = qMin(width() - 8, height() - 8);
-    int displ = extent / 4;
-    int ext = extent / 4 - 1;
+	void paintEvent(QPaintEvent event)
+	{
+		//Q_UNUSED(event);
+		auto p = new QPainter(this);
+		if (m_pixmapEnabled && !m_pixmap.isNull()) {
+			p.drawPixmap(0, 0, m_pixmap);
+			return;
+		}
 
-    p.setRenderHint(QPainter::Antialiasing, true);
+		int extent = qMin(width() - 8, height() - 8);
+		int displ = extent / 4;
+		int ext = extent / 4 - 1;
 
-    if(m_animated)
-        p.setPen(Qt.gray);
-    else
-        p.setPen(QPen(palette().dark().color()));
+		p.setRenderHint(QPainter::Antialiasing, true);
 
-    p.translate(width() / 2, height() / 2); // center
+		if(m_animated)
+			p.setPen(Qt.gray);
+		else
+			p.setPen(QPen(palette().dark().color()));
 
-    for (int segment = 0; segment < segmentCount(); ++segment) {
-        p.rotate(QApplication::isRightToLeft() ? m_step : -m_step);
-        if(m_animated)
-            p.setBrush(colorForSegment(segment));
-        else
-            p.setBrush(palette().background());
-        p.drawEllipse(QRect(displ, -ext / 2, ext, ext));
-    }
-}
+		p.translate(width() / 2, height() / 2); // center
 
-    void timerEvent(QTimerEvent *event)
-{
-    if (event->timerId() == m_timerId) {
-        ++m_segment;
-        update();
-    }
-    QWidget.timerEvent(event);
-}
+		for (int segment = 0; segment < segmentCount(); ++segment) {
+			p.rotate(QApplication::isRightToLeft() ? m_step : -m_step);
+			if(m_animated)
+				p.setBrush(colorForSegment(segment));
+			else
+				p.setBrush(palette().background());
+			p.drawEllipse(QRect(displ, -ext / 2, ext, ext));
+		}
+	}
+
+	void timerEvent(QTimerEvent *event)
+	{
+		if (event->timerId() == m_timerId) {
+			++m_segment;
+			update();
+		}
+		QWidget.timerEvent(event);
+	}
 
 private:
-    int segmentCount()
-{
-    return 360 / m_step;
-}
 
+	int segmentCount()
+	{
+		return 360 / m_step;
+	}
 
-QColor colorForSegment(int seg)
-{
-    int index = ((seg + m_segment) % segmentCount());
-    int comp = qMax(0, 255 - (index * (255 / segmentCount())));
-    return QColor(comp, comp, comp, 255);
-}
+	QColor colorForSegment(int seg)
+	{
+		int index = ((seg + m_segment) % segmentCount());
+		int comp = qMax(0, 255 - (index * (255 / segmentCount())));
+		return QColor(comp, comp, comp, 255);
+	}
 
-    int m_segment;
-    int m_delay;
-    int m_step;
-    int m_timerId;
-    bool m_animated;
-    QPixmap m_pixmap;
-    bool m_pixmapEnabled;
+	int m_segment;
+	int m_delay;
+	int m_step;
+	int m_timerId;
+	bool m_animated;
+	QPixmap m_pixmap;
+	bool m_pixmapEnabled;
 }

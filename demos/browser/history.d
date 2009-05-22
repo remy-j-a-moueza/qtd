@@ -63,8 +63,8 @@ import qt.core.QObject;
 import qt.core.QTimer;
 import qt.core.QUrl;
 
-import QtWebKit.QWebHistoryInterface;
-import QtWebKit.QWebSettings;
+import qt.webkit.QWebHistoryInterface;
+import qtWebkit.QWebSettings;
 
 import QWebHistoryInterface;
 
@@ -110,8 +110,6 @@ public:
 
 class HistoryManager : public QWebHistoryInterface
 {
-	//Q_PROPERTY(int historyLimit READ historyLimit WRITE setHistoryLimit)
-
 	mixin Signal!("historyReset");
 	mixin Signal!("entryAdded", HistoryItem item);
 	mixin Signal!("entryRemoved", HistoryItem item);
@@ -144,12 +142,10 @@ public:
 		QWebHistoryInterface.setDefaultInterface(this);
 	}
 
-
 	~this()
 	{
 		m_saveTimer.saveIfNeccessary();
 	}
-
 
 	bool historyContains(QString &url)
 	{
@@ -184,7 +180,6 @@ public:
 		return m_historyLimit;
 	}
 
-
 	void setHistoryLimit(int limit)
 	{
 		if (m_historyLimit == limit)
@@ -194,12 +189,10 @@ public:
 		m_saveTimer.changeOccurred();
 	}
 
-
 	QList<HistoryItem> history()
 	{
 		return m_history;
 	}
-
 
 	void setHistory(QList<HistoryItem> &history, bool loadedAndSorted = false);
 	{
@@ -220,27 +213,23 @@ public:
 		emit historyReset();
 	}
 
-
 	// History manager keeps around these models for use by the completer and other classes
 	HistoryModel historyModel();
 	{
 		return m_historyModel;
 	}
 
-
 	HistoryFilterModel historyFilterModel()
 	{
 		return m_historyFilterModel;
 	}
-
 
 	HistoryTreeModel historyTreeModel()
 	{
 		return m_historyTreeModel;
 	}
 
-
-public slots:
+public:
 
 	void clear()
 	{
@@ -445,6 +434,7 @@ private:
 	HistoryTreeModel m_historyTreeModel;
 }
 
+
 class HistoryModel : public QAbstractTableModel
 {
 public:
@@ -473,7 +463,7 @@ public:
 		DateTimeRole = Qt.UserRole + 2,
 		UrlRole = Qt.UserRole + 3,
 		UrlStringRole = Qt.UserRole + 4
-	}
+	};
 
 	this(HistoryManager history, QObject parent = null)
 	{
@@ -629,7 +619,6 @@ public:
 		return createIndex(realRow, sourceIndex.column(), sourceModel().rowCount() - sourceIndex.row());
 	}
 
-
 	QModelIndex mapToSource(QModelIndex proxyIndex)
 	{
 		load();
@@ -718,14 +707,13 @@ public:
 		return QAbstractProxyModel.data(index, role);
 	}
 
-private slots:
+private:
 
 	void sourceReset()
 	{
 		m_loaded = false;
 		reset();
 	}
-
 
 	void sourceDataChanged(QModelIndex topLeft, QModelIndex bottomRight)
 	{
@@ -738,7 +726,6 @@ private slots:
 		//Q_UNUSED(end);
 		sourceReset();
 	}
-
 
 	void sourceRowsInserted(QModelIndex parent, int start, int end)
 	{
@@ -786,6 +773,7 @@ private:
 	QHash<QString, int> m_historyHash;
 	bool m_loaded;
 }
+
 
 /*
 The history menu
@@ -918,6 +906,7 @@ private:
 	HistoryTreeModel m_treeModel;
 }
 
+
 // Menu that is dynamically populated from the history
 class HistoryMenu : public ModelMenu
 {
@@ -973,7 +962,8 @@ protected:
 		addAction(clearAction);
 	}
 
-private slots:
+private:
+
 	void activated(QModelIndex index)
 	{
 		emit openUrl(index.data(HistoryModel.UrlRole).toUrl());
@@ -985,7 +975,6 @@ private slots:
 		dialog.openUrl(QUrl).connect(&this.openUrl(QUrl));
 		dialog.show();
 	}
-
 
 private:
 
@@ -999,8 +988,8 @@ private:
 // exposes each url http://www.foo.com and it url starting at the host www.foo.com
 class HistoryCompletionModel : public QAbstractProxyModel
 {
-
 public:
+
 	this(QObject parent = null)
 	{
 		super(parent);
@@ -1008,9 +997,7 @@ public:
 
 	QVariant data(QModelIndex index, int role)
 	{
-		if (sourceModel()
-		&& (role == Qt.EditRole || role == Qt.DisplayRole)
-		&& index.isValid()) {
+		if (sourceModel() && (role == Qt.EditRole || role == Qt.DisplayRole) && index.isValid()) {
 			QModelIndex idx = mapToSource(index);
 			idx = idx.sibling(idx.row(), 1);
 			QString urlString = idx.data(HistoryModel.UrlStringRole).toString();
@@ -1065,28 +1052,29 @@ public:
 	{
 		if (sourceModel()) {
 			sourceModel.modelReset.disconnect(&this.sourceReset);
-			sourceModel.rowsInserted(QModelIndex , int, int).disconnect(&this.sourceReset);
-			sourceModel.rowsRemoved(QModelIndex , int, int).disconnect(&this.sourceReset);
+			sourceModel.rowsInserted.disconnect(&this.sourceReset);
+			sourceModel.rowsRemoved.disconnect(&this.sourceReset);
 		}
 
 		QAbstractProxyModel.setSourceModel(newSourceModel);
 
 		if (newSourceModel) {
 			newSourceModel.modelReset.connect(&this.sourceReset);
-			sourceModel.rowsInserted(QModelIndex , int, int).connect(&this.sourceReset);
-			sourceModel.rowsRemoved(QModelIndex , int, int).connect(&this.sourceReset);
+			sourceModel.rowsInserted.connect(&this.sourceReset);
+			sourceModel.rowsRemoved.connect(&this.sourceReset);
 		}
 
 		reset();
 	}
 
-private slots:
+private:
 
 	void sourceReset()
 	{
 		reset();
 	}
 }
+
 
 // proxy model for the history model that converts the list
 // into a tree, one top level node per day.
@@ -1253,13 +1241,10 @@ public:
 		return true;
 	}
 
-
 	QVariant headerData(int section, Qt.Orientation orientation, int role = Qt.DisplayRole)
 	{
 		return sourceModel().headerData(section, orientation, role);
 	}
-
-
 
 	void setSourceModel(QAbstractItemModel newSourceModel)
 	{
@@ -1282,8 +1267,7 @@ public:
 		reset();
 	}
 
-
-private slots:
+private:
 
 	void sourceReset()
 	{
@@ -1293,7 +1277,7 @@ private slots:
 
 	void sourceRowsInserted(QModelIndex parent, int start, int end);
 	{
-		Q_UNUSED(parent); // Avoid warnings when compiling release
+		//Q_UNUSED(parent); // Avoid warnings when compiling release
 		assert(!parent.isValid());
 		if (start != 0 || start != end) {
 			m_sourceRowCache.clear();
@@ -1373,6 +1357,7 @@ private:
 	QList<int> m_sourceRowCache;
 }
 
+
 // A modified QSortFilterProxyModel that always accepts the root nodes in the tree
 // so filtering is only done on the children.
 // Used in the HistoryDialog
@@ -1395,6 +1380,7 @@ public:
 		return QSortFilterProxyModel.filterAcceptsRow(source_row, source_parent);
 	}
 }
+
 
 import ui_history;
 
@@ -1446,7 +1432,6 @@ private:
 		menu.addAction(tr("Delete"), tree, SLOT(removeOne()));
 		menu.exec(QCursor.pos());
 	}
-
 
 	void open()
 	{

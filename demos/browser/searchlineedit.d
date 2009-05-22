@@ -41,6 +41,7 @@
 
 module searchlineedit;
 
+
 import urllineedit;
 
 import qt.gui.QLineEdit;
@@ -51,19 +52,12 @@ import qt.gui.QMenu;
 import qt.gui.QStyle;
 import qt.gui.QStyleOptionFrameV2;
 
-/*
-QT_BEGIN_NAMESPACE
-class QMenu;
-QT_END_NAMESPACE
 
-class SearchButton;
+/*
+Clear button on the right hand side of the search widget.
+Hidden by default
+"A circle with an X in it"
 */
-
-/*
-    Clear button on the right hand side of the search widget.
-    Hidden by default
-    "A circle with an X in it"
- */
 class ClearButton : public QAbstractButton
 {
 public:
@@ -108,8 +102,8 @@ public:
     Search icon on the left hand side of the search widget
     When a menu is set a down arrow appears
  */
-class SearchButton : public QAbstractButton {
-
+class SearchButton : public QAbstractButton
+{
 public:
 
 	SearchButton(QWidget parent = null)
@@ -160,6 +154,7 @@ public:
 	QMenu m_menu;
 
 protected:
+
 	void mousePressEvent(QMouseEvent event)
 	{
 		if (m_menu && event.button() == Qt.LeftButton) {
@@ -176,17 +171,16 @@ protected:
 
 class SearchLineEdit : public ExLineEdit
 {
-    //Q_PROPERTY(QString inactiveText READ inactiveText WRITE setInactiveText)
-
     mixin Signal!("textChanged", QString &text);
 
 public:
-/*
-    SearchLineEdit is an enhanced QLineEdit
-    - A Search icon on the left with optional menu
-    - When there is no text and doesn't have focus an "inactive text" is displayed
-    - When there is text a clear button is displayed on the right hand side
- */
+	
+	/*
+	SearchLineEdit is an enhanced QLineEdit
+	- A Search icon on the left with optional menu
+	- When there is no text and doesn't have focus an "inactive text" is displayed
+	- When there is text a clear button is displayed on the right hand side
+	*/
 	this(QWidget parent = null) : ExLineEdit(parent)
 	{
 		m_searchButton = new SearchButton(this);
@@ -227,6 +221,7 @@ public:
 	}
 
 protected:
+
 	void resizeEvent(QResizeEvent event)
 	{
 		updateGeometries();

@@ -42,43 +42,43 @@
 module edittreeview;
 
 
-import QtGui.QTreeView;
-import QtGui.QKeyEvent;
+import qt.gui.QTreeView;
+import qt.gui.QKeyEvent;
+
 
 class EditTreeView : public QTreeView
 {
-    Q_OBJECT
+public:
+
+	this(QWidget parent = null)
+	{
+		super(parent);
+	}
+	
+	void keyPressEvent(QKeyEvent event)
+	{
+		if ((event.key() == Qt.Key_Delete || event.key() == Qt.Key_Backspace) && model()) {
+			removeOne();
+		} else {
+			QAbstractItemView::keyPressEvent(event);
+		}
+	}
 
 public:
-this(QWidget *parent = null)
-{
-	super(parent);
-}
-    void keyPressEvent(QKeyEvent *event)
-{
-    if ((event.key() == Qt::Key_Delete
-        || event.key() == Qt::Key_Backspace)
-        && model()) {
-        removeOne();
-    } else {
-        QAbstractItemView::keyPressEvent(event);
-    }
-}
 
-public slots:
-    void removeOne()
-{
-    if (!model())
-        return;
-    QModelIndex ci = currentIndex();
-    int row = ci.row();
-    model().removeRow(row, ci.parent());
-}
+	void removeOne()
+	{
+		if (!model())
+			return;
+		QModelIndex ci = currentIndex();
+		int row = ci.row();
+		model().removeRow(row, ci.parent());
+	}
 
-    void removeAll()
-{
-    if (!model())
-        return;
-    model().removeRows(0, model().rowCount(rootIndex()), rootIndex());
-}
+	void removeAll()
+	{
+		if (!model())
+			return;
+		model().removeRows(0, model().rowCount(rootIndex()), rootIndex());
+	}
 }

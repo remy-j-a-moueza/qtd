@@ -40,75 +40,82 @@
 ****************************************************************************/
 module autosaver;
 
-import QtCore.QObject;
-import QtCore.QBasicTimer;
-import QtCore.QTime;
 
-import QtCore.QDir;
-import QtCore.QCoreApplication;
-import QtCore.QMetaObject;
+import qt.core.QObject;
+import qt.core.QBasicTimer;
+import qt.core.QTime;
+import qt.core.QDir;
+import qt.core.QCoreApplication;
+import qt.core.QMetaObject;
+
 import QtDebug;
+
 
 const uint AUTOSAVE_IN  = 1000 * 3  // seconds
 const uint MAXWAIT = 1000 * 15 // seconds
 
+
 /*
-    This class will call the save() slot on the parent object when the parent changes.
-    It will wait several seconds after changed() to combining multiple changes and
-    prevent continuous writing to disk.
-  */
+This class will call the save() slot on the parent object when the parent changes.
+It will wait several seconds after changed() to combining multiple changes and
+prevent continuous writing to disk.
+*/
+
 class AutoSaver : public QObject {
 
-Q_OBJECT
+public:
+
+	this(QObject parent)
+	{
+		super(parent);
+		assert(parent);
+	}
+	
+	~this();
+	{
+		if (m_timer.isActive())
+			qWarning() << "AutoSaver: still active when destroyed, changes not saved.";
+	}
+	
+	void saveIfNeccessary()
+	{
+		if (!m_timer.isActive())
+			return;
+		m_timer.stop();
+		m_firstChange = QTime();
+		if (!QMetaObject.invokeMethod(parent(), "save", Qt.DirectConnection)) {
+			qWarning() << "AutoSaver: error invoking slot save() on parent";
+		}
+	}
 
 public:
-    this(QObject *parent)
-{
-	super(parent);
-    Q_ASSERT(parent);
-}
-    ~this();
-{
-    if (m_timer.isActive())
-        qWarning() << "AutoSaver: still active when destroyed, changes not saved.";
-}
-    void saveIfNeccessary()
-{
-    if (!m_timer.isActive())
-        return;
-    m_timer.stop();
-    m_firstChange = QTime();
-    if (!QMetaObject::invokeMethod(parent(), "save", Qt::DirectConnection)) {
-        qWarning() << "AutoSaver: error invoking slot save() on parent";
-    }
-}
 
-public slots:
-    void changeOccurred();
-{
-    if (m_firstChange.isNull())
-        m_firstChange.start();
+	void changeOccurred();
+	{
+		if (m_firstChange.isNull())
+			m_firstChange.start();
 
-    if (m_firstChange.elapsed() > MAXWAIT) {
-        saveIfNeccessary();
-    } else {
-        m_timer.start(AUTOSAVE_IN, this);
-    }
-}
+		if (m_firstChange.elapsed() > MAXWAIT) {
+			saveIfNeccessary();
+		} else {
+			m_timer.start(AUTOSAVE_IN, this);
+		}
+	}
 
 protected:
-    void timerEvent(QTimerEvent *event)
-{
-    if (event.timerId() == m_timer.timerId()) {
-        saveIfNeccessary();
-    } else {
-        QObject::timerEvent(event);
-    }
-}
 
+	void timerEvent(QTimerEvent event)
+	{
+		if (event.timerId() == m_timer.timerId()) {
+			saveIfNeccessary();
+		} else {
+			QObject.timerEvent(event);
+		}
+	}
 
 private:
-    QBasicTimer m_timer;
-    QTime m_firstChange;
+
+	QBasicTimer m_timer;
+	QTime m_firstChange;
 }
 

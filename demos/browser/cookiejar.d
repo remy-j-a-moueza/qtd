@@ -40,45 +40,33 @@
 ****************************************************************************/
 module cookiejar;
 
-import QtNetwork.QNetworkCookieJar;
+import qt.network.QNetworkCookieJar;
+import qt.core.QDebug;
 
-import QtCore.QAbstractItemModel;
-import QtCore.QStringList;
+import qt.core.QAbstractItemModel;
+import qt.core.QStringList;
+import qt.core.QDateTime;
+import qt.core.QDir;
+import qt.core.QFile;
+import qt.core.QMetaEnum;
+import qt.core.QSettings;
+import qt.core.QUrl;
 
-import QtGui.QDialog;
-import QtGui.QTableView;
+import qt.gui.QDialog;
+import qt.gui.QTableView;
+import qt.gui.QCompleter;
+import qt.gui.QDesktopServices;
+import qt.gui.QFont;
+import qt.gui.QFontMetrics;
+import qt.gui.QHeaderView;
+import qt.gui.QKeyEvent;
+import qt.gui.QSortFilterProxyModel;
 
+import QtWebKit.QWebSettings;
 
 import cookiejar;
 import autosaver;
 
-import QtCore.QDateTime;
-import QtCore.QDir;
-import QtCore.QFile;
-import QtCore.QMetaEnum;
-import QtCore.QSettings;
-import QtCore.QUrl;
-
-import QtGui.QCompleter;
-import QtGui.QDesktopServices;
-import QtGui.QFont;
-import QtGui.QFontMetrics;
-import QtGui.QHeaderView;
-import QtGui.QKeyEvent;
-import QtGui.QSortFilterProxyModel;
-
-import QtWebKit.QWebSettings;
-
-import QtCore.QDebug;
-
-/*
-QT_BEGIN_NAMESPACE
-class QSortFilterProxyModel;
-class QKeyEvent;
-QT_END_NAMESPACE
-
-class AutoSaver;
-*/
 
 static const unsigned int JAR_VERSION = 23;
 
@@ -95,8 +83,8 @@ QDataStream &operator>>(QDataStream stream, QList<QNetworkCookie> list)
 {
 	list.clear();
 
-	quint32 version;
-	stream >> version;
+	quint32 version_;
+	stream >> version_;
 
 	if (version != JAR_VERSION)
 		return stream;
@@ -120,7 +108,6 @@ QDataStream &operator>>(QDataStream stream, QList<QNetworkCookie> list)
 	}
 	return stream;
 }
-
 
 class CookieJar : public QNetworkCookieJar
 {
@@ -305,7 +292,7 @@ public:
 		m_saveTimer.changeOccurred();
 	}
 
-public slots:
+public:
 
 	void clear()
 	{

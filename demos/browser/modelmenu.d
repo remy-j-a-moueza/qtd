@@ -38,217 +38,218 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+module modelmenu;
 
-import QtGui.QMenu
-import QtCore.QAbstractItemModel;
 
-import modelmenu;
+import qt.gui.QMenu
+import qt.core.QAbstractItemModel;
 
-import QtCore.QAbstractItemModel;
+import qt.core.QAbstractItemModel;
 import qdebug;
-
 
 
 // A QMenu that is dynamically populated from a QAbstractItemModel
 class ModelMenu : public QMenu
 {
-    Q_OBJECT
-
-signals:
-    void activated(const QModelIndex &index);
-    void hovered(const QString &text);
+	
+mixin Signal!("activated", QModelIndex index);
+mixin Signal!("hovered", QString text);
 
 public:
-    ModelMenu(QWidget *parent = null)
-{
-	super(parent);
-	m_maxRows = 7;
-    m_firstSeparator = -1;
- m_maxWidth = -1;
-     m_hoverRole = 0;
-     m_separatorRole = 0;
- m_model = 0;
-    connect(this, SIGNAL(aboutToShow()), this, SLOT(aboutToShow()));
-}
 
-    void setModel(QAbstractItemModel *model)
-{
-    m_model = model;
-}
+	this(QWidget parent = null)
+	{
+		super(parent);
+		m_maxRows = 7;
+		m_firstSeparator = -1;
+		m_maxWidth = -1;
+		m_hoverRole = 0;
+		m_separatorRole = 0;
+		m_model = 0;
+		this.aboutToShow.connect(&this.aboutToShow);
+	}
 
-    QAbstractItemModel *model() const
-{
-    return m_model;
-}
+	void setModel(QAbstractItemModel model)
+	{
+		m_model = model;
+	}
 
-    void setMaxRows(int max)
-{
-    m_maxRows = max;
-}
+	QAbstractItemModel model()
+	{
+		return m_model;
+	}
 
-    int maxRows() const
-{
-    return m_maxRows;
-}
+	void setMaxRows(int max)
+	{
+		m_maxRows = max;
+	}
 
-    void setFirstSeparator(int offset)
-{
-    m_firstSeparator = offset;
-}
+	int maxRows()
+	{
+		return m_maxRows;
+	}
 
-    int firstSeparator() const
-{
-    return m_firstSeparator;
-}
+	void setFirstSeparator(int offset)
+	{
+		m_firstSeparator = offset;
+	}	
 
-    void setRootIndex(const QModelIndex &index)
-{
-    m_root = index;
-}
-    QModelIndex rootIndex() const
-{
-    return m_root;
-}
+	int firstSeparator()
+	{
+		return m_firstSeparator;
+	}
 
-    void setHoverRole(int role)
-{
-    m_hoverRole = role;
-}
-    int hoverRole() const
-{
-    return m_hoverRole;
-}
+	void setRootIndex(QModelIndex index)
+	{
+		m_root = index;
+	}
+	
+	QModelIndex rootIndex()
+	{
+		return m_root;
+	}
 
-    void setSeparatorRole(int role)
-{
-    m_separatorRole = role;
-}
+	void setHoverRole(int role)
+	{
+		m_hoverRole = role;
+	}
+	
+	int hoverRole()
+	{
+		return m_hoverRole;
+	}
 
-    int separatorRole() const
-{
-    return m_separatorRole;
-}
+	void setSeparatorRole(int role)
+	{
+		m_separatorRole = role;
+	}
 
-    QAction *makeAction(const QIcon &icon, const QString &text, QObject *parent);
-{
-    QFontMetrics fm(font());
-    if (-1 == m_maxWidth)
-        m_maxWidth = fm.width(QLatin1Char('m')) * 30;
-    QString smallText = fm.elidedText(text, Qt.ElideMiddle, m_maxWidth);
-    return new QAction(icon, smallText, parent);
-}
+	int separatorRole()
+	{
+		return m_separatorRole;
+	}
+
+	QAction makeAction(QIcon icon, QString text, QObject parent);
+	{
+		QFontMetrics fm(font());
+		if (-1 == m_maxWidth)
+			m_maxWidth = fm.width(QLatin1Char('m')) * 30;
+		QString smallText = fm.elidedText(text, Qt.ElideMiddle, m_maxWidth);
+		return new QAction(icon, smallText, parent);
+	}
 
 protected:
-    // add any actions before the tree, return true if any actions are added.
-    virtual bool prePopulated()
-{
-    return false;
-}
-    // add any actions after the tree
-    virtual void postPopulated()
-{
-}
 
-    // put all of the children of parent into menu up to max
-    void createMenu(const QModelIndex &parent, int max, QMenu *parentMenu = null, QMenu *menu = null)
-{
-    if (!menu) {
-        QString title = parent.data().toString();
-        menu = new QMenu(title, this);
-        QIcon icon = qvariant_cast<QIcon>(parent.data(Qt.DecorationRole));
-        menu.setIcon(icon);
-        parentMenu.addMenu(menu);
-        QVariant v;
-        v.setValue(parent);
-        menu.menuAction().setData(v);
-        connect(menu, SIGNAL(aboutToShow()), this, SLOT(aboutToShow()));
-        return;
-    }
+	// add any actions before the tree, return true if any actions are added.
+	bool prePopulated()
+	{
+		return false;
+	}
+	
+	// add any actions after the tree
+	void postPopulated()
+	{
+	}
 
-    int end = m_model.rowCount(parent);
-    if (max != -1)
-        end = qMin(max, end);
+	// put all of the children of parent into menu up to max
+	void createMenu(QModelIndex parent, int max, QMenu parentMenu = null, QMenu menu = null)
+	{
+		if (!menu) {
+			QString title = parent.data().toString();
+			menu = new QMenu(title, this);
+			QIcon icon = qvariant_cast<QIcon>(parent.data(Qt.DecorationRole));
+			menu.setIcon(icon);
+			parentMenu.addMenu(menu);
+			QVariant v;
+			v.setValue(parent);
+			menu.menuAction().setData(v);
+			connect(menu, SIGNAL(aboutToShow()), this, SLOT(aboutToShow()));
+			return;
+		}
 
-    connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(triggered(QAction*)));
-    connect(menu, SIGNAL(hovered(QAction*)), this, SLOT(hovered(QAction*)));
+		int end = m_model.rowCount(parent);
+		if (max != -1)
+			end = qMin(max, end);
 
-    for (int i = 0; i < end; ++i) {
-        QModelIndex idx = m_model.index(i, 0, parent);
-        if (m_model.hasChildren(idx)) {
-            createMenu(idx, -1, menu);
-        } else {
-            if (m_separatorRole != 0
-                && idx.data(m_separatorRole).toBool())
-                addSeparator();
-            else
-                menu.addAction(makeAction(idx));
-        }
-        if (menu == this && i == m_firstSeparator - 1)
-            addSeparator();
-    }
-}
+		menu.triggered.connect(&this.triggered);
+		menu.hovered.connect(&this.hovered);
 
-private slots:
-Q_DECLARE_METATYPE(QModelIndex)
-void aboutToShow()
-{
-    if (QMenu *menu = qobject_cast<QMenu*>(sender())) {
-        QVariant v = menu.menuAction().data();
-        if (v.canConvert<QModelIndex>()) {
-            QModelIndex idx = qvariant_cast<QModelIndex>(v);
-            createMenu(idx, -1, menu, menu);
-            disconnect(menu, SIGNAL(aboutToShow()), this, SLOT(aboutToShow()));
-            return;
-        }
-    }
-
-    clear();
-    if (prePopulated())
-        addSeparator();
-    int max = m_maxRows;
-    if (max != -1)
-        max += m_firstSeparator;
-    createMenu(m_root, max, this, this);
-    postPopulated();
-}
-
-
-    void triggered(QAction *action)
-{
-    QVariant v = action.data();
-    if (v.canConvert<QModelIndex>()) {
-        QModelIndex idx = qvariant_cast<QModelIndex>(v);
-        emit activated(idx);
-    }
-}
-
-    void hovered(QAction *action)
-{
-    QVariant v = action.data();
-    if (v.canConvert<QModelIndex>()) {
-        QModelIndex idx = qvariant_cast<QModelIndex>(v);
-        QString hoveredString = idx.data(m_hoverRole).toString();
-        if (!hoveredString.isEmpty())
-            emit hovered(hoveredString);
-    }
-}
+		for (int i = 0; i < end; ++i) {
+			QModelIndex idx = m_model.index(i, 0, parent);
+			if (m_model.hasChildren(idx)) {
+				createMenu(idx, -1, menu);
+			} else {
+				if (m_separatorRole != 0 && idx.data(m_separatorRole).toBool())
+					addSeparator();
+				else
+					menu.addAction(makeAction(idx));
+			}
+			if (menu == this && i == m_firstSeparator - 1)
+				addSeparator();
+		}
+	}
 
 private:
-    QAction *makeAction(const QModelIndex &index);
-{
-    QIcon icon = qvariant_cast<QIcon>(index.data(Qt.DecorationRole));
-    QAction *action = makeAction(icon, index.data().toString(), this);
-    QVariant v;
-    v.setValue(index);
-    action.setData(v);
-    return action;
-}
 
-    int m_maxRows;
-    int m_firstSeparator;
-    int m_maxWidth;
-    int m_hoverRole;
-    int m_separatorRole;
-    QAbstractItemModel *m_model;
-    QPersistentModelIndex m_root;
+	void aboutToShow()
+	{
+		if (QMenu menu = qobject_cast<QMenu>(sender())) {
+			QVariant v = menu.menuAction().data();
+			if (v.canConvert<QModelIndex>()) {
+				QModelIndex idx = qvariant_cast<QModelIndex>(v);
+				createMenu(idx, -1, menu, menu);
+				menu.aboutToShow.disconnect(&this.aboutToShow);
+				return;
+			}
+		}
+
+		clear();
+		if (prePopulated())
+			addSeparator();
+		int max = m_maxRows;
+		if (max != -1)
+			max += m_firstSeparator;
+		createMenu(m_root, max, this, this);
+		postPopulated();
+	}
+
+	void triggered(QAction action)
+	{
+		QVariant v = action.data();
+		if (v.canConvert<QModelIndex>()) {
+			QModelIndex idx = qvariant_cast<QModelIndex>(v);
+			emit activated(idx);
+		}
+	}
+
+	void hovered(QAction action)
+	{
+		QVariant v = action.data();
+		if (v.canConvert<QModelIndex>()) {
+			QModelIndex idx = qvariant_cast<QModelIndex>(v);
+			QString hoveredString = idx.data(m_hoverRole).toString();
+			if (!hoveredString.isEmpty())
+				emit hovered(hoveredString);
+		}
+	}
+
+private:
+
+	QAction makeAction(QModelIndex index);
+	{
+		QIcon icon = qvariant_cast<QIcon>(index.data(Qt.DecorationRole));
+		QAction action = makeAction(icon, index.data().toString(), this);
+		QVariant v;
+		v.setValue(index);
+		action.setData(v);
+		return action;
+	}
+
+	int m_maxRows;
+	int m_firstSeparator;
+	int m_maxWidth;
+	int m_hoverRole;
+	int m_separatorRole;
+	QAbstractItemModel m_model;
+	QPersistentModelIndex m_root;
 }

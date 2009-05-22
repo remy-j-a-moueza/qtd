@@ -46,26 +46,26 @@ import QtGui.QLabel;
 
 class SqueezeLabel : public QLabel
 {
-    Q_OBJECT
-
 public:
-this(QWidget *parent = null)
-{
-	super(parent);
-}
+
+	this(QWidget parent = null)
+	{
+		super(parent);
+	}
 
 protected:
-    void paintEvent(QPaintEvent *event)
-{
-    QFontMetrics fm = fontMetrics();
-    if (fm.width(text()) > contentsRect().width()) {
-        QString elided = fm.elidedText(text(), Qt.ElideMiddle, width());
-        QString oldText = text();
-        setText(elided);
-        QLabel.paintEvent(event);
-        setText(oldText);
-    } else {
-        QLabel.paintEvent(event);
-    }
-}
+
+	void paintEvent(QPaintEvent event)
+	{
+		QFontMetrics fm = fontMetrics();
+		if (fm.width(text()) > contentsRect().width()) {
+			QString elided = fm.elidedText(text(), Qt.ElideMiddle, width());
+			QString oldText = text();
+			setText(elided);
+			QLabel.paintEvent(event);
+			setText(oldText);
+		} else {
+			QLabel.paintEvent(event);
+		}
+	}
 }
