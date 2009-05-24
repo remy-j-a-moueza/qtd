@@ -80,20 +80,20 @@ public:
 		loadSettings();
 
 		QNetworkDiskCache diskCache = new QNetworkDiskCache(this);
-		QString location = QDesktopServices.storageLocation(QDesktopServices.CacheLocation);
+		string location = QDesktopServices.storageLocation(QDesktopServices.CacheLocation);
 		diskCache.setCacheDirectory(location);
 		setCache(diskCache);
 	}
 
 private:
 
-    QString[] sslTrustedHostList;
+    string[] sslTrustedHostList;
 
 public:
 
 	void loadSettings()
 	{
-		QSettings settings;
+		auto settings = new QSettings;
 		settings.beginGroup(QLatin1String("proxy"));
 		QNetworkProxy proxy;
 		if (settings.value(QLatin1String("enabled"), false).toBool()) {
@@ -115,17 +115,16 @@ private:
 	{
 		BrowserMainWindow mainWindow = BrowserApplication.instance().mainWindow();
 
-		QDialog dialog(mainWindow);
+		auto dialog = new QDialog(mainWindow);
 		dialog.setWindowFlags(Qt.Sheet);
 
-		Ui.PasswordDialog passwordDialog;
+		auto passwordDialog = new Ui.PasswordDialog;
 		passwordDialog.setupUi(&dialog);
 
-		passwordDialog.iconLabel.setText(QString());
+		passwordDialog.iconLabel.setText(null);
 		passwordDialog.iconLabel.setPixmap(mainWindow.style().standardIcon(QStyle.SP_MessageBoxQuestion, 0, mainWindow).pixmap(32, 32));
 
-		QString introMessage = tr("<qt>Enter username and password for \"%1\" at %2</qt>");
-		introMessage = introMessage.arg(Qt.escape(reply.url().toString())).arg(Qt.escape(reply.url().toString()));
+		string introMessage = Format(tr("<qt>Enter username and password for \"{}\" at {}</qt>"), Qt.escape(reply.url().toString()), Qt.escape(reply.url().toString()));
 		passwordDialog.introLabel.setText(introMessage);
 		passwordDialog.introLabel.setWordWrap(true);
 
@@ -135,21 +134,20 @@ private:
 		}
 	}
 
-	void proxyAuthenticationRequired(const QNetworkProxy proxy, QAuthenticator auth)
+	void proxyAuthenticationRequired(QNetworkProxy proxy, QAuthenticator auth)
 	{
 		BrowserMainWindow mainWindow = BrowserApplication.instance().mainWindow();
 
-		QDialog dialog(mainWindow);
+		auto dialog = new QDialog(mainWindow);
 		dialog.setWindowFlags(Qt.Sheet);
 
-		Ui.ProxyDialog proxyDialog;
+		auto proxyDialog = new Ui.ProxyDialog;
 		proxyDialog.setupUi(&dialog);
 
-		proxyDialog.iconLabel.setText(QString());
+		proxyDialog.iconLabel.setText(null);
 		proxyDialog.iconLabel.setPixmap(mainWindow.style().standardIcon(QStyle.SP_MessageBoxQuestion, 0, mainWindow).pixmap(32, 32));
 
-		QString introMessage = tr("<qt>Connect to proxy \"%1\" using:</qt>");
-		introMessage = introMessage.arg(Qt.escape(proxy.hostName()));
+		string introMessage = Format(tr("<qt>Connect to proxy \"{}\" using:</qt>"), Qt.escape(proxy.hostName()));
 		proxyDialog.introLabel.setText(introMessage);
 		proxyDialog.introLabel.setWordWrap(true);
 
@@ -164,17 +162,17 @@ version(QT_NO_OPENSSL)
 	void sslErrors(QNetworkReply reply, QSslError[] error)
 	{
 		// check if SSL certificate has been trusted already
-		QString replyHost = reply.url().host() ~ ":" ~ reply.url().port();
+		string replyHost = reply.url().host() ~ ":" ~ reply.url().port();
 		if(! sslTrustedHostList.contains(replyHost)) {
 			BrowserMainWindow mainWindow = BrowserApplication.instance().mainWindow();
 
-			QStringList errorStrings;
+			string[] errorStrings;
 			for (int i = 0; i < error.count(); ++i)
-				errorStrings += error.at(i).errorString();
-			QString errors = errorStrings.join(QLatin1String("\n"));
+				errorStrings += error[i].errorString();
+			string errors = errorStrings ~ QLatin1String("\n"));
 			int ret = QMessageBox.warning(mainWindow, QCoreApplication.applicationName(),
-				tr("SSL Errors:\n\n%1\n\n%2\n\n"
-				"Do you want to ignore these errors for this host?").arg(reply.url().toString()).arg(errors),
+				Format(tr("SSL Errors:\n\n{}\n\n{}\n\n"
+				"Do you want to ignore these errors for this host?"), reply.url().toString(), errors),
 				QMessageBox.Yes | QMessageBox.No, QMessageBox.No);
 			if (ret == QMessageBox.Yes) {
 				reply.ignoreSslErrors();

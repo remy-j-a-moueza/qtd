@@ -80,10 +80,10 @@ public:
 	bool operator==(BookmarkNode other)
 	{
 		if (url != other.url || title != other.title || desc != other.desc || expanded != other.expanded
-			|| m_type != other.m_type || m_children.count() != other.m_children.count())
+			|| m_type != other.m_type || m_children.length != other.m_children.length)
 			return false;
 
-		for (int i = 0; i < m_children.count(); ++i)
+		for (int i = 0; i < m_children.length; ++i)
 			if (!((*(m_children[i])) == (*(other.m_children[i]))))
 				return false;
 		return true;
@@ -104,8 +104,7 @@ public:
 		return m_children;
 	}
 
-
-	BookmarkNode parent() const
+	BookmarkNode parent()
 	{
 		return m_parent;
 	}
@@ -117,7 +116,7 @@ public:
 			child.m_parent.remove(child);
 		child.m_parent = this;
 		if (-1 == offset)
-			offset = m_children.size();
+			offset = m_children.length;
 		m_children.insert(offset, child);
 	}
 
@@ -127,9 +126,9 @@ public:
 		m_children.removeAll(child);
 	}
 
-	QString url;
-	QString title;
-	QString desc;
+	string url;
+	string title;
+	string desc;
 	bool expanded;
 
 private:
@@ -147,7 +146,7 @@ public:
 	{
 	}
 
-	BookmarkNode read(QString fileName)
+	BookmarkNode read(string fileName)
 	{
 		auto file = new QFile(fileName);
 		if (!file.exists()) {
@@ -164,7 +163,7 @@ public:
 		while (!atEnd()) {
 			readNext();
 			if (isStartElement()) {
-				QString version_ = attributes().value(QLatin1String("version")).toString();
+				string version_ = attributes().value(QLatin1String("version")).toString();
 				if (name() == QLatin1String("xbel") && (version_.isEmpty() || version_ == QLatin1String("1.0"))) {
 					readXBEL(root);
 				} else {
@@ -299,9 +298,9 @@ public:
 		setAutoFormatting(true);
 	}
 	
-	bool write(QString fileName, BookmarkNode root)
+	bool write(string fileName, BookmarkNode root)
 	{
-		QFile file(fileName);
+		auto file = new QFile(fileName);
 		if (!root || !file.open(QFile.WriteOnly))
 			return false;
 		return write(&file, root);
@@ -316,8 +315,8 @@ public:
 		writeStartElement(QLatin1String("xbel"));
 		writeAttribute(QLatin1String("version"), QLatin1String("1.0"));
 		if (root.type() == BookmarkNode.Root) {
-			for (int i = 0; i < root.children().count(); ++i)
-				writeItem(root.children().at(i));
+			for (int i = 0; i < root.children().length; ++i)
+				writeItem(root.children()[i]);
 		} else {
 			writeItem(root);
 		}
@@ -336,7 +335,7 @@ private:
 				writeAttribute(QLatin1String("folded"), parent.expanded ? QLatin1String("no") : QLatin1String("yes"));
 				writeTextElement(QLatin1String("title"), parent.title);
 				for (int i = 0; i < parent.children().count(); ++i)
-					writeItem(parent.children().at(i));
+					writeItem(parent.children()[i]);
 				writeEndElement();
 				break;
 			case BookmarkNode.Bookmark:

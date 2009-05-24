@@ -59,8 +59,8 @@ protected:
 	{
 		QFontMetrics fm = fontMetrics();
 		if (fm.width(text()) > contentsRect().width()) {
-			QString elided = fm.elidedText(text(), Qt.ElideMiddle, width());
-			QString oldText = text();
+			string elided = fm.elidedText(text(), Qt.ElideMiddle, width());
+			string oldText = text();
 			setText(elided);
 			QLabel.paintEvent(event);
 			setText(oldText);

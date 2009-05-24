@@ -82,7 +82,7 @@ public:
 
 	this() {}
 
-	this(QString u, QDateTime d = QDateTime(), QString t = QString())
+	this(string u, QDateTime d = QDateTime(), string t = null)
 	{
 		title = t;
 		url = u;
@@ -102,8 +102,8 @@ public:
 		return cast(int) (dateTime > other.dateTime);
 	}
 
-	QString title;
-	QString url;
+	string title;
+	string url;
 	QDateTime dateTime;
 }
 
@@ -147,29 +147,29 @@ public:
 		m_saveTimer.saveIfNeccessary();
 	}
 
-	bool historyContains(QString url)
+	bool historyContains(string url)
 	{
 		return m_historyFilterModel.historyContains(url);
 	}
 
-	void addHistoryEntry(QString url)
+	void addHistoryEntry(string url)
 	{
 		QUrl cleanUrl(url);
-		cleanUrl.setPassword(QString());
-		cleanUrl.setHost(cleanUrl.host().toLower());
+		cleanUrl.setPassword(null);
+		cleanUrl.setHost(toLower(cleanUrl.host()));
 		auto item = new HistoryItem(cleanUrl.toString(), QDateTime.currentDateTime());
 		addHistoryItem(item);
 	}
 
-	void updateHistoryItem(QUrl url, QString title)
+	void updateHistoryItem(QUrl url, string title)
 	{
-		for (int i = 0; i < m_history.count(); ++i) {
-			if (url == m_history.at(i).url) {
+		for (int i = 0; i < m_history.length; ++i) {
+			if (url == m_history[i].url) {
 				m_history[i].title = title;
 				m_saveTimer.changeOccurred();
 				if (m_lastSavedUrl.isEmpty())
-				m_lastSavedUrl = m_history.at(i).url;
-				emit entryUpdated(i);
+				m_lastSavedUrl = m_history[i].url;
+				entryUpdated.emit(i);
 				break;
 			}
 		}
@@ -207,10 +207,10 @@ public:
 		if (loadedAndSorted) {
 			m_lastSavedUrl = m_history.value(0).url;
 		} else {
-			m_lastSavedUrl = QString();
+			m_lastSavedUrl = null;
 			m_saveTimer.changeOccurred();
 		}
-		emit historyReset();
+		historyReset.emit();
 	}
 
 	// History manager keeps around these models for use by the completer and other classes
@@ -233,8 +233,8 @@ public:
 
 	void clear()
 	{
-		m_history.clear();
-		m_lastSavedUrl = QString();
+		m_history = null;
+		m_lastSavedUrl = null;
 		m_saveTimer.changeOccurred();
 		m_saveTimer.saveIfNeccessary();
 		historyReset();
@@ -257,21 +257,21 @@ private:
 		settings.setValue(QLatin1String("historyLimit"), m_historyLimit);
 
 		bool saveAll = m_lastSavedUrl.isEmpty();
-		int first = m_history.count() - 1;
+		int first = m_history.length - 1;
 		if (!saveAll) {
 			// find the first one to save
-			for (int i = 0; i < m_history.count(); ++i) {
-				if (m_history.at(i).url == m_lastSavedUrl) {
+			for (int i = 0; i < m_history.length; ++i) {
+				if (m_history[i].url == m_lastSavedUrl) {
 					first = i - 1;
 					break;
 				}
 			}
 		}
 		
-		if (first == m_history.count() - 1)
+		if (first == m_history.length - 1)
 			saveAll = true;
 
-		QString directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
+		string directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
 		if (directory.isEmpty())
 			directory = QDir.homePath() + QLatin1String("/.") + QCoreApplication.applicationName();
 		if (!QFile.exists(directory)) {
@@ -300,7 +300,7 @@ private:
 		for (int i = first; i >= 0; --i) {
 			QByteArray data;
 			auto stream = new QDataStream(data, QIODevice.WriteOnly);
-			HistoryItem item = m_history.at(i);
+			HistoryItem item = m_history[i];
 			stream << HISTORY_VERSION << item.url << item.dateTime << item.title;
 			out_ << data;
 		}
@@ -317,13 +317,13 @@ private:
 
 	void checkForExpired()
 	{
-		if (m_historyLimit < 0 || m_history.isEmpty())
+		if (m_historyLimit < 0 || m_history.length == 0)
 			return;
 
 		QDateTime now = QDateTime.currentDateTime();
 		int nextTimeout = 0;
 
-		while (!m_history.isEmpty()) {
+		while (m_history.length) {
 			QDateTime checkForExpired = m_history.last().dateTime;
 			checkForExpired.setDate(checkForExpired.date().addDays(m_historyLimit));
 			if (now.daysTo(checkForExpired) > 7) {
@@ -336,8 +336,8 @@ private:
 				break;
 			HistoryItem item = m_history.takeLast();
 			// remove from saved file also
-			m_lastSavedUrl = QString();
-			emit entryRemoved(item);
+			m_lastSavedUrl = null;
+			entryRemoved.emit(item);
 		}
 
 		if (nextTimeout > 0)
@@ -352,9 +352,9 @@ protected:
 		if (globalSettings.testAttribute(QWebSettings.PrivateBrowsingEnabled))
 			return;
 
-		m_history.prepend(item);
-		emit entryAdded(item);
-		if (m_history.count() == 1)
+		m_history = [item] ~ m_history;
+		entryAdded.emit(item);
+		if (m_history.length == 1)
 			checkForExpired();
 	}
 
@@ -364,7 +364,7 @@ private:
 	{
 		loadSettings();
 
-		historyFile = new QFile(QDesktopServices.storageLocation(QDesktopServices.DataLocation) + QLatin1String("/history"));
+		historyFile = new QFile(QDesktopServices.storageLocation(QDesktopServices.DataLocation) ~ QLatin1String("/history"));
 		if (!historyFile.exists())
 			return;
 		if (!historyFile.open(QFile.ReadOnly)) {
@@ -376,21 +376,21 @@ private:
 		auto in_ = new QDataStream(&historyFile);
 		// Double check that the history file is sorted as it is read in
 		bool needToSort = false;
-		HistoryItem lastInsertedItem;
-		QByteArray data;
-		QDataStream stream;
-		QBuffer buffer;
+		auto lastInsertedItem = new HistoryItem;
+		auto data = new QByteArray;
+		auto stream = new QDataStream;
+		auto buffer = new QBuffer;
 		stream.setDevice(buffer);
 		while (!historyFile.atEnd()) {
 			in_ >> data;
 			buffer.close();
 			buffer.setBuffer(data);
 			buffer.open(QIODevice.ReadOnly);
-			quint32 ver;
+			uint ver;
 			stream >> ver;
 			if (ver != HISTORY_VERSION)
 				continue;
-			HistoryItem item;
+			auto item = new HistoryItem;
 			stream >> item.url;
 			stream >> item.dateTime;
 			stream >> item.title;
@@ -418,7 +418,7 @@ private:
 
 		// If we had to sort re-write the whole history sorted
 		if (needToSort) {
-			m_lastSavedUrl = QString();
+			m_lastSavedUrl = null;
 			m_saveTimer.changeOccurred();
 		}
 	}
@@ -427,7 +427,7 @@ private:
 	int m_historyLimit;
 	QTimer m_expiredTimer;
 	HistoryItem[] m_history;
-	QString m_lastSavedUrl;
+	string m_lastSavedUrl;
 
 	HistoryModel m_historyModel;
 	HistoryFilterModel m_historyFilterModel;
@@ -453,7 +453,7 @@ public:
 	void entryUpdated(int offset)
 	{
 		QModelIndex idx = index(offset, 0);
-		emit dataChanged(idx, idx);
+		dataChanged.emit(idx, idx);
 	}
 
 public:
@@ -491,10 +491,10 @@ public:
 	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
 	{
 		HistoryItem[] lst = m_history.history();
-		if (index.row() < 0 || index.row() >= lst.size())
+		if (index.row() < 0 || index.row() >= lst.length)
 			return QVariant();
 
-		HistoryItem item = lst.at(index.row());
+		HistoryItem item = lst[index.row()];
 		switch (role) {
 			case DateTimeRole:
 				return item.dateTime;
@@ -510,7 +510,7 @@ public:
 					case 0:
 						// when there is no title try to generate one from the url
 						if (item.title.isEmpty()) {
-							QString page = QFileInfo(QUrl(item.url).path()).fileName();
+							string page = QFileInfo(QUrl(item.url).path()).fileName();
 							if (!page.isEmpty())
 								return page;
 							return item.url;
@@ -554,8 +554,8 @@ public:
 		return true;
 	}
 
-
 private:
+
 	HistoryManager m_history;
 }
 
@@ -579,16 +579,16 @@ public:
 		setSourceModel(sourceModel);
 	}
 
-	bool historyContains(QString url)
+	bool historyContains(string url)
 	{
 		load();
-		return m_historyHash.contains(url);
+		return ((url in m_historyHash) != null);
 	}
 	
-	int historyLocation(QString url)
+	int historyLocation(string url)
 	{
 		load();
-		if (!m_historyHash.contains(url))
+		if (!(url in m_historyHash))
 			return 0;
 		return sourceModel().rowCount() - m_historyHash.value(url);
 	}
@@ -596,8 +596,8 @@ public:
 	QModelIndex mapFromSource(QModelIndex sourceIndex)
 	{
 		load();
-		QString url = sourceIndex.data(HistoryModel.UrlStringRole).toString();
-		if (!m_historyHash.contains(url))
+		string url = sourceIndex.data(HistoryModel.UrlStringRole).toString();
+		if (!(url in m_historyHash))
 			return QModelIndex();
 
 		// This can be done in a binary search, but we can't use qBinary find
@@ -608,7 +608,7 @@ public:
 		int sourceModelRow = sourceModel().rowCount() - sourceIndex.row();
 
 		for (int i = 0; i < m_sourceRow.count(); ++i) {
-			if (m_sourceRow.at(i) == sourceModelRow) {
+			if (m_sourceRow[i] == sourceModelRow) {
 				realRow = i;
 				break;
 			}
@@ -656,7 +656,7 @@ public:
 		load();
 		if (parent.isValid())
 			return 0;
-		return m_historyHash.count();
+		return m_historyHash.length;
 	}
 
 	int columnCount(QModelIndex parent = QModelIndex())
@@ -701,7 +701,6 @@ public:
 		return true;
 	}
 
-
 	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
 	{
 		return QAbstractProxyModel.data(index, role);
@@ -722,20 +721,18 @@ private:
 
 	void sourceRowsRemoved(QModelIndex , int start, int end)
 	{
-		//Q_UNUSED(start);
-		//Q_UNUSED(end);
 		sourceReset();
 	}
 
 	void sourceRowsInserted(QModelIndex parent, int start, int end)
 	{
 		assert(start == end && start == 0);
-		//Q_UNUSED(end);
+		
 		if (!m_loaded)
 			return;
 		QModelIndex idx = sourceModel().index(start, 0, parent);
-		QString url = idx.data(HistoryModel.UrlStringRole).toString();
-		if (m_historyHash.contains(url)) {
+		string url = idx.data(HistoryModel.UrlStringRole).toString();
+		if (url in m_historyHash) {
 			int sourceRow = sourceModel().rowCount() - m_historyHash[url];
 			int realRow = mapFromSource(sourceModel().index(sourceRow, 0)).row();
 			beginRemoveRows(QModelIndex(), realRow, realRow);
@@ -744,7 +741,7 @@ private:
 			endRemoveRows();
 		}
 		beginInsertRows(QModelIndex(), 0, 0);
-		m_historyHash.insert(url, sourceModel().rowCount() - start);
+		m_historyHash[url] = (sourceModel().rowCount() - start);
 		m_sourceRow.insert(0, sourceModel().rowCount());
 		endInsertRows();
 	}
@@ -755,12 +752,13 @@ private:
 		if (m_loaded)
 			return;
 		m_sourceRow.clear();
-		m_historyHash.clear();
-		m_historyHash.reserve(sourceModel().rowCount());
+		m_historyHash = null;
+		m_historyHash.length = sourceModel().rowCount();
+		m_historyHash.length = 0;
 		for (int i = 0; i < sourceModel().rowCount(); ++i) {
 			QModelIndex idx = sourceModel().index(i, 0);
-			QString url = idx.data(HistoryModel.UrlStringRole).toString();
-			if (!m_historyHash.contains(url)) {
+			string url = idx.data(HistoryModel.UrlStringRole).toString();
+			if (!(url in m_historyHash)) {
 				m_sourceRow.append(sourceModel().rowCount() - i);
 				m_historyHash[url] = sourceModel().rowCount() - i;
 			}
@@ -769,7 +767,7 @@ private:
 	}
 
 	int[] m_sourceRow;
-	int[QString] m_historyHash;
+	int[string] m_historyHash;
 	bool m_loaded;
 }
 
@@ -923,8 +921,8 @@ public:
 	void setInitialActions(QAction[] actions)
 	{
 		m_initialActions = actions;
-		for (int i = 0; i < m_initialActions.count(); ++i)
-			addAction(m_initialActions.at(i));
+		for (int i = 0; i < m_initialActions.length; ++i)
+			addAction(m_initialActions[i]);
 	}
 
 protected:
@@ -937,9 +935,9 @@ protected:
 			setModel(m_historyMenuModel);
 		}
 		// initial actions
-		for (int i = 0; i < m_initialActions.count(); ++i)
-			addAction(m_initialActions.at(i));
-		if (!m_initialActions.isEmpty())
+		for (int i = 0; i < m_initialActions.length; ++i)
+			addAction(m_initialActions[i]);
+		if (m_initialActions.length)
 			addSeparator();
 		setFirstSeparator(m_historyMenuModel.bumpedRows());
 
@@ -998,10 +996,10 @@ public:
 		if (sourceModel() && (role == Qt.EditRole || role == Qt.DisplayRole) && index.isValid()) {
 			QModelIndex idx = mapToSource(index);
 			idx = idx.sibling(idx.row(), 1);
-			QString urlString = idx.data(HistoryModel.UrlStringRole).toString();
+			string urlString = idx.data(HistoryModel.UrlStringRole).toString();
 			if (index.row() % 2) {
 				QUrl url = urlString;
-				QString s = url.toString(QUrl.RemoveScheme | QUrl.RemoveUserInfo | QUrl.StripTrailingSlash);
+				string s = url.toString(QUrl.RemoveScheme | QUrl.RemoveUserInfo | QUrl.StripTrailingSlash);
 				return s.mid(2);  // strip // from the front
 			}
 			return urlString;
@@ -1100,7 +1098,7 @@ public:
 					return date.toString(QLatin1String("dddd, MMMM d, yyyy"));
 				}
 				if (index.column() == 1) {
-					return tr("%1 items").arg(rowCount(index.sibling(index.row(), 0)));
+					return Format(tr("{} items"), rowCount(index.sibling(index.row(), 0)));
 				}
 			}
 		}
@@ -1127,8 +1125,8 @@ public:
 
 		// row count OF dates
 		if (!parent.isValid()) {
-			if (!m_sourceRowCache.isEmpty())
-				return m_sourceRowCache.count();
+			if (m_sourceRowCache.length)
+				return m_sourceRowCache.length;
 			QDate currentDate;
 			int rows = 0;
 			int totalRows = sourceModel().rowCount();
@@ -1136,12 +1134,12 @@ public:
 			for (int i = 0; i < totalRows; ++i) {
 				QDate rowDate = sourceModel().index(i, 0).data(HistoryModel.DateRole).toDate();
 				if (rowDate != currentDate) {
-					m_sourceRowCache.append(i);
+					m_sourceRowCache ~= i;
 					currentDate = rowDate;
 					++rows;
 				}
 			}
-			assert(m_sourceRowCache.count() == rows);
+			assert(m_sourceRowCache.length == rows);
 			return rows;
 		}
 
@@ -1156,7 +1154,7 @@ public:
 		if (!sourceIndex.isValid())
 			return QModelIndex();
 
-		if (m_sourceRowCache.isEmpty())
+		if (m_sourceRowCache.length == 0)
 			rowCount(QModelIndex());
 
 		int[].iterator it;
@@ -1164,7 +1162,7 @@ public:
 		if (*it != sourceIndex.row())
 			--it;
 		int dateRow = qMax(0, it - m_sourceRowCache.begin());
-		int row = sourceIndex.row() - m_sourceRowCache.at(dateRow);
+		int row = sourceIndex.row() - m_sourceRowCache[dateRow];
 		return createIndex(row, sourceIndex.column(), dateRow + 1);
 	}
 
@@ -1261,21 +1259,20 @@ private:
 
 	void sourceReset()
 	{
-		m_sourceRowCache.clear();
+		m_sourceRowCache.length = 0;
 		reset();
 	}
 
 	void sourceRowsInserted(QModelIndex parent, int start, int end)
 	{
-		//Q_UNUSED(parent); // Avoid warnings when compiling release
 		assert(!parent.isValid());
 		if (start != 0 || start != end) {
-			m_sourceRowCache.clear();
+			m_sourceRowCache.length = 0;
 			reset();
 			return;
 		}
 
-		m_sourceRowCache.clear();
+		m_sourceRowCache.length = 0;
 		QModelIndex treeIndex = mapFromSource(sourceModel().index(start, 0));
 		QModelIndex treeParent = treeIndex.parent();
 		if (rowCount(treeParent) == 1) {
@@ -1287,18 +1284,17 @@ private:
 		}
 	}
 
-	void sourceRowsRemoved(QModelIndex parent, int start, int end);
+	void sourceRowsRemoved(QModelIndex parent, int start, int end)
 	{
-		//Q_UNUSED(parent); // Avoid warnings when compiling release
 		assert(!parent.isValid());
-		if (m_sourceRowCache.isEmpty())
+		if (m_sourceRowCache.length == 0)
 			return;
 		for (int i = end; i >= start;) {
 			int[]::iterator it;
 			it = qLowerBound(m_sourceRowCache.begin(), m_sourceRowCache.end(), i);
 			// playing it safe
 			if (it == m_sourceRowCache.end()) {
-				m_sourceRowCache.clear();
+				m_sourceRowCache = null;
 				reset();
 				return;
 			}
@@ -1319,7 +1315,7 @@ private:
 				++row;
 				--i;
 			}
-			for (int j = row; j < m_sourceRowCache.count(); ++j)
+			for (int j = row; j < m_sourceRowCache.length; ++j)
 				--m_sourceRowCache[j];
 			endRemoveRows();
 		}
@@ -1333,15 +1329,15 @@ private:
 		if (row <= 0)
 			return 0;
 
-		if (m_sourceRowCache.isEmpty())
+		if (m_sourceRowCache.length == 0)
 			rowCount(QModelIndex());
 
-		if (row >= m_sourceRowCache.count()) {
+		if (row >= m_sourceRowCache.length) {
 			if (!sourceModel())
 				return 0;
 			return sourceModel().rowCount();
 		}
-		return m_sourceRowCache.at(row);
+		return m_sourceRowCache[row];
 	}
 
 	int[] m_sourceRowCache;
@@ -1362,7 +1358,8 @@ public:
 		setFilterCaseSensitivity(Qt.CaseInsensitive);
 	}
 
-	protected:
+protected:
+
 	bool filterAcceptsRow(int source_row, QModelIndex source_parent)
 	{
 		if (!source_parent.isValid())
@@ -1392,7 +1389,7 @@ public:
 		tree.setTextElideMode(Qt.ElideMiddle);
 		auto model = history.historyTreeModel();
 		auto proxyModel = new TreeProxyModel(this);
-		search.textChanged(QString).connect(&proxyModel.setFilterFixedString(QString));
+		search.textChanged.connect(&proxyModel.setFilterFixedString);
 		removeButton.clicked.connect(&tree.removeOne);
 		removeAllButton.clicked.connect(&history.clear);
 		proxyModel.setSourceModel(model);
@@ -1412,7 +1409,7 @@ private:
 
 	void customContextMenuRequested(QPoint pos)
 	{
-		QMenu menu;
+		auto menu = new QMenu;
 		QModelIndex index = tree.indexAt(pos);
 		index = index.sibling(index.row(), 0);
 		if (index.isValid() && !tree.model().hasChildren(index)) {
@@ -1429,7 +1426,7 @@ private:
 		QModelIndex index = tree.currentIndex();
 		if (!index.parent().isValid())
 			return;
-		emit openUrl(index.data(HistoryModel.UrlRole).toUrl());
+		openUrl.emit(index.data(HistoryModel.UrlRole).toUrl());
 	}
 
 	void copy()
@@ -1437,7 +1434,7 @@ private:
 		QModelIndex index = tree.currentIndex();
 		if (!index.parent().isValid())
 			return;
-		QString url = index.data(HistoryModel.UrlStringRole).toString();
+		string url = index.data(HistoryModel.UrlStringRole).toString();
 
 		QClipboard clipboard = QApplication.clipboard();
 		clipboard.setText(url);

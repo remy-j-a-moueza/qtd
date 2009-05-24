@@ -44,7 +44,6 @@ import qt.network.QNetworkCookieJar;
 import qt.core.QDebug;
 
 import qt.core.QAbstractItemModel;
-import qt.core.QStringList;
 import qt.core.QDateTime;
 import qt.core.QDir;
 import qt.core.QFile;
@@ -73,35 +72,35 @@ static const uint JAR_VERSION = 23;
 QDataStream operator<<(QDataStream stream, QNetworkCookie[] list)
 {
 	stream << JAR_VERSION;
-	stream << quint32(list.size());
-	for (int i = 0; i < list.size(); ++i)
-		stream << list.at(i).toRawForm();
+	stream << cast(uint) list.length;
+	for (int i = 0; i < list.length; ++i)
+		stream << list[i].toRawForm();
 	return stream;
 }
 
-QDataStream operator>>(QDataStream stream, QNetworkCookie[] list)
+QDataStream operator>>(QDataStream stream, ref QNetworkCookie[] list)
 {
 	list.clear();
 
-	quint32 version_;
+	uint version_;
 	stream >> version_;
 
 	if (version != JAR_VERSION)
 		return stream;
 
-	quint32 count;
+	uint count;
 	stream >> count;
-	for(quint32 i = 0; i < count; ++i)
+	for(uint i = 0; i < count; ++i)
 	{
 		QByteArray value;
 		stream >> value;
 		QNetworkCookie[] newCookies = QNetworkCookie.parseCookies(value);
-		if (newCookies.count() == 0 && value.length() != 0) {
+		if (newCookies.length == 0 && value.length() != 0) {
 			qWarning() << "CookieJar: Unable to parse saved cookie:" << value;
 		}
 		
-		for (int j = 0; j < newCookies.count(); ++j)
-			list.append(newCookies.at(j));
+		for (int j = 0; j < newCookies.length; ++j)
+			list ~= newCookies[j];
 		
 		if (stream.atEnd())
 			break;
@@ -144,7 +143,7 @@ public:
 
 	QNetworkCookie[] cookiesForUrl(QUrl url)
 	{
-		CookieJar that = const_cast<CookieJar>(this);
+		CookieJar that = cast(CookieJar) this;
 		if (!m_loaded)
 			that.load();
 
@@ -166,7 +165,7 @@ public:
 		if (globalSettings.testAttribute(QWebSettings.PrivateBrowsingEnabled))
 			return false;
 
-		QString host = url.host();
+		string host = url.host();
 		bool eBlock = qBinaryFind(m_exceptions_block.begin(), m_exceptions_block.end(), host) != m_exceptions_block.end();
 		bool eAllow = qBinaryFind(m_exceptions_allow.begin(), m_exceptions_allow.end(), host) != m_exceptions_allow.end();
 		bool eAllowSession = qBinaryFind(m_exceptions_allowForSession.begin(), m_exceptions_allowForSession.end(), host) != m_exceptions_allowForSession.end();
@@ -178,7 +177,7 @@ public:
 			// pass url domain == cookie domain
 			QDateTime soon = QDateTime.currentDateTime();
 			soon = soon.addDays(90);
-			foreach(QNetworkCookie cookie, cookieList) {
+			foreach(QNetworkCookie cookie; cookieList) {
 				QNetworkCookie[] lst;
 				if (m_keepCookies == KeepUntilTimeLimit && !cookie.isSessionCookie() && cookie.expirationDate() > soon) {
 					cookie.setExpirationDate(soon);
@@ -204,7 +203,7 @@ public:
 
 		if (addedCookies) {
 			m_saveTimer.changeOccurred();
-			emit cookiesChanged();
+			cookiesChanged.emit();
 		}
 		return addedCookies;
 	}
@@ -212,7 +211,7 @@ public:
 	AcceptPolicy acceptPolicy()
 	{
 		if (!m_loaded)
-			(const_cast<CookieJar>(this)).load();
+			(cast(CookieJar) this).load();
 		return m_acceptCookies;
 	}
     
@@ -229,7 +228,7 @@ public:
 	KeepPolicy keepPolicy()
 	{
 		if (!m_loaded)
-			(const_cast<CookieJar>(this)).load();
+			(cast(CookieJar) this).load();
 		return m_keepCookies;
 	}
 
@@ -244,28 +243,28 @@ public:
 	}
 
 
-	QStringList blockedCookies()
+	string[] blockedCookies()
 	{
 		if (!m_loaded)
-			(const_cast<CookieJar>(this)).load();
+			(cast(CookieJar) this).load();
 		return m_exceptions_block;
 	}
 
-	QStringList allowedCookies()
+	string[] allowedCookies()
 	{
 		if (!m_loaded)
-			(const_cast<CookieJar>(this)).load();
+			(cast(CookieJar) this).load();
 		return m_exceptions_allow;
 	}
     
-	QStringList allowForSessionCookies()
+	string[] allowForSessionCookies()
 	{
 		if (!m_loaded)
-			(const_cast<CookieJar>(this)).load();
+			(cast(CookieJar) this).load();
 		return m_exceptions_allowForSession;
 	}
 
-	void setBlockedCookies(QStringList list)
+	void setBlockedCookies(string[] list)
 	{
 		if (!m_loaded)
 			load();
@@ -274,7 +273,7 @@ public:
 		m_saveTimer.changeOccurred();
 	}
     
-	void setAllowedCookies(QStringList list)
+	void setAllowedCookies(string[] list)
 	{
 		if (!m_loaded)
 			load();
@@ -283,7 +282,7 @@ public:
 		m_saveTimer.changeOccurred();
 	}
     
-	void setAllowForSessionCookies(QStringList list)
+	void setAllowForSessionCookies(string[] list)
 	{
 		if (!m_loaded)
 			load();
@@ -298,7 +297,7 @@ public:
 	{
 		setAllCookies(QNetworkCookie[]());
 		m_saveTimer.changeOccurred();
-		emit cookiesChanged();
+		cookiesChanged.emit();
 	}
 
 	void loadSettings()
@@ -310,38 +309,39 @@ public:
 		QMetaEnum acceptPolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("AcceptPolicy"));
 		m_acceptCookies = acceptPolicyEnum.keyToValue(value) == -1 ?
 				AcceptOnlyFromSitesNavigatedTo :
-				static_cast<AcceptPolicy>(acceptPolicyEnum.keyToValue(value));
+				cast(AcceptPolicy) acceptPolicyEnum.keyToValue(value);
 
 		value = settings.value(QLatin1String("keepCookiesUntil"), QLatin1String("KeepUntilExpire")).toByteArray();
 		QMetaEnum keepPolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("KeepPolicy"));
 		m_keepCookies = keepPolicyEnum.keyToValue(value) == -1 ?
 				KeepUntilExpire :
-				static_cast<KeepPolicy>(keepPolicyEnum.keyToValue(value));
+				cast(KeepPolicy) keepPolicyEnum.keyToValue(value);
 
 		if (m_keepCookies == KeepUntilExit)
-		setAllCookies(QNetworkCookie[]());
+		setAllCookies(null);
 
 		m_loaded = true;
-		emit cookiesChanged();
+		cookiesChanged.emit();
 	}
 
 private:
+
 	void save()
 	{
 		if (!m_loaded)
 			return;
 		purgeOldCookies();
-		QString directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
+		string directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
 		if (directory.isEmpty())
 			directory = QDir.homePath() + QLatin1String("/.") + QCoreApplication.applicationName();
 		if (!QFile.exists(directory)) {
 			QDir dir;
 			dir.mkpath(directory);
 		}
-		QSettings cookieSettings(directory + QLatin1String("/cookies.ini"), QSettings.IniFormat);
+		auto cookieSettings = new QSettings(directory + QLatin1String("/cookies.ini"), QSettings.IniFormat);
 		QNetworkCookie[] cookies = allCookies();
 		for (int i = cookies.count() - 1; i >= 0; --i) {
-			if (cookies.at(i).isSessionCookie())
+			if (cookies[i].isSessionCookie())
 			cookies.removeAt(i);
 		}
 		cookieSettings.setValue(QLatin1String("cookies"), qVariantFromValue<QNetworkCookie[] >(cookies));
@@ -369,14 +369,14 @@ private:
 			return;
 		int oldCount = cookies.count();
 		QDateTime now = QDateTime.currentDateTime();
-		for (int i = cookies.count() - 1; i >= 0; --i) {
-			if (!cookies.at(i).isSessionCookie() && cookies.at(i).expirationDate() < now)
+		for (int i = cookies.length - 1; i >= 0; --i) {
+			if (!cookies[i].isSessionCookie() && cookies[i].expirationDate() < now)
 				cookies.removeAt(i);
 		}
-		if (oldCount == cookies.count())
+		if (oldCount == cookies.length)
 			return;
 		setAllCookies(cookies);
-		emit cookiesChanged();
+		cookiesChanged.emit();
 	}
 
 	void load()
@@ -384,9 +384,9 @@ private:
 		if (m_loaded)
 			return;
 		// load cookies and exceptions
-		qRegisterMetaTypeStreamOperators<QNetworkCookie[] >("QNetworkCookie[]");
+		qRegisterMetaTypeStreamOperators!(QNetworkCookie[])("QNetworkCookie[]");
 		auto cookieSettings = new QSettings(QDesktopServices.storageLocation(QDesktopServices.DataLocation) + QLatin1String("/cookies.ini"), QSettings.IniFormat);
-		setAllCookies(qvariant_cast<QNetworkCookie[] >(cookieSettings.value(QLatin1String("cookies"))));
+		setAllCookies(cast(QNetworkCookie[]) (cookieSettings.value(QLatin1String("cookies"))));
 		cookieSettings.beginGroup(QLatin1String("Exceptions"));
 		m_exceptions_block = cookieSettings.value(QLatin1String("block")).toStringList();
 		m_exceptions_allow = cookieSettings.value(QLatin1String("allow")).toStringList();
@@ -404,9 +404,9 @@ private:
 	AcceptPolicy m_acceptCookies;
 	KeepPolicy m_keepCookies;
 
-	QStringList m_exceptions_block;
-	QStringList m_exceptions_allow;
-	QStringList m_exceptions_allowForSession;
+	string[] m_exceptions_block;
+	string[] m_exceptions_allow;
+	string[] m_exceptions_allowForSession;
 }
 
 class CookieModel : public QAbstractTableModel
@@ -425,9 +425,9 @@ public:
 	QVariant headerData(int section, Qt.Orientation orientation, int role)
 	{
 		if (role == Qt.SizeHintRole) {
-			QFont font;
+			auto font = new QFont;
 			font.setPointSize(10);
-			QFontMetrics fm(font);
+			auto fm = new QFontMetrics(font);
 			int height = fm.height() + fm.height()/3;
 			int width = fm.width(headerData(section, orientation, Qt.DisplayRole).toString());
 			return QSize(width, height);
@@ -451,7 +451,7 @@ public:
 				case 5:
 					return tr("Contents");
 				default:
-					return QVariant();
+					return new QVariant();
 			}
 		}
 		return QAbstractTableModel.headerData(section, orientation, role);
@@ -464,13 +464,13 @@ public:
 		if (m_cookieJar)
 			lst = m_cookieJar.allCookies();
 		
-		if (index.row() < 0 || index.row() >= lst.size())
-			return QVariant();
+		if (index.row() < 0 || index.row() >= lst.length)
+			return new QVariant();
 
 		switch (role) {
 			case Qt.DisplayRole:
 			case Qt.EditRole: {
-			QNetworkCookie cookie = lst.at(index.row());
+			QNetworkCookie cookie = lst[index.row];
 				switch (index.column()) {
 				    case 0:
 					return cookie.domain();
@@ -487,7 +487,7 @@ public:
 				}
 			}
 			case Qt.FontRole:{
-				QFont font;
+				auto font = new QFont;
 				font.setPointSize(10);
 				return font;
 			}
@@ -522,7 +522,7 @@ public:
 		return true;
 	}
 
-private slots:
+private:
 	
 	void cookiesChanged()
 	{
@@ -530,6 +530,7 @@ private slots:
 	}
 
 private:
+
 	CookieJar m_cookieJar;
 }
 
@@ -542,7 +543,8 @@ class CookiesDialog : public QDialog, public Ui_CookiesDialog
 {
 public:
 
-	this(CookieJar cookieJar, QWidget parent = this) : QDialog(parent)
+	this(CookieJar cookieJar, QWidget parent = this)
+	//: QDialog(parent)
 	{
 		setupUi(this);
 		setWindowFlags(Qt.Sheet);
@@ -606,9 +608,9 @@ public:
 	QVariant headerData(int section, Qt.Orientation orientation, int role)
 	{
 		if (role == Qt.SizeHintRole) {
-			QFont font;
+			auto font = new QFont;
 			font.setPointSize(10);
-			QFontMetrics fm(font);
+			auto fm =new QFontMetrics(font);
 			int height = fm.height() + fm.height()/3;
 			int width = fm.width(headerData(section, orientation, Qt.DisplayRole).toString());
 			return QSize(width, height);
@@ -634,35 +636,35 @@ public:
 			case Qt.DisplayRole:
 			case Qt.EditRole: {
 				int row = index.row();
-				if (row < m_allowedCookies.count()) {
+				if (row < m_allowedCookies.length) {
 					switch (index.column()) {
 						case 0:
-							return m_allowedCookies.at(row);
+							return m_allowedCookies[row];
 						case 1:
 							return tr("Allow");
 					}
 				}
-				row = row - m_allowedCookies.count();
-				if (row < m_blockedCookies.count()) {
+				row = row - m_allowedCookies.length;
+				if (row < m_blockedCookies.length) {
 					switch (index.column()) {
 						case 0:
-							return m_blockedCookies.at(row);
+							return m_blockedCookies[row];
 						case 1:
 							return tr("Block");
 					}
 				}
-				row = row - m_blockedCookies.count();
-				if (row < m_sessionCookies.count()) {
+				row = row - m_blockedCookies.length;
+				if (row < m_sessionCookies.length) {
 					switch (index.column()) {
 						case 0:
-							return m_sessionCookies.at(row);
+							return m_sessionCookies[row];
 						case 1:
 							return tr("Allow For Session");
 					}
 				}
 			}
 			case Qt.FontRole:{
-				QFont font;
+				auto font = new QFont;
 				font.setPointSize(10);
 				return font;
 			}
@@ -677,7 +679,7 @@ public:
 	
 	int rowCount(QModelIndex parent = QModelIndex())
 	{
-		return (parent.isValid() || !m_cookieJar) ? 0 : m_allowedCookies.count() + m_blockedCookies.count() + m_sessionCookies.count();
+		return (parent.isValid() || !m_cookieJar) ? 0 : m_allowedCookies.length + m_blockedCookies.length + m_sessionCookies.length;
 	}
 
 	bool removeRows(int row, int count, QModelIndex parent)
@@ -688,17 +690,17 @@ public:
 		int lastRow = row + count - 1;
 		beginRemoveRows(parent, row, lastRow);
 		for (int i = lastRow; i >= row; --i) {
-			if (i < m_allowedCookies.count()) {
+			if (i < m_allowedCookies.length) {
 				m_allowedCookies.removeAt(row);
 				continue;
 			}
-			i = i - m_allowedCookies.count();
-			if (i < m_blockedCookies.count()) {
+			i = i - m_allowedCookies.length;
+			if (i < m_blockedCookies.length) {
 				m_blockedCookies.removeAt(row);
 				continue;
 			}
-			i = i - m_blockedCookies.count();
-			if (i < m_sessionCookies.count()) {
+			i = i - m_blockedCookies.length;
+			if (i < m_sessionCookies.length) {
 				m_sessionCookies.removeAt(row);
 				continue;
 			}
@@ -716,9 +718,9 @@ private:
 	CookieJar m_cookieJar;
 
 	// Domains we allow, Domains we block, Domains we allow for this session
-	QStringList m_allowedCookies;
-	QStringList m_blockedCookies;
-	QStringList m_sessionCookies;
+	string[] m_allowedCookies;
+	string[] m_blockedCookies;
+	string[] m_sessionCookies;
 }
 
 
@@ -728,7 +730,7 @@ class CookiesExceptionsDialog : public QDialog, public Ui_CookiesExceptionsDialo
 public:
 
 	this(CookieJar cookieJar, QWidget parent = null)
-	: QDialog(parent)
+	//: QDialog(parent)
 	{
 		m_cookieJar = cookieJar;
 		setupUi(this);
@@ -757,7 +759,7 @@ public:
 
 		QFont f = font();
 		f.setPointSize(10);
-		QFontMetrics fm(f);
+		auto fm = new QFontMetrics(f);
 		int height = fm.height() + fm.height()/3;
 		exceptionTable.verticalHeader().setDefaultSectionSize(height);
 		exceptionTable.verticalHeader().setMinimumSectionSize(-1);
@@ -783,7 +785,7 @@ private:
 	{
 		if (domainLineEdit.text().isEmpty())
 			return;
-		m_exceptionsModel.m_blockedCookies.append(domainLineEdit.text());
+		m_exceptionsModel.m_blockedCookies ~= domainLineEdit.text();
 		m_cookieJar.setBlockedCookies(m_exceptionsModel.m_blockedCookies);
 		m_exceptionsModel.reset();
 	}
@@ -792,7 +794,7 @@ private:
 	{
 		if (domainLineEdit.text().isEmpty())
 			return;
-		m_exceptionsModel.m_allowedCookies.append(domainLineEdit.text());
+		m_exceptionsModel.m_allowedCookies ~= domainLineEdit.text();
 		m_cookieJar.setAllowedCookies(m_exceptionsModel.m_allowedCookies);
 		m_exceptionsModel.reset();
 	}
@@ -800,12 +802,12 @@ private:
 	{
 		if (domainLineEdit.text().isEmpty())
 			return;
-		m_exceptionsModel.m_sessionCookies.append(domainLineEdit.text());
+		m_exceptionsModel.m_sessionCookie ~= domainLineEdit.text();
 		m_cookieJar.setAllowForSessionCookies(m_exceptionsModel.m_sessionCookies);
 		m_exceptionsModel.reset();
 	}
 	
-	void textChanged(QString text)
+	void textChanged(string text)
 	{
 		bool enabled = !text.isEmpty();
 		blockButton.setEnabled(enabled);

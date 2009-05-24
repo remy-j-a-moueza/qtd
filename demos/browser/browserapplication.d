@@ -80,10 +80,10 @@ class BrowserApplication : public QApplication
 {
 public:
 
-	this(char[] args)
+	this(string[] args)
 	{
 		super(args);
-		m_localServer = 0;
+		m_localServer = null;
 		QCoreApplication.setOrganizationName(QLatin1String("Trolltech"));
 		QCoreApplication.setApplicationName(QLatin1String("demobrowser"));
 		QCoreApplication.setApplicationVersion(QLatin1String("0.1"));
@@ -92,19 +92,19 @@ public:
 			// Use a different server name for QWS so we can run an X11
 			// browser and a QWS browser in parallel on the same machine for
 			// debugging
-			QString serverName = QCoreApplication.applicationName() + QLatin1String("_qws");
+			string serverName = QCoreApplication.applicationName() + QLatin1String("_qws");
 		} else {
-			QString serverName = QCoreApplication.applicationName();
+			string serverName = QCoreApplication.applicationName();
 		}
-		QLocalSocket socket;
+		auto socket = new QLocalSocket;
 		socket.connectToServer(serverName);
 		if (socket.waitForConnected(500)) {
 			auto stream = new QTextStream(&socket);
-			QStringList args = QCoreApplication.arguments();
+			string[] args = QCoreApplication.arguments();
 			if (args.count() > 1)
 				stream << args.last();
 			else
-				stream << QString();
+				stream << "";
 			stream.flush();
 			socket.waitForBytesWritten();
 			return;
@@ -134,7 +134,7 @@ public:
 		}
 
 		QDesktopServices.setUrlHandler(QLatin1String("http"), this, "openUrl");
-		QString localSysName = QLocale.system().name();
+		string localSysName = QLocale.system().name();
 
 		installTranslator(QLatin1String("qt_") + localSysName);
 
@@ -153,8 +153,8 @@ public:
 	~this()
 	{
 		delete s_downloadManager;
-		for (int i = 0; i < m_mainWindows.size(); ++i) {
-			BrowserMainWindow window = m_mainWindows.at(i);
+		for (int i = 0; i < m_mainWindows.length; ++i) {
+			BrowserMainWindow window = m_mainWindows[i];
 			delete window;
 		}
 		delete s_networkAccessManager;
@@ -172,14 +172,14 @@ public:
 		settings.beginGroup(QLatin1String("websettings"));
 
 		QWebSettings defaultSettings = QWebSettings.globalSettings();
-		QString standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
+		string standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
 		int standardFontSize = defaultSettings.fontSize(QWebSettings.DefaultFontSize);
 		QFont standardFont = QFont(standardFontFamily, standardFontSize);
 		standardFont = qVariantValue!(QFont)(settings.value(QLatin1String("standardFont"), standardFont));
 		defaultSettings.setFontFamily(QWebSettings.StandardFont, standardFont.family());
 		defaultSettings.setFontSize(QWebSettings.DefaultFontSize, standardFont.pointSize());
 
-		QString fixedFontFamily = defaultSettings.fontFamily(QWebSettings.FixedFont);
+		string fixedFontFamily = defaultSettings.fontFamily(QWebSettings.FixedFont);
 		int fixedFontSize = defaultSettings.fontSize(QWebSettings.DefaultFixedFontSize);
 		QFont fixedFont = QFont(fixedFontFamily, fixedFontSize);
 		fixedFont = qVariantValue!(QFont)(settings.value(QLatin1String("fixedFont"), fixedFont));
@@ -197,7 +197,7 @@ public:
 
 	bool isTheOnlyBrowser()
 	{
-		return (m_localServer != 0);
+		return (m_localServer != null);
 	}
 
 	BrowserMainWindow mainWindow()
@@ -212,8 +212,8 @@ public:
 	{
 		clean();
 		BrowserMainWindow[] list;
-		for (int i = 0; i < m_mainWindows.count(); ++i)
-			list ~= m_mainWindows.at(i);
+		for (int i = 0; i < m_mainWindows.length; ++i)
+			list ~= m_mainWindows[i];
 		return list;
 	}
 
@@ -243,9 +243,9 @@ public:
 		auto stream = new QDataStream(&buffer);
 		buffer.open(QIODevice.ReadWrite);
 
-		stream << m_mainWindows.count();
-		for (int i = 0; i < m_mainWindows.count(); ++i)
-			stream << m_mainWindows.at(i).saveState();
+		stream << m_mainWindows.length;
+		for (int i = 0; i < m_mainWindows.length; ++i)
+			stream << m_mainWindows[i].saveState();
 		settings.setValue(QLatin1String("lastSession"), data);
 		settings.endGroup();
 	}
@@ -354,7 +354,7 @@ public:
 			} else {
 				newWindow = newMainWindow();
 			}
-			newWindow.restoreState(windows.at(i));
+			newWindow.restoreState(windows[i]);
 		}
 	}
 
@@ -367,12 +367,12 @@ version(Q_WS_MAC)
 	{
 		clean();
 		int tabCount = 0;
-		for (int i = 0; i < m_mainWindows.count(); ++i) {
-			tabCount =+ m_mainWindows.at(i).tabWidget().count();
+		for (int i = 0; i < m_mainWindows.length; ++i) {
+			tabCount =+ m_mainWindows[i].tabWidget().count();
 		}
 
 		if (tabCount > 1) {
-			int ret = QMessageBox.warning(mainWindow(), QString(),
+			int ret = QMessageBox.warning(mainWindow(), null,
 			tr("There are %1 windows and %2 tabs open\n"
 				"Do you want to quit anyway?").arg(m_mainWindows.count()).arg(tabCount),
 			QMessageBox.Yes | QMessageBox.No,
@@ -401,7 +401,7 @@ private:
 	*/
 	void postLaunch()
 	{
-		QString directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
+		string directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
 		if (directory.isEmpty())
 			directory = QDir.homePath() ~ QLatin1String("/.") ~ QCoreApplication.applicationName();
 		QWebSettings.setIconDatabasePath(directory);
@@ -412,7 +412,7 @@ private:
 
 		// newMainWindow() needs to be called in main() for this to happen
 		if (m_mainWindows.count() > 0) {
-			QStringList args = QCoreApplication.arguments();
+			string[] args = QCoreApplication.arguments();
 			if (args.count() > 1)
 				mainWindow().loadPage(args.last());
 			else
@@ -433,7 +433,7 @@ private:
 			return;
 		socket.waitForReadyRead(1000);
 		QTextStream stream(socket);
-		QString url;
+		string url;
 		stream >> url;
 		if (!url.isEmpty()) {
 			QSettings settings;
@@ -456,12 +456,12 @@ private:
 	void clean()
 	{
 		// cleanup any deleted main windows first
-		for (int i = m_mainWindows.count() - 1; i >= 0; --i)
-			if (m_mainWindows.at(i).isNull())
+		for (int i = m_mainWindows.length - 1; i >= 0; --i)
+			if (m_mainWindows[i].isNull())
 				m_mainWindows.removeAt(i);
 	}
 
-	void installTranslator(QString name)
+	void installTranslator(string name)
 	{
 		QTranslator translator = new QTranslator(this);
 		translator.load(name, QLibraryInfo.location(QLibraryInfo.TranslationsPath));

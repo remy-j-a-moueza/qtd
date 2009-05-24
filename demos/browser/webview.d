@@ -80,7 +80,7 @@ public:
 	{
 		QObject w = this.parent();
 		while (w) {
-			if (BrowserMainWindow mw = qobject_cast<BrowserMainWindow>(w))
+			if (BrowserMainWindow mw = cast(BrowserMainWindow) w)
 				return mw;
 			w = w.parent();
 		}
@@ -117,14 +117,13 @@ protected:
 		}
 		if (frame == mainFrame()) {
 			m_loadingUrl = request.url();
-			emit loadingUrl(m_loadingUrl);
+			loadingUrl.emit(m_loadingUrl);
 		}
 		return QWebPage.acceptNavigationRequest(frame, request, type);
 	}
 
 	QWebPage createWindow(QWebPage.WebWindowType type)
 	{
-		//Q_UNUSED(type);
 		if (m_keyboardModifiers & Qt.ControlModifier || m_pressedButtons == Qt.MidButton)
 			m_openInNewTab = true;
 		if (m_openInNewTab) {
@@ -138,12 +137,9 @@ protected:
 
 	version(QT_NO_UITOOLS) {} else
 	{
-		QObject createPlugin(QString classId, QUrl url, QStringList paramNames, QStringList paramValues);
+		QObject createPlugin(string classId, QUrl url, string[] paramNames, string[] paramValues);
 		{
-			//Q_UNUSED(url);
-			//Q_UNUSED(paramNames);
-			//Q_UNUSED(paramValues);
-			QUiLoader loader;
+			auto loader = new QUiLoader;
 			return loader.createWidget(classId, view());
 		}
 	}
@@ -157,14 +153,14 @@ private:
 			return;
 		}
 
-		QFile file(QLatin1String(":/notfound.html"));
+		auto file = new QFile(QLatin1String(":/notfound.html"));
 		bool isOpened = file.open(QIODevice.ReadOnly);
 		assert(isOpened);
-		QString title = tr("Error loading page: %1").arg(reply.url().toString());
-		QString html = QString(QLatin1String(file.readAll()))
-			.arg(title)
-			.arg(reply.errorString())
-			.arg(reply.url().toString());
+		string title = Format(tr("Error loading page: {}"), reply.url().toString());
+		string html = Format(QLatin1String(file.readAll()),
+			title,
+			reply.errorString(),
+			reply.url().toString());
 
 		QBuffer imageBuffer;
 		imageBuffer.open(QBuffer.ReadWrite);
@@ -172,7 +168,7 @@ private:
 		QPixmap pixmap = icon.pixmap(QSize(32,32));
 		if (pixmap.save(&imageBuffer, "PNG")) {
 			html.replace(QLatin1String("IMAGE_BINARY_DATA_HERE"),
-			QString(QLatin1String(imageBuffer.buffer().toBase64())));
+			QLatin1String(imageBuffer.buffer().toBase64()));
 		}
 
 		QWebFrame[] frames;
@@ -235,7 +231,7 @@ public:
 		return m_initialUrl;
 	}
 
-	QString lastStatusBarText()
+	string lastStatusBarText()
 	{
 		return m_statusBarText;
 	}
@@ -310,9 +306,9 @@ private:
 		m_progress = 0;
 	}
 
-	void setStatusBarText(QString string)
+	void setStatusBarText(string str)
 	{
-		m_statusBarText = string;
+		m_statusBarText = str;
 	}
 
 	void downloadRequested(QNetworkRequest request)
@@ -328,7 +324,7 @@ private:
 	
 private:
 
-	QString m_statusBarText;
+	string m_statusBarText;
 	QUrl m_initialUrl;
 	int m_progress;
 	WebPage m_page;

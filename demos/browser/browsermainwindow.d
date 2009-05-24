@@ -83,7 +83,7 @@ Handles the tab widget and all the actions
 class BrowserMainWindow : public QMainWindow
 {
 	
-static const qint32 BrowserMainWindowMagic = 0xba;
+static const int BrowserMainWindowMagic = 0xba;
 
 public:
 
@@ -165,9 +165,9 @@ public:
 
 public:
 
-	static QUrl guessUrlFromString(QString string)
+	static QUrl guessUrlFromString(string string)
 	{
-		QString urlStr = string.trimmed();
+		string urlStr = string.trimmed();
 		auto test = new QRegExp(QLatin1String("^[a-zA-Z]+\\:.*"));
 
 		// Check if it looks like a qualified URL. Try parsing it and see.
@@ -188,7 +188,7 @@ public:
 		if (!hasSchema) {
 			int dotIndex = urlStr.indexOf(QLatin1Char('.'));
 			if (dotIndex != -1) {
-				QString prefix = urlStr.left(dotIndex).toLower();
+				string prefix = urlStr.left(dotIndex).toLower();
 				QByteArray schema = (prefix == QLatin1String("ftp")) ? prefix.toLatin1() : "http";
 				QUrl url =
 				QUrl.fromEncoded(schema + "://" + urlStr.toUtf8(), QUrl.TolerantMode);
@@ -222,8 +222,8 @@ public:
 		QByteArray data;
 		auto stream = new QDataStream(&data, QIODevice.WriteOnly);
 
-		stream << qint32(BrowserMainWindowMagic);
-		stream << qint32(version_);
+		stream << cast(int) BrowserMainWindowMagic;
+		stream << cast(int) version_;
 
 		stream << size();
 		stream << !m_navigationBar.isHidden();
@@ -232,7 +232,7 @@ public:
 		if (withTabs)
 			stream << tabWidget().saveState();
 		else
-			stream << QByteArray();
+			stream << new QByteArray();
 		return data;
 	}
 
@@ -245,8 +245,8 @@ public:
 		if (stream.atEnd())
 			return false;
 
-		qint32 marker;
-		qint32 v;
+		int marker;
+		int v;
 		stream >> marker;
 		stream >> v;
 		if (marker != BrowserMainWindowMagic || v != version_)
@@ -283,7 +283,7 @@ public:
 
 public:
 
-	void loadPage(QString page)
+	void loadPage(string page)
 	{
 		QUrl url = guessUrlFromString(page);
 		loadUrl(url);
@@ -293,7 +293,7 @@ public:
 	{
 		QSettings settings;
 		settings.beginGroup(QLatin1String("MainWindow"));
-		QString home = settings.value(QLatin1String("home"), QLatin1String("http://qtsoftware.com/")).toString();
+		string home = settings.value(QLatin1String("home"), QLatin1String("http://qtsoftware.com/")).toString();
 		loadPage(home);
 	}
 
@@ -302,7 +302,7 @@ protected:
 	void closeEvent(QCloseEvent event)
 	{
 		if (m_tabWidget.count() > 1) {
-			int ret = QMessageBox.warning(this, QString(),
+			int ret = QMessageBox.warning(this, null,
 				   tr("Are you sure you want to close the window?"
 				      "  There are %1 tab open").arg(m_tabWidget.count()),
 				   QMessageBox.Yes | QMessageBox.No,
@@ -348,12 +348,12 @@ private:
 		}
 	}
 
-	void slotUpdateStatusbar(QString string)
+	void slotUpdateStatusbar(string string)
 	{
 		statusBar().showMessage(string, 2000);
 	}
 
-	void slotUpdateWindowTitle(QString title = QString())
+	void slotUpdateWindowTitle(string title = null)
 	{
 		if (title.isEmpty()) {
 			setWindowTitle(tr("Qt Demo Browser"));
@@ -391,7 +391,7 @@ private:
 
 	void slotFileOpen()
 	{
-		QString file = QFileDialog.getOpenFileName(this, tr("Open Web Resource"), QString(),
+		string file = QFileDialog.getOpenFileName(this, tr("Open Web Resource"), null,
 		tr("Web Resources (*.html *.htm *.svg *.png *.gif *.svgz);;All files (*.*)"));
 
 		if (file.isEmpty())
@@ -424,8 +424,8 @@ private:
 		QWebSettings settings = QWebSettings.globalSettings();
 		bool pb = settings.testAttribute(QWebSettings.PrivateBrowsingEnabled);
 		if (!pb) {
-			QString title = tr("Are you sure you want to turn on private browsing?");
-			QString text = tr("<b>%1</b><br><br>When private browsing in turned on,"
+			string title = tr("Are you sure you want to turn on private browsing?");
+			string text = tr("<b>%1</b><br><br>When private browsing in turned on,"
 			" webpages are not added to the history,"
 			" items are automatically removed from the Downloads window,"
 			" new cookies are not stored, current cookies can't be accessed,"
@@ -434,7 +434,7 @@ private:
 			"  Until you close the window, you can still click the Back and Forward buttons"
 			" to return to the webpages you have opened.").arg(title);
 
-			QMessageBox.StandardButton button = QMessageBox.question(this, QString(), text,
+			QMessageBox.StandardButton button = QMessageBox.question(this, null, text,
 			       QMessageBox.Ok | QMessageBox.Cancel,
 			       QMessageBox.Ok);
 			if (button == QMessageBox.Ok) {
@@ -444,8 +444,8 @@ private:
 			settings.setAttribute(QWebSettings.PrivateBrowsingEnabled, false);
 
 			BrowserMainWindow[] windows = BrowserApplication.instance().mainWindows();
-			for (int i = 0; i < windows.count(); ++i) {
-				BrowserMainWindow window = windows.at(i);
+			for (int i = 0; i < windows.length; ++i) {
+				BrowserMainWindow window = windows[i];
 				window.m_lastSearch = null; //QString::null
 				window.tabWidget().clear();
 			}
@@ -462,7 +462,7 @@ private:
 		if (!currentTab())
 			return;
 		bool ok;
-		QString search = QInputDialog.getText(this, tr("Find"), tr("Text:"), QLineEdit.Normal, m_lastSearch, &ok);
+		string search = QInputDialog.getText(this, tr("Find"), tr("Text:"), QLineEdit.Normal, m_lastSearch, &ok);
 		if (ok && !search.isEmpty()) {
 			m_lastSearch = search;
 			if (!currentTab().findText(m_lastSearch))
@@ -494,8 +494,8 @@ private:
 	void slotAddBookmark()
 	{
 		WebView webView = currentTab();
-		QString url = webView.url().toString();
-		QString title = webView.title();
+		string url = webView.url().toString();
+		string title = webView.title();
 		AddBookmarkDialog dialog(url, title);
 		dialog.exec();
 	}
@@ -570,7 +570,7 @@ private:
 		if (!currentTab())
 			return;
 
-		QString markup = currentTab().page().mainFrame().toHtml();
+		string markup = currentTab().page().mainFrame().toHtml();
 		QPlainTextEdit view = new QPlainTextEdit(markup);
 		view.setWindowTitle(tr("Page Source of %1").arg(currentTab().title()));
 		view.setMinimumWidth(640);
@@ -642,7 +642,7 @@ private:
 		QWebHistory history = currentTab().history();
 		int historyCount = history.count();
 		for (int i = history.backItems(historyCount).count() - 1; i >= 0; --i) {
-			QWebHistoryItem item = history.backItems(history.count()).at(i);
+			QWebHistoryItem item = history.backItems(history.count())[i];
 			QAction action = new QAction(this);
 			action.setData(-1*(historyCount-i-1));
 			QIcon icon = BrowserApplication.instance().icon(item.url());
@@ -660,7 +660,7 @@ private:
 		QWebHistory history = currentTab().history();
 		int historyCount = history.count();
 		for (int i = 0; i < history.forwardItems(history.count()).count(); ++i) {
-			QWebHistoryItem item = history.forwardItems(historyCount).at(i);
+			QWebHistoryItem item = history.forwardItems(historyCount)[i];
 			QAction action = new QAction(this);
 			action.setData(historyCount-i);
 			QIcon icon = BrowserApplication.instance().icon(item.url());
@@ -680,8 +680,8 @@ private:
 
 		m_windowMenu.addSeparator();
 		BrowserMainWindow[] windows = BrowserApplication.instance().mainWindows();
-		for (int i = 0; i < windows.count(); ++i) {
-			BrowserMainWindow window = windows.at(i);
+		for (int i = 0; i < windows.length; ++i) {
+			BrowserMainWindow window = windows[i];
 			QAction action = m_windowMenu.addAction(window.windowTitle(), this, SLOT(slotShowWindow()));
 			action.setData(i);
 			action.setCheckable(true);
@@ -702,13 +702,13 @@ private:
 
 	void slotShowWindow()
 	{
-		if (QAction action = cast(QAction) sender()) {
+		if (QAction action = cast(QAction) signalSender()) {
 			QVariant v = action.data();
 			if (v.canConvert!(int)()) {
 				int offset = cast(int) v;
 				BrowserMainWindow[] windows = BrowserApplication.instance().mainWindows();
-				windows.at(offset).activateWindow();
-				windows.at(offset).currentTab().setFocus();
+				windows[offset].activateWindow();
+				windows[offset].currentTab().setFocus();
 			}
 		}
 	}
@@ -1016,5 +1016,5 @@ private:
 	QIcon m_reloadIcon;
 	QIcon m_stopIcon;
 
-	QString m_lastSearch;
+	string m_lastSearch;
 }

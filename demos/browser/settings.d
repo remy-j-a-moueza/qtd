@@ -67,7 +67,7 @@ public:
 		setupUi(this);
 		exceptionsButton.clicked.connect(&this.showExceptions);
 		setHomeToCurrentPageButton.clicked.connect(&this.setHomeToCurrentPage);
-		cookiesButton.clicked.connect(&this.showCookies()));
+		cookiesButton.clicked.connect(&this.showCookies());
 		standardFontButton.clicked.connect(this.chooseFont);
 		fixedFontButton.clicked.connect(&this.chooseFixedFont);
 
@@ -75,7 +75,7 @@ public:
 		loadFromSettings();
 	}
 	
-	void accept();
+	void accept()
 	{
 		saveToSettings();
 		QDialog.accept();
@@ -86,15 +86,15 @@ private:
 	void loadDefaults()
 	{
 		QWebSettings defaultSettings = QWebSettings.globalSettings();
-		QString standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
+		string standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
 		int standardFontSize = defaultSettings.fontSize(QWebSettings.DefaultFontSize);
 		standardFont = QFont(standardFontFamily, standardFontSize);
-		standardLabel.setText(QString(QLatin1String("%1 %2")).arg(standardFont.family()).arg(standardFont.pointSize()));
+		standardLabel.setText(Format(QLatin1String("{} {}"), standardFont.family(), standardFont.pointSize()));
 
-		QString fixedFontFamily = defaultSettings.fontFamily(QWebSettings.FixedFont);
+		string fixedFontFamily = defaultSettings.fontFamily(QWebSettings.FixedFont);
 		int fixedFontSize = defaultSettings.fontSize(QWebSettings.DefaultFixedFontSize);
 		fixedFont = QFont(fixedFontFamily, fixedFontSize);
-		fixedLabel.setText(QString(QLatin1String("%1 %2")).arg(fixedFont.family()).arg(fixedFont.pointSize()));
+		fixedLabel.setText(Format(QLatin1String("{} {}"), fixedFont.family(), fixedFont.pointSize()));
 
 		downloadsLocation.setText(QDesktopServices.storageLocation(QDesktopServices.DesktopLocation));
 
@@ -104,9 +104,9 @@ private:
 
 	void loadFromSettings()
 	{
-		QSettings settings;
+		auto settings = new QSettings;
 		settings.beginGroup(QLatin1String("MainWindow"));
-		QString defaultHome = QLatin1String("http://qtsoftware.com");
+		string defaultHome = QLatin1String("http://qtsoftware.com");
 		homeLineEdit.setText(settings.value(QLatin1String("home"), defaultHome).toString());
 		settings.endGroup();
 
@@ -127,7 +127,7 @@ private:
 		settings.endGroup();
 
 		settings.beginGroup(QLatin1String("downloadmanager"));
-		QString downloadDirectory = settings.value(QLatin1String("downloadDirectory"), downloadsLocation.text()).toString();
+		string downloadDirectory = settings.value(QLatin1String("downloadDirectory"), downloadsLocation.text()).toString();
 		downloadsLocation.setText(downloadDirectory);
 		settings.endGroup();
 
@@ -141,8 +141,8 @@ private:
 		fixedFont = qVariantValue<QFont>(settings.value(QLatin1String("fixedFont"), fixedFont));
 		standardFont = qVariantValue<QFont>(settings.value(QLatin1String("standardFont"), standardFont));
 
-		standardLabel.setText(QString(QLatin1String("%1 %2")).arg(standardFont.family()).arg(standardFont.pointSize()));
-		fixedLabel.setText(QString(QLatin1String("%1 %2")).arg(fixedFont.family()).arg(fixedFont.pointSize()));
+		standardLabel.setText(Format(QLatin1String("{} {}"), standardFont.family(), standardFont.pointSize()));
+		fixedLabel.setText(Format(QLatin1String("{} {}"), fixedFont.family(), fixedFont.pointSize()));
 
 		enableJavascript.setChecked(settings.value(QLatin1String("enableJavascript"), enableJavascript.isChecked()).toBool());
 		enablePlugins.setChecked(settings.value(QLatin1String("enablePlugins"), enablePlugins.isChecked()).toBool());
@@ -228,7 +228,7 @@ private:
 		settings.setValue(QLatin1String("standardFont"), standardFont);
 		settings.setValue(QLatin1String("enableJavascript"), enableJavascript.isChecked());
 		settings.setValue(QLatin1String("enablePlugins"), enablePlugins.isChecked());
-		QString userStyleSheetString = userStyleSheet.text();
+		string userStyleSheetString = userStyleSheet.text();
 		if (QFile.exists(userStyleSheetString))
 			settings.setValue(QLatin1String("userStyleSheet"), QUrl.fromLocalFile(userStyleSheetString));
 		else
@@ -316,7 +316,7 @@ private:
 		QFont font = QFontDialog.getFont(&ok, standardFont, this);
 		if ( ok ) {
 			standardFont = font;
-			standardLabel.setText(QString(QLatin1String("%1 %2")).arg(font.family()).arg(font.pointSize()));
+			standardLabel.setText(Format(QLatin1String("{} {}"), font.family(), font.pointSize()));
 		}
 	}
 
@@ -326,7 +326,7 @@ private:
 		QFont font = QFontDialog.getFont(&ok, fixedFont, this);
 		if ( ok ) {
 			fixedFont = font;
-			fixedLabel.setText(QString(QLatin1String("%1 %2")).arg(font.family()).arg(font.pointSize()));
+			fixedLabel.setText(Format(QLatin1String("{} {}"), font.family(), font.pointSize()));
 		}
 	}
 

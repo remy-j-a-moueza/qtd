@@ -38,13 +38,14 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+
 module main;
 
 
 import browserapplication;
 
 
-int main(char[][] args)
+int main(string[] args)
 {
 	//Q_INIT_RESOURCE(data);
 	scope application = new BrowserApplication(args);

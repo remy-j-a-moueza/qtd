@@ -56,7 +56,7 @@ import autosaver;
 
 class ToolbarSearch : public SearchLineEdit
 {
-	mixin Signal!("search", QUrl /*url*/)
+	mixin Signal!("search", QUrl /*url*/);
 
 public:
 
@@ -66,7 +66,7 @@ public:
 	*/
 	this(QWidget parent = null)
 	{
-		super(parent)
+		super(parent);
 		m_autosaver = new AutoSaver(this);
 		m_maxSavedSearches = 10;
 		m_stringListModel = new QStringListModel(this);
@@ -76,7 +76,7 @@ public:
 		m.triggered.connect(&this.triggeredMenuAction);
 
 		QCompleter completer = new QCompleter(m_stringListModel, this);
-		completer.setCompletionMode(QCompleter::InlineCompletion);
+		completer.setCompletionMode(QCompleter.InlineCompletion);
 		lineEdit().setCompleter(completer);
 
 		lineEdit().returnPressed.connect(&searchNow);
@@ -93,32 +93,32 @@ public:
 
 	void clear()
 	{
-		m_stringListModel.setStringList(QStringList());
+		m_stringListModel.setStringList(string[]());
 		m_autosaver.changeOccurred();
 	}
 
 	void searchNow()
 	{
-		QString searchText = lineEdit().text();
-		QStringList newList = m_stringListModel.stringList();
+		string searchText = lineEdit().text();
+		string[] newList = m_stringListModel.stringList();
 		if (newList.contains(searchText))
 			newList.removeAt(newList.indexOf(searchText));
 		newList.prepend(searchText);
 		if (newList.size() >= m_maxSavedSearches)
 			newList.removeLast();
 
-		QWebSettings globalSettings = QWebSettings::globalSettings();
-		if (!globalSettings.testAttribute(QWebSettings::PrivateBrowsingEnabled)) {
+		QWebSettings globalSettings = QWebSettings.globalSettings();
+		if (!globalSettings.testAttribute(QWebSettings.PrivateBrowsingEnabled)) {
 			m_stringListModel.setStringList(newList);
 			m_autosaver.changeOccurred();
 		}
 
-		QUrl url(QLatin1String("http://www.google.com/search"));
+		auto url = new QUrl(QLatin1String("http://www.google.com/search"));
 		url.addQueryItem(QLatin1String("q"), searchText);
 		url.addQueryItem(QLatin1String("ie"), QLatin1String("UTF-8"));
 		url.addQueryItem(QLatin1String("oe"), QLatin1String("UTF-8"));
 		url.addQueryItem(QLatin1String("client"), QLatin1String("qtdemobrowser"));
-		emit search(url);
+		search.emit(url);
 	}
 
 private:
@@ -138,7 +138,7 @@ private:
 		lineEdit().selectAll();
 		QMenu m = menu();
 		m.clear();
-		QStringList list = m_stringListModel.stringList();
+		string[] list = m_stringListModel.stringList();
 		if (list.isEmpty()) {
 			m.addAction(tr("No Recent Searches"));
 			return;
@@ -146,8 +146,8 @@ private:
 
 		QAction recent = m.addAction(tr("Recent Searches"));
 		recent.setEnabled(false);
-		for (int i = 0; i < list.count(); ++i) {
-			QString text = list.at(i);
+		for (int i = 0; i < list.length; ++i) {
+			string text = list[i];
 			m.addAction(text).setData(text);
 		}
 		m.addSeparator();
@@ -157,8 +157,8 @@ private:
 	void triggeredMenuAction(QAction action)
 	{
 		QVariant v = action.data();
-		if (v.canConvert<QString>()) {
-			QString text = v.toString();
+		if (v.canConvert!(string)()) {
+			string text = v.toString();
 			lineEdit().setText(text);
 			searchNow();
 		}
@@ -170,7 +170,7 @@ private:
 	{
 		QSettings settings;
 		settings.beginGroup(QLatin1String("toolbarsearch"));
-		QStringList list = settings.value(QLatin1String("recentSearches")).toStringList();
+		string[] list = settings.value(QLatin1String("recentSearches")).toStringList();
 		m_maxSavedSearches = settings.value(QLatin1String("maximumSaved"), m_maxSavedSearches).toInt();
 		m_stringListModel.setStringList(list);
 		settings.endGroup();

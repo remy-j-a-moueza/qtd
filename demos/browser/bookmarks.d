@@ -70,8 +70,8 @@ import history;
 import xbel;
 
 
-const char[] BOOKMARKBAR = "Bookmarks Bar";
-const char[] BOOKMARKMENU = "Bookmarks Menu";
+const string BOOKMARKBAR = "Bookmarks Bar";
+const string BOOKMARKMENU = "Bookmarks Menu";
 
 
 /*!
@@ -123,7 +123,7 @@ public:
 		m_commands.push(command);
 	}
 
-	void setTitle(BookmarkNode node, QString newTitle)
+	void setTitle(BookmarkNode node, string newTitle)
 	{
 		if (!m_loaded)
 			return;
@@ -133,7 +133,7 @@ public:
 		m_commands.push(command);
 	}
 
-	void setUrl(BookmarkNode node, QString newUrl)
+	void setUrl(BookmarkNode node, string newUrl)
 	{
 		if (!m_loaded)
 			return;
@@ -161,7 +161,7 @@ public:
 			load();
 
 		for (int i = m_bookmarkRootNode.children().count() - 1; i >= 0; --i) {
-			BookmarkNode node = m_bookmarkRootNode.children().at(i);
+			BookmarkNode node = m_bookmarkRootNode.children()[i];
 			if (node.title == tr(BOOKMARKMENU))
 				return node;
 		}
@@ -175,7 +175,7 @@ public:
 			load();
 
 		for (int i = m_bookmarkRootNode.children().count() - 1; i >= 0; --i) {
-			BookmarkNode node = m_bookmarkRootNode.children().at(i);
+			BookmarkNode node = m_bookmarkRootNode.children()[i];
 			if (node.title == tr(BOOKMARKBAR))
 				return node;
 		}
@@ -196,7 +196,7 @@ public:
 
 	void importBookmarks()
 	{
-		QString fileName = QFileDialog.getOpenFileName(0, tr("Open File"), QString(), tr("XBEL (*.xbel *.xml)"));
+		string fileName = QFileDialog.getOpenFileName(0, tr("Open File"), null, tr("XBEL (*.xbel *.xml)"));
 		if (fileName.isEmpty())
 			return;
 
@@ -216,7 +216,7 @@ public:
 
 	void exportBookmarks()
 	{
-		QString fileName = QFileDialog.getSaveFileName(0, tr("Save File"),
+		string fileName = QFileDialog.getSaveFileName(0, tr("Save File"),
 				tr("%1 Bookmarks.xbel").arg(QCoreApplication.applicationName()),
 				tr("XBEL (*.xbel *.xml)"));
 		if (fileName.isEmpty())
@@ -235,8 +235,8 @@ private:
 			return;
 
 		XbelWriter writer;
-		QString dir = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
-		QString bookmarkFile = dir + QLatin1String("/bookmarks.xbel");
+		string dir = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
+		string bookmarkFile = dir + QLatin1String("/bookmarks.xbel");
 		if (!writer.write(bookmarkFile, m_bookmarkRootNode))
 			qWarning() << "BookmarkManager: error saving to" << bookmarkFile;
 	}
@@ -249,8 +249,8 @@ private:
 			return;
 		m_loaded = true;
 
-		QString dir = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
-		QString bookmarkFile = dir + QLatin1String("/bookmarks.xbel");
+		string dir = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
+		string bookmarkFile = dir ~ QLatin1String("/bookmarks.xbel");
 		if (!QFile.exists(bookmarkFile))
 			bookmarkFile = QLatin1String(":defaultbookmarks.xbel");
 
@@ -266,7 +266,7 @@ private:
 		BookmarkNode menu = null;
 		BookmarkNode[] others;
 		for (int i = m_bookmarkRootNode.children().count() - 1; i >= 0; --i) {
-			BookmarkNode node = m_bookmarkRootNode.children().at(i);
+			BookmarkNode node = m_bookmarkRootNode.children()[i];
 			if (node.type() == BookmarkNode.Folder) {
 				// Automatically convert
 				if (node.title == tr("Toolbar Bookmarks") && !toolbar) {
@@ -284,7 +284,7 @@ private:
 					menu = node;
 				}
 			} else {
-				others.append(node);
+				others ~= node;
 			}
 			m_bookmarkRootNode.remove(node);
 		}
@@ -303,8 +303,8 @@ private:
 			m_bookmarkRootNode.add(menu);
 		}
 
-		for (int i = 0; i < others.count(); ++i)
-			menu.add(others.at(i));
+		for (int i = 0; i < others.length; ++i)
+			menu.add(others[i]);
 	}
 
 	bool m_loaded;
@@ -377,7 +377,7 @@ class ChangeBookmarkCommand : public QUndoCommand
 {
 public:
 
-	this(BookmarksManager m_bookmarkManagaer, BookmarkNode node, QString newValue, bool title)
+	this(BookmarksManager m_bookmarkManagaer, BookmarkNode node, string newValue, bool title)
 	{
 		super();
 		m_bookmarkManagaer = m_bookmarkManagaer;
@@ -415,8 +415,8 @@ private:
 	
 	BookmarksManager m_bookmarkManagaer;
 	bool m_title;
-	QString m_oldValue;
-	QString m_newValue;
+	string m_oldValue;
+	string m_newValue;
 	BookmarkNode m_node;
 }
 
@@ -494,7 +494,7 @@ public:
 	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
 	{
 		if (!index.isValid() || index.model() != this)
-		return QVariant();
+			return QVariant();
 
 		BookmarkNode bookmarkNode = node(index);
 		switch (role) {
@@ -559,7 +559,7 @@ public:
 
 		// get the parent node
 		BookmarkNode parentNode = node(parent);
-		return createIndex(row, column, parentNode.children().at(row));
+		return createIndex(row, column, parentNode.children()[row]);
 	}
 
 	QModelIndex parent(QModelIndex index = QModelIndex())
@@ -610,7 +610,7 @@ public:
 
 		BookmarkNode bookmarkNode = node(parent);
 		for (int i = row + count - 1; i >= row; --i) {
-			BookmarkNode node = bookmarkNode.children().at(i);
+			BookmarkNode node = bookmarkNode.children()[i];
 			if (node == m_bookmarksManager.menu() || node == m_bookmarksManager.toolbar())
 				continue;
 
@@ -676,13 +676,11 @@ public:
 		return mimeData;
 	}
 
-	const char[] MIMETYPE = QLatin1String("application/bookmarks.xbel");
+	const string MIMETYPE = QLatin1String("application/bookmarks.xbel");
 
-	QStringList mimeTypes()
+	string[] mimeTypes()
 	{
-		QStringList types;
-		types << MIMETYPE;
-		return types;
+		return [ MIMETYPE ];
 	}
 
 	bool dropMimeData(QMimeData data,  Qt.DropAction action, int row, int column, QModelIndex parent)
@@ -711,7 +709,7 @@ public:
 			BookmarkNode rootNode = reader.read(&buffer);
 			BookmarkNode[] children = rootNode.children();
 			for (int i = 0; i < children.count(); ++i) {
-				BookmarkNode bookmarkNode = children.at(i);
+				BookmarkNode bookmarkNode = children[i];
 				rootNode.remove(bookmarkNode);
 				row = qMax(0, row);
 				BookmarkNode parentNode = node(parent);
@@ -776,7 +774,7 @@ public:
 	{
 		m_initialActions = actions;
 		for (int i = 0; i < m_initialActions.count(); ++i)
-			addAction(m_initialActions.at(i));
+			addAction(m_initialActions[i]);
 	}
 
 protected:
@@ -788,7 +786,7 @@ protected:
 		setRootIndex(m_bookmarksManager.bookmarksModel().index(1, 0));
 		// initial actions
 		for (int i = 0; i < m_initialActions.count(); ++i)
-			addAction(m_initialActions.at(i));
+			addAction(m_initialActions[i]);
 		if (!m_initialActions.isEmpty())
 			addSeparator();
 		createMenu(model().index(0, 0), 1, this);
@@ -847,7 +845,7 @@ class AddBookmarkDialog : public QDialog, public Ui_AddBookmarkDialog
 {
 public:
 
-	this(QString url, QString title, QWidget parent = null, BookmarksManager bookmarkManager = null)
+	this(string url, string title, QWidget parent = null, BookmarksManager bookmarkManager = null)
 	//: QDialog(parent)
 	{
 		m_url = url;
@@ -896,7 +894,7 @@ private:
 
 private:
 
-	QString m_url;
+	string m_url;
 	BookmarksManager m_bookmarksManager;
 	AddBookmarkProxyModel m_proxyModel;
 }
@@ -953,7 +951,7 @@ private:
 
 	void customContextMenuRequested(QPoint pos)
 	{
-		QMenu menu;
+		auto menu = new QMenu;
 		QModelIndex index = tree.indexAt(pos);
 		index = index.sibling(index.row(), 0);
 		if (index.isValid() && !tree.model().hasChildren(index)) {
@@ -1063,7 +1061,7 @@ protected:
 
 	void dragEnterEvent(QDragEnterEvent event)
 	{
-		const QMimeData mimeData = event.mimeData();
+		QMimeData mimeData = event.mimeData();
 		if (mimeData.hasUrls())
 			event.acceptProposedAction();
 		QToolBar.dragEnterEvent(event);
@@ -1071,18 +1069,18 @@ protected:
 
 	void dropEvent(QDropEvent event)
 	{
-		const QMimeData mimeData = event.mimeData();
+		QMimeData mimeData = event.mimeData();
 		if (mimeData.hasUrls() && mimeData.hasText()) {
 			QUrl[] urls = mimeData.urls();
 			QAction action = actionAt(event.pos());
-			QString dropText;
+			string dropText;
 			if (action)
 				dropText = action.text();
 			int row = -1;
 			QModelIndex parentIndex = m_root;
 			for (int i = 0; i < m_bookmarksModel.rowCount(m_root); ++i) {
 				QModelIndex idx = m_bookmarksModel.index(i, 0, m_root);
-				QString title = idx.data().toString();
+				string title = idx.data().toString();
 				if (title == dropText) {
 					row = i;
 					if (m_bookmarksModel.hasChildren(idx)) {
@@ -1093,7 +1091,7 @@ protected:
 				}
 			}
 			BookmarkNode bookmark = new BookmarkNode(BookmarkNode.Bookmark);
-			bookmark.url = urls.at(0).toString();
+			bookmark.url = urls[0].toString();
 			bookmark.title = mimeData.text();
 
 			BookmarkNode parent = m_bookmarksModel.node(parentIndex);

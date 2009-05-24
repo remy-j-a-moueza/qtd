@@ -83,13 +83,13 @@ public:
 		setAcceptDrops(true);
 		this.customContextMenuRequested.connect(&this.contextMenuRequested);
 
-		QString alt = QLatin1String("Alt+%1");
+		string alt = QLatin1String("Alt+%1");
 		for (int i = 1; i <= 10; ++i) {
 			int key = i;
 			if (key == 10)
 				key = 0;
 			QShortcut shortCut = new QShortcut(alt.arg(key), this);
-			m_tabShortcuts.append(shortCut);
+			m_tabShortcuts ~= shortCut;
 			shortCut.activated.connect(&this.selectTabAction);
 		}
 		setTabsClosable(true);
@@ -115,10 +115,10 @@ protected:
 			if ((event.pos() - m_dragStartPos).manhattanLength() > QApplication.startDragDistance() && diffX < 3 && diffX > -3 && diffY < -10) {
 				QDrag drag = new QDrag(this);
 				QMimeData mimeData = new QMimeData;
-				QList<QUrl> urls;
+				QUrl[] urls;
 				int index = tabAt(event.pos());
 				QUrl url = tabData(index).toUrl();
-				urls.append(url);
+				urls ~= url;
 				mimeData.setUrls(urls);
 				mimeData.setText(tabText(index));
 				mimeData.setData(QLatin1String("action"), "tab-reordering");
@@ -133,7 +133,7 @@ private:
 
 	void selectTabAction()
 	{
-		if (QShortcut shortCut = qobject_cast<QShortcut*>(sender())) {
+		if (QShortcut shortCut = cast(QShortcut) signalSender()) {
 			int index = m_tabShortcuts.indexOf(shortCut);
 			if (index == 0)
 				index = 10;
@@ -143,33 +143,33 @@ private:
 
 	void cloneTab()
 	{
-		if (QAction action = qobject_cast<QAction>(sender())) {
+		if (QAction action = cast(QAction) signalSender()) {
 			int index = action.data().toInt();
-			emit cloneTab(index);
+			cloneTab.emit(index);
 		}
 	}
 
 	void closeTab()
 	{
-		if (QAction action = qobject_cast<QAction>(sender())) {
+		if (QAction action = cast(QAction) signalSender()) {
 			int index = action.data().toInt();
-			emit closeTab(index);
+			closeTab.emit(index);
 		}
 	}
 
 	void closeOtherTabs()
 	{
-		if (QAction action = qobject_cast<QAction>(sender())) {
+		if (QAction action = cast(QAction) signalSender()) {
 			int index = action.data().toInt();
-			emit closeOtherTabs(index);
+			closeOtherTabs.emit(index);
 		}
 	}
 
 	void reloadTab()
 	{
-		if (QAction action = qobject_cast<QAction>(sender())) {
+		if (QAction action = cast(QAction) signalSender()) {
 			int index = action.data().toInt();
-			emit reloadTab(index);
+			reloadTab.emit(index);
 		}
 	}
 
@@ -278,7 +278,7 @@ private:
 
 	void childChanged()
 	{
-		if (QAction source = qobject_cast<QAction>(sender())) {
+		if (QAction source = cast(QAction) signalSender()) {
 			if (m_root && m_currentParent && source.parent() == m_currentParent) {
 					m_root.setChecked(source.isChecked());
 					m_root.setEnabled(source.isEnabled());
@@ -317,14 +317,14 @@ to proxy the actions.
 class TabWidget : public QTabWidget
 {
 	// tab widget signals
-	mixin Singal!("loadPage", QString /*url*/);
+	mixin Singal!("loadPage", string /*url*/);
 	mixin Singal!("tabsChanged");
 	mixin Singal!("lastTabClosed");
 
 	// current tab signals
-	mixin Singal!("setCurrentTitle", QString /*url*/);
-	mixin Singal!("showStatusBarMessage", QString /*message*/);
-	mixin Singal!("linkHovered", QString /*link*/);
+	mixin Singal!("setCurrentTitle", string /*url*/);
+	mixin Singal!("showStatusBarMessage", string /*message*/);
+	mixin Singal!("linkHovered", string /*link*/);
 	mixin Singal!("loadProgress", int /*progress*/);
 	mixin Singal!("geometryChangeRequested", QRect /*geometry*/);
 	mixin Singal!("menuBarVisibilityChangeRequested", bool /*visible*/);
@@ -336,7 +336,7 @@ public:
 
 	this(QWidget parent = null)
 	{
-		QTabWidget(parent)
+		super(parent);
 		m_recentlyClosedTabsAction = 0;
 		m_newTabAction = 0;
 		m_closeTabAction = 0;
@@ -350,12 +350,12 @@ public:
 		setElideMode(Qt.ElideRight);
 
 		m_tabBar.newTab.connect(&this.newTab);
-		m_tabBar.closeTab.connect(&this.closeTab(int)));
-		m_tabBar.cloneTab.connect(&this.cloneTab(int)));
-		m_tabBar.closeOtherTabs.connect(&this.closeOtherTabs(int)));
-		m_tabBar.reloadTab.connect(&this.reloadTab(int)));
-		m_tabBar.reloadAllTabs.connect(&this.reloadAllTabs()));
-		m_tabBar.tabMoved.connect(&this.moveTab(int, int)));
+		m_tabBar.closeTab.connect(&this.closeTab);
+		m_tabBar.cloneTab.connect(&this.cloneTab);
+		m_tabBar.closeOtherTabs.connect(&this.closeOtherTabs);
+		m_tabBar.reloadTab.connect(&this.reloadTab);
+		m_tabBar.reloadAllTabs.connect(&this.reloadAllTabs);
+		m_tabBar.tabMoved.connect(&this.moveTab);
 		setTabBar(m_tabBar);
 		setDocumentMode(true);
 
@@ -371,20 +371,20 @@ public:
 		m_closeTabAction.triggered.connect(&this.closeTab);
 
 		m_nextTabAction = new QAction(tr("Show Next Tab"), this);
-		QList<QKeySequence> shortcuts;
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceRight));
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageDown));
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketRight));
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Less));
+		QKeySequence[] shortcuts;
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_BraceRight);
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_PageDown);
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_BracketRight);
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_Less);
 		m_nextTabAction.setShortcuts(shortcuts);
 		m_nextTabAction.triggered.connect(&this.nextTab);
 
 		m_previousTabAction = new QAction(tr("Show Previous Tab"), this);
 		shortcuts.clear();
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BraceLeft));
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_PageUp));
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_BracketLeft));
-		shortcuts.append(QKeySequence(Qt.CTRL | Qt.Key_Greater));
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_BraceLeft);
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_PageUp);
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_BracketLeft);
+		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_Greater);
 		m_previousTabAction.setShortcuts(shortcuts);
 		m_previousTabAction.triggered.connect(&this.previousTab);
 
@@ -403,7 +403,7 @@ public:
 	void clear()
 	{
 		// clear the recently closed tabs
-		m_recentlyClosedTabs.clear();
+		m_recentlyClosedTabs.length = 0;
 		// clear the line edit history
 		for (int i = 0; i < m_lineEdits.count(); ++i) {
 			QLineEdit qLineEdit = lineEdit(i);
@@ -466,7 +466,7 @@ public:
 		} else {
 			// optimization to delay creating the first webview
 			if (count() == 1) {
-				TabWidget that = const_cast<TabWidget>(this);
+				TabWidget that = cast(TabWidget) this;
 				that.setUpdatesEnabled(false);
 				that.newTab();
 				that.closeTab(0);
@@ -479,7 +479,7 @@ public:
 
 	QLineEdit lineEdit(int index)
 	{
-		UrlLineEdit urlLineEdit = qobject_cast<UrlLineEdit>(m_lineEdits.widget(index));
+		UrlLineEdit urlLineEdit = cast(UrlLineEdit) m_lineEdits.widget(index);
 		if (urlLineEdit)
 			return urlLineEdit.lineEdit();
 		return 0;
@@ -492,23 +492,23 @@ public:
 	}
 
     
-static const qint32 TabWidgetMagic = 0xaa;
+static const int TabWidgetMagic = 0xaa;
 
 	QByteArray saveState()
 	{
-		int version = 1;
+		int version_ = 1;
 		QByteArray data;
 		QDataStream stream(data, QIODevice.WriteOnly);
 
-		stream << qint32(TabWidgetMagic);
-		stream << qint32(version);
+		stream << cast(int) TabWidgetMagic;
+		stream << cast(int) version_;
 
-		QStringList tabs;
+		string[] tabs;
 		for (int i = 0; i < count(); ++i) {
-			if (WebView tab = cast(WebView) widget(i))) {
+			if (WebView tab = cast(WebView) widget(i)) {
 				tabs.append(tab.url().toString());
 			} else {
-				tabs.append(QString.null);
+				tabs.append(null); //QString.null);
 			}
 		}
 		stream << tabs;
@@ -524,20 +524,20 @@ static const qint32 TabWidgetMagic = 0xaa;
 		if (stream.atEnd())
 			return false;
 
-		qint32 marker;
-		qint32 v;
+		int marker;
+		int v;
 		stream >> marker;
 		stream >> v;
 		if (marker != TabWidgetMagic || v != version_)
 			return false;
 
-		QStringList openTabs;
+		string[] openTabs;
 		stream >> openTabs;
 
-		for (int i = 0; i < openTabs.count(); ++i) {
+		for (int i = 0; i < openTabs.length; ++i) {
 			if (i != 0)
 				newTab();
-			loadPage(openTabs.at(i));
+			loadPage(openTabs[i]);
 		}
 
 		int currentTab;
@@ -575,7 +575,7 @@ protected:
 		if (event.button() == Qt.MidButton && !childAt(event.pos())
 		// Remove the line below when QTabWidget does not have a one pixel frame
 		&& event.pos().y() < (tabBar().y() + tabBar().height())) {
-			QUrl url(QApplication.clipboard().text(QClipboard.Selection));
+			auto url = new QUrl(QApplication.clipboard().text(QClipboard.Selection));
 			if (!url.isEmpty() && url.isValid() && !url.scheme().isEmpty()) {
 				WebView webView = newTab();
 				webView.setUrl(url);
@@ -605,7 +605,7 @@ public:
 			m_lineEditCompleter = new QCompleter(completionModel, this);
 			// Should this be in Qt by default?
 			QAbstractItemView popup = m_lineEditCompleter.popup();
-			QListView listView = qobject_cast<QListView*>(popup);
+			QListView listView = cast(QListView) popup;
 			if (listView)
 				listView.setUniformItemSizes(true);
 		}
@@ -653,7 +653,7 @@ public:
 
 		if (count() == 1)
 			currentChanged(currentIndex());
-		emit tabsChanged();
+		tabsChanged.emit();
 		return webView;
 	}
 
@@ -694,8 +694,8 @@ public:
 			hasFocus = tab.hasFocus();
 
 			m_recentlyClosedTabsAction.setEnabled(true);
-			m_recentlyClosedTabs.prepend(tab.url());
-			if (m_recentlyClosedTabs.size() >= TabWidget.m_recentlyClosedTabsSize)
+			m_recentlyClosedTabs = [tab.url()] ~ m_recentlyClosedTabs;
+			if (m_recentlyClosedTabs.length >= TabWidget.m_recentlyClosedTabsSize)
 				m_recentlyClosedTabs.removeLast();
 		}
 		QWidget lineEdit = m_lineEdits.widget(index);
@@ -704,11 +704,11 @@ public:
 		QWidget webView = widget(index);
 		removeTab(index);
 		webView.deleteLater();
-		emit tabsChanged();
+		tabsChanged.emit();
 		if (hasFocus && count() > 0)
 			currentWebView().setFocus();
 		if (count() == 0)
-			emit lastTabClosed();
+			lastTabClosed.emit();
 	}
 
 	void closeOtherTabs(int index)
@@ -785,10 +785,10 @@ private:
 			WebActionMapper mapper = m_actions[i];
 			mapper.updateCurrent(webView.page());
 		}
-		emit setCurrentTitle(webView.title());
+		setCurrentTitle.emit(webView.title());
 		m_lineEdits.setCurrentIndex(index);
-		emit loadProgress(webView.progress());
-		emit showStatusBarMessage(webView.lastStatusBarText());
+		loadProgress.emit(webView.progress());
+		showStatusBarMessage.emit(webView.lastStatusBarText());
 		if (webView.url().isEmpty())
 			m_lineEdits.currentWidget().setFocus();
 		else
@@ -798,12 +798,12 @@ private:
 	void aboutToShowRecentTabsMenu()
 	{
 		m_recentlyClosedTabsMenu.clear();
-		for (int i = 0; i < m_recentlyClosedTabs.count(); ++i) {
+		for (int i = 0; i < m_recentlyClosedTabs.length; ++i) {
 			QAction action = new QAction(m_recentlyClosedTabsMenu);
-			action.setData(m_recentlyClosedTabs.at(i));
-			QIcon icon = BrowserApplication.instance().icon(m_recentlyClosedTabs.at(i));
+			action.setData(m_recentlyClosedTabs[i]);
+			QIcon icon = BrowserApplication.instance().icon(m_recentlyClosedTabs[i]);
 			action.setIcon(icon);
-			action.setText(m_recentlyClosedTabs.at(i).toString());
+			action.setText(m_recentlyClosedTabs[i].toString());
 			m_recentlyClosedTabsMenu.addAction(action);
 		}
 	}
@@ -816,17 +816,17 @@ private:
 
 	void webViewLoadStarted()
 	{
-		WebView webView = cast(WebView) sender();
+		WebView webView = cast(WebView) signalSender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
-			QIcon icon(QLatin1String(":loading.gif"));
+			auto icon = new QIcon(QLatin1String(":loading.gif"));
 			setTabIcon(index, icon);
 		}
 	}
 
 	void webViewIconChanged()
 	{
-		WebView webView = cast(WebView) sender();
+		WebView webView = cast(WebView) signalSender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
 			QIcon icon = BrowserApplication.instance().icon(webView.url());
@@ -834,32 +834,32 @@ private:
 		}
 	}
 
-	void webViewTitleChanged(QString title)
+	void webViewTitleChanged(string title)
 	{
-		WebView webView = cast(WebView) sender();
+		WebView webView = cast(WebView) signalSender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
 			setTabText(index, title);
 		}
 		if (currentIndex() == index)
-			emit setCurrentTitle(title);
+			setCurrentTitle.emit(title);
 		BrowserApplication.historyManager().updateHistoryItem(webView.url(), title);
 	}
 
 	void webViewUrlChanged(QUrl url)
 	{
-		WebView webView = cast(WebView) sender();
+		WebView webView = cast(WebView) signalSender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
 			m_tabBar.setTabData(index, url);
 		}
-		emit tabsChanged();
+		tabsChanged.emit();
 	}
 
 	void lineEditReturnPressed()
 	{
-		if (QLineEdit lineEdit = cast(QLineEdit) sender()) {
-			emit loadPage(lineEdit.text());
+		if (QLineEdit lineEdit = cast(QLineEdit) signalSender()) {
+			loadPage.emit(lineEdit.text());
 			if (m_lineEdits.currentWidget() == lineEdit)
 				currentWebView().setFocus();
 		}
@@ -867,7 +867,7 @@ private:
 
 	void windowCloseRequested()
 	{
-		WebPage webPage = cast(WebPage) sender();
+		WebPage webPage = cast(WebPage) signalSender();
 		WebView webView = cast(WebView) webPage.view();
 		int index = webViewIndex(webView);
 		if (index >= 0) {

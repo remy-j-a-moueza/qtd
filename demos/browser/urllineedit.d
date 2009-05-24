@@ -254,8 +254,8 @@ protected:
 			QDrag drag = new QDrag(this);
 			QMimeData mimeData = new QMimeData;
 			mimeData.setText(QString.fromUtf8(m_webView.url().toEncoded()));
-			QList<QUrl> urls;
-			urls.append(m_webView.url());
+			QUrl[] urls;
+			urls ~= m_webView.url();
 			mimeData.setUrls(urls);
 			drag.setMimeData(mimeData);
 			drag.exec();

@@ -41,7 +41,7 @@
 module modelmenu;
 
 
-import qt.gui.QMenu
+import qt.gui.QMenu;
 import qt.core.QAbstractItemModel;
 
 import qt.core.QAbstractItemModel;
@@ -51,9 +51,9 @@ import qdebug;
 // A QMenu that is dynamically populated from a QAbstractItemModel
 class ModelMenu : public QMenu
 {
-	
+
 mixin Signal!("activated", QModelIndex /*index*/);
-mixin Signal!("hovered", QString /*text*/);
+mixin Signal!("hovered", string /*text*/);
 
 public:
 
@@ -129,12 +129,12 @@ public:
 		return m_separatorRole;
 	}
 
-	QAction makeAction(QIcon icon, QString text, QObject parent)
+	QAction makeAction(QIcon icon, string text, QObject parent)
 	{
 		auto fm = new QFontMetrics(font());
 		if (-1 == m_maxWidth)
 			m_maxWidth = fm.width(QLatin1Char('m')) * 30;
-		QString smallText = fm.elidedText(text, Qt.ElideMiddle, m_maxWidth);
+		string smallText = fm.elidedText(text, Qt.ElideMiddle, m_maxWidth);
 		return new QAction(icon, smallText, parent);
 	}
 
@@ -155,9 +155,9 @@ protected:
 	void createMenu(QModelIndex parent, int max, QMenu parentMenu = null, QMenu menu = null)
 	{
 		if (!menu) {
-			QString title = parent.data().toString();
+			string title = parent.data().toString();
 			menu = new QMenu(title, this);
-			QIcon icon = qvariant_cast<QIcon>(parent.data(Qt.DecorationRole));
+			QIcon icon = cast(QIcon) parent.data(Qt.DecorationRole);
 			menu.setIcon(icon);
 			parentMenu.addMenu(menu);
 			QVariant v;
@@ -193,10 +193,10 @@ private:
 
 	void aboutToShow()
 	{
-		if (QMenu menu = qobject_cast<QMenu>(sender())) {
+		if (QMenu menu = cast(QMenu) signalSender()) {
 			QVariant v = menu.menuAction().data();
-			if (v.canConvert<QModelIndex>()) {
-				QModelIndex idx = qvariant_cast<QModelIndex>(v);
+			if (v.canConvert!(QModelIndex)()) {
+				QModelIndex idx = cast(QModelIndex) v;
 				createMenu(idx, -1, menu, menu);
 				menu.aboutToShow.disconnect(&this.aboutToShow);
 				return;
@@ -216,20 +216,20 @@ private:
 	void triggered(QAction action)
 	{
 		QVariant v = action.data();
-		if (v.canConvert<QModelIndex>()) {
-			QModelIndex idx = qvariant_cast<QModelIndex>(v);
-			emit activated(idx);
+		if (v.canConvert!(QModelIndex)()) {
+			QModelIndex idx = cast(QModelIndex) v;
+			activated.emit(idx);
 		}
 	}
 
 	void hovered(QAction action)
 	{
 		QVariant v = action.data();
-		if (v.canConvert<QModelIndex>()) {
-			QModelIndex idx = qvariant_cast<QModelIndex>(v);
-			QString hoveredString = idx.data(m_hoverRole).toString();
+		if (v.canConvert!(QModelIndex)()) {
+			QModelIndex idx = cast(QModelIndex) v;
+			string hoveredString = idx.data(m_hoverRole).toString();
 			if (!hoveredString.isEmpty())
-				emit hovered(hoveredString);
+				hovered.emit(hoveredString);
 		}
 	}
 

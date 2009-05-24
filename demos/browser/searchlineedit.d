@@ -73,8 +73,7 @@ public:
 	
 	void paintEvent(QPaintEvent event)
 	{
-		//Q_UNUSED(event);
-		QPainter painter(this);
+		auto painter = new QPainter(this);
 		int height = this.height();
 
 		painter.setRenderHint(QPainter.Antialiasing, true);
@@ -92,7 +91,7 @@ public:
 		painter.drawLine(border, height - border, width() - border, border);
 	}
 
-	void textChanged(QString text)
+	void textChanged(string text)
 	{
 		setVisible(!text.isEmpty());
 	}
@@ -106,7 +105,7 @@ class SearchButton : public QAbstractButton
 {
 public:
 
-	SearchButton(QWidget parent = null)
+	this(QWidget parent = null)
 	{
 		super(parent);
 		m_menu = 0;
@@ -117,19 +116,18 @@ public:
 
 	void paintEvent(QPaintEvent event)
 	{
-		//Q_UNUSED(event);
 		QPainterPath myPath;
 
 		int radius = (height() / 5) * 2;
-		QRect circle(height() / 3 - 1, height() / 4, radius, radius);
+		QRect circle = QRect(height() / 3 - 1, height() / 4, radius, radius);
 		myPath.addEllipse(circle);
 
 		myPath.arcMoveTo(circle, 300);
 		QPointF c = myPath.currentPosition();
 		int diff = height() / 7;
-		myPath.lineTo(qMin(width() - 2, (int)c.x() + diff), c.y() + diff);
+		myPath.lineTo(qMin(width() - 2, cast(int) c.x() + diff), c.y() + diff);
 
-		QPainter painter(this);
+		auto painter = new QPainter(this);
 		painter.setRenderHint(QPainter.Antialiasing, true);
 		painter.setPen(QPen(Qt.darkGray, 2));
 		painter.drawPath(myPath);
@@ -171,7 +169,7 @@ protected:
 
 class SearchLineEdit : public ExLineEdit
 {
-    mixin Signal!("textChanged", QString /*text*/);
+    mixin Signal!("textChanged", string /*text*/);
 
 public:
 	
@@ -193,12 +191,12 @@ public:
 		setSizePolicy(QSizePolicy.Preferred, policy.verticalPolicy());
 	}
 
-	QString inactiveText()
+	string inactiveText()
 	{
 		return m_inactiveText;
 	}
 
-	void setInactiveText(QString text)
+	void setInactiveText(string text)
 	{
 		m_inactiveText = text;
 	}
@@ -208,7 +206,7 @@ public:
 		if (!m_searchButton.m_menu) {
 			m_searchButton.m_menu = new QMenu(m_searchButton);
 			if (isVisible())
-				(const_cast<SearchLineEdit>(this)).updateGeometries();
+				(cast(SearchLineEdit) this).updateGeometries();
 		}
 		return m_searchButton.m_menu;
 	}
@@ -238,8 +236,8 @@ protected:
 			QRect r = style().subElementRect(QStyle.SE_LineEditContents, &panel, this);
 			QFontMetrics fm = fontMetrics();
 			int horizontalMargin = lineEdit().x();
-			QRect lineRect(horizontalMargin + r.x(), r.y() + (r.height() - fm.height() + 1) / 2, r.width() - 2 * horizontalMargin, fm.height());
-			QPainter painter(this);
+			QRect lineRect = QRect(horizontalMargin + r.x(), r.y() + (r.height() - fm.height() + 1) / 2, r.width() - 2 * horizontalMargin, fm.height());
+			QPainter painter = new QPainter(this);
 			painter.setPen(palette().brush(QPalette.Disabled, QPalette.Text).color());
 			painter.drawText(lineRect, Qt.AlignLeft|Qt.AlignVCenter, m_inactiveText);
 		} else {
@@ -259,5 +257,5 @@ private:
 	}
 
 	SearchButton m_searchButton;
-	QString m_inactiveText;
+	string m_inactiveText;
 }

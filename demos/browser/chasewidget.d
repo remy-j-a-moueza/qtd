@@ -101,7 +101,6 @@ protected:
 
 	void paintEvent(QPaintEvent event)
 	{
-		//Q_UNUSED(event);
 		auto p = new QPainter(this);
 		if (m_pixmapEnabled && !m_pixmap.isNull()) {
 			p.drawPixmap(0, 0, m_pixmap);
