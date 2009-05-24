@@ -2481,6 +2481,9 @@
         <include file-name="QStringList" location="global"/>
     </extra-includes>
 
+    <modify-function signature="scope() const">
+        <rename to="scope_"/>
+    </modify-function>
     <modify-function signature="setSystemIniPath(const QString&amp;)" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="setUserIniPath(const QString&amp;)" remove="all"/> <!--### Obsolete in 4.3-->
   </object-type>
