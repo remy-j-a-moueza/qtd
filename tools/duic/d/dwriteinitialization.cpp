@@ -1161,13 +1161,13 @@ void WriteInitialization::writeProperties(const QString &varName,
             }
             break;
         case DomProperty::Cursor:
-            propertyValue = QString::fromLatin1("QCursor(cast(Qt.CursorShape)(%1))")
+            propertyValue = QString::fromLatin1("new QCursor(cast(Qt.CursorShape)(%1))")
                             .arg(p->elementCursor());
             break;
         case DomProperty::CursorShape:
             if (p->hasAttributeStdset() && !p->attributeStdset())
                 varNewName += QLatin1String(".viewport()");
-            propertyValue = QString::fromLatin1("QCursor(Qt.%1)")
+            propertyValue = QString::fromLatin1("new QCursor(Qt.%1)")
                             .arg(p->elementCursorShape());
             break;
         case DomProperty::Enum:
