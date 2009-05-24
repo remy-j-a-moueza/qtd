@@ -732,7 +732,7 @@ void WriteInitialization::acceptWidget(DomWidget *node)
             icon += iconCall(picon);
         }
 
-        m_output << m_option.indent << parentWidget << ".addTab(" << varName << icon << ", " << "\"\");\n";
+        m_output << m_option.indent << parentWidget << ".addTab(" << varName << icon << ", " << "null);\n";
 
         m_refreshOut << m_option.indent << parentWidget << ".setTabText("
                    << parentWidget << ".indexOf(" << varName << "), " << trCall(title) << ");\n";
@@ -2008,7 +2008,7 @@ void WriteInitialization::initializeComboBox(DomWidget *w)
             m_output << m_option.indent << varName << ".addItem(";
             if (icon)
                 m_output << iconValue << ", ";
-            m_output << "\"\");\n";
+            m_output << "null);\n";
 
             if (!toString(text->elementString()).isEmpty())
                 m_refreshOut << m_option.indent << varName << ".setItemText(" << i << ", " << trCall(text->elementString()) << ");\n";
@@ -2269,7 +2269,7 @@ void WriteInitialization::initializeTableWidget(DomWidget *w)
 QString WriteInitialization::trCall(const QString &str, const QString &commentHint) const
 {
     if (str.isEmpty())
-        return QLatin1String("\"\"");
+        return QLatin1String("null");
 
     QString result;
     const QString comment = commentHint.isEmpty() ? QString("null") : fixString(commentHint, m_option.indent);
