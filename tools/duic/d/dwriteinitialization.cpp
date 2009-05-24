@@ -170,9 +170,9 @@ namespace {
         return  true;
     }
 
-    inline void openIfndef(QTextStream &str, const QString &symbol)  { str << endl << QLatin1String("#ifndef ") << symbol << endl;  }
-    inline void closeIfdef(QTextStream &str, const QString &symbol) { str << QLatin1String("#endif // ") << symbol << endl << endl; }
-
+    inline void openIfndef(QTextStream &str, const QString &symbol)  { str << endl << QLatin1String("version(") << symbol << QLatin1String(") {} else {") << endl;  }
+    inline void closeIfdef(QTextStream &str, const QString &symbol) { str << QLatin1String("} // ") << symbol << endl << endl; }
+    
     const char *accessibilityDefineC = "QT_NO_ACCESSIBILITY";
     const char *toolTipDefineC = "QT_NO_TOOLTIP";
     const char *whatsThisDefineC = "QT_NO_WHATSTHIS";
