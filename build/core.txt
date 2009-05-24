@@ -51,5 +51,6 @@ set (classes
     QAbstractFactory
     QAbstractListModel
     QCryptographicHash
+    QSettings
     )
 	
