@@ -277,10 +277,8 @@ QString CppImplGenerator::jniReturnName(const AbstractMetaFunction *java_functio
 
     // qtd
     if (f_type) {
-        if (f_type->name() == "QModelIndex")
+        if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
             return_type = "void";
-        else if (f_type->typeEntry()->isStructInD())
-            return_type = f_type->typeEntry()->qualifiedCppName();
         else if (f_type->isObject() || f_type->isReference() || f_type->isValue() || f_type->isQObject())
             return_type = "void*";
         if (f_type->isVariant())
@@ -784,8 +782,12 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
                 if (f_type->isTargetLangString())
                     s << INDENT << "char* ret_str = NULL;" << endl
                       << INDENT << "size_t ret_str_size = 0;" << endl;
+
                 if (f_type->name() == "QModelIndex")
                     s << INDENT << "QModelIndexAccessor __d_return_value;" << endl;
+                else if (f_type->typeEntry()->isStructInD())
+                    s << INDENT << f_type->typeEntry()->qualifiedCppName() << " __d_return_value;" << endl;
+
                 if (f_type->isContainer())
                     s << INDENT << "void* __d_return_value;" << endl
                       << INDENT << "size_t __d_return_value_size;" << endl;
@@ -827,7 +829,7 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
                         s << f_type->name() << " *__qt_return_value = (" << f_type->name() << "*) ";
                     else if (f_type->isObject() || f_type->isQObject())
                         s << "return (" << f_type->name() <<"*) ";
-                    else if (f_type->name() == "QModelIndex")
+                    else if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
                         ;
                     else if ((options & NoReturnStatement) == 0)
                         s << "return ";
@@ -842,7 +844,7 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
                 if (f_type) {
                     if (f_type->isTargetLangString())
                         s << ", ret_str, ret_str_size";
-                    if (f_type->name() == "QModelIndex")
+                    if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
                         s << ", &__d_return_value";
                     if (f_type->isContainer())
                         s << ", &__d_return_value, &__d_return_value_size";
@@ -863,7 +865,8 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
 s << "__qtd_dummy();" << endl; // hack!!!
 #endif
                         s << INDENT << "return __qt_return_value;" << endl;
-                    }
+                    } else if (f_type->typeEntry()->isStructInD())
+                        s << INDENT << "return __d_return_value;" << endl;
 
                     if (f_type->isContainer()) {
                         writeJavaToQt(s, f_type, "__qt_return_value", "__d_return_value",
@@ -893,8 +896,12 @@ void CppImplGenerator::writeVirtualDispatchArguments(QTextStream &s, const Abstr
     if (ret_type) {
         if (ret_type->isTargetLangString())
             s << ", char* ret_str, size_t ret_str_size";
+
         if (ret_type->name() == "QModelIndex")
             s << ", QModelIndexAccessor *__d_return_value";
+        else if(ret_type->typeEntry()->isStructInD())
+            s << ", " << ret_type->typeEntry()->qualifiedCppName() << " *__d_return_value";
+
         if (ret_type->isContainer())
             s << ", void** __d_arr_ptr, size_t* __d_arr_size";
     }
@@ -1894,7 +1901,8 @@ void CppImplGenerator::writeFinalFunctionArguments(QTextStream &s, const Abstrac
     if (f_type) {
         if (f_type->isTargetLangString() ||
             f_type->isContainer() ||
-            f_type->name() == "QModelIndex")
+            f_type->name() == "QModelIndex" ||
+            f_type->typeEntry()->isStructInD())
             return_arg = true;
 
         if (return_arg && nativeArgCount > 0)
@@ -1904,6 +1912,8 @@ void CppImplGenerator::writeFinalFunctionArguments(QTextStream &s, const Abstrac
             s << "void*";
         else if (f_type->name() == "QModelIndex")
             s << "QModelIndexAccessor*";
+        else if (f_type->typeEntry()->isStructInD())
+            s << f_type->typeEntry()->qualifiedCppName() << " *";
 
         if(return_arg) {
             s << " __d_return_value";
@@ -1922,7 +1932,8 @@ void CppImplGenerator::writeFinalFunctionArguments(QTextStream &s, const Abstrac
 
             if (nativeArgCount > 0)
                 s << "," << endl << " ";
-            // if QString argument we have to pass DArrat
+
+            // if QString argument we have to pass DArray
             if ((te && te->qualifiedCppName() == "QString") || d_type->isTargetLangString()) {
                 if (d_export)
                     s << "string " << arg_name;
@@ -2110,7 +2121,7 @@ void CppImplGenerator::writeFinalFunction(QTextStream &s, const AbstractMetaFunc
 
                 if (function_type && function_type->name() != "QModelIndex") {
                     if(function_type->typeEntry()->isStructInD())
-                        s << endl << INDENT << "return " << qt_return_value << ";";
+                        ; //s << endl << INDENT << "return " << qt_return_value << ";";
                     else if (!function_type->isTargetLangString() && !function_type->isContainer())
                         s << endl << INDENT << "return " << java_return_value << ";";
                 }
@@ -2140,7 +2151,6 @@ void CppImplGenerator::writeRefArguments(QTextStream &s, const AbstractMetaFunct
             s << QString("    _d_toUtf8(__qt_%1.utf16(), __qt_%1.size(), &%1);").arg(argument->indexedName()) << endl;
     }
 }
-
 
 void CppImplGenerator::writeAssignment(QTextStream &s, const QString &destName, const QString &srcName,
                                        const AbstractMetaType *java_type)
@@ -2217,7 +2227,7 @@ void CppImplGenerator::writeFieldAccessors(QTextStream &s, const AbstractMetaFie
             if (getter->type()->isTargetLangString() || getter->type()->name() == "QModelIndex")
                 ;
             else if(getter->type()->typeEntry()->isStructInD())
-                s << INDENT << "return " << tmp_name << ";" << endl;
+                ; //s << INDENT << "return " << tmp_name << ";" << endl;
             else
                 s << INDENT << "return " << java_return_value << ";" << endl;
         }
@@ -2948,9 +2958,13 @@ void CppImplGenerator::writeQtToJava(QTextStream &s,
         else
             s << INDENT << "*" << java_name << " = qtd_from_QModelIndex(" << qt_name << ");" << endl;
 
-    } else if(java_type->typeEntry()->isStructInD()) {
-        s << INDENT << java_type->typeEntry()->name() << " *" << java_name << " = (" << java_type->typeEntry()->name() << " *) &"
-                << qt_name << ";" << endl; // do nothing
+    } else if (java_type->typeEntry()->isStructInD()) {
+        if (option & BoxedPrimitive) {
+            s << INDENT << java_type->typeEntry()->name() << " *" << java_name << " = ("
+              << java_type->typeEntry()->name() << " *) &" << qt_name << ";" << endl;
+        } else {
+            s << INDENT << "*" << java_name << " = " << qt_name << ";" << endl;
+        }
     } else if (java_type->isArray() && java_type->arrayElementType()->isPrimitive()) {
         AbstractMetaType *elementType = java_type->arrayElementType();
 /* qtd
@@ -2996,7 +3010,6 @@ void CppImplGenerator::writeQtToJava(QTextStream &s,
     } else if (java_type->isVariant()) {
         s << INDENT << "QVariant *" << java_name
           << " = new QVariant(" << qt_name << ");" << endl;
-
     } else if (java_type->isTargetLangString()) {
         if(java_type->typeEntry()->qualifiedCppName() == "QStringRef") {
             s << INDENT << "const QString *str_ref = " << qt_name << ".string();" << endl
@@ -3644,7 +3657,7 @@ QString CppImplGenerator::translateType(const AbstractMetaType *java_type, Optio
     } else {
         return d_name + QString(java_type->indirections(), '*');
     }
- }
+}
 
 void CppImplGenerator::writeExtraIncludes(QTextStream &s, const AbstractMetaClass *java_class)
 {

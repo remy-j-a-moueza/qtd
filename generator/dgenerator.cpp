@@ -126,9 +126,9 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
 
     if (!d_type) {
         s = "void";
-    } else if (d_type->typeEntry()->qualifiedCppName() == "QChar")
+    } else if (d_type->typeEntry()->qualifiedCppName() == "QChar") {
         s = "wchar" + QString(d_type->actualIndirections(), '*');
-    else if (d_type->typeEntry() && d_type->typeEntry()->qualifiedCppName() == "QString") {
+    } else if (d_type->typeEntry() && d_type->typeEntry()->qualifiedCppName() == "QString") {
         s = "string";
     } else if (d_type->isArray()) {
         s = translateType(d_type->arrayElementType(), context) + "[]";
@@ -668,29 +668,29 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
 
         if(return_type->name() == "QModelIndex")
             s << INDENT << "QModelIndex res;" << endl;
+        else if (return_type->typeEntry()->isStructInD())
+            s << INDENT << return_type->name() << " res;" << endl;
 
         if(return_type->isContainer())
             s << INDENT << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << " res;" << endl;
     }
 
+    //returning string or a struct
+    bool return_in_arg = return_type && (return_type->isTargetLangString() ||
+                                         return_type->name() == "QModelIndex" ||
+                                         return_type->isContainer() ||
+                                         return_type->typeEntry()->isStructInD());
+
+
     s << INDENT;
     if ( (has_return_type && d_function->argumentReplaced(0).isEmpty() ) || d_function->isConstructor()) { //qtd
         if(d_function->type() && d_function->type()->isQObject()) { // qtd
             s << "void *__qt_return_value = ";
-        } else if(d_function->type() && (d_function->type()->isTargetLangString() ||
-                                         d_function->type()->name() == "QModelIndex" ||
-                                         d_function->type()->isContainer())) // qtd
+        } else if(return_in_arg) // qtd
             ;
-/* qtd2 not sure        else if (needs_return_variable) {
-            if (new_return_type.isEmpty())
-                s << translateType(return_type, d_function->implementingClass());
-            else
-                s << new_return_type;
-
-            s << " __qt_return_value = ";
-        }*/ else if (d_function->isConstructor()) { // qtd
+        else if (d_function->isConstructor()) { // qtd
             s << "void* __qt_return_value = ";
-        } else if (return_type && return_type->isValue()  && !return_type->typeEntry()->isStructInD()) {
+        } else if (return_type && return_type->isValue() && !return_type->typeEntry()->isStructInD()) {
             s << "void* __qt_return_value = ";
         } else if (return_type && return_type->isVariant()) {
             s << "void* __qt_return_value = ";
@@ -762,10 +762,6 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
             s << ", ";
     }
 
-    //returning string or a struct
-    bool return_in_arg = d_function->type() && (d_function->type()->isTargetLangString() ||
-                                                d_function->type()->name() == "QModelIndex" ||
-                                                d_function->type()->isContainer());
     if(return_in_arg) { // qtd
         if (!d_function->isStatic() && !d_function->isConstructor()) // qtd
             s << ", ";
@@ -794,18 +790,18 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                 s << arg_name << " is null ? null : " << arg_name << ".__ptr_" << te->designatedInterface()->name();
             else if (modified_type == "string" /* && type->fullName() == "char" */) {
                 s << "toStringz(" << arg_name << ")";
-            } else if (type->isArray())
+            } else if (type->isArray()) {
                 s << arg_name << ".ptr";
-            else if(type->isContainer()) {
+            } else if(type->isContainer()) {
                 const ContainerTypeEntry *cte =
                         static_cast<const ContainerTypeEntry *>(te);
                 if(isLinearContainer(cte))
                     s << QString("%1.ptr, %1.length").arg(arg_name);
-            } else if (type->typeEntry()->qualifiedCppName() == "QChar")
+            } else if (type->typeEntry()->qualifiedCppName() == "QChar") {
                 s << arg_name;
-            else if (type->isTargetLangString() || (te && te->qualifiedCppName() == "QString"))
+            } else if (type->isTargetLangString() || (te && te->qualifiedCppName() == "QString")) {
                 s << arg_name;
-            else if (type->isTargetLangEnum() || type->isTargetLangFlags()) {
+            } else if (type->isTargetLangEnum() || type->isTargetLangFlags()) {
                 s << arg_name;
 // qtd                s << arg->argumentName() << ".value()";
             } else if (!type->hasNativeId() && !(te->isValue() && type->isNativePointer())) { // qtd2 hack for QStyleOption not being a nativeId based for some reason
@@ -853,9 +849,9 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
     // return value marschalling
     if(return_type) {
         if ( ( has_return_type && d_function->argumentReplaced(0).isEmpty() )/* || d_function->isConstructor()*/) // qtd
-            if(d_function->type()->isQObject()) {
+            if(return_type->isQObject()) {
 
-            QString type_name = d_function->type()->name();
+            QString type_name = return_type->name();
             const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(d_function->type()->typeEntry());
             if(ctype->isAbstract())
                 type_name = type_name + "_ConcreteWrapper";
@@ -868,12 +864,12 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                     << INDENT << "    new_obj.__no_real_delete = true;" << endl
                     << INDENT << "    return new_obj;" << endl
                     << INDENT << "} else" << endl
-                    << INDENT << "    return cast(" << d_function->type()->name() << ") d_obj;" << endl;
+                    << INDENT << "    return cast(" << return_type->name() << ") d_obj;" << endl;
         }
 
 
         if (return_type->isValue() && !return_type->typeEntry()->isStructInD())
-            s << INDENT << "return new " << d_function->type()->name() << "(__qt_return_value, false);" << endl;
+            s << INDENT << "return new " << return_type->name() << "(__qt_return_value, false);" << endl;
 
         if (return_type->isVariant())
             s << INDENT << "return new QVariant(__qt_return_value, false);" << endl;
@@ -887,13 +883,13 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                         << INDENT << QString("return __m_%1;").arg(d_function->name()) << endl;
             else {
                 QString type_name = return_type->name();
-                const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(d_function->type()->typeEntry());
+                const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(return_type->typeEntry());
                 if(ctype->isAbstract())
                     type_name = type_name + "_ConcreteWrapper";
 
-                QString return_type_name = d_function->type()->name();
+                QString return_type_name = return_type->name();
                 if(return_type->typeEntry()->designatedInterface())
-                    return_type_name = d_function->type()->typeEntry()->designatedInterface()->name();
+                    return_type_name = return_type->typeEntry()->designatedInterface()->name();
 
                 AbstractMetaClass *classForTypeEntry = NULL;
                 // search in AbstractMetaClass list for return type
@@ -904,12 +900,12 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                         classForTypeEntry = cls;
                 }*/
 
-                classForTypeEntry = ClassFromEntry::get(d_function->type()->typeEntry());
+                classForTypeEntry = ClassFromEntry::get(return_type->typeEntry());
 
                 // if class has virtual functions then it has classname_entity function so
                 // we can look for D Object pointer. otherwise create new wrapper
                 if (classForTypeEntry != NULL && classForTypeEntry->hasVirtualFunctions()) {
-                    s << INDENT << "void* d_obj = __" << return_type->name() << "_entity(__qt_return_value);" << endl
+                    s << INDENT << "void* d_obj = __" << d_function->type()->name() << "_entity(__qt_return_value);" << endl
                             << INDENT << "if (d_obj !is null) {" << endl
                             << INDENT << "    auto d_obj_ref = cast (Object) d_obj;" << endl
                             << INDENT << "    return cast(" << return_type_name << ") d_obj_ref;" << endl
@@ -926,7 +922,6 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
             }
             s << endl;
         }
-
         if (return_type->isArray()) {
             s << INDENT << "return __qt_return_value[0 .. " << return_type->arrayElementCount() << "];" << endl;
         }
@@ -1910,8 +1905,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << "public import qt.QGlobal;" << endl
           << "public import qt.core.Qt;" << endl
           << "private import qt.QtDObject;" << endl
-          << "private import qt.qtd.Array;" << endl
-          << "private import qt.core.QString;" << endl;
+          << "private import qt.core.QString;" << endl
+          << "private import qt.qtd.Array;" << endl;
         if (d_class->isQObject()) {
             s << "public import qt.Signal;" << endl;
             if (d_class->name() != "QObject")
@@ -2393,18 +2388,18 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 */
     s << "}" << endl;
 
-    /* ---------------- injected free code ----------------*/
-    const ComplexTypeEntry *class_type = d_class->typeEntry();
-    Q_ASSERT(class_type);
+    /* ---------------- injected free code ----------------*/ 
+    const ComplexTypeEntry *class_type = d_class->typeEntry(); 
+    Q_ASSERT(class_type); 
 
-    CodeSnipList code_snips = class_type->codeSnips();
-    foreach (const CodeSnip &snip, code_snips) {
-        if (!d_class->isInterface() && snip.language == TypeSystem::TargetLangFreeCode) {
-            s << endl;
-            snip.formattedCode(s, INDENT);
-        }
-    }
-    /* --------------------------------------------------- */
+    CodeSnipList code_snips = class_type->codeSnips(); 
+    foreach (const CodeSnip &snip, code_snips) { 
+        if (!d_class->isInterface() && snip.language == TypeSystem::TargetLangFreeCode) { 
+            s << endl; 
+            snip.formattedCode(s, INDENT); 
+        } 
+    } 
+	/* --------------------------------------------------- */ 
 
     interfaces = d_class->interfaces();
     if (!interfaces.isEmpty()) {
@@ -2872,7 +2867,7 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
         }
         else if (f_type && f_type->isTargetLangString())
             s << "string _d_str = ";
-        else if (f_type && f_type->name() == "QModelIndex")
+        else if (f_type && (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD()))
             s << "*__d_return_value = ";
         else
             s << "auto return_value = ";
@@ -2939,7 +2934,7 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                 s << INDENT << "*__d_arr_ptr = return_value.ptr;" << endl
                   << INDENT << "*__d_arr_size = return_value.length;" << endl;
 //                  << INDENT << "addReference(return_value.ptr);" << endl;
-            else if (f_type->name() == "QModelIndex")
+            else if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
                 ;
             else
                 s << INDENT << "return return_value;" << endl;
