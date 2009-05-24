@@ -3,6 +3,8 @@ find_package(Qt4 REQUIRED)
 
 ## TODO: Is this definition correct?  
 add_definitions(-DQDESIGNER_UILIB_LIBRARY)
+set (QT_USE_QTXML true)
+include (${QT_USE_FILE})
 include_directories( ${QT_INCLUDE_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}/d )

@@ -1177,7 +1177,6 @@ void WriteInitialization::writeProperties(const QString &varName,
                 scope += QLatin1String("::");
                 propertyValue.prepend(scope);
             }
-            propertyValue = propertyValue.replace("::", "."); // qtd
             break;
         case DomProperty::Set:
             propertyValue = p->elementSet();
@@ -1354,6 +1353,8 @@ void WriteInitialization::writeProperties(const QString &varName,
         case DomProperty::Unknown:
             break;
         }
+        
+        propertyValue = propertyValue.replace("::", "."); // qtd
 
         if (propertyValue.size()) {
             const char* defineC = 0;
