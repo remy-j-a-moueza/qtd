@@ -302,7 +302,7 @@ protected:
 	void paintEvent(QPaintEvent event)
 	{
 		QPalette p = palette();
-		if (m_webView && m_webView.url().scheme() == QLatin1String("https")) {
+		if (m_webView && m_webView.url().scheme() == "https") {
 			QColor lightYellow(248, 248, 210);
 			p.setBrush(QPalette.Base, generateGradient(lightYellow));
 		} else {
@@ -311,13 +311,13 @@ protected:
 		setPalette(p);
 		ExLineEdit.paintEvent(event);
 
-		QPainter painter(this);
+		auto painter = new QPainter(this);
 		QStyleOptionFrameV2 panel;
 		initStyleOption(&panel);
 		QRect backgroundRect = style().subElementRect(QStyle.SE_LineEditContents, &panel, this);
 		if (m_webView && !hasFocus()) {
 			int progress = m_webView.progress();
-			QColor loadingColor = QColor(116, 192, 250);
+			QColor loadingColor = new QColor(116, 192, 250);
 			painter.setBrush(generateGradient(loadingColor));
 			painter.setPen(Qt.transparent);
 			int mid = backgroundRect.width() / 100 * progress;

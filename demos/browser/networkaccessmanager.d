@@ -94,17 +94,17 @@ public:
 	void loadSettings()
 	{
 		auto settings = new QSettings;
-		settings.beginGroup(QLatin1String("proxy"));
+		settings.beginGroup("proxy");
 		QNetworkProxy proxy;
-		if (settings.value(QLatin1String("enabled"), false).toBool()) {
-			if (settings.value(QLatin1String("type"), 0).toInt() == 0)
+		if (settings.value("enabled", false).toBool()) {
+			if (settings.value("type", 0).toInt() == 0)
 				proxy = QNetworkProxy.Socks5Proxy;
 			else
 				proxy = QNetworkProxy.HttpProxy;
-			proxy.setHostName(settings.value(QLatin1String("hostName")).toString());
-			proxy.setPort(settings.value(QLatin1String("port"), 1080).toInt());
-			proxy.setUser(settings.value(QLatin1String("userName")).toString());
-			proxy.setPassword(settings.value(QLatin1String("password")).toString());
+			proxy.setHostName(settings.value("hostName").toString());
+			proxy.setPort(settings.value("port", 1080).toInt());
+			proxy.setUser(settings.value("userName").toString());
+			proxy.setPassword(settings.value("password").toString());
 		}
 		setProxy(proxy);
 	}
@@ -169,7 +169,7 @@ version(QT_NO_OPENSSL)
 			string[] errorStrings;
 			for (int i = 0; i < error.count(); ++i)
 				errorStrings += error[i].errorString();
-			string errors = errorStrings ~ QLatin1String("\n"));
+			string errors = errorStrings ~ "\n";
 			int ret = QMessageBox.warning(mainWindow, QCoreApplication.applicationName(),
 				Format(tr("SSL Errors:\n\n{}\n\n{}\n\n"
 				"Do you want to ignore these errors for this host?"), reply.url().toString(), errors),

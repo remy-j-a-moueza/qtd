@@ -69,7 +69,7 @@ import autosaver;
 
 static const uint JAR_VERSION = 23;
 
-QDataStream operator<<(QDataStream stream, QNetworkCookie[] list)
+QDataStream opShl(QDataStream stream, QNetworkCookie[] list)
 {
 	stream << JAR_VERSION;
 	stream << cast(uint) list.length;
@@ -78,14 +78,14 @@ QDataStream operator<<(QDataStream stream, QNetworkCookie[] list)
 	return stream;
 }
 
-QDataStream operator>>(QDataStream stream, ref QNetworkCookie[] list)
+QDataStream opShr(QDataStream stream, ref QNetworkCookie[] list)
 {
 	list.clear();
 
 	uint version_;
 	stream >> version_;
 
-	if (version != JAR_VERSION)
+	if (version_ != JAR_VERSION)
 		return stream;
 
 	uint count;
@@ -303,15 +303,15 @@ public:
 	void loadSettings()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("cookies"));
-		QByteArray value = settings.value(QLatin1String("acceptCookies"),
-				QLatin1String("AcceptOnlyFromSitesNavigatedTo")).toByteArray();
+		settings.beginGroup("cookies");
+		QByteArray value = settings.value("acceptCookies",
+				"AcceptOnlyFromSitesNavigatedTo").toByteArray();
 		QMetaEnum acceptPolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("AcceptPolicy"));
 		m_acceptCookies = acceptPolicyEnum.keyToValue(value) == -1 ?
 				AcceptOnlyFromSitesNavigatedTo :
 				cast(AcceptPolicy) acceptPolicyEnum.keyToValue(value);
 
-		value = settings.value(QLatin1String("keepCookiesUntil"), QLatin1String("KeepUntilExpire")).toByteArray();
+		value = settings.value("keepCookiesUntil", "KeepUntilExpire").toByteArray();
 		QMetaEnum keepPolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("KeepPolicy"));
 		m_keepCookies = keepPolicyEnum.keyToValue(value) == -1 ?
 				KeepUntilExpire :
@@ -333,31 +333,31 @@ private:
 		purgeOldCookies();
 		string directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
 		if (directory.isEmpty())
-			directory = QDir.homePath() + QLatin1String("/.") + QCoreApplication.applicationName();
+			directory = QDir.homePath() ~ "/." ~ QCoreApplication.applicationName();
 		if (!QFile.exists(directory)) {
 			QDir dir;
 			dir.mkpath(directory);
 		}
-		auto cookieSettings = new QSettings(directory + QLatin1String("/cookies.ini"), QSettings.IniFormat);
+		auto cookieSettings = new QSettings(directory ~ "/cookies.ini", QSettings.IniFormat);
 		QNetworkCookie[] cookies = allCookies();
 		for (int i = cookies.count() - 1; i >= 0; --i) {
 			if (cookies[i].isSessionCookie())
 			cookies.removeAt(i);
 		}
-		cookieSettings.setValue(QLatin1String("cookies"), qVariantFromValue<QNetworkCookie[] >(cookies));
-		cookieSettings.beginGroup(QLatin1String("Exceptions"));
-		cookieSettings.setValue(QLatin1String("block"), m_exceptions_block);
-		cookieSettings.setValue(QLatin1String("allow"), m_exceptions_allow);
-		cookieSettings.setValue(QLatin1String("allowForSession"), m_exceptions_allowForSession);
+		cookieSettings.setValue("cookies", qVariantFromValue<QNetworkCookie[] >(cookies));
+		cookieSettings.beginGroup("Exceptions");
+		cookieSettings.setValue("block", m_exceptions_block);
+		cookieSettings.setValue("allow", m_exceptions_allow);
+		cookieSettings.setValue("allowForSession", m_exceptions_allowForSession);
 
 		// save cookie settings
 		QSettings settings;
-		settings.beginGroup(QLatin1String("cookies"));
+		settings.beginGroup("cookies");
 		QMetaEnum acceptPolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("AcceptPolicy"));
-		settings.setValue(QLatin1String("acceptCookies"), QLatin1String(acceptPolicyEnum.valueToKey(m_acceptCookies)));
+		settings.setValue("acceptCookies", acceptPolicyEnum.valueToKey(m_acceptCookies));
 
 		QMetaEnum keepPolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("KeepPolicy"));
-		settings.setValue(QLatin1String("keepCookiesUntil"), QLatin1String(keepPolicyEnum.valueToKey(m_keepCookies)));
+		settings.setValue("keepCookiesUntil", keepPolicyEnum.valueToKey(m_keepCookies));
 	}
 
 private:
@@ -385,12 +385,12 @@ private:
 			return;
 		// load cookies and exceptions
 		qRegisterMetaTypeStreamOperators!(QNetworkCookie[])("QNetworkCookie[]");
-		auto cookieSettings = new QSettings(QDesktopServices.storageLocation(QDesktopServices.DataLocation) + QLatin1String("/cookies.ini"), QSettings.IniFormat);
-		setAllCookies(cast(QNetworkCookie[]) (cookieSettings.value(QLatin1String("cookies"))));
-		cookieSettings.beginGroup(QLatin1String("Exceptions"));
-		m_exceptions_block = cookieSettings.value(QLatin1String("block")).toStringList();
-		m_exceptions_allow = cookieSettings.value(QLatin1String("allow")).toStringList();
-		m_exceptions_allowForSession = cookieSettings.value(QLatin1String("allowForSession")).toStringList();
+		auto cookieSettings = new QSettings(QDesktopServices.storageLocation(QDesktopServices.DataLocation) ~ "/cookies.ini", QSettings.IniFormat);
+		setAllCookies(cast(QNetworkCookie[]) (cookieSettings.value("cookies")));
+		cookieSettings.beginGroup("Exceptions");
+		m_exceptions_block = cookieSettings.value("block").toStringList();
+		m_exceptions_allow = cookieSettings.value("allow").toStringList();
+		m_exceptions_allowForSession = cookieSettings.value("allowForSession").toStringList();
 		qSort(m_exceptions_block.begin(), m_exceptions_block.end());
 		qSort(m_exceptions_allow.begin(), m_exceptions_allow.end());
 		qSort(m_exceptions_allowForSession.begin(), m_exceptions_allowForSession.end());
@@ -571,16 +571,16 @@ public:
 			int header = cookiesTable.horizontalHeader().sectionSizeHint(i);
 			switch (i) {
 				case 0:
-					header = fm.width(QLatin1String("averagehost.domain.com"));
+					header = fm.width("averagehost.domain.com");
 					break;
 				case 1:
-					header = fm.width(QLatin1String("_session_id"));
+					header = fm.width("_session_id");
 					break;
 				case 4:
 					header = fm.width(QDateTime.currentDateTime().toString(Qt.LocalDate));
 					break;
 			}
-			int buffer = fm.width(QLatin1String("xx"));
+			int buffer = fm.width("xx");
 			header += buffer;
 			cookiesTable.horizontalHeader().resizeSection(i, header);
 		}
@@ -767,13 +767,13 @@ public:
 			int header = exceptionTable.horizontalHeader().sectionSizeHint(i);
 			switch (i) {
 				case 0:
-				header = fm.width(QLatin1String("averagebiglonghost.domain.com"));
+				header = fm.width("averagebiglonghost.domain.com");
 				break;
 				case 1:
-				header = fm.width(QLatin1String("Allow For Session"));
+				header = fm.width("Allow For Session");
 				break;
 			}
-			int buffer = fm.width(QLatin1String("xx"));
+			int buffer = fm.width("xx");
 			header += buffer;
 			exceptionTable.horizontalHeader().resizeSection(i, header);
 		}

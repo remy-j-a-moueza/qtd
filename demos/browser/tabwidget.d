@@ -83,7 +83,7 @@ public:
 		setAcceptDrops(true);
 		this.customContextMenuRequested.connect(&this.contextMenuRequested);
 
-		string alt = QLatin1String("Alt+%1");
+		string alt = "Alt+%1";
 		for (int i = 1; i <= 10; ++i) {
 			int key = i;
 			if (key == 10)
@@ -121,7 +121,7 @@ protected:
 				urls ~= url;
 				mimeData.setUrls(urls);
 				mimeData.setText(tabText(index));
-				mimeData.setData(QLatin1String("action"), "tab-reordering");
+				mimeData.setData("action", "tab-reordering");
 				drag.setMimeData(mimeData);
 				drag.exec();
 			}
@@ -360,12 +360,12 @@ public:
 		setDocumentMode(true);
 
 		// Actions
-		m_newTabAction = new QAction(QIcon(QLatin1String(":addtab.png")), tr("New &Tab"), this);
+		m_newTabAction = new QAction(new QIcon(":addtab.png"), tr("New &Tab"), this);
 		m_newTabAction.setShortcuts(QKeySequence.AddTab);
 		m_newTabAction.setIconVisibleInMenu(false);
 		m_newTabAction.triggered.connect(&this.newTab);
 
-		m_closeTabAction = new QAction(QIcon(QLatin1String(":closetab.png")), tr("&Close Tab"), this);
+		m_closeTabAction = new QAction(new QIcon(":closetab.png"), tr("&Close Tab"), this);
 		m_closeTabAction.setShortcuts(QKeySequence.Close);
 		m_closeTabAction.setIconVisibleInMenu(false);
 		m_closeTabAction.triggered.connect(&this.closeTab);
@@ -819,7 +819,7 @@ private:
 		WebView webView = cast(WebView) signalSender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
-			auto icon = new QIcon(QLatin1String(":loading.gif"));
+			auto icon = new QIcon(":loading.gif");
 			setTabIcon(index, icon);
 		}
 	}

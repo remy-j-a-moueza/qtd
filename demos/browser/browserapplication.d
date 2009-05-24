@@ -84,15 +84,15 @@ public:
 	{
 		super(args);
 		m_localServer = null;
-		QCoreApplication.setOrganizationName(QLatin1String("Trolltech"));
-		QCoreApplication.setApplicationName(QLatin1String("demobrowser"));
-		QCoreApplication.setApplicationVersion(QLatin1String("0.1"));
+		QCoreApplication.setOrganizationName("Trolltech");
+		QCoreApplication.setApplicationName("demobrowser");
+		QCoreApplication.setApplicationVersion("0.1");
 		version(Q_WS_QWS)
 		{
 			// Use a different server name for QWS so we can run an X11
 			// browser and a QWS browser in parallel on the same machine for
 			// debugging
-			string serverName = QCoreApplication.applicationName() + QLatin1String("_qws");
+			string serverName = QCoreApplication.applicationName() ~ "_qws";
 		} else {
 			string serverName = QCoreApplication.applicationName();
 		}
@@ -133,14 +133,14 @@ public:
 			}
 		}
 
-		QDesktopServices.setUrlHandler(QLatin1String("http"), this, "openUrl");
+		QDesktopServices.setUrlHandler("http", this, "openUrl");
 		string localSysName = QLocale.system().name();
 
-		installTranslator(QLatin1String("qt_") + localSysName);
+		installTranslator("qt_" ~ localSysName);
 
 		QSettings settings;
-		settings.beginGroup(QLatin1String("sessions"));
-		m_lastSession = settings.value(QLatin1String("lastSession")).toByteArray();
+		settings.beginGroup("sessions");
+		m_lastSession = settings.value("lastSession").toByteArray();
 		settings.endGroup();
 
 		version(Q_WS_MAC) {
@@ -169,27 +169,27 @@ public:
 	void loadSettings()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("websettings"));
+		settings.beginGroup("websettings");
 
 		QWebSettings defaultSettings = QWebSettings.globalSettings();
 		string standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
 		int standardFontSize = defaultSettings.fontSize(QWebSettings.DefaultFontSize);
 		QFont standardFont = QFont(standardFontFamily, standardFontSize);
-		standardFont = qVariantValue!(QFont)(settings.value(QLatin1String("standardFont"), standardFont));
+		standardFont = qVariantValue!(QFont)(settings.value("standardFont", standardFont));
 		defaultSettings.setFontFamily(QWebSettings.StandardFont, standardFont.family());
 		defaultSettings.setFontSize(QWebSettings.DefaultFontSize, standardFont.pointSize());
 
 		string fixedFontFamily = defaultSettings.fontFamily(QWebSettings.FixedFont);
 		int fixedFontSize = defaultSettings.fontSize(QWebSettings.DefaultFixedFontSize);
 		QFont fixedFont = QFont(fixedFontFamily, fixedFontSize);
-		fixedFont = qVariantValue!(QFont)(settings.value(QLatin1String("fixedFont"), fixedFont));
+		fixedFont = qVariantValue!(QFont)(settings.value("fixedFont", fixedFont));
 		defaultSettings.setFontFamily(QWebSettings.FixedFont, fixedFont.family());
 		defaultSettings.setFontSize(QWebSettings.DefaultFixedFontSize, fixedFont.pointSize());
 
-		defaultSettings.setAttribute(QWebSettings.JavascriptEnabled, settings.value(QLatin1String("enableJavascript"), true).toBool());
-		defaultSettings.setAttribute(QWebSettings.PluginsEnabled, settings.value(QLatin1String("enablePlugins"), true).toBool());
+		defaultSettings.setAttribute(QWebSettings.JavascriptEnabled, settings.value("enableJavascript", true).toBool());
+		defaultSettings.setAttribute(QWebSettings.PluginsEnabled, settings.value("enablePlugins", true).toBool());
 
-		QUrl url = settings.value(QLatin1String("userStyleSheet")).toUrl();
+		QUrl url = settings.value("userStyleSheet").toUrl();
 		defaultSettings.setUserStyleSheetUrl(url);
 
 		settings.endGroup();
@@ -223,7 +223,7 @@ public:
 		if (!icon.isNull())
 			return icon.pixmap(16, 16);
 		if (m_defaultIcon.isNull())
-			m_defaultIcon = QIcon(QLatin1String(":defaulticon.png"));
+			m_defaultIcon = QIcon(":defaulticon.png");
 		return m_defaultIcon.pixmap(16, 16);
 	}
 
@@ -236,7 +236,7 @@ public:
 		clean();
 
 		QSettings settings;
-		settings.beginGroup(QLatin1String("sessions"));
+		settings.beginGroup("sessions");
 
 		QByteArray data;
 		auto buffer = new QBuffer(&data);
@@ -246,7 +246,7 @@ public:
 		stream << m_mainWindows.length;
 		for (int i = 0; i < m_mainWindows.length; ++i)
 			stream << m_mainWindows[i].saveState();
-		settings.setValue(QLatin1String("lastSession"), data);
+		settings.setValue("lastSession", data);
 		settings.endGroup();
 	}
 
@@ -403,10 +403,10 @@ private:
 	{
 		string directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
 		if (directory.isEmpty())
-			directory = QDir.homePath() ~ QLatin1String("/.") ~ QCoreApplication.applicationName();
+			directory = QDir.homePath() ~ "/." ~ QCoreApplication.applicationName();
 		QWebSettings.setIconDatabasePath(directory);
 
-		setWindowIcon(QIcon(QLatin1String(":browser.svg")));
+		setWindowIcon(new QIcon(":browser.svg"));
 
 		loadSettings();
 
@@ -437,8 +437,8 @@ private:
 		stream >> url;
 		if (!url.isEmpty()) {
 			QSettings settings;
-			settings.beginGroup(QLatin1String("general"));
-			int openLinksIn = settings.value(QLatin1String("openLinksIn"), 0).toInt();
+			settings.beginGroup("general");
+			int openLinksIn = settings.value("openLinksIn", 0).toInt();
 			settings.endGroup();
 			if (openLinksIn == 1)
 				newMainWindow();

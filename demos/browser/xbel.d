@@ -77,16 +77,16 @@ public:
 		m_type = BookmarkNode.Root;
 	}
 
-	bool operator==(BookmarkNode other)
+	int opEquals(BookmarkNode other)
 	{
 		if (url != other.url || title != other.title || desc != other.desc || expanded != other.expanded
 			|| m_type != other.m_type || m_children.length != other.m_children.length)
-			return false;
+			return cast(int) false;
 
 		for (int i = 0; i < m_children.length; ++i)
 			if (!((*(m_children[i])) == (*(other.m_children[i]))))
-				return false;
-		return true;
+				return cast(int) false;
+		return cast(int) true;
 	}
 
 	Type type()
@@ -163,8 +163,8 @@ public:
 		while (!atEnd()) {
 			readNext();
 			if (isStartElement()) {
-				string version_ = attributes().value(QLatin1String("version")).toString();
-				if (name() == QLatin1String("xbel") && (version_.isEmpty() || version_ == QLatin1String("1.0"))) {
+				string version_ = attributes().value("version").toString();
+				if (name() == "xbel" && (version_.isEmpty() || version_ == "1.0")) {
 					readXBEL(root);
 				} else {
 					raiseError(QObject.tr("The file is not an XBEL version 1.0 file."));
@@ -193,7 +193,7 @@ private:
 
 	void readXBEL(BookmarkNode parent)
 	{
-		assert(isStartElement() && name() == QLatin1String("xbel"));
+		assert(isStartElement() && name() == "xbel");
 
 		while (!atEnd()) {
 			readNext();
@@ -201,11 +201,11 @@ private:
 				break;
 
 			if (isStartElement()) {
-				if (name() == QLatin1String("folder"))
+				if (name() == "folder")
 					readFolder(parent);
-				else if (name() == QLatin1String("bookmark"))
+				else if (name() == ("bookmark")
 					readBookmarkNode(parent);
-				else if (name() == QLatin1String("separator"))
+				else if (name() == ("separator")
 					readSeparator(parent);
 				else
 					skipUnknownElement();
@@ -215,13 +215,13 @@ private:
 
 	void readTitle(BookmarkNode parent)
 	{
-		assert(isStartElement() && name() == QLatin1String("title"));
+		assert(isStartElement() && name() == "title");
 		parent.title = readElementText();
 	}
 
 	void readDescription(BookmarkNode parent)
 	{
-		assert(isStartElement() && name() == QLatin1String("desc"));
+		assert(isStartElement() && name() == "desc");
 		parent.desc = readElementText();
 	}
 
@@ -235,10 +235,10 @@ private:
 
 	void readFolder(BookmarkNode parent)
 	{
-		assert(isStartElement() && name() == QLatin1String("folder"));
+		assert(isStartElement() && name() == "folder");
 
 		BookmarkNode folder = new BookmarkNode(BookmarkNode.Folder, parent);
-		folder.expanded = (attributes().value(QLatin1String("folded")) == QLatin1String("no"));
+		folder.expanded = (attributes().value("folded") == "no");
 
 		while (!atEnd()) {
 			readNext();
@@ -247,15 +247,15 @@ private:
 				break;
 
 			if (isStartElement()) {
-				if (name() == QLatin1String("title"))
+				if (name() == "title")
 					readTitle(folder);
-				else if (name() == QLatin1String("desc"))
+				else if (name() == "desc")
 					readDescription(folder);
-				else if (name() == QLatin1String("folder"))
+				else if (name() == "folder")
 					readFolder(folder);
-				else if (name() == QLatin1String("bookmark"))
+				else if (name() == "bookmark")
 					readBookmarkNode(folder);
-				else if (name() == QLatin1String("separator"))
+				else if (name() == "separator")
 					readSeparator(folder);
 				else
 					skipUnknownElement();
@@ -265,18 +265,18 @@ private:
 
 	void readBookmarkNode(BookmarkNode parent)
 	{
-		assert(isStartElement() && name() == QLatin1String("bookmark"));
+		assert(isStartElement() && name() == "bookmark");
 		BookmarkNode bookmark = new BookmarkNode(BookmarkNode.Bookmark, parent);
-		bookmark.url = attributes().value(QLatin1String("href")).toString();
+		bookmark.url = attributes().value("href").toString();
 		while (!atEnd()) {
 			readNext();
 			if (isEndElement())
 				break;
 
 			if (isStartElement()) {
-				if (name() == QLatin1String("title"))
+				if (name() == "title")
 					readTitle(bookmark);
-				else if (name() == QLatin1String("desc"))
+				else if (name() == "desc")
 					readDescription(bookmark);
 				else
 					skipUnknownElement();
@@ -311,9 +311,9 @@ public:
 		setDevice(device);
 
 		writeStartDocument();
-		writeDTD(QLatin1String("<!DOCTYPE xbel>"));
-		writeStartElement(QLatin1String("xbel"));
-		writeAttribute(QLatin1String("version"), QLatin1String("1.0"));
+		writeDTD("<!DOCTYPE xbel>");
+		writeStartElement("xbel");
+		writeAttribute("version", "1.0");
 		if (root.type() == BookmarkNode.Root) {
 			for (int i = 0; i < root.children().length; ++i)
 				writeItem(root.children()[i]);
@@ -331,24 +331,24 @@ private:
 	{
 		switch (parent.type()) {
 			case BookmarkNode.Folder:
-				writeStartElement(QLatin1String("folder"));
-				writeAttribute(QLatin1String("folded"), parent.expanded ? QLatin1String("no") : QLatin1String("yes"));
-				writeTextElement(QLatin1String("title"), parent.title);
+				writeStartElement("folder");
+				writeAttribute("folded", parent.expanded ? "no" : "yes");
+				writeTextElement("title", parent.title);
 				for (int i = 0; i < parent.children().count(); ++i)
 					writeItem(parent.children()[i]);
 				writeEndElement();
 				break;
 			case BookmarkNode.Bookmark:
-				writeStartElement(QLatin1String("bookmark"));
+				writeStartElement("bookmark");
 				if (!parent.url.isEmpty())
-					writeAttribute(QLatin1String("href"), parent.url);
-				writeTextElement(QLatin1String("title"), parent.title);
+					writeAttribute("href", parent.url);
+				writeTextElement("title", parent.title);
 				if (!parent.desc.isEmpty())
-					writeAttribute(QLatin1String("desc"), parent.desc);
+					writeAttribute("desc", parent.desc);
 				writeEndElement();
 				break;
 			case BookmarkNode.Separator:
-				writeEmptyElement(QLatin1String("separator"));
+				writeEmptyElement("separator");
 				break;
 			default:
 				break;

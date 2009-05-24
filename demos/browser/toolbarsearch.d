@@ -113,11 +113,11 @@ public:
 			m_autosaver.changeOccurred();
 		}
 
-		auto url = new QUrl(QLatin1String("http://www.google.com/search"));
-		url.addQueryItem(QLatin1String("q"), searchText);
-		url.addQueryItem(QLatin1String("ie"), QLatin1String("UTF-8"));
-		url.addQueryItem(QLatin1String("oe"), QLatin1String("UTF-8"));
-		url.addQueryItem(QLatin1String("client"), QLatin1String("qtdemobrowser"));
+		auto url = new QUrl("http://www.google.com/search");
+		url.addQueryItem("q", searchText);
+		url.addQueryItem("ie", "UTF-8");
+		url.addQueryItem("oe", "UTF-8");
+		url.addQueryItem("client", "qtdemobrowser");
 		search.emit(url);
 	}
 
@@ -126,9 +126,9 @@ private:
 	void save()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("toolbarsearch"));
-		settings.setValue(QLatin1String("recentSearches"), m_stringListModel.stringList());
-		settings.setValue(QLatin1String("maximumSaved"), m_maxSavedSearches);
+		settings.beginGroup("toolbarsearch");
+		settings.setValue("recentSearches", m_stringListModel.stringList());
+		settings.setValue("maximumSaved", m_maxSavedSearches);
 		settings.endGroup();
 	}
 
@@ -169,9 +169,9 @@ private:
 	void load()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("toolbarsearch"));
-		string[] list = settings.value(QLatin1String("recentSearches")).toStringList();
-		m_maxSavedSearches = settings.value(QLatin1String("maximumSaved"), m_maxSavedSearches).toInt();
+		settings.beginGroup("toolbarsearch");
+		string[] list = settings.value("recentSearches").toStringList();
+		m_maxSavedSearches = settings.value("maximumSaved", m_maxSavedSearches).toInt();
 		m_stringListModel.setStringList(list);
 		settings.endGroup();
 	}

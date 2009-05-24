@@ -89,12 +89,12 @@ private:
 		string standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
 		int standardFontSize = defaultSettings.fontSize(QWebSettings.DefaultFontSize);
 		standardFont = QFont(standardFontFamily, standardFontSize);
-		standardLabel.setText(Format(QLatin1String("{} {}"), standardFont.family(), standardFont.pointSize()));
+		standardLabel.setText(Format("{} {}", standardFont.family(), standardFont.pointSize()));
 
 		string fixedFontFamily = defaultSettings.fontFamily(QWebSettings.FixedFont);
 		int fixedFontSize = defaultSettings.fontSize(QWebSettings.DefaultFixedFontSize);
 		fixedFont = QFont(fixedFontFamily, fixedFontSize);
-		fixedLabel.setText(Format(QLatin1String("{} {}"), fixedFont.family(), fixedFont.pointSize()));
+		fixedLabel.setText(Format("{} {}", fixedFont.family(), fixedFont.pointSize()));
 
 		downloadsLocation.setText(QDesktopServices.storageLocation(QDesktopServices.DesktopLocation));
 
@@ -105,13 +105,13 @@ private:
 	void loadFromSettings()
 	{
 		auto settings = new QSettings;
-		settings.beginGroup(QLatin1String("MainWindow"));
-		string defaultHome = QLatin1String("http://qtsoftware.com");
-		homeLineEdit.setText(settings.value(QLatin1String("home"), defaultHome).toString());
+		settings.beginGroup("MainWindow");
+		string defaultHome = "http://qtsoftware.com";
+		homeLineEdit.setText(settings.value("home", defaultHome).toString());
 		settings.endGroup();
 
-		settings.beginGroup(QLatin1String("history"));
-		int historyExpire = settings.value(QLatin1String("historyExpire")).toInt();
+		settings.beginGroup("history");
+		int historyExpire = settings.value("historyExpire").toInt();
 		int idx = 0;
 		switch (historyExpire) {
 			case 1: idx = 0; break;
@@ -126,34 +126,34 @@ private:
 		expireHistory.setCurrentIndex(idx);
 		settings.endGroup();
 
-		settings.beginGroup(QLatin1String("downloadmanager"));
-		string downloadDirectory = settings.value(QLatin1String("downloadDirectory"), downloadsLocation.text()).toString();
+		settings.beginGroup("downloadmanager");
+		string downloadDirectory = settings.value("downloadDirectory", downloadsLocation.text()).toString();
 		downloadsLocation.setText(downloadDirectory);
 		settings.endGroup();
 
-		settings.beginGroup(QLatin1String("general"));
-		openLinksIn.setCurrentIndex(settings.value(QLatin1String("openLinksIn"), openLinksIn.currentIndex()).toInt());
+		settings.beginGroup("general");
+		openLinksIn.setCurrentIndex(settings.value("openLinksIn", openLinksIn.currentIndex()).toInt());
 
 		settings.endGroup();
 
 		// Appearance
-		settings.beginGroup(QLatin1String("websettings"));
-		fixedFont = qVariantValue<QFont>(settings.value(QLatin1String("fixedFont"), fixedFont));
-		standardFont = qVariantValue<QFont>(settings.value(QLatin1String("standardFont"), standardFont));
+		settings.beginGroup("websettings");
+		fixedFont = new QFont(settings.value("fixedFont", fixedFont));
+		standardFont = new QFont(settings.value("standardFont", standardFont));
 
-		standardLabel.setText(Format(QLatin1String("{} {}"), standardFont.family(), standardFont.pointSize()));
-		fixedLabel.setText(Format(QLatin1String("{} {}"), fixedFont.family(), fixedFont.pointSize()));
+		standardLabel.setText(Format("{} {}", standardFont.family(), standardFont.pointSize()));
+		fixedLabel.setText(Format("{} {}", fixedFont.family(), fixedFont.pointSize()));
 
-		enableJavascript.setChecked(settings.value(QLatin1String("enableJavascript"), enableJavascript.isChecked()).toBool());
-		enablePlugins.setChecked(settings.value(QLatin1String("enablePlugins"), enablePlugins.isChecked()).toBool());
-		userStyleSheet.setText(settings.value(QLatin1String("userStyleSheet")).toUrl().toString());
+		enableJavascript.setChecked(settings.value("enableJavascript", enableJavascript.isChecked()).toBool());
+		enablePlugins.setChecked(settings.value("enablePlugins", enablePlugins.isChecked()).toBool());
+		userStyleSheet.setText(settings.value("userStyleSheet").toUrl().toString());
 		settings.endGroup();
 
 		// Privacy
-		settings.beginGroup(QLatin1String("cookies"));
+		settings.beginGroup("cookies");
 
 		CookieJar jar = BrowserApplication.cookieJar();
-		QByteArray value = settings.value(QLatin1String("acceptCookies"), QLatin1String("AcceptOnlyFromSitesNavigatedTo")).toByteArray();
+		QByteArray value = settings.value("acceptCookies", "AcceptOnlyFromSitesNavigatedTo").toByteArray();
 		QMetaEnum acceptPolicyEnum = jar.staticMetaObject.enumerator(jar.staticMetaObject.indexOfEnumerator("AcceptPolicy"));
 		CookieJar.AcceptPolicy acceptCookies = acceptPolicyEnum.keyToValue(value) == -1 ? CookieJar.AcceptOnlyFromSitesNavigatedTo :
 			cast(CookieJar.AcceptPolicy) acceptPolicyEnum.keyToValue(value);
@@ -169,7 +169,7 @@ private:
 				break;
 		}
 
-		value = settings.value(QLatin1String("keepCookiesUntil"), QLatin1String("Expire")).toByteArray();
+		value = settings.value("keepCookiesUntil", "Expire").toByteArray();
 		QMetaEnum keepPolicyEnum = jar.staticMetaObject.enumerator(jar.staticMetaObject.indexOfEnumerator("KeepPolicy"));
 		CookieJar.KeepPolicy keepCookies = keepPolicyEnum.keyToValue(value) == -1 ? CookieJar.KeepUntilExpire :
 			cast(CookieJar.KeepPolicy)(keepPolicyEnum.keyToValue(value));
@@ -187,28 +187,28 @@ private:
 		settings.endGroup();
 
 		// Proxy
-		settings.beginGroup(QLatin1String("proxy"));
-		proxySupport.setChecked(settings.value(QLatin1String("enabled"), false).toBool());
-		proxyType.setCurrentIndex(settings.value(QLatin1String("type"), 0).toInt());
-		proxyHostName.setText(settings.value(QLatin1String("hostName")).toString());
-		proxyPort.setValue(settings.value(QLatin1String("port"), 1080).toInt());
-		proxyUserName.setText(settings.value(QLatin1String("userName")).toString());
-		proxyPassword.setText(settings.value(QLatin1String("password")).toString());
+		settings.beginGroup("proxy");
+		proxySupport.setChecked(settings.value("enabled", false).toBool());
+		proxyType.setCurrentIndex(settings.value("type", 0).toInt());
+		proxyHostName.setText(settings.value("hostName").toString());
+		proxyPort.setValue(settings.value("port", 1080).toInt());
+		proxyUserName.setText(settings.value("userName").toString());
+		proxyPassword.setText(settings.value("password").toString());
 		settings.endGroup();
 	}
 
 	void saveToSettings()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("MainWindow"));
-		settings.setValue(QLatin1String("home"), homeLineEdit.text());
+		settings.beginGroup("MainWindow");
+		settings.setValue("home", homeLineEdit.text());
 		settings.endGroup();
 
-		settings.beginGroup(QLatin1String("general"));
-		settings.setValue(QLatin1String("openLinksIn"), openLinksIn.currentIndex());
+		settings.beginGroup("general");
+		settings.setValue("openLinksIn", openLinksIn.currentIndex());
 		settings.endGroup();
 
-		settings.beginGroup(QLatin1String("history"));
+		settings.beginGroup("history");
 		int historyExpire = expireHistory.currentIndex();
 		int idx = -1;
 		switch (historyExpire) {
@@ -219,24 +219,24 @@ private:
 			case 4: idx = 365; break;
 			case 5: idx = -1; break;
 		}
-		settings.setValue(QLatin1String("historyExpire"), idx);
+		settings.setValue("historyExpire", idx);
 		settings.endGroup();
 
 		// Appearance
-		settings.beginGroup(QLatin1String("websettings"));
-		settings.setValue(QLatin1String("fixedFont"), fixedFont);
-		settings.setValue(QLatin1String("standardFont"), standardFont);
-		settings.setValue(QLatin1String("enableJavascript"), enableJavascript.isChecked());
-		settings.setValue(QLatin1String("enablePlugins"), enablePlugins.isChecked());
+		settings.beginGroup("websettings");
+		settings.setValue("fixedFont", fixedFont);
+		settings.setValue("standardFont", standardFont);
+		settings.setValue("enableJavascript", enableJavascript.isChecked());
+		settings.setValue("enablePlugins", enablePlugins.isChecked());
 		string userStyleSheetString = userStyleSheet.text();
 		if (QFile.exists(userStyleSheetString))
-			settings.setValue(QLatin1String("userStyleSheet"), QUrl.fromLocalFile(userStyleSheetString));
+			settings.setValue("userStyleSheet", QUrl.fromLocalFile(userStyleSheetString));
 		else
-			settings.setValue(QLatin1String("userStyleSheet"), QUrl(userStyleSheetString));
+			settings.setValue("userStyleSheet", QUrl(userStyleSheetString));
 		settings.endGroup();
 
 		//Privacy
-		settings.beginGroup(QLatin1String("cookies"));
+		settings.beginGroup("cookies");
 
 		CookieJar.KeepPolicy keepCookies;
 		switch(acceptCombo.currentIndex()) {
@@ -253,7 +253,7 @@ private:
 		}
 		CookieJar jar = BrowserApplication.cookieJar();
 		QMetaEnum acceptPolicyEnum = jar.staticMetaObject.enumerator(jar.staticMetaObject.indexOfEnumerator("AcceptPolicy"));
-		settings.setValue(QLatin1String("acceptCookies"), QLatin1String(acceptPolicyEnum.valueToKey(keepCookies)));
+		settings.setValue("acceptCookies", acceptPolicyEnum.valueToKey(keepCookies));
 
 		CookieJar.KeepPolicy keepPolicy;
 		switch(keepUntilCombo.currentIndex()) {
@@ -270,18 +270,18 @@ private:
 		}
 
 		QMetaEnum keepPolicyEnum = jar.staticMetaObject.enumerator(jar.staticMetaObject.indexOfEnumerator("KeepPolicy"));
-		settings.setValue(QLatin1String("keepCookiesUntil"), QLatin1String(keepPolicyEnum.valueToKey(keepPolicy)));
+		settings.setValue("keepCookiesUntil", keepPolicyEnum.valueToKey(keepPolicy));
 
 		settings.endGroup();
 
 		// proxy
-		settings.beginGroup(QLatin1String("proxy"));
-		settings.setValue(QLatin1String("enabled"), proxySupport.isChecked());
-		settings.setValue(QLatin1String("type"), proxyType.currentIndex());
-		settings.setValue(QLatin1String("hostName"), proxyHostName.text());
-		settings.setValue(QLatin1String("port"), proxyPort.text());
-		settings.setValue(QLatin1String("userName"), proxyUserName.text());
-		settings.setValue(QLatin1String("password"), proxyPassword.text());
+		settings.beginGroup("proxy");
+		settings.setValue("enabled", proxySupport.isChecked());
+		settings.setValue("type", proxyType.currentIndex());
+		settings.setValue("hostName", proxyHostName.text());
+		settings.setValue("port", proxyPort.text());
+		settings.setValue("userName", proxyUserName.text());
+		settings.setValue("password", proxyPassword.text());
 		settings.endGroup();
 
 		BrowserApplication.instance().loadSettings();
@@ -316,7 +316,7 @@ private:
 		QFont font = QFontDialog.getFont(&ok, standardFont, this);
 		if ( ok ) {
 			standardFont = font;
-			standardLabel.setText(Format(QLatin1String("{} {}"), font.family(), font.pointSize()));
+			standardLabel.setText(Format("{} {}", font.family(), font.pointSize()));
 		}
 	}
 
@@ -326,7 +326,7 @@ private:
 		QFont font = QFontDialog.getFont(&ok, fixedFont, this);
 		if ( ok ) {
 			fixedFont = font;
-			fixedLabel.setText(Format(QLatin1String("{} {}"), font.family(), font.pointSize()));
+			fixedLabel.setText(Format("{} {}", font.family(), font.pointSize()));
 		}
 	}
 

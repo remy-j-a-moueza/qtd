@@ -109,7 +109,7 @@ public:
 	{
 		super(parent);
 		m_menu = 0;
-		setObjectName(QLatin1String("SearchButton"));
+		setObjectName("SearchButton");
 		setCursor(Qt.ArrowCursor);
 		setFocusPolicy(Qt.NoFocus);
 	}

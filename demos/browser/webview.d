@@ -153,11 +153,11 @@ private:
 			return;
 		}
 
-		auto file = new QFile(QLatin1String(":/notfound.html"));
+		auto file = new QFile(":/notfound.html");
 		bool isOpened = file.open(QIODevice.ReadOnly);
 		assert(isOpened);
 		string title = Format(tr("Error loading page: {}"), reply.url().toString());
-		string html = Format(QLatin1String(file.readAll()),
+		string html = Format(file.readAll(),
 			title,
 			reply.errorString(),
 			reply.url().toString());
@@ -167,8 +167,8 @@ private:
 		QIcon icon = view().style().standardIcon(QStyle.SP_MessageBoxWarning, 0, view());
 		QPixmap pixmap = icon.pixmap(QSize(32,32));
 		if (pixmap.save(&imageBuffer, "PNG")) {
-			html.replace(QLatin1String("IMAGE_BINARY_DATA_HERE"),
-			QLatin1String(imageBuffer.buffer().toBase64()));
+			html.replace("IMAGE_BINARY_DATA_HERE",
+				imageBuffer.buffer().toBase64());
 		}
 
 		QWebFrame[] frames;

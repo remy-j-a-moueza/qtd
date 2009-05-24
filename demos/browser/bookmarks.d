@@ -203,7 +203,7 @@ public:
 		XbelReader reader;
 		BookmarkNode importRootNode = reader.read(fileName);
 		if (reader.error() != QXmlStreamReader.NoError) {
-			QMessageBox.warning(0, QLatin1String("Loading Bookmark"),
+			QMessageBox.warning(0, "Loading Bookmark",
 				tr("Error when loading bookmarks on line %1, column %2:\n"
 				"%3").arg(reader.lineNumber()).arg(reader.columnNumber()).arg(reader.errorString()));
 		}
@@ -236,7 +236,7 @@ private:
 
 		XbelWriter writer;
 		string dir = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
-		string bookmarkFile = dir + QLatin1String("/bookmarks.xbel");
+		string bookmarkFile = dir ~ "/bookmarks.xbel";
 		if (!writer.write(bookmarkFile, m_bookmarkRootNode))
 			qWarning() << "BookmarkManager: error saving to" << bookmarkFile;
 	}
@@ -250,14 +250,14 @@ private:
 		m_loaded = true;
 
 		string dir = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
-		string bookmarkFile = dir ~ QLatin1String("/bookmarks.xbel");
+		string bookmarkFile = dir ~ "/bookmarks.xbel";
 		if (!QFile.exists(bookmarkFile))
-			bookmarkFile = QLatin1String(":defaultbookmarks.xbel");
+			bookmarkFile = ":defaultbookmarks.xbel";
 
 		XbelReader reader;
 		m_bookmarkRootNode = reader.read(bookmarkFile);
 		if (reader.error() != QXmlStreamReader.NoError) {
-			QMessageBox.warning(0, QLatin1String("Loading Bookmark"),
+			QMessageBox.warning(0, "Loading Bookmark",
 			tr("Error when loading bookmarks on line %1, column %2:\n"
 			"%3").arg(reader.lineNumber()).arg(reader.columnNumber()).arg(reader.errorString()));
 		}
@@ -676,7 +676,7 @@ public:
 		return mimeData;
 	}
 
-	const string MIMETYPE = QLatin1String("application/bookmarks.xbel");
+	const string MIMETYPE = "application/bookmarks.xbel";
 
 	string[] mimeTypes()
 	{
@@ -697,7 +697,7 @@ public:
 			return false;
 
 		QUndoStack undoStack = m_bookmarksManager.undoRedoStack();
-		undoStack.beginMacro(QLatin1String("Move Bookmarks"));
+		undoStack.beginMacro("Move Bookmarks");
 
 		while (!stream.atEnd()) {
 			QByteArray encodedData;
@@ -705,7 +705,7 @@ public:
 			QBuffer buffer = new QBuffer(&encodedData);
 			buffer.open(QBuffer.ReadOnly);
 
-			XbelReader reader;
+			auto reader = new XbelReader;
 			BookmarkNode rootNode = reader.read(&buffer);
 			BookmarkNode[] children = rootNode.children();
 			for (int i = 0; i < children.count(); ++i) {

@@ -168,7 +168,7 @@ public:
 	static QUrl guessUrlFromString(string string)
 	{
 		string urlStr = string.trimmed();
-		auto test = new QRegExp(QLatin1String("^[a-zA-Z]+\\:.*"));
+		auto test = new QRegExp("^[a-zA-Z]+\\:.*");
 
 		// Check if it looks like a qualified URL. Try parsing it and see.
 		bool hasSchema = test.exactMatch(urlStr);
@@ -189,7 +189,7 @@ public:
 			int dotIndex = urlStr.indexOf(QLatin1Char('.'));
 			if (dotIndex != -1) {
 				string prefix = urlStr.left(dotIndex).toLower();
-				QByteArray schema = (prefix == QLatin1String("ftp")) ? prefix.toLatin1() : "http";
+				QByteArray schema = (prefix == "ftp") ? prefix.toLatin1() : "http";
 				QUrl url =
 				QUrl.fromEncoded(schema + "://" + urlStr.toUtf8(), QUrl.TolerantMode);
 				if (url.isValid())
@@ -292,8 +292,8 @@ public:
 	void slotHome()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("MainWindow"));
-		string home = settings.value(QLatin1String("home"), QLatin1String("http://qtsoftware.com/")).toString();
+		settings.beginGroup("MainWindow");
+		string home = settings.value("home", "http://qtsoftware.com/").toString();
 		loadPage(home);
 	}
 
@@ -323,9 +323,9 @@ private:
 		BrowserApplication.instance().saveSession();
 
 		QSettings settings;
-		settings.beginGroup(QLatin1String("BrowserMainWindow"));
+		settings.beginGroup("BrowserMainWindow");
 		QByteArray data = saveState(false);
-		settings.setValue(QLatin1String("defaultState"), data);
+		settings.setValue("defaultState", data);
 		settings.endGroup();
 	}
 
@@ -754,8 +754,8 @@ private:
 	void loadDefaultState()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("BrowserMainWindow"));
-		QByteArray data = settings.value(QLatin1String("defaultState")).toByteArray();
+		settings.beginGroup("BrowserMainWindow");
+		QByteArray data = settings.value("defaultState").toByteArray();
 		restoreState(data);
 		settings.endGroup();
 	}
@@ -920,7 +920,7 @@ private:
 
 		QAction showAllBookmarksAction = new QAction(tr("Show All Bookmarks"), this);
 		showAllBookmarksAction.triggered().connect(&this.slotShowBookmarksDialog);
-		m_addBookmark = new QAction(QIcon(QLatin1String(":addbookmark.png")), tr("Add Bookmark..."), this);
+		m_addBookmark = new QAction(new QIcon(":addbookmark.png"), tr("Add Bookmark..."), this);
 		m_addBookmark.setIconVisibleInMenu(false);
 
 		m_addBookmark.triggered().connect(&this.slotAddBookmark);

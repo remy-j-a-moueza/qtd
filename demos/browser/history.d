@@ -244,8 +244,8 @@ public:
 	{
 		// load settings
 		QSettings settings;
-		settings.beginGroup(QLatin1String("history"));
-		m_historyLimit = settings.value(QLatin1String("historyLimit"), 30).toInt();
+		settings.beginGroup("history");
+		m_historyLimit = settings.value("historyLimit", 30).toInt();
 	}
 
 private:
@@ -253,8 +253,8 @@ private:
 	void save()
 	{
 		QSettings settings;
-		settings.beginGroup(QLatin1String("history"));
-		settings.setValue(QLatin1String("historyLimit"), m_historyLimit);
+		settings.beginGroup("history");
+		settings.setValue("historyLimit", m_historyLimit);
 
 		bool saveAll = m_lastSavedUrl.isEmpty();
 		int first = m_history.length - 1;
@@ -273,13 +273,13 @@ private:
 
 		string directory = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
 		if (directory.isEmpty())
-			directory = QDir.homePath() + QLatin1String("/.") + QCoreApplication.applicationName();
+			directory = QDir.homePath() ~ "/." ~ QCoreApplication.applicationName();
 		if (!QFile.exists(directory)) {
 			QDir dir;
 			dir.mkpath(directory);
 		}
 
-		auto historyFile = new QFile(directory ~ QLatin1String("/history"));
+		auto historyFile = new QFile(directory ~ "/history");
 		// When saving everything use a temporary file to prevent possible data loss.
 		auto tempFile = new QTemporaryFile;
 		tempFile.setAutoRemove(false);
@@ -364,7 +364,7 @@ private:
 	{
 		loadSettings();
 
-		historyFile = new QFile(QDesktopServices.storageLocation(QDesktopServices.DataLocation) ~ QLatin1String("/history"));
+		historyFile = new QFile(QDesktopServices.storageLocation(QDesktopServices.DataLocation) ~ "/history");
 		if (!historyFile.exists())
 			return;
 		if (!historyFile.open(QFile.ReadOnly)) {
@@ -1095,7 +1095,7 @@ public:
 					QDate date = idx.data(HistoryModel.DateRole).toDate();
 					if (date == QDate.currentDate())
 						return tr("Earlier Today");
-					return date.toString(QLatin1String("dddd, MMMM d, yyyy"));
+					return date.toString("dddd, MMMM d, yyyy");
 				}
 				if (index.column() == 1) {
 					return Format(tr("{} items"), rowCount(index.sibling(index.row(), 0)));
@@ -1103,7 +1103,7 @@ public:
 			}
 		}
 		if (role == Qt.DecorationRole && index.column() == 0 && !index.parent().isValid())
-			return QIcon(QLatin1String(":history.png"));
+			return new QIcon(":history.png");
 		if (role == HistoryModel.DateRole && index.column() == 0 && index.internalId() == 0) {
 			int offset = sourceDateRow(index.row());
 			QModelIndex idx = sourceModel().index(offset, 0);
