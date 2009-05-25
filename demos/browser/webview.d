@@ -137,7 +137,7 @@ protected:
 
 	version(QT_NO_UITOOLS) {} else
 	{
-		QObject createPlugin(string classId, QUrl url, string[] paramNames, string[] paramValues);
+		QObject createPlugin(string classId, QUrl url, string[] paramNames, string[] paramValues)
 		{
 			auto loader = new QUiLoader;
 			return loader.createWidget(classId, view());
@@ -195,13 +195,13 @@ private:
 	Qt.MouseButtons m_pressedButtons;
 	bool m_openInNewTab;
 	QUrl m_loadingUrl;
-};
+}
 
 class WebView : public QWebView
 {
 public:
 	
-	WebView(QWidget parent = null)
+	this(QWidget parent = null)
 	{
 		super(parent);
 		m_progress = 0;
@@ -236,7 +236,10 @@ public:
 		return m_statusBarText;
 	}
 
-	int progress() const { return m_progress; }
+	int progress()
+	{
+		return m_progress;
+	}
 
 protected:
 
@@ -251,7 +254,7 @@ protected:
 	{
 		QWebView.mouseReleaseEvent(event);
 		if (!event.isAccepted() && (m_page.m_pressedButtons & Qt.MidButton)) {
-			QUrl url(QApplication.clipboard().text(QClipboard.Selection));
+			auto url = new QUrl(QApplication.clipboard().text(QClipboard.Selection));
 			if (!url.isEmpty() && url.isValid() && !url.scheme().isEmpty()) {
 				setUrl(url);
 			}
@@ -262,7 +265,7 @@ protected:
 	{
 		QWebHitTestResult r = page().mainFrame().hitTestContent(event.pos());
 		if (!r.linkUrl().isEmpty()) {
-			QMenu menu(this);
+			auto menu = new QMenu(this);
 			menu.addAction(pageAction(QWebPage.OpenLinkInNewWindow));
 			menu.addAction(tr("Open in New Tab"), this, SLOT(openLinkInNewTab()));
 			menu.addSeparator();

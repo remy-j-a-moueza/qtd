@@ -149,7 +149,7 @@ protected:
 
 	void paintEvent(QPaintEvent event)
 	{
-		QPainter p(this);
+		auto p = new QPainter(this);
 		QStyleOptionFrameV2 panel;
 		initStyleOption(&panel);
 		style().drawPrimitive(QStyle.PE_PanelLineEdit, &panel, &p, this);
@@ -303,7 +303,7 @@ protected:
 	{
 		QPalette p = palette();
 		if (m_webView && m_webView.url().scheme() == "https") {
-			QColor lightYellow(248, 248, 210);
+			auto lightYellow = new QColor(248, 248, 210);
 			p.setBrush(QPalette.Base, generateGradient(lightYellow));
 		} else {
 			p.setBrush(QPalette.Base, m_defaultBaseColor);
@@ -321,7 +321,7 @@ protected:
 			painter.setBrush(generateGradient(loadingColor));
 			painter.setPen(Qt.transparent);
 			int mid = backgroundRect.width() / 100 * progress;
-			QRect progressRect(backgroundRect.x(), backgroundRect.y(), mid, backgroundRect.height());
+			QRect progressRect = QRect(backgroundRect.x(), backgroundRect.y(), mid, backgroundRect.height());
 			painter.drawRect(progressRect);
 		}
 	}
@@ -343,9 +343,9 @@ private:
 
 	void webViewIconChanged()
 	{
-		QUrl url = (m_webView)  ? m_webView.url() : new QUrl();
+		QUrl url = m_webView ? m_webView.url() : new QUrl();
 		QIcon icon = BrowserApplication.instance().icon(url);
-		QPixmap pixmap(icon.pixmap(16, 16));
+		auto pixmap = new QPixmap(icon.pixmap(16, 16));
 		m_iconLabel.setPixmap(pixmap);
 	}
 
@@ -353,7 +353,7 @@ private:
 
 	QLinearGradient generateGradient(QColor color)
 	{
-		QLinearGradient gradient(0, 0, 0, height());
+		auto gradient = new QLinearGradient(0, 0, 0, height());
 		gradient.setColorAt(0, m_defaultBaseColor);
 		gradient.setColorAt(0.15, color.lighter(120));
 		gradient.setColorAt(0.5, color);

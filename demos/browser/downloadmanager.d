@@ -217,7 +217,7 @@ private:
 		string defaultLocation = QDesktopServices.storageLocation(QDesktopServices.DesktopLocation);
 		string downloadDirectory = settings.value("downloadDirectory", defaultLocation).toString();
 		if (!downloadDirectory.isEmpty())
-			downloadDirectory ~= QLatin1Char('/');
+			downloadDirectory ~= "/";
 
 		string defaultFileName = saveFileName(downloadDirectory);
 		string fileName = defaultFileName;
@@ -334,12 +334,12 @@ private:
 			baseName = "unnamed_download";
 			qDebug() << "DownloadManager:: downloading unknown file:" << m_url;
 		}
-		string name = directory ~ baseName ~ QLatin1Char('.') ~ endName;
+		string name = directory ~ baseName ~ "." ~ endName;
 		if (QFile.exists(name)) {
 			// already exists, don't overwrite
 			int i = 1;
 			do {
-				name = directory ~ baseName ~ QLatin1Char('-') ~ QString.number(i++) ~ QLatin1Char('.') ~ endName;
+				name = directory ~ baseName ~ "-" ~ .toString(i++) ~ "." ~ endName;
 			} while (QFile.exists(name));
 		}
 		return name;

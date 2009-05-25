@@ -46,9 +46,9 @@ import qt.core.QBasicTimer;
 import qt.core.QTime;
 import qt.core.QDir;
 import qt.core.QCoreApplication;
-import qt.core.QMetaObject;
+//import qt.core.QMetaObject;
 
-import QtDebug;
+//import QtDebug;
 
 
 const uint AUTOSAVE_IN  = 1000 * 3;  // seconds
@@ -83,9 +83,11 @@ public:
 			return;
 		m_timer.stop();
 		m_firstChange = QTime();
-		if (!QMetaObject.invokeMethod(parent(), "save", Qt.DirectConnection)) {
-			qWarning() << "AutoSaver: error invoking slot save() on parent";
-		}
+		
+		//TODO!
+		//if (!QMetaObject.invokeMethod(parent(), "save", Qt.DirectConnection)) {
+		//	qWarning() << "AutoSaver: error invoking slot save() on parent";
+		//}
 	}
 
 public:

@@ -344,14 +344,14 @@ private:
 			if (cookies[i].isSessionCookie())
 			cookies.removeAt(i);
 		}
-		cookieSettings.setValue("cookies", qVariantFromValue<QNetworkCookie[] >(cookies));
+		//cookieSettings.setValue("cookies", qVariantFromValue<QNetworkCookie[] >(cookies)); //TODO!
 		cookieSettings.beginGroup("Exceptions");
 		cookieSettings.setValue("block", m_exceptions_block);
 		cookieSettings.setValue("allow", m_exceptions_allow);
 		cookieSettings.setValue("allowForSession", m_exceptions_allowForSession);
 
 		// save cookie settings
-		QSettings settings;
+		auto settings = new QSettings;
 		settings.beginGroup("cookies");
 		QMetaEnum acceptPolicyEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("AcceptPolicy"));
 		settings.setValue("acceptCookies", acceptPolicyEnum.valueToKey(m_acceptCookies));
@@ -672,7 +672,7 @@ public:
 		return QVariant();
 	}
 
-	int columnCount(QModelIndex parent = QModelIndex());
+	int columnCount(QModelIndex parent = QModelIndex())
 	{
 		return (parent.isValid()) ? 0 : 2;
 	}

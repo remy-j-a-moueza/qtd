@@ -203,9 +203,9 @@ private:
 			if (isStartElement()) {
 				if (name() == "folder")
 					readFolder(parent);
-				else if (name() == ("bookmark")
+				else if (name() == "bookmark")
 					readBookmarkNode(parent);
-				else if (name() == ("separator")
+				else if (name() == "separator")
 					readSeparator(parent);
 				else
 					skipUnknownElement();

@@ -82,11 +82,11 @@ public:
 
 	this() {}
 
-	this(string u, QDateTime d = QDateTime(), string t = null)
+	this(string u, QDateTime d = null, string t = null)
 	{
 		title = t;
 		url = u;
-		dateTime = d;
+		dateTime = d ? d : new QDateTime();
 	}
 
 	//bool operator==(HistoryItem &other)
@@ -673,7 +673,7 @@ public:
 		return createIndex(row, column, m_sourceRow[row]);
 	}
 
-	QModelIndex parent(QModelIndex index= QModelIndex())
+	QModelIndex parent(QModelIndex index = QModelIndex())
 	{
 		return QModelIndex();
 	}
@@ -1038,7 +1038,7 @@ public:
 		return createIndex(row, column, 0);
 	}
 
-	QModelIndex parent(QModelIndex index= QModelIndex())
+	QModelIndex parent(QModelIndex index = QModelIndex())
 	{
 		return QModelIndex();
 	}
@@ -1157,11 +1157,13 @@ public:
 		if (m_sourceRowCache.length == 0)
 			rowCount(QModelIndex());
 
-		int[].iterator it;
-		it = qLowerBound(m_sourceRowCache.begin(), m_sourceRowCache.end(), sourceIndex.row());
-		if (*it != sourceIndex.row())
+		//int[].iterator it;
+		//it = qLowerBound(m_sourceRowCache.begin(), m_sourceRowCache.end(), sourceIndex.row());
+		int it = 0;
+		it = qLowerBound(m_sourceRowCache, sourceIndex.row());
+		if (it != sourceIndex.row())
 			--it;
-		int dateRow = qMax(0, it - m_sourceRowCache.begin());
+		int dateRow = qMax(0, it);
 		int row = sourceIndex.row() - m_sourceRowCache[dateRow];
 		return createIndex(row, sourceIndex.column(), dateRow + 1);
 	}
@@ -1290,18 +1292,20 @@ private:
 		if (m_sourceRowCache.length == 0)
 			return;
 		for (int i = end; i >= start;) {
-			int[]::iterator it;
-			it = qLowerBound(m_sourceRowCache.begin(), m_sourceRowCache.end(), i);
+			//int[]::iterator it;
+			//it = qLowerBound(m_sourceRowCache.begin(), m_sourceRowCache.end(), i);
+			int it;
+			it = qLowerBound(m_sourceRowCache, i);
 			// playing it safe
-			if (it == m_sourceRowCache.end()) {
-				m_sourceRowCache = null;
+			if (it == m_sourceRowCache.length) {
+				m_sourceRowCache.length = 0;
 				reset();
 				return;
 			}
 
-			if (*it != i)
+			if (it != i)
 				--it;
-			int row = qMax(0, it - m_sourceRowCache.begin());
+			int row = qMax(0, it);
 			int offset = m_sourceRowCache[row];
 			QModelIndex dateParent = index(row, 0);
 			// If we can remove all the rows in the date do that and skip over them
@@ -1402,7 +1406,7 @@ public:
 		tree.header().setStretchLastSection(true);
 		tree.activated(QModelIndex).connect(this.open);
 		tree.setContextMenuPolicy(Qt.CustomContextMenu);
-		tree.customContextMenuRequested(QPoint).connect(&this.customContextMenuRequested(QPoint));
+		tree.customContextMenuRequested.connect(&this.customContextMenuRequested);
 	}
 
 private:
