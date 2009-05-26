@@ -938,7 +938,14 @@ extern "C" DLL_PUBLIC int qtd_QVariant_userType
     return __java_return_value;
 }
 
+extern "C" DLL_PUBLIC void *qtd_QVariant_data(void* __this_nativeId)
+{
+    QVariant_QtDShell *__qt_this = (QVariant_QtDShell *) __this_nativeId;
+    return __qt_this->data();
+}
+
 // ---externC---end
 // Field accessors
+
 
 

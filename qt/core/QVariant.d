@@ -2,6 +2,7 @@ module qt.core.QVariant;
 
 public import qt.QGlobal;
 private import qt.QtDObject;
+private import qt.core.QMetaType;
 
 // automatic imports-------------
 private import qt.core.QSizeF;
@@ -28,6 +29,7 @@ version (Tango)
     import tango.core.Array;
     import tango.stdc.stringz;
     import tango.text.convert.Utf;
+    import tango.core.Traits;
 }
 
 
@@ -91,8 +93,38 @@ public class QVariant : QtDObject
 
         LastType = 0xffffffff // need this so that gcc >= 3.4 allocates 32 bits for Type
     }
-
+    
 // Functions
+
+    static public QVariant fromValue(T)(T obj)
+    {
+	QVariant var;
+	static if (is(T == class) || is(T == interface))
+	{
+	    int i = qtd_MetatypeId(toStringz(obj.classinfo.name));
+	    var = new QVariant(i, cast(void*)(obj));
+	}
+	else static if (isDynamicArrayType!(T) || isStaticArrayType!(T) )
+	{
+	    int i = qtd_MetatypeId(toStringz(typeid(ElementTypeOfArray!(T)).toString ~ "[]"));
+	    auto darray = new DArrayToC;
+	    darray.array = obj.dup;
+	    var = new QVariant(i, cast(void*)(darray));
+	}
+	else
+	{
+	    int i = qtd_MetatypeId(toStringz(typeid(T).toString));
+	    auto data = new T;
+	    *data = obj;
+	    var = new QVariant(i, cast(void*)(data));
+	}
+	return var;
+    }
+    
+    static public QVariant opCall(T)(T obj)
+    {
+	return fromValue(obj);
+    }
 
     public this() {
         void* __qt_return_value = qtd_QVariant_QVariant();
@@ -267,9 +299,73 @@ public class QVariant : QtDObject
         super(__qt_return_value);
     }
 
-
     public final bool canConvert(Type type) {
         return qtd_QVariant_canConvert(nativeId, type);
+    }
+
+    public final Type value(Type)() {
+	static if ( is(Type == QBitArray) )
+	    return toBitArra; 
+	else static if ( is(Type == bool) )
+	    return toBool; 
+	else static if ( is(Type == QByteArray) )
+	    return toByteArray; 
+	else static if ( is(Type == QDate) )
+	    return toDate; 
+	else static if ( is(Type == QDateTime) )
+	    return toDateTime; 
+	else static if ( is(Type == double) )
+	    return toDouble; 
+	else static if ( is(Type == int) )
+	    return toInt; 
+	else static if ( is(Type == QLine) )
+	    return toLine; 
+	else static if ( is(Type == QLineF) )
+	    return toLineF; 
+	else static if ( is(Type == QLocale) )
+	    return toLocale; 
+	else static if ( is(Type == long) )
+	    return toLongLong; 
+	else static if ( is(Type == QPoint) )
+	    return toPoint; 
+	else static if ( is(Type == QPointF) )
+	    return toPointF;
+	else static if ( is(Type == QRect) )
+	    return toRect;
+	else static if ( is(Type == QRectF) )
+	    return toRectF;
+	else static if ( is(Type == QRegExp) )
+	    return toRegExp;
+	else static if ( is(Type == QSize) )
+	    return toSize;
+	else static if ( is(Type == QSizeF) )
+	    return toSizeF;
+	else  static if ( is(Type == string) )
+	    return toString;
+	else  static if ( is(Type == QTime) )
+	    return toTime;
+	else static if ( is(Type == uint) )
+	    return toUInt;
+	else static if ( is(Type == ulong) )
+	    return toULongLong;
+	else static if ( is(Type == QUrl) )
+	    return toUrl;
+	else static if( is( Type == class ) || is( Type == interface ) )
+	{
+	    Object object = cast(Object)qtd_QVariant_data(nativeId);
+	    if(object)
+		return cast(Type)(object);
+	    return null;
+	}
+	else static if (isDynamicArrayType!(Type) || isStaticArrayType!(Type) )
+	{
+	    auto array = cast(DArrayToC*)qtd_QVariant_data(nativeId);
+	    return cast(Type)(array.array);
+	}
+	else
+	{
+	    return *cast(Type*)qtd_QVariant_data(nativeId);
+	}
     }
 
     public final void clear() {
@@ -530,8 +626,8 @@ private extern(C) ulong  qtd_QVariant_toULongLong_nativepointerbool(void* __this
 private extern(C) void*  qtd_QVariant_toUrl(void* __this_nativeId);
 private extern(C) char*  qtd_QVariant_typeName(void* __this_nativeId);
 private extern(C) int  qtd_QVariant_userType(void* __this_nativeId);
+private extern(C) void *qtd_QVariant_data(void* __this_nativeId);
+
 // Just the private functions for abstract functions implemeneted in superclasses
-
-
 
 // Virtual Dispatch functions
