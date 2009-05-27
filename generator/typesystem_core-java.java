@@ -113,7 +113,7 @@ class QCoreApplication___ extends QCoreApplication {
 
     protected static QCoreApplication m_instance = null;
 
-	this(char[][] args)
+	this(in string[] args)
 	{
 //        if (m_instance != null)
 //            throw new RuntimeException("QCoreApplication can only be initialized once");
@@ -489,24 +489,13 @@ class QBuffer___ extends QBuffer {
 
     // retain a reference to avoid gc
     private Object strongDataReference = null;
-
-    public QBuffer(QByteArray byteArray, QObject parent) {
-        this(byteArray.nativePointer(), parent);
-        strongDataReference = byteArray;
-    }
-
-    public QBuffer(QByteArray byteArray) {
-        this(byteArray, null);
-    }
-
     public final void setBuffer(QByteArray byteArray) {
-        setBuffer(byteArray.nativePointer());
+        setBuffer_private(byteArray);
         strongDataReference = byteArray;
     }
 
     public final void setData(byte data[]) {
-        QNativePointer np = qt.internal.QtJambiInternal.byteArrayToNativePointer(data);
-        setData(np, data.length);
+        setData(cast(char*)data.ptr, data.length);
     }
 
 }// class

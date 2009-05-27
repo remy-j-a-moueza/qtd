@@ -70,4 +70,6 @@ core_classes =  \
     QTimeLine \
     QAbstractFactory \
     QAbstractListModel \
-    QCryptographicHash
+    QCryptographicHash \
+    QProcess \
+    QBuffer

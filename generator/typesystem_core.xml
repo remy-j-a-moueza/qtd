@@ -2178,10 +2178,11 @@
         <remove/>
     </modify-function>
   
+
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QBuffer___" quote-before-line="}// class"/>
         </inject-code>
-        <extra-includes>
+<!--        <extra-includes>
             <include file-name="qt.QNativePointer" location="java"/>
         </extra-includes>
 
@@ -2193,9 +2194,10 @@
             </modify-argument>
         </modify-function>
 
-
+-->
         <modify-function signature="setBuffer(QByteArray*)">
             <access modifier="private"/>
+            <rename to="setBuffer_private"/>
         </modify-function>
 
 
@@ -2253,7 +2255,10 @@
   <object-type name="QProcess">
     <modify-function signature="readChannelMode()const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="setReadChannelMode(QProcess::ProcessChannelMode)" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
+        <modify-function signature="error()const">
+            <rename to="lastError"/>
+        </modify-function>
         <modify-function signature="finished(int, QProcess::ExitStatus)">
             <rename to="finishedWithStatusCode"/>
         </modify-function>
@@ -2262,7 +2267,7 @@
                 <reference-count action="set" variable-name="__rcStandardOutputProcess"/>
             </modify-argument>
         </modify-function>
-        <modify-function signature="startDetached(QString,QStringList&lt;QString&gt;,QString,long long*)">
+<!--        <modify-function signature="startDetached(QString,QStringList&lt;QString&gt;,QString,long long*)">
             <access modifier="private"/>
             <modify-argument index="4">
                 <remove-default-expression/>
@@ -2270,7 +2275,7 @@
         </modify-function>
         <inject-code>
              <import-file name="typesystem_core-java.java" quote-after-line="class QProcess___" quote-before-line="}// class"/>
-        </inject-code>
+        </inject-code>-->
   </object-type>
 
   <object-type name="QSignalMapper">
