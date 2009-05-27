@@ -72,4 +72,5 @@ core_classes =  \
     QAbstractListModel \
     QCryptographicHash \
     QProcess \
-    QBuffer
+    QBuffer \
+    QMetaType
