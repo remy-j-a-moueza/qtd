@@ -7526,13 +7526,6 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
       <include file-name="qt.qtd.Str" location="java"/>
     </extra-includes>
 
-    <!-- qtd2 -->
-    <modify-function signature="inputContext() const" remove="all"/>
-<!--    <modify-function signature="setStyle(QStyle*)" remove="all"/>
-    <modify-function signature="setStyle(const QString&amp;)" remove="all"/>
-    <modify-function signature="style()" remove="all"/>
--->
-
     <modify-function signature="QApplication(int &amp;, char  **, int)">
         <access modifier="private"/>
     </modify-function>
