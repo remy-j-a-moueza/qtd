@@ -1,0 +1,1 @@
+dmd main.d droparea.d dropsitewindow.d libqtdcore.lib libqtdgui.lib -I../../../ -I../../../qt/d1 -ofdropsite
