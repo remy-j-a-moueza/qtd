@@ -41,13 +41,13 @@
 module cookiejar;
 
 import qt.network.QNetworkCookieJar;
-import qt.core.QDebug;
+//import qt.core.QDebug;
 
 import qt.core.QAbstractItemModel;
 import qt.core.QDateTime;
 import qt.core.QDir;
 import qt.core.QFile;
-import qt.core.QMetaEnum;
+//import qt.core.QMetaEnum;
 import qt.core.QSettings;
 import qt.core.QUrl;
 
@@ -60,8 +60,9 @@ import qt.gui.QFontMetrics;
 import qt.gui.QHeaderView;
 import qt.gui.QKeyEvent;
 import qt.gui.QSortFilterProxyModel;
+import qt.gui.QAbstractTableModel;
 
-import QtWebKit.QWebSettings;
+import qt.webkit.QWebSettings;
 
 import cookiejar;
 import autosaver;
@@ -92,11 +93,11 @@ QDataStream opShr(QDataStream stream, ref QNetworkCookie[] list)
 	stream >> count;
 	for(uint i = 0; i < count; ++i)
 	{
-		QByteArray value;
+		auto value = new QByteArray;
 		stream >> value;
 		QNetworkCookie[] newCookies = QNetworkCookie.parseCookies(value);
 		if (newCookies.length == 0 && value.length() != 0) {
-			qWarning() << "CookieJar: Unable to parse saved cookie:" << value;
+			qWarning("CookieJar: Unable to parse saved cookie:" ~ cast(char[]) value.data());
 		}
 		
 		for (int j = 0; j < newCookies.length; ++j)
@@ -318,7 +319,7 @@ public:
 				cast(KeepPolicy) keepPolicyEnum.keyToValue(value);
 
 		if (m_keepCookies == KeepUntilExit)
-		setAllCookies(null);
+			setAllCookies(null);
 
 		m_loaded = true;
 		cookiesChanged.emit();
@@ -340,9 +341,9 @@ private:
 		}
 		auto cookieSettings = new QSettings(directory ~ "/cookies.ini", QSettings.IniFormat);
 		QNetworkCookie[] cookies = allCookies();
-		for (int i = cookies.count() - 1; i >= 0; --i) {
+		for (int i = cookies.length - 1; i >= 0; --i) {
 			if (cookies[i].isSessionCookie())
-			cookies.removeAt(i);
+				cookies.removeAt(i);
 		}
 		//cookieSettings.setValue("cookies", qVariantFromValue<QNetworkCookie[] >(cookies)); //TODO!
 		cookieSettings.beginGroup("Exceptions");
@@ -539,14 +540,16 @@ import ui_cookies;
 import ui_cookiesexceptions;
 
 
-class CookiesDialog : public QDialog, public Ui_CookiesDialog
+class CookiesDialog : public QDialog //, public Ui_CookiesDialog
 {
+	CookiesDialog ui;
+	
 public:
 
-	this(CookieJar cookieJar, QWidget parent = this)
-	//: QDialog(parent)
+	this(CookieJar cookieJar, QWidget parent = null)
 	{
-		setupUi(this);
+		super(parent);
+		ui.setupUi(this);
 		setWindowFlags(Qt.Sheet);
 		CookieModel model = new CookieModel(cookieJar, this);
 		m_proxyModel = new QSortFilterProxyModel(this);
@@ -724,16 +727,17 @@ private:
 }
 
 
-class CookiesExceptionsDialog : public QDialog, public Ui_CookiesExceptionsDialog
+class CookiesExceptionsDialog : public QDialog //, public Ui_CookiesExceptionsDialog
 {
+	CookiesExceptionsDialog ui;
 
 public:
 
 	this(CookieJar cookieJar, QWidget parent = null)
-	//: QDialog(parent)
 	{
+		super(parent);
 		m_cookieJar = cookieJar;
-		setupUi(this);
+		ui.setupUi(this);
 		setWindowFlags(Qt.Sheet);
 		removeButton.clicked.connect(&exceptionTable.removeOne);
 		removeAllButton.clicked.connect(&exceptionTable.removeAll);

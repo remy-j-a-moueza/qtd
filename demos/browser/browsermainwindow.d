@@ -57,7 +57,7 @@ import qt.gui.QStatusBar;
 import qt.gui.QToolBar;
 import qt.gui.QInputDialog;
 
-import qt.core.QDebug;
+//import qt.core.QDebug;
 
 import qt.webkit.QWebFrame;
 import qt.webkit.QWebHistory;
@@ -87,7 +87,7 @@ static const int BrowserMainWindowMagic = 0xba;
 
 public:
 
-	this(QWidget parent = null, Qt.WindowFlags flags = 0)
+	this(QWidget parent = null, int flags = 0) //Qt.WindowFlags flags
 	{
 		super(parent, flags);
 		m_tabWidget = new TabWidget(this);
@@ -97,7 +97,7 @@ public:
 		m_stop = 0;
 		m_reload = 0;
 
-		setAttribute(Qt.WA_DeleteOnClose, true);
+		setAttribute(Qt_WidgetAttribute.WA_DeleteOnClose, true);
 		statusBar().setSizeGripEnabled(true);
 		setupMenu();
 		setupToolBar();
@@ -219,7 +219,7 @@ public:
 	QByteArray saveState(bool withTabs)
 	{
 		int version_ = 2;
-		QByteArray data;
+		auto data = new QByteArray;
 		auto stream = new QDataStream(&data, QIODevice.WriteOnly);
 
 		stream << cast(int) BrowserMainWindowMagic;
@@ -291,7 +291,7 @@ public:
 
 	void slotHome()
 	{
-		QSettings settings;
+		auto settings = new QSettings;
 		settings.beginGroup("MainWindow");
 		string home = settings.value("home", "http://qtsoftware.com/").toString();
 		loadPage(home);
@@ -322,7 +322,7 @@ private:
 	{
 		BrowserApplication.instance().saveSession();
 
-		QSettings settings;
+		auto settings = new QSettings;
 		settings.beginGroup("BrowserMainWindow");
 		QByteArray data = saveState(false);
 		settings.setValue("defaultState", data);
@@ -447,7 +447,7 @@ private:
 			for (int i = 0; i < windows.length; ++i) {
 				BrowserMainWindow window = windows[i];
 				window.m_lastSearch = null; //QString::null
-				window.tabWidget().clear();
+				window.tabWidget().clearTabs();
 			}
 		}
 	}
@@ -494,7 +494,7 @@ private:
 	void slotAddBookmark()
 	{
 		WebView webView = currentTab();
-		string url = webView.url().toString();
+		string url = webView.getUrl().toString();
 		string title = webView.title();
 		AddBookmarkDialog dialog(url, title);
 		dialog.exec();

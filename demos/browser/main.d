@@ -45,7 +45,7 @@ module main;
 import browserapplication;
 
 
-int main(string[] args)
+int main(char[][] args)
 {
 	//Q_INIT_RESOURCE(data);
 	scope application = new BrowserApplication(args);

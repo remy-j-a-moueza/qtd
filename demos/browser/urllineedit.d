@@ -43,7 +43,7 @@ module urllineedit;
 
 import qt.core.QUrl;
 import qt.core.QEvent;
-import qt.core.QDebug;
+//import qt.core.QDebug;
 
 import qt.gui.QWidget;
 import qt.gui.QStyleOptionFrame;
@@ -56,6 +56,8 @@ import qt.gui.QLineEdit;
 import qt.gui.QPainter;
 import qt.gui.QStyle;
 import qt.gui.QStyleOptionFrameV2;
+import qt.gui.QLinearGradient;
+
 
 import browserapplication;
 import searchlineedit;
@@ -253,9 +255,9 @@ protected:
 				&& m_webView) {
 			QDrag drag = new QDrag(this);
 			QMimeData mimeData = new QMimeData;
-			mimeData.setText(QString.fromUtf8(m_webView.url().toEncoded()));
+			mimeData.setText(QString.fromUtf8(m_webView.getUrl().toEncoded()));
 			QUrl[] urls;
-			urls ~= m_webView.url();
+			urls ~= m_webView.getUrl();
 			mimeData.setUrls(urls);
 			drag.setMimeData(mimeData);
 			drag.exec();
@@ -302,7 +304,7 @@ protected:
 	void paintEvent(QPaintEvent event)
 	{
 		QPalette p = palette();
-		if (m_webView && m_webView.url().scheme() == "https") {
+		if (m_webView && m_webView.getUrl().scheme() == "https") {
 			auto lightYellow = new QColor(248, 248, 210);
 			p.setBrush(QPalette.Base, generateGradient(lightYellow));
 		} else {
@@ -329,7 +331,7 @@ protected:
 	void focusOutEvent(QFocusEvent event)
 	{
 		if (m_lineEdit.text().isEmpty() && m_webView)
-			m_lineEdit.setText(QString.fromUtf8(m_webView.url().toEncoded()));
+			m_lineEdit.setText(QString.fromUtf8(m_webView.getUrl().toEncoded()));
 		ExLineEdit.focusOutEvent(event);
 	}
 
@@ -343,7 +345,7 @@ private:
 
 	void webViewIconChanged()
 	{
-		QUrl url = m_webView ? m_webView.url() : new QUrl();
+		QUrl url = m_webView ? m_webView.getUrl() : new QUrl();
 		QIcon icon = BrowserApplication.instance().icon(url);
 		auto pixmap = new QPixmap(icon.pixmap(16, 16));
 		m_iconLabel.setPixmap(pixmap);

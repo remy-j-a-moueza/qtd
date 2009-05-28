@@ -74,7 +74,7 @@ public:
 	~this()
 	{
 		if (m_timer.isActive())
-			qWarning() << "AutoSaver: still active when destroyed, changes not saved.";
+			qWarning("AutoSaver: still active when destroyed, changes not saved.");
 	}
 	
 	void saveIfNeccessary()
@@ -82,11 +82,11 @@ public:
 		if (!m_timer.isActive())
 			return;
 		m_timer.stop();
-		m_firstChange = QTime();
+		m_firstChange = new QTime();
 		
 		//TODO!
 		//if (!QMetaObject.invokeMethod(parent(), "save", Qt.DirectConnection)) {
-		//	qWarning() << "AutoSaver: error invoking slot save() on parent";
+		//	qWarning("AutoSaver: error invoking slot save() on parent");
 		//}
 	}
 
@@ -111,7 +111,7 @@ protected:
 		if (event.timerId() == m_timer.timerId()) {
 			saveIfNeccessary();
 		} else {
-			QObject.timerEvent(event);
+			super.timerEvent(event);
 		}
 	}
 

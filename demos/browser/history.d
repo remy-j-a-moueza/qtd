@@ -47,8 +47,9 @@ import qt.gui.QDesktopServices;
 import qt.gui.QHeaderView;
 import qt.gui.QStyle;
 import qt.gui.QSortFilterProxyModel;
+import qt.gui.QAbstractTableModel;
 
-import qt.core.QtAlgorithms;
+//import qt.core.QtAlgorithms;
 import qt.core.QBuffer;
 import qt.core.QDir;
 import qt.core.QFile;
@@ -56,9 +57,9 @@ import qt.core.QFileInfo;
 import qt.core.QSettings;
 import qt.core.QTemporaryFile;
 import qt.core.QTextStream;
-import qt.core.QDebug;
+//import qt.core.QDebug;
 import qt.core.QDateTime;
-import qt.core.QHash;
+//import qt.core.QHash;
 import qt.core.QObject;
 import qt.core.QTimer;
 import qt.core.QUrl;
@@ -66,7 +67,7 @@ import qt.core.QUrl;
 import qt.webkit.QWebHistoryInterface;
 import qt.webkit.QWebSettings;
 
-import QWebHistoryInterface;
+//import QWebHistoryInterface;
 
 import autosaver;
 import browserapplication;
@@ -291,8 +292,7 @@ private:
 		}
 
 		if (!open) {
-			qWarning() << "Unable to open history file for saving"
-			<< (saveAll ? tempFile.fileName() : historyFile.fileName());
+			qWarning("Unable to open history file for saving" ~ (saveAll ? tempFile.fileName() : historyFile.fileName()));
 			return;
 		}
 
@@ -308,9 +308,9 @@ private:
 
 		if (saveAll) {
 			if (historyFile.exists() && !historyFile.remove())
-				qWarning() << "History: error removing old history." << historyFile.errorString();
+				qWarning("History: error removing old history." ~ historyFile.errorString());
 			if (!tempFile.rename(historyFile.fileName()))
-				qWarning() << "History: error moving new history over old." << tempFile.errorString() << historyFile.fileName();
+				qWarning("History: error moving new history over old." ~ tempFile.errorString() ~ historyFile.fileName());
 		}
 		m_lastSavedUrl = m_history.value(0).url;
 	}
@@ -368,7 +368,7 @@ private:
 		if (!historyFile.exists())
 			return;
 		if (!historyFile.open(QFile.ReadOnly)) {
-			qWarning() << "Unable to open history file" << historyFile.fileName();
+			qWarning("Unable to open history file" ~ historyFile.fileName());
 			return;
 		}
 
@@ -459,10 +459,10 @@ public:
 public:
 
 	enum Roles {
-		DateRole = Qt.UserRole + 1,
-		DateTimeRole = Qt.UserRole + 2,
-		UrlRole = Qt.UserRole + 3,
-		UrlStringRole = Qt.UserRole + 4
+		DateRole = Qt_ItemDataRole.UserRole + 1,
+		DateTimeRole = Qt_ItemDataRole.UserRole + 2,
+		UrlRole = Qt_ItemDataRole.UserRole + 3,
+		UrlStringRole = Qt_ItemDataRole.UserRole + 4
 	};
 
 	this(HistoryManager history, QObject parent = null)
@@ -477,9 +477,9 @@ public:
 		m_history.entryUpdated.connect(&this.entryUpdated);
 	}
     
-	QVariant headerData(int section, Qt.Orientation orientation, int role = Qt.DisplayRole)
+	QVariant headerData(int section, Qt_Orientation orientation, int role = Qt_ItemDataRole.DisplayRole)
 	{
-		if (orientation == Qt.Horizontal && role == Qt.DisplayRole) {
+		if (orientation == Qt_Orientation.Horizontal && role == Qt_Orientation.DisplayRole) {
 			switch (section) {
 				case 0: return tr("Title");
 				case 1: return tr("Address");
@@ -488,11 +488,11 @@ public:
 		return QAbstractTableModel.headerData(section, orientation, role);
 	}
 
-	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
+	QVariant data(QModelIndex index, int role = Qt_ItemDataRole.DisplayRole)
 	{
 		HistoryItem[] lst = m_history.history();
 		if (index.row() < 0 || index.row() >= lst.length)
-			return QVariant();
+			return new QVariant();
 
 		HistoryItem item = lst[index.row()];
 		switch (role) {
@@ -501,16 +501,16 @@ public:
 			case DateRole:
 				return item.dateTime.date();
 			case UrlRole:
-				return QUrl(item.url);
+				return new QUrl(item.url);
 			case UrlStringRole:
 				return item.url;
-			case Qt.DisplayRole:
-			case Qt.EditRole: {
+			case Qt_ItemDataRole.DisplayRole:
+			case Qt_ItemDataRole.EditRole: {
 				switch (index.column()) {
 					case 0:
 						// when there is no title try to generate one from the url
 						if (item.title.isEmpty()) {
-							string page = QFileInfo(QUrl(item.url).path()).fileName();
+							string page = (new QFileInfo((new QUrl(item.url)).path())).fileName();
 							if (!page.isEmpty())
 								return page;
 							return item.url;
@@ -520,12 +520,12 @@ public:
 						return item.url;
 				}
 			}
-			case Qt.DecorationRole:
+			case Qt_ItemDataRole.DecorationRole:
 				if (index.column() == 0) {
 					return BrowserApplication.instance().icon(item.url);
 				}
 		}
-		return QVariant();
+		return new QVariant();
 	}
 
 	int columnCount(QModelIndex parent = QModelIndex())
@@ -646,7 +646,7 @@ public:
 		}
 	}
 
-	QVariant headerData(int section, Qt.Orientation orientation, int role = Qt.DisplayRole)
+	QVariant headerData(int section, Qt_Orientation orientation, int role = Qt_ItemDataRole.DisplayRole)
 	{
 		return sourceModel().headerData(section, orientation, role);
 	}
@@ -701,7 +701,7 @@ public:
 		return true;
 	}
 
-	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
+	QVariant data(QModelIndex index, int role = Qt_ItemDataRole.DisplayRole)
 	{
 		return QAbstractProxyModel.data(index, role);
 	}
@@ -993,7 +993,7 @@ public:
 
 	QVariant data(QModelIndex index, int role)
 	{
-		if (sourceModel() && (role == Qt.EditRole || role == Qt.DisplayRole) && index.isValid()) {
+		if (sourceModel() && (role == Qt_ItemDataRole.EditRole || role == Qt_ItemDataRole.DisplayRole) && index.isValid()) {
 			QModelIndex idx = mapToSource(index);
 			idx = idx.sibling(idx.row(), 1);
 			string urlString = idx.data(HistoryModel.UrlStringRole).toString();
@@ -1084,9 +1084,9 @@ public:
 		setSourceModel(sourceModel);
 	}
 
-	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
+	QVariant data(QModelIndex index, int role = Qt_ItemDataRole.DisplayRole)
 	{
-		if ((role == Qt.EditRole || role == Qt.DisplayRole)) {
+		if ((role == Qt_ItemDataRole.EditRole || role == Qt_ItemDataRole.DisplayRole)) {
 			int start = index.internalId();
 			if (start == 0) {
 				int offset = sourceDateRow(index.row());
@@ -1102,7 +1102,7 @@ public:
 				}
 			}
 		}
-		if (role == Qt.DecorationRole && index.column() == 0 && !index.parent().isValid())
+		if (role == Qt_ItemDataRole.DecorationRole && index.column() == 0 && !index.parent().isValid())
 			return new QIcon(":history.png");
 		if (role == HistoryModel.DateRole && index.column() == 0 && index.internalId() == 0) {
 			int offset = sourceDateRow(index.row());
@@ -1203,11 +1203,11 @@ public:
 		return false;
 	}
 
-	Qt.ItemFlags flags(QModelIndex index)
+	int flags(QModelIndex index)
 	{
 		if (!index.isValid())
-			return Qt.NoItemFlags;
-		return Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsDragEnabled;
+			return Qt_ItemFlag.NoItemFlags;
+		return Qt_ItemFlag.ItemIsSelectable | Qt_ItemFlag.ItemIsEnabled | Qt_ItemFlag.ItemIsDragEnabled;
 	}
 
 	bool removeRows(int row, int count, QModelIndex parent = QModelIndex())
@@ -1231,7 +1231,7 @@ public:
 		return true;
 	}
 
-	QVariant headerData(int section, Qt.Orientation orientation, int role = Qt.DisplayRole)
+	QVariant headerData(int section, Qt_Orientation orientation, int role = Qt_ItemDataRole.DisplayRole)
 	{
 		return sourceModel().headerData(section, orientation, role);
 	}
@@ -1359,7 +1359,7 @@ public:
 	{
 		super(parent);
 		setSortRole(HistoryModel.DateTimeRole);
-		setFilterCaseSensitivity(Qt.CaseInsensitive);
+		setFilterCaseSensitivity(Qt_CaseSensitivity.CaseInsensitive);
 	}
 
 protected:
@@ -1375,22 +1375,24 @@ protected:
 
 import ui_history;
 
-class HistoryDialog : public QDialog, public Ui_HistoryDialog
+class HistoryDialog : public QDialog//, public Ui_HistoryDialog
 {
+	HistoryDialog ui;
+	
 	mixin Signal!("openUrl", QUrl /*url*/);
 
 public:
 
 	this(QWidget parent = null, HistoryManager history = null)
-	//: QDialog(parent)
 	{
+		super(parent);
 		HistoryManager history = setHistory;
 		if (!history)
 			history = BrowserApplication.historyManager();
-		setupUi(this);
+		ui.setupUi(this);
 		tree.setUniformRowHeights(true);
 		tree.setSelectionBehavior(QAbstractItemView.SelectRows);
-		tree.setTextElideMode(Qt.ElideMiddle);
+		tree.setTextElideMode(Qt_TextElideMode.ElideMiddle);
 		auto model = history.historyTreeModel();
 		auto proxyModel = new TreeProxyModel(this);
 		search.textChanged.connect(&proxyModel.setFilterFixedString);
@@ -1405,7 +1407,7 @@ public:
 		tree.header().resizeSection(0, header);
 		tree.header().setStretchLastSection(true);
 		tree.activated(QModelIndex).connect(this.open);
-		tree.setContextMenuPolicy(Qt.CustomContextMenu);
+		tree.setContextMenuPolicy(Qt_ContextMenuPolicy.CustomContextMenu);
 		tree.customContextMenuRequested.connect(&this.customContextMenuRequested);
 	}
 

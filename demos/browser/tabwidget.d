@@ -52,8 +52,9 @@ import qt.gui.QMouseEvent;
 import qt.gui.QStackedWidget;
 import qt.gui.QStyle;
 import qt.gui.QToolButton;
+import qt.gui.QLineEdit;
 
-import qt.core.QDebug;
+//import qt.core.QDebug;
 
 import browserapplication;
 import browsermainwindow;
@@ -209,7 +210,7 @@ private:
 	int m_dragCurrentIndex;
 }
 
-import QtWebKit.QWebPage;
+import qt.webkit.QWebPage;
 
 /*!
 A proxy object that connects a single browser action
@@ -317,20 +318,20 @@ to proxy the actions.
 class TabWidget : public QTabWidget
 {
 	// tab widget signals
-	mixin Singal!("loadPage", string /*url*/);
-	mixin Singal!("tabsChanged");
-	mixin Singal!("lastTabClosed");
+	mixin Signal!("loadPage", string /*url*/);
+	mixin Signal!("tabsChanged");
+	mixin Signal!("lastTabClosed");
 
 	// current tab signals
-	mixin Singal!("setCurrentTitle", string /*url*/);
-	mixin Singal!("showStatusBarMessage", string /*message*/);
-	mixin Singal!("linkHovered", string /*link*/);
-	mixin Singal!("loadProgress", int /*progress*/);
-	mixin Singal!("geometryChangeRequested", QRect /*geometry*/);
-	mixin Singal!("menuBarVisibilityChangeRequested", bool /*visible*/);
-	mixin Singal!("statusBarVisibilityChangeRequested", bool /*visible*/);
-	mixin Singal!("toolBarVisibilityChangeRequested", bool /*visible*/);
-	mixin Singal!("printRequested", QWebFrame /*frame*/);
+	mixin Signal!("setCurrentTitle", string /*url*/);
+	mixin Signal!("showStatusBarMessage", string /*message*/);
+	mixin Signal!("linkHovered", string /*link*/);
+	mixin Signal!("loadProgress", int /*progress*/);
+	mixin Signal!("geometryChangeRequested", QRect /*geometry*/);
+	mixin Signal!("menuBarVisibilityChangeRequested", bool /*visible*/);
+	mixin Signal!("statusBarVisibilityChangeRequested", bool /*visible*/);
+	mixin Signal!("toolBarVisibilityChangeRequested", bool /*visible*/);
+	mixin Signal!("printRequested", QWebFrame /*frame*/);
 
 public:
 
@@ -381,10 +382,10 @@ public:
 
 		m_previousTabAction = new QAction(tr("Show Previous Tab"), this);
 		shortcuts.clear();
-		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_BraceLeft);
-		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_PageUp);
-		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_BracketLeft);
-		shortcuts ~= QKeySequence(Qt.CTRL | Qt.Key_Greater);
+		shortcuts ~= QKeySequence(Qt_Modifier.CTRL | Qt_Key.Key_BraceLeft);
+		shortcuts ~= QKeySequence(Qt_Modifier.CTRL | Qt_Key.Key_PageUp);
+		shortcuts ~= QKeySequence(Qt_Modifier.CTRL | Qt_Key.Key_BracketLeft);
+		shortcuts ~= QKeySequence(Qt_Modifier.CTRL | Qt_Key.Key_Greater);
 		m_previousTabAction.setShortcuts(shortcuts);
 		m_previousTabAction.triggered.connect(&this.previousTab);
 
@@ -400,7 +401,7 @@ public:
 		m_lineEdits = new QStackedWidget(this);
 	}
 
-	void clear()
+	void clearTabs()
 	{
 		// clear the recently closed tabs
 		m_recentlyClosedTabs.length = 0;
@@ -497,8 +498,8 @@ static const int TabWidgetMagic = 0xaa;
 	QByteArray saveState()
 	{
 		int version_ = 1;
-		QByteArray data;
-		QDataStream stream(data, QIODevice.WriteOnly);
+		auto data = new QByteArray;
+		auto stream = new QDataStream(data, QIODevice.WriteOnly);
 
 		stream << cast(int) TabWidgetMagic;
 		stream << cast(int) version_;
@@ -506,9 +507,9 @@ static const int TabWidgetMagic = 0xaa;
 		string[] tabs;
 		for (int i = 0; i < count(); ++i) {
 			if (WebView tab = cast(WebView) widget(i)) {
-				tabs.append(tab.url().toString());
+				tabs ~= tab.getUrl().toString();
 			} else {
-				tabs.append(null); //QString.null);
+				tabs ~= null; //QString.null);
 			}
 		}
 		stream << tabs;
@@ -520,7 +521,7 @@ static const int TabWidgetMagic = 0xaa;
 	{
 		int version_ = 1;
 		QByteArray sd = state;
-		QDataStream stream(sd, QIODevice.ReadOnly);
+		auto stream = new QDataStream(sd, QIODevice.ReadOnly);
 		if (stream.atEnd())
 			return false;
 
@@ -665,7 +666,7 @@ public:
 		if (index < 0 || index >= count())
 			return;
 		WebView tab = newTab(false);
-		tab.setUrl(webView(index).url());
+		tab.setUrl(webView(index).getUrl());
 	}
 
 	// When index is -1 index chooses the current tab
@@ -694,9 +695,9 @@ public:
 			hasFocus = tab.hasFocus();
 
 			m_recentlyClosedTabsAction.setEnabled(true);
-			m_recentlyClosedTabs = [tab.url()] ~ m_recentlyClosedTabs;
+			m_recentlyClosedTabs = [tab.getUrl()] ~ m_recentlyClosedTabs;
 			if (m_recentlyClosedTabs.length >= TabWidget.m_recentlyClosedTabsSize)
-				m_recentlyClosedTabs.removeLast();
+				m_recentlyClosedTabs = m_recentlyClosedTabs[0..$-1];
 		}
 		QWidget lineEdit = m_lineEdits.widget(index);
 		m_lineEdits.removeWidget(lineEdit);
@@ -789,7 +790,7 @@ private:
 		m_lineEdits.setCurrentIndex(index);
 		loadProgress.emit(webView.progress());
 		showStatusBarMessage.emit(webView.lastStatusBarText());
-		if (webView.url().isEmpty())
+		if (webView.getUrl().isEmpty())
 			m_lineEdits.currentWidget().setFocus();
 		else
 			webView.setFocus();
@@ -829,7 +830,7 @@ private:
 		WebView webView = cast(WebView) signalSender();
 		int index = webViewIndex(webView);
 		if (-1 != index) {
-			QIcon icon = BrowserApplication.instance().icon(webView.url());
+			QIcon icon = BrowserApplication.instance().icon(webView.getUrl());
 			setTabIcon(index, icon);
 		}
 	}
@@ -843,7 +844,7 @@ private:
 		}
 		if (currentIndex() == index)
 			setCurrentTitle.emit(title);
-		BrowserApplication.historyManager().updateHistoryItem(webView.url(), title);
+		BrowserApplication.historyManager().updateHistoryItem(webView.getUrl(), title);
 	}
 
 	void webViewUrlChanged(QUrl url)

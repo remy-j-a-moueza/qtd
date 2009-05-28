@@ -44,19 +44,21 @@ module downloadmanager;
 
 import qt.core.QFile;
 import qt.core.QTime;
-import qt.core.QMetaEnum;
+//import qt.core.QMetaEnum;
 import qt.core.QSettings;
-import qt.core.QDebug;
+//import qt.core.QDebug;
 
 import qt.gui.QDesktopServices;
 import qt.gui.QFileDialog;
 import qt.gui.QHeaderView;
 import qt.gui.QFileIconProvider;
 
+import qt.core.QAbstractListModel;
+
 import qt.network.QNetworkReply;
 import qt.webkit.QWebSettings;
 
-import math;
+//import math;
 import autosaver;
 import browserapplication;
 import networkaccessmanager;
@@ -64,9 +66,10 @@ import ui_downloads;
 import ui_downloaditem;
 
 
-class DownloadItem : public QWidget, public Ui_DownloadItem
+class DownloadItem : public QWidget //, public Ui_DownloadItem
 {
-    mixin Signal!("statusChanged");
+	mixin Signal!("statusChanged");
+	DownloadItem ui;
 
 public:
  
@@ -82,7 +85,7 @@ public:
 		m_requestFileName = requestFileName;
 		m_bytesReceived = 0;
 
-		setupUi(this);
+		ui.setupUi(this);
 		QPalette p = downloadInfoLabel.palette();
 		p.setColor(QPalette.Text, Qt.darkGray);
 		downloadInfoLabel.setPalette(p);
@@ -351,8 +354,9 @@ private:
 }
 
 
-class DownloadManager : public QDialog, public Ui_DownloadDialog
+class DownloadManager : public QDialog //, public Ui_DownloadDialog
 {
+	DownloadDialog ui;
 
 public:
 
@@ -369,14 +373,15 @@ public:
 	extract zipped files or anything fancy.
 	*/
 	this(QWidget parent = null)
-	//: QDialog(parent)
 	{
+		super(parent);
+		
 		m_autoSaver = new AutoSaver(this);
 		m_manager = BrowserApplication.networkAccessManager();
 		m_iconProvider = 0;
 		m_removePolicy = RemovePolicy.Never;
 
-		setupUi(this);
+		ui.setupUi(this);
 		downloadsView.setShowGrid(false);
 		downloadsView.verticalHeader().hide();
 		downloadsView.horizontalHeader().hide();

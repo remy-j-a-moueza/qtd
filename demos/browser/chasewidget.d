@@ -59,7 +59,7 @@ class ChaseWidget : public QWidget
 {
 public:
 
-	this(QWidget parent = null, QPixmap pixmap = QPixmap(), bool pixmapEnabled = false)
+	this(QWidget parent = null, QPixmap pixmap = new QPixmap(), bool pixmapEnabled = false)
 	{
 		super(parent);
 		m_segment = 0;

@@ -41,7 +41,7 @@
 module squeezelabel;
 
 
-import QtGui.QLabel;
+import qt.gui.QLabel;
 
 
 class SqueezeLabel : public QLabel

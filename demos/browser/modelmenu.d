@@ -44,8 +44,8 @@ module modelmenu;
 import qt.gui.QMenu;
 import qt.core.QAbstractItemModel;
 
-import qt.core.QAbstractItemModel;
-import qdebug;
+import qt.core.QPersistentModelIndex;
+//import qdebug;
 
 
 // A QMenu that is dynamically populated from a QAbstractItemModel
@@ -53,7 +53,7 @@ class ModelMenu : public QMenu
 {
 
 mixin Signal!("activated", QModelIndex /*index*/);
-mixin Signal!("hovered", string /*text*/);
+mixin Signal!("linkHovered", string /*text*/);
 
 public:
 
@@ -160,10 +160,10 @@ protected:
 			QIcon icon = cast(QIcon) parent.data(Qt.DecorationRole);
 			menu.setIcon(icon);
 			parentMenu.addMenu(menu);
-			QVariant v;
+			auto v = new QVariant;
 			v.setValue(parent);
 			menu.menuAction().setData(v);
-			connect(menu, SIGNAL(aboutToShow()), this, SLOT(aboutToShow()));
+			menu.aboutToShow.connect(&this.aboutToShow);
 			return;
 		}
 
@@ -172,7 +172,7 @@ protected:
 			end = qMin(max, end);
 
 		menu.triggered.connect(&this.triggered);
-		menu.hovered.connect(&this.hovered);
+		menu.linkHovered.connect(&this.linkHovered);
 
 		for (int i = 0; i < end; ++i) {
 			QModelIndex idx = m_model.index(i, 0, parent);
@@ -222,14 +222,14 @@ private:
 		}
 	}
 
-	void hovered(QAction action)
+	void linkHovered(QAction action)
 	{
 		QVariant v = action.data();
 		if (v.canConvert!(QModelIndex)()) {
 			QModelIndex idx = cast(QModelIndex) v;
 			string hoveredString = idx.data(m_hoverRole).toString();
 			if (!hoveredString.isEmpty())
-				hovered.emit(hoveredString);
+				linkHovered.emit(hoveredString);
 		}
 	}
 
@@ -239,7 +239,7 @@ private:
 	{
 		QIcon icon = cast(QIcon) index.data(Qt.DecorationRole);
 		QAction action = makeAction(icon, index.data().toString(), this);
-		QVariant v;
+		auto v = new QVariant;
 		v.setValue(index);
 		action.setData(v);
 		return action;

@@ -48,7 +48,7 @@ import qt.gui.QCompleter;
 import qt.gui.QMenu;
 import qt.gui.QStringListModel;
 
-import QtWebKit.QWebSettings;
+import qt.webkit.QWebSettings;
 
 import searchlineedit;
 import autosaver;

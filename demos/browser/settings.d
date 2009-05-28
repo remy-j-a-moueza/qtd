@@ -43,10 +43,10 @@ module settings;
 
 import qt.core.QSettings;
 
-import qt.gui.qt.gui;
+//import qt.gui.QtGui; //TODO: needed?
 import qt.gui.QDialog;
 
-import qt.webkit.QtWebKit;
+//import qt.webkit.QtWebKit; //TODO: needed?
 
 import browserapplication;
 import browsermainwindow;
@@ -57,14 +57,16 @@ import webview;
 import ui_settings;
 
 
-class SettingsDialog : public QDialog, public Ui_Settings
+class SettingsDialog : public QDialog //, public Ui_Settings
 {
+	Settings ui;
+
 public:
 	
 	this(QWidget parent = null)
-	//: QDialog(parent)
 	{
-		setupUi(this);
+		super(this);
+		ui.setupUi(this);
 		exceptionsButton.clicked.connect(&this.showExceptions);
 		setHomeToCurrentPageButton.clicked.connect(&this.setHomeToCurrentPage);
 		cookiesButton.clicked.connect(&this.showCookies());
@@ -295,7 +297,7 @@ private:
 		BrowserMainWindow mw = cast(BrowserMainWindow) parent();
 		WebView webView = mw.currentTab();
 		if (webView)
-			homeLineEdit.setText(webView.url().toString());
+			homeLineEdit.setText(webView.getUrl().toString());
 	}
 
 	void showCookies()

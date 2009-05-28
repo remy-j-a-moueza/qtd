@@ -44,14 +44,15 @@ import qt.gui.QClipboard;
 import qt.gui.QMenu;
 import qt.gui.QMessageBox;
 import qt.gui.QMouseEvent;
-
-import qt.core.QDebug;
+//import qt.core.QDebug;
 import qt.core.QBuffer;
 
-import QtWebKit.QWebView;
-import QtWebKit.QWebHitTestResult;
-import QtUiTools.QUiLoader;
-
+import qt.webkit.QWebView;
+import qt.webkit.QWebHitTestResult;
+version(QT_NO_UITOOLS) {} else
+{
+	import qt.uitools.QUiLoader;
+}
 import browserapplication;
 import browsermainwindow;
 import cookiejar;
@@ -69,8 +70,8 @@ public:
 	this(QObject parent = null)
 	{
 		super(parent);
-		m_keyboardModifiers = Qt.NoModifier;
-		m_pressedButtons = Qt.NoButton;
+		m_keyboardModifiers = Qt_KeyboardModifier.NoModifier;
+		m_pressedButtons = Qt_MouseButton.NoButton;
 		m_openInNewTab = false;
 		setNetworkAccessManager(BrowserApplication.networkAccessManager());
 		this.unsupportedContent.connect(&this.handleUnsupportedContent);
@@ -95,9 +96,9 @@ protected:
 		// ctrl-shift open in new tab and select
 		// ctrl-alt open in new window
 		if (type == QWebPage.NavigationTypeLinkClicked
-			&& (m_keyboardModifiers & Qt.ControlModifier
-			|| m_pressedButtons == Qt.MidButton)) {
-			bool newWindow = (m_keyboardModifiers & Qt.AltModifier);
+			&& (m_keyboardModifiers & Qt_KeyboardModifier.ControlModifier
+			|| m_pressedButtons == Qt_MouseButton.MidButton)) {
+			bool newWindow = (m_keyboardModifiers & Qt_KeyboardModifier.AltModifier);
 			WebView webView;
 			if (newWindow) {
 				BrowserApplication.instance().newMainWindow();
@@ -107,12 +108,12 @@ protected:
 				newMainWindow.activateWindow();
 				webView.setFocus();
 			} else {
-				bool selectNewTab = (m_keyboardModifiers & Qt.ShiftModifier);
+				bool selectNewTab = (m_keyboardModifiers & Qt_KeyboardModifier.ShiftModifier);
 				webView = mainWindow().tabWidget().newTab(selectNewTab);
 			}
 			webView.load(request);
-			m_keyboardModifiers = Qt.NoModifier;
-			m_pressedButtons = Qt.NoButton;
+			m_keyboardModifiers = Qt_KeyboardModifier.NoModifier;
+			m_pressedButtons = Qt_MouseButton.NoButton;
 			return false;
 		}
 		if (frame == mainFrame()) {
@@ -124,7 +125,7 @@ protected:
 
 	QWebPage createWindow(QWebPage.WebWindowType type)
 	{
-		if (m_keyboardModifiers & Qt.ControlModifier || m_pressedButtons == Qt.MidButton)
+		if (m_keyboardModifiers & Qt_KeyboardModifier.ControlModifier || m_pressedButtons == Qt_MouseButton.MidButton)
 			m_openInNewTab = true;
 		if (m_openInNewTab) {
 			m_openInNewTab = false;
@@ -191,8 +192,8 @@ private:
 private:
 
 	// set the webview mousepressedevent
-	Qt.KeyboardModifiers m_keyboardModifiers;
-	Qt.MouseButtons m_pressedButtons;
+	Qt_KeyboardModifier m_keyboardModifiers;
+	Qt_MouseButton m_pressedButtons;
 	bool m_openInNewTab;
 	QUrl m_loadingUrl;
 }
@@ -223,7 +224,7 @@ public:
 		load(url);
 	}
 
-	QUrl url()
+	QUrl getUrl()
 	{
 		QUrl url = QWebView.url();
 		if (!url.isEmpty())
@@ -253,7 +254,7 @@ protected:
 	void mouseReleaseEvent(QMouseEvent event)
 	{
 		QWebView.mouseReleaseEvent(event);
-		if (!event.isAccepted() && (m_page.m_pressedButtons & Qt.MidButton)) {
+		if (!event.isAccepted() && (m_page.m_pressedButtons & Qt_MouseButton.MidButton)) {
 			auto url = new QUrl(QApplication.clipboard().text(QClipboard.Selection));
 			if (!url.isEmpty() && url.isValid() && !url.scheme().isEmpty()) {
 				setUrl(url);
@@ -304,7 +305,7 @@ private:
 	void loadFinished()
 	{
 		if (100 != m_progress) {
-			qWarning() << "Received finished signal while progress is still:" << progress() << "Url:" << url();
+			qWarning("Received finished signal while progress is still:" ~ progress() ~ "Url:" ~ url());
 		}
 		m_progress = 0;
 	}

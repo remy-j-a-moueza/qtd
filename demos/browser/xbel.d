@@ -42,7 +42,8 @@
 module xbel;
 
 
-import qt.core.QXmlStreamReader;
+import qt.xml.QXmlStreamReader;
+
 import qt.core.QDateTime;
 import qt.core.QFile;
 
@@ -58,7 +59,7 @@ public:
 		Separator
 	};
 
-	this(Type type = Root, BookmarkNode parent = null)
+	this(Type type = Type.Root, BookmarkNode parent = null)
 	{
 		expanded = false;
 		m_parent = parent;
@@ -287,7 +288,7 @@ private:
 	}
 }
 
-import qt.core.QXmlStreamWriter;
+import qt.xml.QXmlStreamWriter;
 
 class XbelWriter : public QXmlStreamWriter
 {

@@ -12,4 +12,4 @@
 ../../tools/duic/duic proxy.ui -o ui_proxy.d
 ../../tools/duic/duic settings.ui -o ui_settings.d
 
-ldc *.d -L-L../../lib -L-lqtdgui -L-lqtdcore -I../../ -I../../qt/d1 -L-lQtGui -L-lQtCore -ofbrowser
+ldc *.d -L-L../../lib -L-lqtdgui -L-lqtdcore -I../../ -I../../qt/d1 -L-lQtGui -L-lQtCore -ofbrowser -d-version=QT_NO_UITOOLS

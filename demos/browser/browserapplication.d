@@ -49,7 +49,7 @@ import qt.core.QSettings;
 import qt.core.QTextStream;
 import qt.core.QTranslator;
 import qt.core.QUrl;
-import qt.core.QPointer;
+//import qt.core.QPointer;
 
 import qt.gui.QApplication;
 import qt.gui.QIcon;
@@ -62,9 +62,9 @@ import qt.network.QLocalSocket;
 import qt.network.QNetworkProxy;
 import qt.network.QSslSocket;
 
-import QtWebKit.QWebSettings;
+import qt.webkit.QWebSettings;
 
-import qt.core.QDebug;
+//import qt.core.QDebug;
 
 import bookmarks;
 import browsermainwindow;
@@ -101,8 +101,8 @@ public:
 		if (socket.waitForConnected(500)) {
 			auto stream = new QTextStream(&socket);
 			string[] args = QCoreApplication.arguments();
-			if (args.count() > 1)
-				stream << args.last();
+			if (args.length > 1)
+				stream << args[$-1];
 			else
 				stream << "";
 			stream.flush();
@@ -203,7 +203,7 @@ public:
 	BrowserMainWindow mainWindow()
 	{
 		clean();
-		if (m_mainWindows.isEmpty())
+		if (m_mainWindows.length == 0)
 			newMainWindow();
 		return m_mainWindows[0];
 	}
@@ -303,7 +303,7 @@ version(Q_WS_MAC)
 		switch (event.type()) {
 			case QEvent.ApplicationActivate: {
 				clean();
-				if (!m_mainWindows.isEmpty()) {
+				if (m_mainWindows.length) {
 					BrowserMainWindow mw = mainWindow();
 					if (mw && !mw.isMinimized()) {
 						mainWindow().show();
@@ -312,7 +312,7 @@ version(Q_WS_MAC)
 				}
 			}
 			case QEvent.FileOpen:
-				if (!m_mainWindows.isEmpty()) {
+				if (m_mainWindows.length) {
 					mainWindow().loadPage(cast(QFileOpenEvent) event.file());
 					return true;
 				}
@@ -328,7 +328,7 @@ public:
 	BrowserMainWindow newMainWindow()
 	{
 		BrowserMainWindow browser = new BrowserMainWindow();
-		m_mainWindows.prepend(browser);
+		m_mainWindows = [browser] ~ m_mainWindows;
 		browser.show();
 		return browser;
 	}
@@ -348,8 +348,8 @@ public:
 		}
 		for (int i = 0; i < windows.count(); ++i) {
 			BrowserMainWindow newWindow = 0;
-			if (m_mainWindows.count() == 1 && mainWindow().tabWidget().count() == 1
-				&& mainWindow().currentTab().url() == QUrl()) {
+			if (m_mainWindows.length == 1 && mainWindow().tabWidget().count() == 1
+				&& mainWindow().currentTab().getUrl() is null) {
 				newWindow = mainWindow();
 			} else {
 				newWindow = newMainWindow();
@@ -373,8 +373,8 @@ version(Q_WS_MAC)
 
 		if (tabCount > 1) {
 			int ret = QMessageBox.warning(mainWindow(), null,
-			tr("There are %1 windows and %2 tabs open\n"
-				"Do you want to quit anyway?").arg(m_mainWindows.count()).arg(tabCount),
+				Format(tr("There are %1 windows and %2 tabs open\n"
+					"Do you want to quit anyway?"), m_mainWindows.length, tabCount),
 			QMessageBox.Yes | QMessageBox.No,
 			QMessageBox.No);
 			if (ret == QMessageBox.No)
@@ -389,10 +389,9 @@ version(Q_WS_MAC)
 		clean();
 		BrowserMainWindow mw = new BrowserMainWindow;
 		mw.slotHome();
-		m_mainWindows.prepend(mw);
+		m_mainWindows = [mw] ~ m_mainWindows;
 	}
 }
-
 
 private:
 
@@ -411,7 +410,7 @@ private:
 		loadSettings();
 
 		// newMainWindow() needs to be called in main() for this to happen
-		if (m_mainWindows.count() > 0) {
+		if (m_mainWindows.length > 0) {
 			string[] args = QCoreApplication.arguments();
 			if (args.count() > 1)
 				mainWindow().loadPage(args.last());
@@ -473,7 +472,8 @@ private:
 	static NetworkAccessManager s_networkAccessManager;
 	static BookmarksManager s_bookmarksManager;
 	
-	QPointer!(BrowserMainWindow)[] m_mainWindows;
+	//QPointer!(BrowserMainWindow)[] m_mainWindows;
+	BrowserMainWindow[] m_mainWindows;
 	QLocalServer m_localServer;
 	QByteArray m_lastSession;
 	QIcon m_defaultIcon;
