@@ -1,0 +1,1 @@
+build_example(dynamiclayouts main.d dialog.d)
