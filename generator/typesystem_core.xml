@@ -2660,9 +2660,9 @@
         }
 */
       </inject-code>
-
+<!--
       <template name="core.stream_constructor_bytearray">
-/*        // Hold reference to byte array which goes away when the stream dies
+        // Hold reference to byte array which goes away when the stream dies
         private QByteArray byteArray = null;
         public %CLASSNAME(QByteArray a, QIODevice.OpenMode mode) {
             this(a.nativePointer(), mode);
@@ -2672,7 +2672,7 @@
         public %CLASSNAME(QByteArray a, QIODevice.OpenModeFlag ... mode) {
             this(a.nativePointer(), mode);
             byteArray = a;
-        } */
+        }
       </template>
 
       <modify-function signature="QDataStream(QByteArray*,QFlags&lt;QIODevice::OpenModeFlag&gt;)">
@@ -2683,7 +2683,7 @@
               <replace from="%CLASSNAME" to="QDataStream"/>
           </insert-template>
       </inject-code>
-
+-->
       <template name="core.qdatastream_readorwrite_bytes">
         extern "C" JNIEXPORT jint JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_core_QDataStream_%FUNCTION_NAME%)
         (JNIEnv *env, jobject, jlong stream, jbyteArray array, jint length)
