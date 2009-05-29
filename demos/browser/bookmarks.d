@@ -44,13 +44,10 @@ module bookmarks;
 
 import qt.core.QObject;
 import qt.core.QAbstractItemModel;
-
-
 import qt.core.QBuffer;
 import qt.core.QFile;
 import qt.core.QMimeData;
 import qt.core.QPersistentModelIndex;
-
 import qt.gui.QUndoStack;
 import qt.gui.QUndoCommand;
 import qt.gui.QDesktopServices;
@@ -60,8 +57,10 @@ import qt.gui.QHeaderView;
 import qt.gui.QIcon;
 import qt.gui.QMessageBox;
 import qt.gui.QToolButton;
-
+import qt.xml.QXmlStreamReader;
 import qt.webkit.QWebSettings;
+
+import tango.text.convert.Format;
 
 //import qt.core.QDebug;
 
@@ -75,6 +74,16 @@ import xbel;
 const string BOOKMARKBAR = "Bookmarks Bar";
 const string BOOKMARKMENU = "Bookmarks Menu";
 
+// workaround for QList implementation
+int indexOf(T)(T[] items, T item)
+{
+	for(auto i = 0; i < items.length; ++i)
+	{
+		if(items[i] == item)
+			return i;
+	}
+	return -1;
+}
 
 /*!
 Bookmark manager, owner of the bookmarks, loads, saves and basic tasks
@@ -120,7 +129,7 @@ public:
 
 		assert(node);
 		BookmarkNode parent = node.parent();
-		int row = parent.children().indexOf(node);
+		int row = indexOf(parent.children(), node);
 		RemoveBookmarksCommand command = new RemoveBookmarksCommand(this, parent, row);
 		m_commands.push(command);
 	}
@@ -162,13 +171,13 @@ public:
 		if (!m_loaded)
 			load();
 
-		for (int i = m_bookmarkRootNode.children().count() - 1; i >= 0; --i) {
+		for (int i = m_bookmarkRootNode.children().length - 1; i >= 0; --i) {
 			BookmarkNode node = m_bookmarkRootNode.children()[i];
 			if (node.title == tr(BOOKMARKMENU))
 				return node;
 		}
 		assert(false);
-		return 0;
+		return null;
 	}
 
 	BookmarkNode toolbar()
@@ -176,13 +185,13 @@ public:
 		if (!m_loaded)
 			load();
 
-		for (int i = m_bookmarkRootNode.children().count() - 1; i >= 0; --i) {
+		for (int i = m_bookmarkRootNode.children().length - 1; i >= 0; --i) {
 			BookmarkNode node = m_bookmarkRootNode.children()[i];
 			if (node.title == tr(BOOKMARKBAR))
 				return node;
 		}
 		assert(false);
-		return 0;
+		return null;
 	}
 
 	BookmarksModel bookmarksModel()
@@ -198,35 +207,34 @@ public:
 
 	void importBookmarks()
 	{
-		string fileName = QFileDialog.getOpenFileName(0, tr("Open File"), null, tr("XBEL (*.xbel *.xml)"));
-		if (fileName.isEmpty())
+		string fileName = QFileDialog.getOpenFileName(null, tr("Open File"), null, tr("XBEL (*.xbel *.xml)"));
+		if (fileName.length == 0)
 			return;
 
-		XbelReader reader;
+		auto reader = new XbelReader;
 		BookmarkNode importRootNode = reader.read(fileName);
 		if (reader.error() != QXmlStreamReader.NoError) {
-			QMessageBox.warning(0, "Loading Bookmark",
-				tr("Error when loading bookmarks on line %1, column %2:\n"
-				"%3").arg(reader.lineNumber()).arg(reader.columnNumber()).arg(reader.errorString()));
+			QMessageBox.warning(null, "Loading Bookmark",
+				Format(tr("Error when loading bookmarks on line %1, column %2:\n"
+				"%3"), reader.lineNumber(), reader.columnNumber(), reader.errorString()));
 		}
 
-		importRootNode.setType(BookmarkNode.Folder);
-		importRootNode.title = (tr("Imported %1").arg(QDate.currentDate().toString(Qt.SystemLocaleShortDate)));
+		importRootNode.setType(BookmarkNode.Type.Folder);
+		importRootNode.title = Format(tr("Imported %1"), QDate.currentDate().toString(Qt_DateFormat.SystemLocaleShortDate));
 		addBookmark(menu(), importRootNode);
 	}
 
-
 	void exportBookmarks()
 	{
-		string fileName = QFileDialog.getSaveFileName(0, tr("Save File"),
-				tr("%1 Bookmarks.xbel").arg(QCoreApplication.applicationName()),
+		string fileName = QFileDialog.getSaveFileName(null, tr("Save File"),
+				Format(tr("%1 Bookmarks.xbel"), QCoreApplication.applicationName()),
 				tr("XBEL (*.xbel *.xml)"));
-		if (fileName.isEmpty())
+		if (fileName.length == 0)
 			return;
 
-		XbelWriter writer;
+		auto writer = new XbelWriter;
 		if (!writer.write(fileName, m_bookmarkRootNode))
-			QMessageBox.critical(0, tr("Export error"), tr("error saving bookmarks"));
+			QMessageBox.critical(null, tr("Export error"), tr("error saving bookmarks"));
 	}
 
 private:
@@ -236,7 +244,7 @@ private:
 		if (!m_loaded)
 			return;
 
-		XbelWriter writer;
+		auto writer = new XbelWriter;
 		string dir = QDesktopServices.storageLocation(QDesktopServices.DataLocation);
 		string bookmarkFile = dir ~ "/bookmarks.xbel";
 		if (!writer.write(bookmarkFile, m_bookmarkRootNode))
@@ -259,17 +267,17 @@ private:
 		XbelReader reader;
 		m_bookmarkRootNode = reader.read(bookmarkFile);
 		if (reader.error() != QXmlStreamReader.NoError) {
-			QMessageBox.warning(0, "Loading Bookmark",
-			tr("Error when loading bookmarks on line %1, column %2:\n"
-			"%3").arg(reader.lineNumber()).arg(reader.columnNumber()).arg(reader.errorString()));
+			QMessageBox.warning(null, "Loading Bookmark",
+			Format(tr("Error when loading bookmarks on line %1, column %2:\n"
+			"%3"), reader.lineNumber(), reader.columnNumber(), reader.errorString()));
 		}
 
 		BookmarkNode toolbar = null;
 		BookmarkNode menu = null;
 		BookmarkNode[] others;
-		for (int i = m_bookmarkRootNode.children().count() - 1; i >= 0; --i) {
+		for (int i = m_bookmarkRootNode.children().length - 1; i >= 0; --i) {
 			BookmarkNode node = m_bookmarkRootNode.children()[i];
-			if (node.type() == BookmarkNode.Folder) {
+			if (node.type() == BookmarkNode.Type.Folder) {
 				// Automatically convert
 				if (node.title == tr("Toolbar Bookmarks") && !toolbar) {
 					node.title = tr(BOOKMARKBAR);
@@ -290,16 +298,16 @@ private:
 			}
 			m_bookmarkRootNode.remove(node);
 		}
-		assert(m_bookmarkRootNode.children().count() == 0);
+		assert(m_bookmarkRootNode.children().length == 0);
 		if (!toolbar) {
-			toolbar = new BookmarkNode(BookmarkNode.Folder, m_bookmarkRootNode);
+			toolbar = new BookmarkNode(BookmarkNode.Type.Folder, m_bookmarkRootNode);
 			toolbar.title = tr(BOOKMARKBAR);
 		} else {
 			m_bookmarkRootNode.add(toolbar);
 		}
 
 		if (!menu) {
-			menu = new BookmarkNode(BookmarkNode.Folder, m_bookmarkRootNode);
+			menu = new BookmarkNode(BookmarkNode.Type.Folder, m_bookmarkRootNode);
 			menu.title = tr(BOOKMARKMENU);
 		} else {
 			m_bookmarkRootNode.add(menu);
@@ -320,12 +328,12 @@ class RemoveBookmarksCommand : public QUndoCommand
 {
 public:
 
-	this(BookmarksManager m_bookmarkManagaer, BookmarkNode parent, int row)
+	this(BookmarksManager m_bookmarkManager, BookmarkNode parent, int row)
 	{
-		super(BookmarksManager.tr("Remove Bookmark"));
+		super(tr("Remove Bookmark"));
 		m_row = row;
-		m_bookmarkManagaer = m_bookmarkManagaer;
-		m_node = parent.children().value(row);
+		m_bookmarkManager = m_bookmarkManager;
+		m_node = (row < parent.children().length) ? parent.children()[row] : null;
 		m_parent = parent;
 		m_done = false;
 	}
@@ -340,21 +348,21 @@ public:
 	void undo()
 	{
 		m_parent.add(m_node, m_row);
-		m_bookmarkManagaer.entryAdded.emit(m_node);
+		m_bookmarkManager.entryAdded.emit(m_node);
 		m_done = false;
 	}
 
 	void redo()
 	{
 		m_parent.remove(m_node);
-		m_bookmarkManagaer.entryRemoved.emit(m_parent, m_row, m_node);
+		m_bookmarkManager.entryRemoved.emit(m_parent, m_row, m_node);
 		m_done = true;
 	}
 
 protected:
 
 	int m_row;
-	BookmarksManager m_bookmarkManagaer;
+	BookmarksManager m_bookmarkManager;
 	BookmarkNode m_node;
 	BookmarkNode m_parent;
 	bool m_done;
@@ -363,11 +371,12 @@ protected:
 class InsertBookmarksCommand : public RemoveBookmarksCommand
 {
 public:
-	this(BookmarksManager m_bookmarkManagaer, BookmarkNode parent, BookmarkNode node, int row)
-	{
-		super(m_bookmarkManagaer, parent, row);
 
-		setText(BookmarksManager.tr("Insert Bookmark"));
+	this(BookmarksManager m_bookmarkManager, BookmarkNode parent, BookmarkNode node, int row)
+	{
+		super(m_bookmarkManager, parent, row);
+
+		setText(tr("Insert Bookmark"));
 		m_node = node;
 	}
 
@@ -379,19 +388,19 @@ class ChangeBookmarkCommand : public QUndoCommand
 {
 public:
 
-	this(BookmarksManager m_bookmarkManagaer, BookmarkNode node, string newValue, bool title)
+	this(BookmarksManager m_bookmarkManager, BookmarkNode node, string newValue, bool title)
 	{
 		super();
-		m_bookmarkManagaer = m_bookmarkManagaer;
+		m_bookmarkManager = m_bookmarkManager;
 		m_title = title;
 		m_newValue = newValue;
 		m_node = node;
 		if (m_title) {
 			m_oldValue = m_node.title;
-			setText(BookmarksManager.tr("Name Change"));
+			setText(tr("Name Change"));
 		} else {
 			m_oldValue = m_node.url;
-			setText(BookmarksManager.tr("Address Change"));
+			setText(tr("Address Change"));
 		}
 	}
 
@@ -401,7 +410,7 @@ public:
 			m_node.title = m_oldValue;
 		else
 			m_node.url = m_oldValue;
-		m_bookmarkManagaer.entryChanged.emit(m_node);
+		m_bookmarkManager.entryChanged.emit(m_node);
 	}
 
 	void redo()
@@ -410,12 +419,12 @@ public:
 			m_node.title = m_newValue;
 		else
 			m_node.url = m_newValue;
-		m_bookmarkManagaer.entryChanged.emit(m_node);
+		m_bookmarkManager.entryChanged.emit(m_node);
 	}
 
 private:
 	
-	BookmarksManager m_bookmarkManagaer;
+	BookmarksManager m_bookmarkManager;
 	bool m_title;
 	string m_oldValue;
 	string m_newValue;
@@ -434,7 +443,7 @@ public:
 	void entryAdded(BookmarkNode item)
 	{
 		assert(item && item.parent());
-		int row = item.parent().children().indexOf(item);
+		int row = indexOf(item.parent().children(), item);
 		BookmarkNode parent = item.parent();
 		// item was already added so remove beore beginInsertRows is called
 		parent.remove(item);
@@ -486,8 +495,8 @@ public:
 	{
 		if (orientation == Qt.Horizontal && role == Qt.DisplayRole) {
 			switch (section) {
-				case 0: return tr("Title");
-				case 1: return tr("Address");
+				case 0: return new QVariant(tr("Title"));
+				case 1: return QVariant(tr("Address"));
 			}
 		}
 		return QAbstractItemModel.headerData(section, orientation, role);
@@ -496,45 +505,48 @@ public:
 	QVariant data(QModelIndex index, int role = Qt.DisplayRole)
 	{
 		if (!index.isValid() || index.model() != this)
-			return QVariant();
+			return new QVariant();
 
 		BookmarkNode bookmarkNode = node(index);
 		switch (role) {
-			case Qt.EditRole:
-			case Qt.DisplayRole:
-				if (bookmarkNode.type() == BookmarkNode.Separator) {
+			case Qt_ItemDataRole.EditRole:
+			case Qt_ItemDataRole.DisplayRole:
+				if (bookmarkNode.type() == BookmarkNode.Type.Separator) {
 					switch (index.column()) {
-						case 0: return QString(50, 0xB7);
+						case 0:
+							char[] tmp = new char[](50);
+							tmp[] = 0xB7;
+							return new QVariant(tmp);
 						case 1: return null;
 					}
 				}
 
 				switch (index.column()) {
-					case 0: return bookmarkNode.title;
-					case 1: return bookmarkNode.url;
+					case 0: return new QVariant(bookmarkNode.title);
+					case 1: return new QVariant(bookmarkNode.url);
 				}
 				break;
-			case BookmarksModel.UrlRole:
-				return new QUrl(bookmarkNode.url);
+			case BookmarksModel.Roles.UrlRole:
+				return new QVariant(new QUrl(bookmarkNode.url));
 				break;
-			case BookmarksModel.UrlStringRole:
-				return bookmarkNode.url;
+			case BookmarksModel.Roles.UrlStringRole:
+				return new QVariant(bookmarkNode.url);
 				break;
-			case BookmarksModel.TypeRole:
-				return bookmarkNode.type();
+			case BookmarksModel.Roles.TypeRole:
+				return new QVariant(cast(ulong) bookmarkNode.type());
 				break;
-			case BookmarksModel.SeparatorRole:
-				return (bookmarkNode.type() == BookmarkNode.Separator);
+			case BookmarksModel.Roles.SeparatorRole:
+				return new QVariant(bookmarkNode.type() == BookmarkNode.Type.Separator);
 				break;
-			case Qt.DecorationRole:
+			case Qt_ItemDataRole.DecorationRole:
 				if (index.column() == 0) {
-					if (bookmarkNode.type() == BookmarkNode.Folder)
-						return QApplication.style().standardIcon(QStyle.SP_DirIcon);
-					return BrowserApplication.instance().icon(bookmarkNode.url);
+					if (bookmarkNode.type() == BookmarkNode.Type.Folder)
+						return new QVariant(QApplication.style().standardIcon(QStyle.SP_DirIcon));
+					return new QVariant(BrowserApplication.instance().icon(bookmarkNode.url));
 				}
 		}
 
-		return QVariant();
+		return new QVariant();
 	}
 
 	int columnCount(QModelIndex parent = QModelIndex())
@@ -548,10 +560,10 @@ public:
 			return 0;
 
 		if (!parent.isValid())
-			return m_bookmarksManager.bookmarks().children().count();
+			return m_bookmarksManager.bookmarks().children().length;
 
 		BookmarkNode item = cast(BookmarkNode) parent.internalPointer();
-		return item.children().count();
+		return item.children().length;
 	}
 
 	QModelIndex index(int row, int column, QModelIndex parent = QModelIndex())
@@ -561,7 +573,7 @@ public:
 
 		// get the parent node
 		BookmarkNode parentNode = node(parent);
-		return createIndex(row, column, parentNode.children()[row]);
+		return createIndex(row, column, cast(void*) parentNode.children()[row]);
 	}
 
 	QModelIndex parent(QModelIndex index = QModelIndex())
@@ -570,7 +582,7 @@ public:
 			return QModelIndex();
 
 		BookmarkNode itemNode = node(index);
-		BookmarkNode parentNode = (itemNode ? itemNode.parent() : 0);
+		BookmarkNode parentNode = (itemNode ? itemNode.parent() : null);
 		if (!parentNode || parentNode == m_bookmarksManager.bookmarks())
 			return QModelIndex();
 
@@ -578,7 +590,7 @@ public:
 		BookmarkNode grandParentNode = parentNode.parent();
 		int parentRow = grandParentNode.children().indexOf(parentNode);
 		assert(parentRow >= 0);
-		return createIndex(parentRow, 0, parentNode);
+		return createIndex(parentRow, 0, cast(void*) parentNode);
 	}
 
 	int flags(QModelIndex index)
@@ -592,7 +604,7 @@ public:
 
 		if (bookmarkNode != m_bookmarksManager.menu() && bookmarkNode != m_bookmarksManager.toolbar()) {
 			flags |= Qt_ItemFlag.ItemIsDragEnabled;
-			if (bookmarkNode.type() != BookmarkNode.Separator)
+			if (bookmarkNode.type() != BookmarkNode.Type.Separator)
 				flags |= Qt_ItemFlag.ItemIsEditable;
 		}
 		if (hasChildren(index))
@@ -602,7 +614,7 @@ public:
 
 	int supportedDropActions()
 	{
-		return Qt_DropActiont.CopyAction | Qt_DropAction.MoveAction;
+		return Qt_DropAction.CopyAction | Qt_DropAction.MoveAction;
 	}
 
 	bool removeRows(int row, int count, QModelIndex parent = QModelIndex())
@@ -633,8 +645,8 @@ public:
 		BookmarkNode item = node(index);
 
 		switch (role) {
-			case Qt_ItemFlag.EditRole:
-			case Qt_ItemFlag.DisplayRole:
+			case Qt_ItemDataRole.EditRole:
+			case Qt_ItemDataRole.DisplayRole:
 				if (index.column() == 0) {
 					m_bookmarksManager.setTitle(item, value.toString());
 					break;
@@ -644,10 +656,10 @@ public:
 					break;
 				}
 				return false;
-			case BookmarksModel.UrlRole:
+			case BookmarksModel.Roles.UrlRole:
 				m_bookmarksManager.setUrl(item, value.toUrl().toString());
 				break;
-			case BookmarksModel.UrlStringRole:
+			case BookmarksModel.Roles.UrlStringRole:
 				m_bookmarksManager.setUrl(item, value.toString());
 				break;
 			default:
@@ -672,7 +684,8 @@ public:
 			auto writer = new XbelWriter;
 			BookmarkNode parentNode = node(index);
 			writer.write(buffer, parentNode);
-			stream << encodedData;
+			foreach(b; encodedData.data()[0..encodedData.size()])
+				stream.writeByte(cast(byte) b);
 		}
 		mimeData.setData(MIMETYPE, data);
 		return mimeData;
@@ -704,13 +717,14 @@ public:
 		while (!stream.atEnd()) {
 			auto encodedData = new QByteArray;
 			stream >> encodedData;
+			
 			auto buffer = new QBuffer(encodedData);
 			buffer.open(QBuffer.ReadOnly);
 
 			auto reader = new XbelReader;
 			BookmarkNode rootNode = reader.read(buffer);
 			BookmarkNode[] children = rootNode.children();
-			for (int i = 0; i < children.count(); ++i) {
+			for (int i = 0; i < children.length; ++i) {
 				BookmarkNode bookmarkNode = children[i];
 				rootNode.remove(bookmarkNode);
 				row = qMax(0, row);
@@ -728,7 +742,7 @@ public:
 		if (!parent.isValid())
 			return true;
 		const BookmarkNode parentNode = node(parent);
-		return (parentNode.type() == BookmarkNode.Folder);
+		return (parentNode.type() == BookmarkNode.Type.Folder);
 	}
 
 	BookmarkNode node(QModelIndex index)
@@ -744,7 +758,7 @@ public:
 		BookmarkNode parent = node.parent();
 		if (!parent)
 			return QModelIndex();
-		return createIndex(parent.children().indexOf(node), 0, node);
+		return createIndex(indexOf(parent.children(), node), 0, cast(void*) node);
 	}
 
 private:
@@ -765,17 +779,17 @@ public:
 	this(QWidget parent = null)
 	{
 		super(parent);	
-		m_bookmarksManager = 0;
+		m_bookmarksManager = null;
 		this.activated.connect(&this.activated);
 		setMaxRows(-1);
-		setHoverRole(BookmarksModel.UrlStringRole);
-		setSeparatorRole(BookmarksModel.SeparatorRole);
+		setHoverRole(BookmarksModel.Roles.UrlStringRole);
+		setSeparatorRole(BookmarksModel.Roles.SeparatorRole);
 	}
 	
 	void setInitialActions(QAction[] actions)
 	{
 		m_initialActions = actions;
-		for (int i = 0; i < m_initialActions.count(); ++i)
+		for (int i = 0; i < m_initialActions.length; ++i)
 			addAction(m_initialActions[i]);
 	}
 
@@ -787,9 +801,9 @@ protected:
 		setModel(m_bookmarksManager.bookmarksModel());
 		setRootIndex(m_bookmarksManager.bookmarksModel().index(1, 0));
 		// initial actions
-		for (int i = 0; i < m_initialActions.count(); ++i)
+		for (int i = 0; i < m_initialActions.length; ++i)
 			addAction(m_initialActions[i]);
-		if (!m_initialActions.isEmpty())
+		if (m_initialActions.length)
 			addSeparator();
 		createMenu(model().index(0, 0), 1, this);
 		return true;
@@ -799,7 +813,7 @@ private:
 
 	void activated(QModelIndex index)
 	{
-		openUrl.emit(index.data(BookmarksModel.UrlRole).toUrl());
+		openUrl.emit(index.data(BookmarksModel.Roles.UrlRole).toUrl());
 	}
 
 private:
@@ -973,7 +987,7 @@ private:
 		QModelIndex index = tree.currentIndex();
 		if (!index.parent().isValid())
 			return;
-		openUrl.emit(index.sibling(index.row(), 1).data(BookmarksModel.UrlRole).toUrl());
+		openUrl.emit(index.sibling(index.row(), 1).data(BookmarksModel.Roles.UrlRole).toUrl());
 	}
 
 	void newFolder()
@@ -986,7 +1000,7 @@ private:
 			idx = tree.rootIndex();
 		idx = m_proxyModel.mapToSource(idx);
 		BookmarkNode parent = m_bookmarksManager.bookmarksModel().node(idx);
-		BookmarkNode node = new BookmarkNode(BookmarkNode.Folder);
+		BookmarkNode node = new BookmarkNode(BookmarkNode.Type.Folder);
 		node.title = tr("New Folder");
 		m_bookmarksManager.addBookmark(parent, node, currentIndex.row() + 1);
 	}
@@ -1105,7 +1119,7 @@ protected:
 			bookmarksManager.addBookmark(parent, bookmark, row);
 			event.acceptProposedAction();
 		}
-		QToolBar.dropEvent(event);
+		super.dropEvent(event);
 	}
 
 private:
@@ -1120,7 +1134,7 @@ private:
 
 	void activated(QModelIndex index)
 	{
-		openUrl.emit(index.data(BookmarksModel.UrlRole).toUrl());
+		openUrl.emit(index.data(BookmarksModel.Roles.UrlRole).toUrl());
 	}
 
 	void build()
@@ -1139,12 +1153,12 @@ private:
 				menu.setRootIndex(idx);
 				menu.addAction(new QAction(menu));
 				button.setMenu(menu);
-				button.setToolButtonStyle(Qt.ToolButtonTextOnly);
+				button.setToolButtonStyle(Qt_ToolButtonStyle.ToolButtonTextOnly);
 				QAction a = addWidget(button);
 				a.setText(idx.data().toString());
 			} else {
 				QAction action = addAction(idx.data().toString());
-				action.setData(idx.data(BookmarksModel.UrlRole));
+				action.setData(idx.data(BookmarksModel.Roles.UrlRole));
 			}
 		}
 	}

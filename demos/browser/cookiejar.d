@@ -97,7 +97,7 @@ QDataStream opShr(QDataStream stream, ref QNetworkCookie[] list)
 		stream >> value;
 		QNetworkCookie[] newCookies = QNetworkCookie.parseCookies(value);
 		if (newCookies.length == 0 && value.length() != 0) {
-			qWarning("CookieJar: Unable to parse saved cookie:" ~ cast(char[]) value.data());
+			qWarning("CookieJar: Unable to parse saved cookie:" ~ cast(string) value.data());
 		}
 		
 		for (int j = 0; j < newCookies.length; ++j)

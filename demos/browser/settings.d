@@ -42,11 +42,11 @@ module settings;
 
 
 import qt.core.QSettings;
-
 //import qt.gui.QtGui; //TODO: needed?
 import qt.gui.QDialog;
-
 //import qt.webkit.QtWebKit; //TODO: needed?
+
+import tango.text.convert.Format;
 
 import browserapplication;
 import browsermainwindow;

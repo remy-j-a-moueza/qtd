@@ -48,7 +48,6 @@ import qt.gui.QHeaderView;
 import qt.gui.QStyle;
 import qt.gui.QSortFilterProxyModel;
 import qt.gui.QAbstractTableModel;
-
 //import qt.core.QtAlgorithms;
 import qt.core.QBuffer;
 import qt.core.QDir;
@@ -63,11 +62,11 @@ import qt.core.QDateTime;
 import qt.core.QObject;
 import qt.core.QTimer;
 import qt.core.QUrl;
-
 import qt.webkit.QWebHistoryInterface;
 import qt.webkit.QWebSettings;
-
 //import QWebHistoryInterface;
+
+import tango.text.convert.Format;
 
 import autosaver;
 import browserapplication;

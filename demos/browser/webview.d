@@ -46,13 +46,15 @@ import qt.gui.QMessageBox;
 import qt.gui.QMouseEvent;
 //import qt.core.QDebug;
 import qt.core.QBuffer;
-
 import qt.webkit.QWebView;
 import qt.webkit.QWebHitTestResult;
 version(QT_NO_UITOOLS) {} else
 {
 	import qt.uitools.QUiLoader;
 }
+
+import tango.text.convert.Format;
+
 import browserapplication;
 import browsermainwindow;
 import cookiejar;

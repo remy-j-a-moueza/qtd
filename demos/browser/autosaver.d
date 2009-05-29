@@ -120,4 +120,3 @@ private:
 	QBasicTimer m_timer;
 	QTime m_firstChange;
 }
-

@@ -47,16 +47,15 @@ import qt.core.QTime;
 //import qt.core.QMetaEnum;
 import qt.core.QSettings;
 //import qt.core.QDebug;
-
 import qt.gui.QDesktopServices;
 import qt.gui.QFileDialog;
 import qt.gui.QHeaderView;
 import qt.gui.QFileIconProvider;
-
 import qt.core.QAbstractListModel;
-
 import qt.network.QNetworkReply;
 import qt.webkit.QWebSettings;
+
+import tango.text.convert.Format;
 
 //import math;
 import autosaver;
@@ -177,7 +176,7 @@ private:
 
 	void error(QNetworkReply.NetworkError code)
 	{
-		qDebug() << "DownloadItem::error" << m_reply.errorString() << m_url;
+		qDebug("DownloadItem::error" ~ m_reply.errorString() ~ m_url);
 		downloadInfoLabel.setText(Format(tr("Network Error: {}"), m_reply.errorString()));
 		tryAgainButton.setEnabled(true);
 		tryAgainButton.setVisible(true);
@@ -198,7 +197,7 @@ private:
 
 	void metaDataChanged()
 	{
-		qDebug() << "DownloadItem::metaDataChanged: not handled.";
+		qDebug("DownloadItem::metaDataChanged: not handled.");
 	}
 
 	void finished()
@@ -335,7 +334,7 @@ private:
 
 		if (baseName.isEmpty()) {
 			baseName = "unnamed_download";
-			qDebug() << "DownloadManager:: downloading unknown file:" << m_url;
+			qDebug("DownloadManager:: downloading unknown file:" ~ m_url);
 		}
 		string name = directory ~ baseName ~ "." ~ endName;
 		if (QFile.exists(name)) {
@@ -448,7 +447,7 @@ public:
 		if (ok && size == 0)
 			return;
 
-		qDebug() << "DownloadManager::handleUnsupportedContent" << reply.url() << "requestFileName" << requestFileName;
+		qDebug("DownloadManager::handleUnsupportedContent" ~ reply.url() ~ "requestFileName" ~ requestFileName);
 		DownloadItem item = new DownloadItem(reply, requestFileName, this);
 		addItem(item);
 	}
