@@ -84,7 +84,7 @@ private:
 		mainLayout.setSizeConstraint(QLayout.SetNoConstraint);
 		setMinimumSize(0, 0);
 
-		Qt_Orientation orientation = cast(Qt_Orientation) buttonsOrientationComboBox.itemData(index).toInt();
+		Qt.Orientation orientation = cast(Qt.Orientation) buttonsOrientationComboBox.itemData(index).toInt();
 
 		if (orientation == buttonBox.orientation())
 			return;
@@ -136,15 +136,26 @@ private:
 	{
 		rotableGroupBox = new QGroupBox(tr("Rotable Widgets"));
 
-		rotableWidgets ~= new QSpinBox;
-		rotableWidgets ~= new QSlider;
-		rotableWidgets ~= new QDial;
-		rotableWidgets ~= new QProgressBar;
-
+		a0 = new QSpinBox;
+		a1 = new QSlider;
+		a2 = new QDial;
+		a3 = new QProgressBar;
+        
+        rotableWidgets ~= a0;
+        rotableWidgets ~= a1;
+        rotableWidgets ~= a2;
+        rotableWidgets ~= a3;
+        
+        a0.valueChanged.connect(&a1.setValue);
+        a1.valueChanged.connect(&a2.setValue);
+        a2.valueChanged.connect(&a3.setValue);
+        a3.valueChanged.connect(&a0.setValue);
+        
+        /*
 		int n = rotableWidgets.length;
 		for (int i = 0; i < n; ++i) {
 			rotableWidgets[i].valueChanged.connect(&rotableWidgets[(i + 1) % n].setValue);
-		}
+		}*/
 
 		rotableLayout = new QGridLayout;
 		rotableGroupBox.setLayout(rotableLayout);
@@ -186,6 +197,12 @@ private:
 
 	QGroupBox rotableGroupBox;
 	QWidget[] rotableWidgets;
+    
+    // qtd
+    QSpinBox a0;
+	QSlider a1;
+	QDial a2;
+	QProgressBar a3;
 
 	QGroupBox optionsGroupBox;
 	QLabel buttonsOrientationLabel;
