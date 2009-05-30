@@ -1,13 +1,13 @@
 /********************************************************************************
 ** Form generated from reading ui file 'mainwindow.ui'
 **
-** Created: Tue May 19 04:13:07 2009
+** Created: Sat May 30 11:51:12 2009
 **      by: QtD User Interface Compiler version 4.5.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
 ********************************************************************************/
 
-//module ui_mainwindow;
+module ui_mainwindow;
 
 public import qt.core.QString;
 public import qt.core.QVariant;

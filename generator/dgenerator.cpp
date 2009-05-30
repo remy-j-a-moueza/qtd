@@ -2928,12 +2928,10 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                     native_id =  "__ptr_" + f_type->typeEntry()->designatedInterface()->name();
                 s << INDENT << "return ret_value is null? null : ret_value." << native_id << ";" << endl;
             } else if (f_type->isTargetLangString())
-                s << INDENT << "ret_str = _d_str.ptr;" << endl
-                  << INDENT << "ret_str_size = _d_str.length;" << endl;
+                s << INDENT << "*ret_str = _d_str;" << endl;
             else if (f_type->isContainer())
                 s << INDENT << "*__d_arr_ptr = return_value.ptr;" << endl
                   << INDENT << "*__d_arr_size = return_value.length;" << endl;
-//                  << INDENT << "addReference(return_value.ptr);" << endl;
             else if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
                 ;
             else
