@@ -610,6 +610,9 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     if (hasCustomDestructor(java_class)) */
     writeFinalDestructor(s, java_class);
 
+    if (java_class->isQObject())
+        writeSignalsHandling(s, java_class);
+
     if (shellClass) {
         foreach (AbstractMetaFunction *function, java_class->functions()) {
             if (function->isConstructor() && !function->isPrivate())
@@ -661,9 +664,6 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
             writeVirtualFunctionOverride(s, function, java_class);
         }
     }
-
-    if (java_class->isQObject())
-        writeSignalsHandling(s, java_class);
 
     writeExtraFunctions(s, java_class);
 /* qtd2
