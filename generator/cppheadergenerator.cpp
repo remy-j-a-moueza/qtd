@@ -191,11 +191,11 @@ void CppHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *java_cla
           s << "  mutable QHash<int,int> m_map;" << endl;
       }
 */
-      s // << "  const QMetaObject *metaObject() const;" << endl
+//      s << "  const QMetaObject *metaObject() const;" << endl
 //        << "  void *qt_metacast(const char *);" << endl
 //        << "  QT_TR_FUNCTIONS" << endl
-        << "  virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl
-        << "private:" << endl;
+//        << "  virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl
+      s << "private:" << endl;
     }
 
 

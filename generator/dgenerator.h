@@ -154,6 +154,8 @@ private:
     void writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_class);
     void writeEnumAlias(QTextStream &s, const AbstractMetaEnum *d_enum);
     void writeSignalConnectors(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunctionList signal_funcs);
+    void writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *d_class);
+
 //    void writeMarshallFunction(QTextStream &s, const AbstractMetaClass *d_class);
 
     int m_recursive;

@@ -608,9 +608,9 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     writeDefaultConstructedValues(s, java_class);
 
     if (hasCustomDestructor(java_class)) */
-        writeFinalDestructor(s, java_class);
+    writeFinalDestructor(s, java_class);
 
-   if (shellClass) {
+    if (shellClass) {
         foreach (AbstractMetaFunction *function, java_class->functions()) {
             if (function->isConstructor() && !function->isPrivate())
                 writeShellConstructor(s, function);
@@ -627,7 +627,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
         AbstractMetaFunctionList virtualFunctions = java_class->virtualFunctions();
         for (int pos = 0; pos<virtualFunctions.size(); ++pos) {
             const AbstractMetaFunction *function = virtualFunctions.at(pos);
-// qtd            writeShellFunction(s, function, java_class, pos);
+            // qtd            writeShellFunction(s, function, java_class, pos);
             writeShellVirtualFunction(s, function, java_class, pos);
         }
 
@@ -639,7 +639,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
         AbstractMetaFunctionList shellFunctions = java_class->nonVirtualShellFunctions();
         for (int i=0; i<shellFunctions.size(); ++i) {
             const AbstractMetaFunction *function = shellFunctions.at(i);
-                writeShellFunction(s, function, java_class, -1);
+            writeShellFunction(s, function, java_class, -1);
         }
 
         // Write public overrides for functions that are protected in the base class
@@ -660,8 +660,10 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
                 continue;
             writeVirtualFunctionOverride(s, function, java_class);
         }
-
     }
+
+    if (java_class->isQObject())
+        writeSignalsHandling(s, java_class);
 
     writeExtraFunctions(s, java_class);
 /* qtd2
@@ -1258,19 +1260,20 @@ void CppImplGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaC
       << "}" << endl << endl;
 */
 
-    writeSignalsHandling(s, java_class);
-
-    // QObject::qt_metacall()
+//    writeSignalsHandling(s, java_class);
+/*
+    // QObject_Link::qt_metacall()
     s << "int " << shellClassName(java_class) << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
       << "{" << endl;
 
-    s << "  _id = " << java_class->qualifiedCppName() << "::qt_metacall(_c, _id, _a);" << endl
-      << "   if (_id < 0 || _c != QMetaObject::InvokeMetaMethod)" << endl
-      << "       return _id;" << endl
-//      << "   Q_ASSERT(_id < 2);" << endl
-      << "   emit_callbacks_" << java_class->name() << "[_id](this->d_entity(), _a);" << endl
-      << "   return -1;" << endl
+    s << "    _id = " << java_class->qualifiedCppName() << "::qt_metacall(_c, _id, _a);" << endl
+      << "    if (_id < 0 || _c != QMetaObject::InvokeMetaMethod)" << endl
+      << "        return _id;" << endl
+//      << "    Q_ASSERT(_id < 2);" << endl
+      << "    emit_callbacks_" << java_class->name() << "[_id](this->d_entity(), _a);" << endl
+      << "    return -1;" << endl
       << "}" << endl << endl;
+*/
 }
 
 void CppImplGenerator::writeSignalHandler(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunction *function)
@@ -1315,6 +1318,57 @@ void CppImplGenerator::writeSignalHandler(QTextStream &s, const AbstractMetaClas
 
 }
 
+void CppImplGenerator::writeQObjectLink(QTextStream &s, const AbstractMetaClass *java_class)
+{
+    QString linkName = java_class->name() + "_Link";
+    QString className = java_class->name();
+    s << "class " << linkName << " : public QObject, public QObjectUserData" << endl
+      << "{" << endl
+      << "public:" << endl
+      << "    Q_OBJECT_CHECK" << endl
+      << "    virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl << endl
+
+      << "    " << linkName << "(QObject *parent, void *d_ptr) : QObject() { _d_ptr = d_ptr; }" << endl
+      << "    void *d_entity() const { return _d_ptr; }" << endl << endl
+
+      << "private:" << endl
+      << "    void *_d_ptr;" << endl
+      << "};" << endl << endl;
+
+    // QObject_Link::qt_metacall()
+    s << "int " << linkName << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
+      << "{" << endl
+      << "    _id = QObject::qt_metacall(_c, _id, _a);" << endl
+      << "    if (_id < 0 || _c != QMetaObject::InvokeMetaMethod)" << endl
+      << "        return _id;" << endl
+//      << "    Q_ASSERT(_id < 2);" << endl
+      << "    emit_callbacks_" << java_class->name() << "[_id](this->d_entity(), _a);" << endl
+      << "    return -1;" << endl
+      << "}" << endl << endl;
+
+    s << QString("inline %1_Link *get_%1_link(%1 *obj)").arg(className) << endl
+      << "{" << endl
+      << "    return static_cast<" << linkName << "*>(obj->userData(USER_DATA_ID));" << endl
+      << "}" << endl << endl;
+
+    s << QString("extern \"C\" DLL_PUBLIC void* qtd_%1_d_pointer(%1 *obj)").arg(className) << endl
+      << "{" << endl
+      << "    if (obj->userData(USER_DATA_ID)) {" << endl
+      << "        " << QString("%1_Link *qobj_helper = get_%1_link(obj);").arg(className) << endl
+      << "        return qobj_helper->d_entity();" << endl
+      << "    } else" << endl
+      << "        return NULL;" << endl
+      << "}" << endl << endl;
+
+    s << QString("extern \"C\" DLL_PUBLIC void qtd_%1_create_link(%1 *obj, void* d_obj)").arg(className) << endl
+      << "{" << endl
+      << "    if(obj->userData(USER_DATA_ID))" << endl
+      << "        return;" << endl
+      << "    " << QString("%1 *qobj_link = new %1(obj, d_obj);").arg(linkName) << endl
+      << "    obj->setUserData(USER_DATA_ID, qobj_link);" << endl
+      << "}" << endl << endl;
+}
+
 void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaClass *java_class)
 {
     s << "extern \"C\" typedef void (*EmitCallback)(void*, void**);" << endl;
@@ -1340,6 +1394,8 @@ void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaCl
         s << endl << "};" << endl << endl;
     }
 
+    writeQObjectLink(s, java_class);
+
     // Functions connecting/disconnecting shell's slots
     for(int i = 0; i < signal_funcs.size(); i++) {
         AbstractMetaFunction *signal = signal_funcs.at(i);
@@ -1348,17 +1404,19 @@ void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaCl
         s << "extern \"C\" DLL_PUBLIC void " << sigExternName << "_connect"
           << "(void* native_id)" << endl << "{" << endl
           << "    " << shellClassName(java_class) << " *qobj = (" << shellClassName(java_class) << "*) native_id;" << endl
-          << "    const QMetaObject &mo = " << shellClassName(java_class) << "::staticMetaObject;" << endl
+          << "    const QMetaObject &mo = " << java_class->name() << "::staticMetaObject;" << endl
+          << "    const QMetaObject &mo2 = " << java_class->name() << "_Link::staticMetaObject;" << endl
           << "    int signalId = mo.indexOfSignal(\"" << signal->minimalSignature() << "\");" << endl
-          << "    mo.connect(qobj, signalId, qobj, mo.methodCount() + " << i << ");" << endl
+          << "    mo.connect(qobj, signalId, get_" << java_class->name() << "_link(qobj), mo2.methodCount() + " << i << ");" << endl
           << "}" << endl;
 
         s << "extern \"C\" DLL_PUBLIC void " << sigExternName << "_disconnect"
           << "(void* native_id)" << endl << "{" << endl
           << "    " << shellClassName(java_class) << " *qobj = (" << shellClassName(java_class) << "*) native_id;" << endl
           << "    const QMetaObject &mo = " << shellClassName(java_class) << "::staticMetaObject;" << endl
+          << "    const QMetaObject &mo2 = " << java_class->name() << "_Link::staticMetaObject;" << endl
           << "    int signalId = mo.indexOfSignal(\"" << signal->minimalSignature() << "\");" << endl
-          << "    mo.disconnect(qobj, signalId, qobj, mo.methodCount() + " << i << ");" << endl
+          << "    mo.disconnect(qobj, signalId, get_" << java_class->name() << "_link(qobj), mo2.methodCount() + " << i << ");" << endl
           << "}" << endl << endl;
     }
 }

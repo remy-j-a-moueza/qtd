@@ -851,11 +851,12 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         if ( ( has_return_type && d_function->argumentReplaced(0).isEmpty() )/* || d_function->isConstructor()*/) // qtd
             if(return_type->isQObject()) {
 
+            const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(return_type->typeEntry());
             QString type_name = return_type->name();
-            const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(d_function->type()->typeEntry());
+            QString class_name = ctype->name();
             if(ctype->isAbstract())
                 type_name = type_name + "_ConcreteWrapper";
-
+/*
             s << INDENT << "if (__qt_return_value is null)" << endl
                     << INDENT << "    return null;" << endl
                     << INDENT << "void* d_obj = __QObject_entity(__qt_return_value);" << endl
@@ -865,6 +866,18 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                     << INDENT << "    return new_obj;" << endl
                     << INDENT << "} else" << endl
                     << INDENT << "    return cast(" << return_type->name() << ") d_obj;" << endl;
+                    */
+            s << INDENT << "if (__qt_return_value is null)" << endl
+              << INDENT << "    return null;" << endl
+              << INDENT << "void* d_obj = qtd_" << class_name << "_d_pointer(__qt_return_value);" << endl
+              << INDENT << "if (d_obj is null) {" << endl
+              << INDENT << "    auto new_obj = new " << type_name << "(__qt_return_value, true);" << endl
+              << INDENT << "    qtd_" << class_name << "_create_link(new_obj.nativeId, cast(void*) new_obj);" << endl
+              << INDENT << "    new_obj.__no_real_delete = true;" << endl
+              << INDENT << "    return new_obj;" << endl
+              << INDENT << "} else" << endl
+              << INDENT << "    return cast(" << class_name << ") d_obj;" << endl;
+
         }
 
 
@@ -2399,7 +2412,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             snip.formattedCode(s, INDENT); 
         } 
     } 
-	/* --------------------------------------------------- */ 
+    /* --------------------------------------------------- */
 
     interfaces = d_class->interfaces();
     if (!interfaces.isEmpty()) {
@@ -2413,10 +2426,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 
     if (!d_class->isInterface() && d_class->isAbstract()) {
         s << endl;
-/* qtd
-        if (TypeDatabase::instance()->includeEclipseWarnings())
-            s << INDENT << "@SuppressWarnings(\"unused\")" << endl;
-*/
+
         s << INDENT << "public class " << d_class->name() << "_ConcreteWrapper : " << d_class->name() << " {" << endl;
 
         {
@@ -2505,8 +2515,11 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             && (d_class->typeEntry()->isObject() || d_class->typeEntry()->isQObject()) )
         s << endl << "extern (C) void *__" << d_class->name() << "_entity(void *q_ptr);" << endl << endl;
     }
+
     if (d_class->isQObject()) {
-        s<< "private extern (C) void qtd_D_" << d_class->name() << "_delete(void *d_ptr) {" << endl
+        writeQObjectFunctions(s, d_class);
+
+        s << "private extern (C) void qtd_D_" << d_class->name() << "_delete(void *d_ptr) {" << endl
           << "    auto d_ref = cast(QObject) d_ptr;" << endl
           << "    d_ref.__no_real_delete = true;" << endl
           << "    delete d_ref;" << endl
@@ -2621,6 +2634,12 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         write(s, cls);
         m_isRecursive = false;
     }
+}
+
+void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *d_class)
+{
+    s << "extern(C) void* qtd_" << d_class->name() << "_d_pointer(void *obj);" << endl
+      << "extern(C) void qtd_" << d_class->name() << "_create_link(void *obj, void* d_obj);" << endl << endl;
 }
 
 /*
@@ -3233,6 +3252,9 @@ void DGenerator::writeConstructorContents(QTextStream &s, const AbstractMetaFunc
             } else {
                 s << INDENT << ctor_call << "(__qt_return_value, true);" << endl;
             }
+
+            // creating a link object associated with the current QObject for signal handling and metadata
+            s << INDENT << "qtd_" << d_function->ownerClass()->name() << "_create_link(this.nativeId, cast(void*) this);" << endl;
         }
         else
             s << INDENT << "this(__qt_return_value);" << endl;

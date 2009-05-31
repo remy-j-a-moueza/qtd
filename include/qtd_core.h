@@ -46,6 +46,8 @@ struct DArray {
     void* ptr;
 };
 
+const uint USER_DATA_ID = 0;
+
 #define Array DArray
 
 #ifdef CPP_SHARED
