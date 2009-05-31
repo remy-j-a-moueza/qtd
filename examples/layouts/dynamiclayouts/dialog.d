@@ -56,7 +56,6 @@ import qt.gui.QProgressBar;
 
 class Dialog : public QDialog
 {
-
 public:
 
 	this(QWidget parent = null)
@@ -116,7 +115,7 @@ private:
 			rotableLayout.removeWidget(widget);
 
 		rotableWidgets = rotableWidgets[1..$] ~ rotableWidgets[0];
-
+		
 		int n = rotableWidgets.length;
 		for (int i = 0; i < n / 2; ++i) {
 			rotableLayout.addWidget(rotableWidgets[n - i - 1], 0, i);
@@ -136,22 +135,22 @@ private:
 	{
 		rotableGroupBox = new QGroupBox(tr("Rotable Widgets"));
 
-		a0 = new QSpinBox;
-		a1 = new QSlider;
-		a2 = new QDial;
-		a3 = new QProgressBar;
-        
-        rotableWidgets ~= a0;
-        rotableWidgets ~= a1;
-        rotableWidgets ~= a2;
-        rotableWidgets ~= a3;
-        
-        a0.valueChanged.connect(&a1.setValue);
-        a1.valueChanged.connect(&a2.setValue);
-        a2.valueChanged.connect(&a3.setValue);
-        a3.valueChanged.connect(&a0.setValue);
-        
-        /*
+		auto a0 = new QSpinBox;
+		auto a1 = new QSlider;
+		auto a2 = new QDial;
+		auto a3 = new QProgressBar;
+		
+		rotableWidgets ~= a0;
+		rotableWidgets ~= a1;
+		rotableWidgets ~= a2;
+		rotableWidgets ~= a3;
+
+		a0.valueChanged.connect(&a1.setValue);
+		a1.valueChanged.connect(&a2.setValue);
+		a2.valueChanged.connect(&a3.setValue);
+		a3.valueChanged.connect(&a0.setValue);
+
+		/*
 		int n = rotableWidgets.length;
 		for (int i = 0; i < n; ++i) {
 			rotableWidgets[i].valueChanged.connect(&rotableWidgets[(i + 1) % n].setValue);
@@ -198,12 +197,6 @@ private:
 	QGroupBox rotableGroupBox;
 	QWidget[] rotableWidgets;
     
-    // qtd
-    QSpinBox a0;
-	QSlider a1;
-	QDial a2;
-	QProgressBar a3;
-
 	QGroupBox optionsGroupBox;
 	QLabel buttonsOrientationLabel;
 	QComboBox buttonsOrientationComboBox;
