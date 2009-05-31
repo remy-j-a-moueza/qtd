@@ -1,6 +1,3 @@
-CONFIG += debug
-CONFIG -= release
-    
 TEMPLATE = app
 TARGET = drcc
 
