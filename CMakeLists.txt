@@ -75,17 +75,16 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STRE
     )
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "")
 
-
+## TODO: disable this option for ldc < rev. 1433.
 if(D_IS_MARS)
     option(SINGLE_D_OBJECT "Build all d sources to one object file" "ON")
-elseif(D_IS_LLVM)
+elseif(D_IS_LLVM) 
     option(SINGLE_D_OBJECT "Build all d sources to one object file" "OFF")
-    if(SINGLE_D_OBJECT)
-	message(STATUS "LDC not support build multiple source files in one .obj file")
-	set(SINGLE_D_OBJECT "OFF") 
-	#set(D_FLAGS ${D_FLAGS} -singleobj)
-    endif(SINGLE_D_OBJECT)
-endif(D_IS_MARS)
+endif(D_IS_MARS)    
+
+if(SINGLE_D_OBJECT AND D_IS_LLVM)
+      set(D_FLAGS ${D_FLAGS} -singleobj)
+endif(SINGLE_D_OBJECT AND D_IS_LLVM)
 
 # Check D compiler version
 if(D_VERSION EQUAL "1")
