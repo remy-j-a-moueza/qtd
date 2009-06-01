@@ -582,18 +582,5 @@ const ushort QT_EDITION_ACADEMIC =    QT_EDITION_DESKTOP;
 const ushort QT_EDITION_EDUCATIONAL = QT_EDITION_DESKTOP;
 const ushort QT_EDITION_EVALUATION =  QT_EDITION_DESKTOP;
 
-T qObjectFromPtr(T)(void *__qt_return_value) {
-    if (__qt_return_value is null)
-        return null;
-    mixin("void* d_obj = qtd_" ~ T.stringof ~ "_d_pointer(__qt_return_value);");
-    if (d_obj is null) {
-        T new_obj = new T(__qt_return_value, true);
-        mixin("qtd_" ~ T.stringof ~ "_create_link(new_obj.nativeId, cast(void*) new_obj);");
-        new_obj.__no_real_delete = true;
-        return new_obj;
-    } else
-        return cast(T) d_obj;
-}
-
 mixin QT_END_NAMESPACE;
 mixin QT_END_HEADER;

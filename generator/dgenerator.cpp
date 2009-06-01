@@ -866,7 +866,8 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                 s << INDENT << QString("__m_%1.nativeId = __qt_return_value;").arg(d_function->name()) << endl
                         << INDENT << QString("return __m_%1;").arg(d_function->name()) << endl;
             else {
-                QString type_name = return_type->name();
+                s << INDENT << "return qtd_" << return_type->name() << "_from_ptr(__qt_return_value);" << endl;
+/*                QString type_name = return_type->name();
                 const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(return_type->typeEntry());
                 if(ctype->isAbstract())
                     type_name = type_name + "_ConcreteWrapper";
@@ -894,7 +895,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                     s << INDENT << "auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
                             << INDENT << "return_value.__no_real_delete = true;" << endl
                             << INDENT << "return return_value;" << endl;
-                }
+                }*/
             }
             s << endl;
         }
@@ -2600,9 +2601,12 @@ void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass
 {
     const ComplexTypeEntry *ctype = d_class->typeEntry();
     QString class_name = ctype->name();
+    QString return_type_name = class_name;
+    if(ctype->designatedInterface())
+        return_type_name = ctype->designatedInterface()->name();
+    s << return_type_name << " qtd_" << class_name << "_from_ptr(void* __qt_return_value) {" << endl;
 
     if(ctype->isQObject()) {
-s << class_name << " qtd_" << class_name << "_from_ptr(void* __qt_return_value) {" << endl;
         QString type_name = class_name;
         if(ctype->isAbstract())
             type_name = type_name + "_ConcreteWrapper";
@@ -2617,16 +2621,10 @@ s << class_name << " qtd_" << class_name << "_from_ptr(void* __qt_return_value) 
           << INDENT << "    return new_obj;" << endl
           << INDENT << "} else" << endl
           << INDENT << "    return cast(" << class_name << ") d_obj;" << endl;
-s << "}" << endl << endl;
-
-    } /* else if (ctype->isObject()) {
+    } else if (ctype->isObject()) {
         QString type_name = class_name;
         if(ctype->isAbstract())
             type_name = type_name + "_ConcreteWrapper";
-
-        QString return_type_name = ctype->name();
-        if(ctype->designatedInterface())
-            return_type_name = ctype->designatedInterface()->name();
 
         // if class has virtual functions then it has classname_entity function so
         // we can look for D Object pointer. otherwise create new wrapper
@@ -2645,7 +2643,8 @@ s << "}" << endl << endl;
               << INDENT << "return_value.__no_real_delete = true;" << endl
               << INDENT << "return return_value;" << endl;
         }
-    }*/
+    }
+    s << "}" << endl << endl;
 }
 
 
