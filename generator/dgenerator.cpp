@@ -848,38 +848,9 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
 
     // return value marschalling
     if(return_type) {
-        if ( ( has_return_type && d_function->argumentReplaced(0).isEmpty() )/* || d_function->isConstructor()*/) // qtd
-            if(return_type->isQObject()) {
-
-            const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(return_type->typeEntry());
-            QString type_name = return_type->name();
-            QString class_name = ctype->name();
-            if(ctype->isAbstract())
-                type_name = type_name + "_ConcreteWrapper";
-/*
-            s << INDENT << "if (__qt_return_value is null)" << endl
-                    << INDENT << "    return null;" << endl
-                    << INDENT << "void* d_obj = __QObject_entity(__qt_return_value);" << endl
-                    << INDENT << "if (d_obj is null) {" << endl
-                    << INDENT << "    auto new_obj = new " << type_name << "(__qt_return_value, true);" << endl
-                    << INDENT << "    new_obj.__no_real_delete = true;" << endl
-                    << INDENT << "    return new_obj;" << endl
-                    << INDENT << "} else" << endl
-                    << INDENT << "    return cast(" << return_type->name() << ") d_obj;" << endl;
-                    */
-            s << INDENT << "if (__qt_return_value is null)" << endl
-              << INDENT << "    return null;" << endl
-              << INDENT << "void* d_obj = qtd_" << class_name << "_d_pointer(__qt_return_value);" << endl
-              << INDENT << "if (d_obj is null) {" << endl
-              << INDENT << "    auto new_obj = new " << type_name << "(__qt_return_value, true);" << endl
-              << INDENT << "    qtd_" << class_name << "_create_link(new_obj.nativeId, cast(void*) new_obj);" << endl
-              << INDENT << "    new_obj.__no_real_delete = true;" << endl
-              << INDENT << "    return new_obj;" << endl
-              << INDENT << "} else" << endl
-              << INDENT << "    return cast(" << class_name << ") d_obj;" << endl;
-
-        }
-
+        if ( ( has_return_type && d_function->argumentReplaced(0).isEmpty() )) // qtd
+            if(return_type->isQObject())
+                s << INDENT << "return qtd_" << return_type->name() << "_from_ptr(__qt_return_value);" << endl;
 
         if (return_type->isValue() && !return_type->typeEntry()->isStructInD())
             s << INDENT << "return new " << return_type->name() << "(__qt_return_value, false);" << endl;
@@ -905,14 +876,6 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                     return_type_name = return_type->typeEntry()->designatedInterface()->name();
 
                 AbstractMetaClass *classForTypeEntry = NULL;
-                // search in AbstractMetaClass list for return type
-                // find a better way to perform TypeEntry -> AbstractMetaClass lookup, maybe create hash before generation
-                // qtd2
-                /*foreach (AbstractMetaClass *cls, m_classes) {
-                    if ( cls->name() == d_function->type()->name() )
-                        classForTypeEntry = cls;
-                }*/
-
                 classForTypeEntry = ClassFromEntry::get(return_type->typeEntry());
 
                 // if class has virtual functions then it has classname_entity function so
@@ -2516,15 +2479,12 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << endl << "extern (C) void *__" << d_class->name() << "_entity(void *q_ptr);" << endl << endl;
     }
 
-    if (d_class->isQObject()) {
+    if (d_class->isQObject())
         writeQObjectFunctions(s, d_class);
 
-        s << "private extern (C) void qtd_D_" << d_class->name() << "_delete(void *d_ptr) {" << endl
-          << "    auto d_ref = cast(QObject) d_ptr;" << endl
-          << "    d_ref.__no_real_delete = true;" << endl
-          << "    delete d_ref;" << endl
-          << "}" << endl;
-    }
+
+    if (d_class->needsConversionFunc)
+        writeConversionFunction(s, d_class);
 
     if (d_class->hasConstructors())
         s << "extern (C) void qtd_" << d_class->name() << "_destructor(void *ptr);" << endl << endl;
@@ -2636,10 +2596,68 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     }
 }
 
+void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass *d_class)
+{
+    const ComplexTypeEntry *ctype = d_class->typeEntry();
+    QString class_name = ctype->name();
+
+    if(ctype->isQObject()) {
+s << class_name << " qtd_" << class_name << "_from_ptr(void* __qt_return_value) {" << endl;
+        QString type_name = class_name;
+        if(ctype->isAbstract())
+            type_name = type_name + "_ConcreteWrapper";
+
+        s << INDENT << "if (__qt_return_value is null)" << endl
+          << INDENT << "    return null;" << endl
+          << INDENT << "void* d_obj = qtd_" << class_name << "_d_pointer(__qt_return_value);" << endl
+          << INDENT << "if (d_obj is null) {" << endl
+          << INDENT << "    auto new_obj = new " << type_name << "(__qt_return_value, true);" << endl
+          << INDENT << "    qtd_" << class_name << "_create_link(new_obj.nativeId, cast(void*) new_obj);" << endl
+          << INDENT << "    new_obj.__no_real_delete = true;" << endl
+          << INDENT << "    return new_obj;" << endl
+          << INDENT << "} else" << endl
+          << INDENT << "    return cast(" << class_name << ") d_obj;" << endl;
+s << "}" << endl << endl;
+
+    } /* else if (ctype->isObject()) {
+        QString type_name = class_name;
+        if(ctype->isAbstract())
+            type_name = type_name + "_ConcreteWrapper";
+
+        QString return_type_name = ctype->name();
+        if(ctype->designatedInterface())
+            return_type_name = ctype->designatedInterface()->name();
+
+        // if class has virtual functions then it has classname_entity function so
+        // we can look for D Object pointer. otherwise create new wrapper
+        if (d_class->hasVirtualFunctions()) {
+            s << INDENT << "void* d_obj = __" << ctype->name() << "_entity(__qt_return_value);" << endl
+              << INDENT << "if (d_obj !is null) {" << endl
+              << INDENT << "    auto d_obj_ref = cast (Object) d_obj;" << endl
+              << INDENT << "    return cast(" << return_type_name << ") d_obj_ref;" << endl
+              << INDENT << "} else {" << endl
+              << INDENT << "    auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
+              << INDENT << "    return_value.__no_real_delete = true;" << endl
+              << INDENT << "    return return_value;" << endl
+              << INDENT << "}";
+        } else {
+            s << INDENT << "auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
+              << INDENT << "return_value.__no_real_delete = true;" << endl
+              << INDENT << "return return_value;" << endl;
+        }
+    }*/
+}
+
+
 void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *d_class)
 {
     s << "extern(C) void* qtd_" << d_class->name() << "_d_pointer(void *obj);" << endl
       << "extern(C) void qtd_" << d_class->name() << "_create_link(void *obj, void* d_obj);" << endl << endl;
+    s << "private extern (C) void qtd_D_" << d_class->name() << "_delete(void *d_ptr) {" << endl
+      << "    auto d_ref = cast(QObject) d_ptr;" << endl
+      << "    d_ref.__no_real_delete = true;" << endl
+      << "    delete d_ref;" << endl
+      << "}" << endl << endl;
 }
 
 /*
@@ -2972,7 +2990,6 @@ void DGenerator::generate()
 
         if (!cls->isInterface() && cls->isAbstract()) {
             ComplexTypeEntry *ctype_m = (ComplexTypeEntry *)ctype;
-
             ctype_m->setAbstract(true);
         }
 
@@ -2983,8 +3000,21 @@ void DGenerator::generate()
 
         foreach (AbstractMetaFunction *function, cls->functions())
             function->checkStoreResult();
-    }
 
+        // generate QObject conversion functions only those that are required
+        AbstractMetaFunctionList d_funcs = cls->functionsInTargetLang();
+        for (int i=0; i<d_funcs.size(); ++i) {
+            AbstractMetaType *f_type = d_funcs.at(i)->type();
+            if (!f_type)
+                continue;
+            if (f_type->isQObject() || f_type->isObject()) {
+                const ComplexTypeEntry* cte = static_cast<const ComplexTypeEntry *>(f_type->typeEntry());
+                AbstractMetaClass* d_class = ClassFromEntry::get(cte);
+                if (d_class)
+                    d_class->needsConversionFunc = true;
+            }
+        }
+    }
 
     Generator::generate();
 
@@ -3353,16 +3383,38 @@ ClassFromEntry* ClassFromEntry::m_instance = NULL;
 
 ClassFromEntry::ClassFromEntry()
 {
+}
+
+AbstractMetaClass* ClassFromEntry::get(const TypeEntry *ctype)
+{
+    if(!m_instance)
+        return NULL;
+
+    return m_instance->classFromEntry[ctype];
+}
+
+void ClassFromEntry::construct(const AbstractMetaClassList &classes)
+{
+    if(!m_instance) {
+        m_instance = new ClassFromEntry;
+        m_instance->setClasses(classes);
+        m_instance->buildHash();
+    }
+}
+
+void ClassFromEntry::buildHash()
+{
     foreach (AbstractMetaClass *cls, m_classes) {
         const ComplexTypeEntry *ctype = cls->typeEntry();
         classFromEntry[ctype] = cls;
     }
 }
 
-AbstractMetaClass* ClassFromEntry::get(const TypeEntry *ctype)
+void ClassFromEntry::print(QTextStream &s)
 {
-    if(!m_instance)
-        m_instance = new ClassFromEntry;
-
-    return m_instance->classFromEntry[ctype];
+    s << "_fuck_" << m_instance->m_classes.size();
+    foreach (AbstractMetaClass *cls, m_instance->m_classes) {
+        s << cls->name() << endl;
+    }
 }
+

@@ -695,7 +695,8 @@ public:
           m_extracted_interface(0),
           m_primary_interface_implementor(0),
           m_type_entry(0),
-          m_qDebug_stream_function(0)
+          m_qDebug_stream_function(0),
+          needsConversionFunc(false)
     {
     }
 
@@ -844,6 +845,8 @@ public:
     bool isTypeAlias() const { return m_is_type_alias; }
 
     const QStringList &depends() { return m_type_entry->depends(); }
+
+    bool needsConversionFunc;
 private:
     uint m_namespace : 1;
     uint m_qobject : 1;

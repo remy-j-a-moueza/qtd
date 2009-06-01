@@ -155,6 +155,8 @@ QString GeneratorSetD::generate() {
     JumpTablePreprocessor *jumpTablePreprocessor = 0;
     JumpTableGenerator *jumpTableGenerator = 0;
 
+    ClassFromEntry::construct(builder.classes());
+
     QStringList contexts;
     if (build_qdoc_japi) {
         generators << new QDocGenerator;
