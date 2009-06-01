@@ -865,40 +865,11 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
             if(d_function->storeResult())
                 s << INDENT << QString("__m_%1.nativeId = __qt_return_value;").arg(d_function->name()) << endl
                         << INDENT << QString("return __m_%1;").arg(d_function->name()) << endl;
-            else {
+            else
                 s << INDENT << "return qtd_" << return_type->name() << "_from_ptr(__qt_return_value);" << endl;
-/*                QString type_name = return_type->name();
-                const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(return_type->typeEntry());
-                if(ctype->isAbstract())
-                    type_name = type_name + "_ConcreteWrapper";
-
-                QString return_type_name = return_type->name();
-                if(return_type->typeEntry()->designatedInterface())
-                    return_type_name = return_type->typeEntry()->designatedInterface()->name();
-
-                AbstractMetaClass *classForTypeEntry = NULL;
-                classForTypeEntry = ClassFromEntry::get(return_type->typeEntry());
-
-                // if class has virtual functions then it has classname_entity function so
-                // we can look for D Object pointer. otherwise create new wrapper
-                if (classForTypeEntry != NULL && classForTypeEntry->hasVirtualFunctions()) {
-                    s << INDENT << "void* d_obj = __" << d_function->type()->name() << "_entity(__qt_return_value);" << endl
-                            << INDENT << "if (d_obj !is null) {" << endl
-                            << INDENT << "    auto d_obj_ref = cast (Object) d_obj;" << endl
-                            << INDENT << "    return cast(" << return_type_name << ") d_obj_ref;" << endl
-                            << INDENT << "} else {" << endl
-                            << INDENT << "    auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
-                            << INDENT << "    return_value.__no_real_delete = true;" << endl
-                            << INDENT << "    return return_value;" << endl
-                            << INDENT << "}";
-                } else {
-                    s << INDENT << "auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
-                            << INDENT << "return_value.__no_real_delete = true;" << endl
-                            << INDENT << "return return_value;" << endl;
-                }*/
-            }
             s << endl;
         }
+
         if (return_type->isArray()) {
             s << INDENT << "return __qt_return_value[0 .. " << return_type->arrayElementCount() << "];" << endl;
         }
