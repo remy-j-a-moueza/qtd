@@ -474,6 +474,12 @@ foreach(package_big ${all_packages})
 
 	## Link CPP library.
 	add_library(cpp_${package} SHARED ${cpp_sources})
+	set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
+	foreach(cpp_source ${cpp_sources})
+	    set(cpp_source ${cpp_source})
+	    obj_path(cpp_source)
+	    set(cpp_objs ${cpp_objs} CMakeFiles/cpp_${package}.dir/${cpp_source}${CMAKE_CXX_OUTPUT_EXTENSION})
+	endforeach(cpp_source)
 
 	## Link D library.
 	set(lib_name ${D_LIB_PREFIX}qtd${package}${D_LIB_SUFFIX})    
@@ -498,37 +504,44 @@ foreach(package_big ${all_packages})
 		string(TOLOWER ${req} req_lower)
 		set(link_cpp ${link_cpp} cpp_${req_lower} ${QT_QT${req_upper}_LIBRARY})
 	    endforeach(req ${require})
+
+	    ## Does the next three lines need for ldc? 
 	    string(TOUPPER ${package} package_upper)
 	    set(link_cpp ${link_cpp} ${QT_QT${package_upper}_LIBRARY})
 	    target_link_libraries(cpp_${package} ${link_cpp} )
-	    set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.dll)
-	    set(cpp_lib_native ${cpp_lib})
-	    make_native_path(cpp_lib_native)
-	    set(d_implib ${CMAKE_BINARY_DIR}/CMakeFiles/${package}.dir/cpp_${package}.lib)
-	    set(d_implib_native ${d_implib})
-	    make_native_path(d_implib_native)
-	    add_custom_command(
+	    if(D_IS_MARS)	    
+		set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.dll)
+		set(cpp_lib_native ${cpp_lib})
+		make_native_path(cpp_lib_native)
+		set(d_implib ${CMAKE_BINARY_DIR}/CMakeFiles/${package}.dir/cpp_${package}.lib)
+		set(d_implib_native ${d_implib})
+		make_native_path(d_implib_native)
+		add_custom_command(
 			    OUTPUT "${d_implib}"
 			    COMMAND "${IMPLIB}"
 			    ARGS /system /PAGESIZE:32 ${d_implib_native} ${cpp_lib_native}
 			    DEPENDS  "cpp_${package}"
 			    COMMENT "Creating implib ${lib_name}"
 			)
-	    add_custom_command(
+	    
+		add_custom_command(
+				OUTPUT "${lib}"
+				COMMAND "${DC}"
+				ARGS -lib ${d_objs} ${d_implib} -of${lib}
+				DEPENDS ${d_objs} ${d_implib}
+				COMMENT "Linking ${lib_name}"
+			    )
+	    elseif(D_IS_MARS)
+		  add_custom_command(
 			    OUTPUT "${lib}"
-			    COMMAND "${DC}"
-			    ARGS -lib ${d_objs} ${d_implib} -of${lib}
-			    DEPENDS ${d_objs} ${d_implib}
+			    COMMAND "${CMAKE_AR}"
+			    ARGS rcs ${lib} ${d_objs} ${cpp_objs}
+			    DEPENDS ${d_objs}
 			    COMMENT "Linking ${lib_name}"
 			)
+	    endif(D_IS_MARS)
 	    install(FILES ${cpp_lib} COMPONENT qtd DESTINATION lib)
 	else(CMAKE_HOST_UNIX)   
-	    set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
-	    foreach(cpp_source ${cpp_sources})
-		set(cpp_source ${cpp_source})
-		obj_path(cpp_source)
-		set(cpp_objs ${cpp_objs} CMakeFiles/cpp_${package}.dir/${cpp_source}${CMAKE_CXX_OUTPUT_EXTENSION})
-	    endforeach(cpp_source)
 	    add_custom_command(
 			    OUTPUT "${lib}"
 			    COMMAND "${CMAKE_AR}"
