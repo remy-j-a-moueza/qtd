@@ -59,14 +59,14 @@ import ui_settings;
 
 class SettingsDialog : public QDialog //, public Ui_Settings
 {
-	Settings ui;
+	mixin Ui_Settings;
 
 public:
 	
 	this(QWidget parent = null)
 	{
 		super(this);
-		ui.setupUi(this);
+		setupUi(this);
 		exceptionsButton.clicked.connect(&this.showExceptions);
 		setHomeToCurrentPageButton.clicked.connect(&this.setHomeToCurrentPage);
 		cookiesButton.clicked.connect(&this.showCookies());

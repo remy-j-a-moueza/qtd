@@ -2,7 +2,6 @@
 
 ../../tools/duic/duic bookmarks.ui -o ui_bookmarks.d
 ../../tools/duic/duic addbookmarkdialog.ui -o ui_addbookmarkdialog.d
-../../tools/duic/duic addbookmarkdialog.ui -o ui_addbookmarkdialog.d
 ../../tools/duic/duic cookiesexceptions.ui -o ui_cookiesexceptions.d
 ../../tools/duic/duic cookies.ui -o ui_cookies.d
 ../../tools/duic/duic downloaditem.ui -o ui_downloaditem.d

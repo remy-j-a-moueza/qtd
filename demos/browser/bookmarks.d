@@ -57,6 +57,7 @@ import qt.gui.QHeaderView;
 import qt.gui.QIcon;
 import qt.gui.QMessageBox;
 import qt.gui.QToolButton;
+import qt.gui.QTreeView;
 import qt.xml.QXmlStreamReader;
 import qt.webkit.QWebSettings;
 
@@ -64,7 +65,6 @@ import tango.text.convert.Format;
 
 //import qt.core.QDebug;
 
-import bookmarks;
 import autosaver;
 import browserapplication;
 import history;
@@ -540,9 +540,10 @@ public:
 				break;
 			case Qt_ItemDataRole.DecorationRole:
 				if (index.column() == 0) {
+					//TODO: is cast(void*) ok?
 					if (bookmarkNode.type() == BookmarkNode.Type.Folder)
-						return new QVariant(QApplication.style().standardIcon(QStyle.SP_DirIcon));
-					return new QVariant(BrowserApplication.instance().icon(bookmarkNode.url));
+						return new QVariant(cast(void*) QApplication.style().standardIcon(QStyle.SP_DirIcon));
+					return new QVariant(cast(void*) BrowserApplication.instance().icon(new QUrl(bookmarkNode.url)));
 				}
 		}
 
@@ -716,7 +717,7 @@ public:
 
 		while (!stream.atEnd()) {
 			auto encodedData = new QByteArray;
-			stream >> encodedData;
+			//stream >> encodedData; //TODO
 			
 			auto buffer = new QBuffer(encodedData);
 			buffer.open(QBuffer.ReadOnly);
@@ -741,7 +742,7 @@ public:
 	{
 		if (!parent.isValid())
 			return true;
-		const BookmarkNode parentNode = node(parent);
+		BookmarkNode parentNode = node(parent);
 		return (parentNode.type() == BookmarkNode.Type.Folder);
 	}
 
@@ -780,7 +781,7 @@ public:
 	{
 		super(parent);	
 		m_bookmarksManager = null;
-		this.activated.connect(&this.activated);
+		this.activated.connect(&this.activatedIndex);
 		setMaxRows(-1);
 		setHoverRole(BookmarksModel.Roles.UrlStringRole);
 		setSeparatorRole(BookmarksModel.Roles.SeparatorRole);
@@ -811,7 +812,7 @@ protected:
 
 private:
 
-	void activated(QModelIndex index)
+	void activatedIndex(QModelIndex index)
 	{
 		openUrl.emit(index.data(BookmarksModel.Roles.UrlRole).toUrl());
 	}
@@ -859,7 +860,7 @@ import ui_addbookmarkdialog;
 
 class AddBookmarkDialog : public QDialog //, public Ui_AddBookmarkDialog
 {
-	AddBookmarkDialog ui;
+	mixin Ui_AddBookmarkDialog;
 	
 public:
 
@@ -872,8 +873,8 @@ public:
 		setWindowFlags(Qt.Sheet);
 		if (!m_bookmarksManager)
 			m_bookmarksManager = BrowserApplication.bookmarksManager();
-		ui.setupUi(this);
-		QTreeView view = new QTreeView(this);
+		setupUi(this);
+		auto view = new QTreeView(this);
 		m_proxyModel = new AddBookmarkProxyModel(this);
 		BookmarksModel model = m_bookmarksManager.bookmarksModel();
 		m_proxyModel.setSourceModel(model);
@@ -903,7 +904,7 @@ private:
 		if (!index.isValid())
 			index = m_bookmarksManager.bookmarksModel().index(0, 0);
 		BookmarkNode parent = m_bookmarksManager.bookmarksModel().node(index);
-		BookmarkNode bookmark = new BookmarkNode(BookmarkNode.Bookmark);
+		BookmarkNode bookmark = new BookmarkNode(BookmarkNode.Type.Bookmark);
 		bookmark.url = m_url;
 		bookmark.title = name.text();
 		m_bookmarksManager.addBookmark(parent, bookmark);
@@ -922,7 +923,7 @@ import ui_bookmarks;
 //class TreeProxyModel;
 class BookmarksDialog : public QDialog //, public Ui_BookmarksDialog
 {
-	BookmarksDialog ui;
+	mixin Ui_BookmarksDialog;
 	
 	mixin Signal!("openUrl", QUrl /*url*/);
 
@@ -934,7 +935,7 @@ public:
 		m_bookmarksManager = manager;
 		if (!m_bookmarksManager)
 			m_bookmarksManager = BrowserApplication.bookmarksManager();
-		ui.setupUi(this);
+		setupUi(this);
 
 		tree.setUniformRowHeights(true);
 		tree.setSelectionBehavior(QAbstractItemView.SelectRows);
@@ -950,7 +951,7 @@ public:
 		tree.setExpanded(m_proxyModel.index(0, 0), true);
 		tree.setAlternatingRowColors(true);
 		auto fm = new QFontMetrics(font());
-		int header = fm.width(QLatin1Char('m')) * 40;
+		int header = fm.width("m") * 40;
 		tree.header().resizeSection(0, header);
 		tree.header().setStretchLastSection(true);
 		tree.activated.connect(&this.open);
@@ -975,10 +976,14 @@ private:
 		QModelIndex index = tree.indexAt(pos);
 		index = index.sibling(index.row(), 0);
 		if (index.isValid() && !tree.model().hasChildren(index)) {
-			menu.addAction(tr("Open"), this, SLOT(open()));
+			auto action = new QAction(tr("Open"), this);
+			action.triggered.connect(&this.open);
+			menu.addAction(action);
 			menu.addSeparator();
 		}
-		menu.addAction(tr("Delete"), tree, SLOT(removeOne()));
+		auto action = new QAction(tr("Delete"), this);
+		action.triggered.connect(&tree.removeOne);
+		menu.addAction(action);
 		menu.exec(QCursor.pos());
 	}
 	
@@ -1008,7 +1013,7 @@ private:
 private:
 	void expandNodes(BookmarkNode node)
 	{
-		for (int i = 0; i < node.children().count(); ++i) {
+		for (int i = 0; i < node.children().length; ++i) {
 			BookmarkNode childNode = node.children()[i];
 			if (childNode.expanded) {
 				QModelIndex idx = m_bookmarksModel.index(childNode);
@@ -1049,7 +1054,7 @@ import qt.gui.QToolBar;
 
 class BookmarksToolBar : public QToolBar
 {
-mixin Signal!("openUrl", QUrl /*url*/);
+	mixin Signal!("openUrl", QUrl /*url*/);
 
 public:
 
@@ -1084,7 +1089,7 @@ protected:
 		QMimeData mimeData = event.mimeData();
 		if (mimeData.hasUrls())
 			event.acceptProposedAction();
-		QToolBar.dragEnterEvent(event);
+		super.dragEnterEvent(event);
 	}
 
 	void dropEvent(QDropEvent event)
@@ -1110,7 +1115,7 @@ protected:
 					break;
 				}
 			}
-			BookmarkNode bookmark = new BookmarkNode(BookmarkNode.Bookmark);
+			BookmarkNode bookmark = new BookmarkNode(BookmarkNode.Type.Bookmark);
 			bookmark.url = urls[0].toString();
 			bookmark.title = mimeData.text();
 
@@ -1127,7 +1132,7 @@ private:
 	void triggered(QAction action)
 	{
 		QVariant v = action.data();
-		if (v.canConvert!(QUrl)()) {
+		if (v.canConvert(QVariant.Type.Url)) {
 			openUrl.emit(v.toUrl());
 		}
 	}
@@ -1166,5 +1171,5 @@ private:
 private:
 
 	BookmarksModel m_bookmarksModel;
-	QPersistentModelIndex m_root;
+	/*TODO: needed? QPersistentModelIndex*/ QModelIndex m_root;
 }

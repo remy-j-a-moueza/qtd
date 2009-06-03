@@ -68,7 +68,7 @@ import ui_downloaditem;
 class DownloadItem : public QWidget //, public Ui_DownloadItem
 {
 	mixin Signal!("statusChanged");
-	DownloadItem ui;
+	mixin Ui_DownloadItem;
 
 public:
  
@@ -84,7 +84,7 @@ public:
 		m_requestFileName = requestFileName;
 		m_bytesReceived = 0;
 
-		ui.setupUi(this);
+		setupUi(this);
 		QPalette p = downloadInfoLabel.palette();
 		p.setColor(QPalette.Text, Qt.darkGray);
 		downloadInfoLabel.setPalette(p);
@@ -355,7 +355,7 @@ private:
 
 class DownloadManager : public QDialog //, public Ui_DownloadDialog
 {
-	DownloadDialog ui;
+	mixin Ui_DownloadDialog;
 
 public:
 
@@ -380,7 +380,7 @@ public:
 		m_iconProvider = 0;
 		m_removePolicy = RemovePolicy.Never;
 
-		ui.setupUi(this);
+		setupUi(this);
 		downloadsView.setShowGrid(false);
 		downloadsView.verticalHeader().hide();
 		downloadsView.horizontalHeader().hide();

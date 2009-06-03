@@ -157,7 +157,7 @@ private:
 	void triggeredMenuAction(QAction action)
 	{
 		QVariant v = action.data();
-		if (v.canConvert!(string)()) {
+		if (v.canConvert(QVariant.Type.String)) {
 			string text = v.toString();
 			lineEdit().setText(text);
 			searchNow();

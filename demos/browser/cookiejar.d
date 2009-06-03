@@ -542,14 +542,14 @@ import ui_cookiesexceptions;
 
 class CookiesDialog : public QDialog //, public Ui_CookiesDialog
 {
-	CookiesDialog ui;
-	
+	mixin Ui_CookiesDialog;
+
 public:
 
 	this(CookieJar cookieJar, QWidget parent = null)
 	{
 		super(parent);
-		ui.setupUi(this);
+		setupUi(this);
 		setWindowFlags(Qt.Sheet);
 		CookieModel model = new CookieModel(cookieJar, this);
 		m_proxyModel = new QSortFilterProxyModel(this);
@@ -729,7 +729,7 @@ private:
 
 class CookiesExceptionsDialog : public QDialog //, public Ui_CookiesExceptionsDialog
 {
-	CookiesExceptionsDialog ui;
+	mixin Ui_CookiesExceptionsDialog;
 
 public:
 
@@ -737,7 +737,7 @@ public:
 	{
 		super(parent);
 		m_cookieJar = cookieJar;
-		ui.setupUi(this);
+		setupUi(this);
 		setWindowFlags(Qt.Sheet);
 		removeButton.clicked.connect(&exceptionTable.removeOne);
 		removeAllButton.clicked.connect(&exceptionTable.removeAll);

@@ -49,6 +49,7 @@ import qt.core.QSettings;
 import qt.core.QTextStream;
 import qt.core.QTranslator;
 import qt.core.QUrl;
+import qt.core.QTimer;
 //import qt.core.QPointer;
 
 import qt.gui.QApplication;
@@ -80,9 +81,9 @@ class BrowserApplication : public QApplication
 {
 public:
 
-	this(string[] args)
+	this(string[] arguments)
 	{
-		super(args);
+		super(arguments);
 		m_localServer = null;
 		QCoreApplication.setOrganizationName("Trolltech");
 		QCoreApplication.setApplicationName("demobrowser");
@@ -102,9 +103,9 @@ public:
 			auto stream = new QTextStream(&socket);
 			string[] args = QCoreApplication.arguments();
 			if (args.length > 1)
-				stream << args[$-1];
-			else
-				stream << "";
+				stream.writeString(args[$-1]);
+			//else
+			//	stream << "";
 			stream.flush();
 			socket.waitForBytesWritten();
 			return;
@@ -128,7 +129,7 @@ public:
 
 		version(QT_NO_OPENSSL) {} else {
 			if (!QSslSocket.supportsSsl()) {
-				QMessageBox.information(0, "Demo Browser",
+				QMessageBox.information(null, "Demo Browser",
 				"This system does not support OpenSSL. SSL websites will not be available.");
 			}
 		}
@@ -138,7 +139,7 @@ public:
 
 		installTranslator("qt_" ~ localSysName);
 
-		QSettings settings;
+		auto settings = new QSettings;
 		settings.beginGroup("sessions");
 		m_lastSession = settings.value("lastSession").toByteArray();
 		settings.endGroup();
@@ -174,7 +175,7 @@ public:
 		QWebSettings defaultSettings = QWebSettings.globalSettings();
 		string standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
 		int standardFontSize = defaultSettings.fontSize(QWebSettings.DefaultFontSize);
-		QFont standardFont = QFont(standardFontFamily, standardFontSize);
+		QFont standardFont = new QFont(standardFontFamily, standardFontSize);
 		standardFont = qVariantValue!(QFont)(settings.value("standardFont", standardFont));
 		defaultSettings.setFontFamily(QWebSettings.StandardFont, standardFont.family());
 		defaultSettings.setFontSize(QWebSettings.DefaultFontSize, standardFont.pointSize());

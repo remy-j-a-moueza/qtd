@@ -1374,10 +1374,9 @@ protected:
 
 import ui_history;
 
-class HistoryDialog : public QDialog//, public Ui_HistoryDialog
+class HistoryDialog : public QDialog //, public Ui_HistoryDialog
 {
-	HistoryDialog ui;
-	
+	mixin Ui_HistoryDialog;
 	mixin Signal!("openUrl", QUrl /*url*/);
 
 public:
@@ -1388,7 +1387,7 @@ public:
 		HistoryManager history = setHistory;
 		if (!history)
 			history = BrowserApplication.historyManager();
-		ui.setupUi(this);
+		setupUi(this);
 		tree.setUniformRowHeights(true);
 		tree.setSelectionBehavior(QAbstractItemView.SelectRows);
 		tree.setTextElideMode(Qt_TextElideMode.ElideMiddle);
