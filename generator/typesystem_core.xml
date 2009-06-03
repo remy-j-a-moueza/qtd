@@ -2745,7 +2745,6 @@
     <modify-function signature="operator&gt;&gt;(QByteArray&amp;)"> <remove/> </modify-function>
     <modify-function signature="operator&gt;&gt;(QString&amp;)"> <remove/> </modify-function>
     <modify-function signature="operator&gt;&gt;(unsigned short&amp;)"> <remove/> </modify-function>
-    <modify-function signature="operator&lt;&lt;(const QString&amp;)"> <remove/> </modify-function>
 
 <!--
     <modify-function signature="setCodec(QTextCodec *)">
@@ -2806,7 +2805,11 @@
           <modify-argument index="0" replace-value="this"/>
           <access modifier="private"/>
       </modify-function>
-
+      <modify-function signature="operator&lt;&lt;(const QString&amp;)">
+          <rename to="writeString"/>
+          <modify-argument index="0" replace-value="this"/>
+      </modify-function>
+      
       <modify-function signature="operator&gt;&gt;(char&amp;)">
           <access modifier="private"/>
           <modify-argument index="0" replace-value="this"/>
