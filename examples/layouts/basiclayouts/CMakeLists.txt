@@ -1,0 +1,1 @@
+build_example(basiclayouts main.d dialog.d)
