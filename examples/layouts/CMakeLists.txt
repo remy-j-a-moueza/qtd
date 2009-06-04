@@ -1,2 +1,3 @@
+add_subdirectory(borderlayout)
 add_subdirectory(basiclayouts)
 add_subdirectory(dynamiclayouts)
