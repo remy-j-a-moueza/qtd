@@ -108,12 +108,12 @@ int main(string[] args)
 
 	string translatorFileName = "qt_";
 	translatorFileName ~= QLocale.system().name();
-	QTranslator translator = new QTranslator(app);
+	scope translator = new QTranslator(app);
 	if (translator.load(translatorFileName, QLibraryInfo.location(QLibraryInfo.TranslationsPath)))
 		app.installTranslator(translator);
 
 
-	auto wizard = new QWizard;
+	scope wizard = new QWizard;
 	wizard.addPage(createIntroPage());
 	wizard.addPage(createRegistrationPage());
 	wizard.addPage(createConclusionPage());
