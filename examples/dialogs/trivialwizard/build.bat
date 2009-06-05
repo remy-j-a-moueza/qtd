@@ -1,0 +1,1 @@
+dmd trivialwizard.d libqtdcore.lib libqtdgui.lib -I../../../ -I../../../qt/d1 -oftrivialwizard
