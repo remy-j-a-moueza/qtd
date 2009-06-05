@@ -5510,9 +5510,8 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!-- These should be restored later after fixing abstract classes issue -->
 <!--<modify-function signature="inputContext()" remove="all"/>
 <modify-function signature="layout() const" remove="all"/>
-<modify-function signature="setLayout(QLayout*)" remove="all"/>-->
-<modify-function signature="style () const" remove="all"/>
-<!--                                                                    -->
+<modify-function signature="setLayout(QLayout*)" remove="all"/>
+<modify-function signature="style () const" remove="all"/>-->
 
     <modify-function signature="actionEvent(QActionEvent*)">
         <modify-argument index="1" invalidate-after-use="yes"/>
