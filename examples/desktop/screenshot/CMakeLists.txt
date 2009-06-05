@@ -1,0 +1,1 @@
+build_example(screenshot main.d screenshot.d)
