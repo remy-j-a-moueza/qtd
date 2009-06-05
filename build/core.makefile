@@ -73,4 +73,5 @@ core_classes =  \
     QCryptographicHash \
     QProcess \
     QBuffer \
-    QMetaType
+    QMetaType \
+    QLibraryInfo
