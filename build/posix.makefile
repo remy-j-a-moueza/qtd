@@ -15,7 +15,6 @@ ifndef QTDIR_LIB
 QTDIR_LIB = $(QTDIR)/lib
 endif
 endif
-LIB_EXT = a
 DYN_LIB_EXT = so
 D_OBJ_EXT = o
 LIB_NAME_PREFIX = lib

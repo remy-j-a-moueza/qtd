@@ -10,11 +10,14 @@ export QTDIR_LIB
 ## End. Read variable from shell.
 
 ## Try identify system.
-ifeq ($(MAKE), mingw32-make) # TODO: add another system.
-SYSTEM = windows
-endif
-ifndef SYSTEM
-SYSTEM = posix
+ifeq ($(strip $(shell uname)),Linux)
+	SYSTEM=posix
+else
+	ifeq ($(strip $(shell uname)),Darwin)
+		SYSTEM=posix
+	else
+		SYSTEM=windows
+	endif
 endif
 ## End, Try identify system.
 
@@ -24,7 +27,7 @@ include build/$(SYSTEM).makefile
 ## Main settings.
 ## D compiler.
 ifndef $(DC)
-DC = dmd
+DC = ldmd
 endif
 ## C++ compiler.
 ifndef $(CC)
@@ -107,11 +110,24 @@ ifeq ($(DC), dmd)
 NOT_SEPARATE_D_OBJ = true
 endif
 
+ifeq ($(SYSTEM), windows)
+	ifeq ($(DC), dmd)
+		DMD_WIN = true
+	endif
+endif
+
+ifeq ($(DMD_WIN), true)
+	CPP_SHARED = true
+	LIB_EXT = lib
+else
+	LIB_EXT = a
+endif
 
 ## CPP_SHARED options.
 ifeq ($(CPP_SHARED), true)
 CC_CFLAGS += -DCPP_SHARED
 GEN_OPT   += --cpp_shared
+D_CFLAGS += -version=cpp_shared
 endif
 ## End. CPP_SHARED options.
 
@@ -166,7 +182,7 @@ define BUILD_template
     ## DMD compile template bug fix
     $(1)_D_RULE =$(TMP_PATH)/$(1)_dobj.$(D_OBJ_EXT)
     $$($(1)_D_RULE):
-	    $(DC) $(D_CFLAGS) $(D_INCLUDE) -c $$($(1)_d_files) -of$$($(1)_D_RULE)
+	    $(DC) $(D_CFLAGS) $(D_INCLUDE) -c $$($(1)_d_files) -singleobj -of$$($(1)_D_RULE)
     else
     $(1)_D_RULE = $$($(1)_d_files:qt/%.d=$(TMP_PATH)/%_d.o)
     endif
@@ -194,7 +210,7 @@ define BUILD_template
     DELETE_FILES += $$($(1)_D_RULE) $$($(1)_CPP_RULE) $(OUTPUT_PATH)/$(LIB_PREFIX)$$(qt_$(1)_name)D.$(LIB_EXT)
     ## Implib link.
     $(1)_LIB = $(OUTPUT_PATH)$(SL)$(LIB_PREFIX)$(NAME_PREFIX)$(1)$(LIB_POSTFIX).$(LIB_EXT)
-    ifeq ($(SYSTEM), windows)
+    ifeq ($(DMD_WIN), true)
     $$($(1)_LIB): $$($(1)_D_RULE) $$($(1)_CPP_RULE)
 	    $(DC) $$($(1)_D_RULE) $$($(1)_CPP_RULE) $(D_LIB_PATH:%=-L-L%) $$($(1)_link_d:%=-L-l%) -lib -of$$($(1)_LIB)
     else

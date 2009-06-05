@@ -1,0 +1,10 @@
+#! /bin/bash
+
+#ldmd main.d  -I../../../ -I../../../qt/d1 -c
+#ldmd dialog.d -I../../../ -I../../../qt/d1 -c
+
+#g++ 'dialog.o' 'main.o' '-o' 'main.exe' '-LC:/msys/1.0/home/Eldar/ldc/lib' '-LC:/eldar/Qt/qt/lib' '-lqtdgui' '-lqtdcore' '-ltango-user-ldc' '-ltango-base-ldc' '-lQtGui4' '-lQtCore4' '-m32'
+
+ldmd main.d dialog.d -I../../../ -I../../../qt/d1 -L-LC:/msys/1.0/home/Eldar/ldc/lib -L-LC:/eldar/Qt/qt/lib -L-lqtdgui -L-lqtdcore -L-lQtGui4 -L-lQtCore4 -L-lstdc++ -L-m32
+
+#'-Wl' '-Wl,-subsystem,windows' '-enable-stdcall-fixup' '-Wl,-enable-auto-import' '-Wl,-enable-runtime-pseudo-reloc' '-Wl,-s' '-mthreads'

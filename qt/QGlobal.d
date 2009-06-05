@@ -28,12 +28,13 @@ template QT_END_HEADER() {
 mixin QT_BEGIN_HEADER;
 mixin QT_BEGIN_NAMESPACE;
 
-version(Windows)
+extern(C) void __qtd_dummy() {}
+
+version(cpp_shared)
 {
-    export extern(C) void d_dummy() {}
     extern (C) void __qtd_qtd_core_initCallBacks(void* toUtf8, void* dummy);
     static this() {
-        __qtd_qtd_core_initCallBacks(&_d_toUtf8, &d_dummy);
+        __qtd_qtd_core_initCallBacks(&_d_toUtf8, &__qtd_dummy);
     }
 }
 

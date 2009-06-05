@@ -88,7 +88,7 @@ private extern(C) void qtd_get_string_from_array(string* arr, size_t pos, string
     *elem = arr[pos];
 }
 
-version(Windows)
+version(cpp_shared)
 {
     extern (C) void qtd_core_ArrayOps_initCallBacks(void* callbacks);
 

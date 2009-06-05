@@ -310,7 +310,7 @@ void ContainerGenerator::writeDContent(QTextStream &s, AbstractMetaClass *cls)
     if (num_funcs == 0)
         return;
 
-    s << "version (Windows) {" << endl
+    s << "version (cpp_shared) {" << endl
       << "    private extern (C) void qtd_" << cls->package().replace(".", "_") << "_ArrayOps_initCallBacks(void* callbacks);" << endl << endl
       << "    static this() {" << endl
       << "        void*[" << num_funcs << "] callbacks; " << endl << endl;
