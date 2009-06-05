@@ -1,1 +1,1 @@
-build_example(systray main.d window.d RESOURCES resources.qrc)
+build_example(systray main.d window.d RESOURCES systray.qrc)

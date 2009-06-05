@@ -46,7 +46,7 @@ import qt.gui.QApplication;
 import qt.gui.QSystemTrayIcon;
 
 import window;
-import resources;
+import qrc_systray;
 
 int main(char[][] args)
 {
