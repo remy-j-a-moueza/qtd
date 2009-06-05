@@ -1,0 +1,1 @@
+dmd main.d addressbook.d libqtdcore.lib libqtdgui.lib -I../../../../ -ofaddressbook
