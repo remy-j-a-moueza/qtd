@@ -1710,9 +1710,12 @@ class QInputDialog___ extends QInputDialog {
     public static double getDouble(QWidget _parent, string title, string label, double value = 0, double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1, ref bool ok = false, int flags = 0) {
         return qtd_QInputDialog_getDouble_private_QWidget_string_string_double_double_double_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.nativeId, title, label, value, minValue, maxValue, decimals, &ok, flags);
     }
-
-    public static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, ref bool ok = false, int flags = 0) {
-        return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.nativeId, title, label, value, minValue, maxValue, step, &ok, flags);
+    
+    static if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
+    {
+	public static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, ref bool ok = false, int flags = 0) {
+	    return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.nativeId, title, label, value, minValue, maxValue, step, &ok, flags);
+	}
     }
 
     public static string getItem(QWidget _parent, string title, string label, string[] items, int current = 0, bool editable = true, ref bool ok = false, int flags = 0) {
