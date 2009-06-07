@@ -257,12 +257,12 @@ public class QVariant : QtDObject
         super(__qt_return_value);
     }
 
-
+/*
     public this(char* str) {
         void* __qt_return_value = qtd_QVariant_QVariant_nativepointerchar(str);
         super(__qt_return_value);
     }
-
+*/
 
     public this(double d) {
         void* __qt_return_value = qtd_QVariant_QVariant_double(d);
