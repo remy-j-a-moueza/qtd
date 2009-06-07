@@ -1132,7 +1132,7 @@ private:
 	void triggered(QAction action)
 	{
 		QVariant v = action.data();
-		if (v.canConvert!(QVariant.Type.Url)) {
+		if (v.canConvert!(QUrl)) {
 			openUrl.emit(v.toUrl());
 		}
 	}
