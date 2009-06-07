@@ -182,7 +182,7 @@ define BUILD_template
     ## DMD compile template bug fix
     $(1)_D_RULE =$(TMP_PATH)/$(1)_dobj.$(D_OBJ_EXT)
     $$($(1)_D_RULE):
-	    $(DC) $(D_CFLAGS) $(D_INCLUDE) -c $$($(1)_d_files) -singleobj -of$$($(1)_D_RULE)
+	    $(DC) $(D_CFLAGS) $(D_INCLUDE) -c $$($(1)_d_files) -of$$($(1)_D_RULE)
     else
     $(1)_D_RULE = $$($(1)_d_files:qt/%.d=$(TMP_PATH)/%_d.o)
     endif

@@ -675,12 +675,16 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
             s << INDENT << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << " res;" << endl;
     }
 
-    //returning string or a struct
+    // returning string or a struct
     bool return_in_arg = return_type && (return_type->isTargetLangString() ||
                                          return_type->name() == "QModelIndex" ||
                                          return_type->isContainer() ||
                                          return_type->typeEntry()->isStructInD());
 
+    // bool flag showing if we return value immediately, without any conversions
+    // which is commpon for primitive types, initially set up to return_in_arg, because in that case
+    // we don't need type conversions
+    bool returnImmediately = return_in_arg;
 
     s << INDENT;
     if ( (has_return_type && d_function->argumentReplaced(0).isEmpty() ) || d_function->isConstructor()) { //qtd
@@ -701,6 +705,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         } else if (return_type && return_type->isArray()) {
             s << return_type->arrayElementType()->name() + "* __qt_return_value = ";
         } else {
+            returnImmediately = true;
             s << "return ";
         }
 
@@ -840,41 +845,8 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
 // qtd2    if (return_type && (/* qtdreturn_type->isTargetLangEnum() ||*/ return_type->isTargetLangFlags()))
 //        s << ")";
 
-    foreach (ReferenceCount referenceCount, referenceCounts) {
-        writeReferenceCount(s, referenceCount, "__qt_return_value");
-    }
-
     s << ";" << endl;
 
-    // return value marschalling
-    if(return_type) {
-        if ( ( has_return_type && d_function->argumentReplaced(0).isEmpty() )) // qtd
-            if(return_type->isQObject())
-                s << INDENT << "return qtd_" << return_type->name() << "_from_ptr(__qt_return_value);" << endl;
-
-        if (return_type->isValue() && !return_type->typeEntry()->isStructInD())
-            s << INDENT << "return new " << return_type->name() << "(__qt_return_value, false);" << endl;
-
-        if (return_type->isVariant())
-            s << INDENT << "return new QVariant(__qt_return_value, false);" << endl;
-
-        if (return_type->isNativePointer() && return_type->typeEntry()->isValue())
-            s << INDENT << "return new " << return_type->name() << "(__qt_return_value, true);" << endl;
-
-        if (return_type->isObject()) {
-            if(d_function->storeResult())
-                s << INDENT << QString("__m_%1.nativeId = __qt_return_value;").arg(d_function->name()) << endl
-                        << INDENT << QString("return __m_%1;").arg(d_function->name()) << endl;
-            else
-                s << INDENT << "return qtd_" << return_type->name() << "_from_ptr(__qt_return_value);" << endl;
-            s << endl;
-        }
-
-        if (return_type->isArray()) {
-            s << INDENT << "return __qt_return_value[0 .. " << return_type->arrayElementCount() << "];" << endl;
-        }
-    }
-    writeInjectedCode(s, d_function, CodeSnip::End);
 /* qtd2
     if (needs_return_variable) {
         if (owner != TypeSystem::InvalidOwnership) {
@@ -893,6 +865,53 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         if (owner != TypeSystem::InvalidOwnership && d_function->isConstructor())
             s << INDENT << "this." << function_call_for_ownership(owner) << ";" << endl;
     }
+
+    // return value marschalling
+    if(return_type) {
+        if (!returnImmediately && !d_function->storeResult()) {
+            s << INDENT;
+            QString modified_type = d_function->typeReplaced(0);
+            if (modified_type.isEmpty())
+                s << translateType(d_function->type(), d_function->implementingClass());
+            else
+                s << modified_type.replace('$', '.');
+            s << " __d_return_value = ";
+        }
+
+        if ( ( has_return_type && d_function->argumentReplaced(0).isEmpty() )) // qtd
+            if(return_type->isQObject())
+                s << "qtd_" << return_type->name() << "_from_ptr(__qt_return_value);" << endl;
+
+        if (return_type->isValue() && !return_type->typeEntry()->isStructInD())
+            s << "new " << return_type->name() << "(__qt_return_value, false);" << endl;
+
+        if (return_type->isVariant())
+            s << "new QVariant(__qt_return_value, false);" << endl;
+
+        if (return_type->isNativePointer() && return_type->typeEntry()->isValue())
+            s << "new " << return_type->name() << "(__qt_return_value, true);" << endl;
+
+        if (return_type->isObject()) {
+            if(d_function->storeResult())
+                s << INDENT << QString("__m_%1.nativeId = __qt_return_value;").arg(d_function->name()) << endl
+                  << INDENT << QString("return __m_%1;").arg(d_function->name()) << endl;
+            else
+                s << "qtd_" << return_type->name() << "_from_ptr(__qt_return_value);" << endl;
+            s << endl;
+        }
+
+        if (return_type->isArray()) {
+            s << "__qt_return_value[0 .. " << return_type->arrayElementCount() << "];" << endl;
+        }
+
+        foreach (ReferenceCount referenceCount, referenceCounts) {
+            writeReferenceCount(s, referenceCount, "__d_return_value");
+        }
+
+        if (!returnImmediately && !d_function->storeResult())
+            s << INDENT << "return __d_return_value;" << endl;
+    }
+    writeInjectedCode(s, d_function, CodeSnip::End);
 
     if(return_in_arg) // qtd
         s << INDENT << "return res;" << endl;

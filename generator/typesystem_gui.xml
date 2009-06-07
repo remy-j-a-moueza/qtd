@@ -3459,6 +3459,16 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="add" variable-name="__rcMenus"/>
         </modify-argument>
     </modify-function>
+    <modify-function signature="addMenu(const QString &amp;)">
+        <modify-argument index="0">
+            <reference-count action="add" variable-name="__rcMenus"/>
+        </modify-argument>
+    </modify-function>
+    <modify-function signature="addMenu(const QIcon &amp;, const QString &amp;)">
+        <modify-argument index="0">
+            <reference-count action="add" variable-name="__rcMenus"/>
+        </modify-argument>
+    </modify-function>
     <modify-function signature="insertMenu(QAction*,QMenu*)">
         <modify-argument index="2">
             <reference-count action="add" variable-name="__rcMenus"/>

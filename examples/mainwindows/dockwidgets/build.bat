@@ -1,1 +1,1 @@
-dmd main.d mainwindow.d libqtdcore.lib libqtdgui.lib -I../../../
+dmd main.d mainwindow.d libqtdcore.lib libqtdgui.lib -I../../../ -I../../../qt/d1
