@@ -96,24 +96,35 @@ public class QVariant : QtDObject
     
 // Functions
 
+    private template getMetaId()
+    {
+	const char[] getMetaId = "
+	    int i = qtd_MetatypeId(toStringz(name));
+	    if(i <= 0)
+		i = qRegisterMetaType!(T)(name);";
+    }
+	
     static public QVariant fromValue(T)(T obj)
     {
 	QVariant var;
 	static if (is(T == class) || is(T == interface))
 	{
-	    int i = qtd_MetatypeId(toStringz(obj.classinfo.name));
+	    string name = obj.classinfo.name;
+	    mixin(getMetaId!());
 	    var = new QVariant(i, cast(void*)(obj));
 	}
 	else static if (isDynamicArrayType!(T) || isStaticArrayType!(T) )
 	{
-	    int i = qtd_MetatypeId(toStringz(typeid(ElementTypeOfArray!(T)).toString ~ "[]"));
+	    string name = typeid(ElementTypeOfArray!(T)).toString ~ "[]";
+	    mixin(getMetaId!());
 	    auto darray = new DArrayToC;
 	    darray.array = obj.dup;
 	    var = new QVariant(i, cast(void*)(darray));
 	}
 	else
 	{
-	    int i = qtd_MetatypeId(toStringz(typeid(T).toString));
+	    string name = typeid(T).toString;
+	    mixin(getMetaId!());
 	    auto data = new T;
 	    *data = obj;
 	    var = new QVariant(i, cast(void*)(data));
@@ -299,8 +310,80 @@ public class QVariant : QtDObject
         super(__qt_return_value);
     }
 
-    public final bool canConvert(Type type) {
-        return qtd_QVariant_canConvert(nativeId, type);
+    private final bool canConvertImpl(char[] name)
+    {
+	int i = qtd_MetatypeId(toStringz(name));
+	assert(i > 0);
+	return qtd_QVariant_canConvert(nativeId, i);
+    }
+
+    public final bool canConvert(Type)() {
+	static if ( is(Type == QBitArray) )
+	    return canConvertImpl("QBitArray");
+	else static if ( is(Type == bool) )
+	    return canConvertImpl("bool");
+	else static if ( is(Type == QByteArray) )
+	    return canConvertImpl("QByteArray");
+	else static if ( is(Type == QDate) )
+	    return canConvertImpl("QDate");
+	else static if ( is(Type == QDateTime) )
+	    return canConvertImpl("QDateTime");
+	else static if ( is(Type == double) )
+	    return canConvertImpl("double");
+	else static if ( is(Type == int) )
+	    return canConvertImpl("int");
+	else static if ( is(Type == QLine) )
+	    return canConvertImpl("QLine");
+	else static if ( is(Type == QLineF) )
+	    return canConvertImpl("QLineF");
+	else static if ( is(Type == QLocale) )
+	    return canConvertImpl("QLocale");
+	else static if ( is(Type == long) )
+	    return canConvertImpl("long");
+	else static if ( is(Type == QPoint) )
+	    return canConvertImpl("QPoint");
+	else static if ( is(Type == QPointF) )
+	    return canConvertImpl("QPointF");
+	else static if ( is(Type == QRect) )
+	    return canConvertImpl("QRect");
+	else static if ( is(Type == QRectF) )
+	    return canConvertImpl("QRectF");
+	else static if ( is(Type == QRegExp) )
+	    return canConvertImpl("QRegExp");
+	else static if ( is(Type == QSize) )
+	    return canConvertImpl("QSize");
+	else static if ( is(Type == QSizeF) )
+	    return canConvertImpl("QSizeF");
+	else  static if ( is(Type == string) )
+	    return canConvertImpl("QString");
+	else  static if ( is(Type == QTime) )
+	    return canConvertImpl("QTime");
+	else static if ( is(Type == uint) )
+	    return canConvertImpl("unsigned int"); // TODO: 
+	else static if ( is(Type == ulong) )
+	    return canConvertImpl("unsigned long long"); // TODO: 
+	else static if ( is(Type == QUrl) )
+	    return canConvertImpl("QUrl");
+	else
+	{
+	    static if( is( Type == class ) || is( Type == interface ) )
+	    {
+		Object object = cast(Object)qtd_QVariant_data(nativeId);
+		if(object)
+		    return cast(Type)(object) !is null;
+		return false;
+	    }
+	    else static if (isDynamicArrayType!(Type) || isStaticArrayType!(Type) )
+	    {
+		auto array = cast(DArrayToC*)qtd_QVariant_data(nativeId);
+		return cast(Type)(array.array) !is null;
+	    }
+	    else
+	    {
+		int i = qtd_MetatypeId(toStringz(typeid(Type).toString));
+		return qtd_QVariant_canConvert(nativeId, i);
+	    }
+	}
     }
 
     public final Type value(Type)() {
