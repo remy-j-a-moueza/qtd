@@ -167,7 +167,7 @@ macro(build_example name)
 	      set(qtd_libs ${${package}_lib_param} ${qtd_libs})
 	endif(NOT is_founded)	
     endforeach(package ${PACKAGES})
-    add_d_program(${name} ${SOURCES} ${res_sources} INCLUDES ${QTD_IMPORT_PATH} ${CMAKE_CURRENT_BINARY_DIR}
+    add_d_program(${name} ${SOURCES} ${res_sources} DEPENDS ${res_sources} INCLUDES ${QTD_IMPORT_PATH} ${CMAKE_CURRENT_BINARY_DIR}
 	LIB_PATHS ${QTD_LIBRARIES_PATH} ${CMAKE_SOURCE_DIR}/lib LIBS ${qtd_libs})
     ## TODO: Enable on windows too.
     if(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX) ##
