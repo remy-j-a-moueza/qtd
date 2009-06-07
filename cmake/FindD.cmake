@@ -72,15 +72,18 @@ endif(NOT ONE_BUILD_COMMAND)
 ## Specifics flags for build configurations.
 ## TODO: Add another targets.
 set(D_RELEASE_FLAGS -O -release)
+set(D_DEBUG_FLAGS -g )
 if(D_IS_LLVM)
     set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -enable-inlining)
+    set(D_DEBUG_FLAGS ${D_DEBUG_FLAGS} -d-debug)
 else(D_IS_LLVM)
     set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -inline)
+    set(D_DEBUG_FLAGS ${D_DEBUG_FLAGS} -debug)
 endif(D_IS_LLVM)
 if(CMAKE_HOST_WIN32)
     set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -L/subsystem:windows)
 endif(CMAKE_HOST_WIN32)   
-set(D_DEBUG_FLAGS -g -gc -debug)
+
 
 ## Settings.
 if(CMAKE_HOST_WIN32)
