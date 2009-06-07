@@ -9,11 +9,11 @@ FIND_PACKAGE(Qt4 REQUIRED)
 include_directories(${QT_INCLUDES} include ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 ## Options.
-option(BUILD_EXAMPLES "Build examples" "ON")
-option(BUILD_SHARED_LIBRARY "Build shared library (very experemental and only for ldc)" "OFF")
+option(BUILD_EXAMPLES "Build examples" "OFF")
+option(BUILD_SHARED_LIBRARIES "Build shared library (very experemental and only for ldc)" "OFF")
 option(BUILD_TOOLS "Build tools" "ON")
 #option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
-set(GENERATE_DI_FILES OFF) ## Very experimental option. Temporary disabled.
+set(GENERATE_DI_FILES OFF) ## Very experemental option. Temporary disabled.
 
 set(QTD_VERSION_STR ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
 math(EXPR QTD_VERSION "(${QT_VERSION_MAJOR} << 16) + (${QT_VERSION_MINOR} << 8) + ${QT_VERSION_PATCH}")
@@ -286,13 +286,13 @@ foreach(package_big ${all_packages})
 
 	## Link D library.
 	set(lib_name qtd${package})
-	if(BUILD_SHARED_LIBRARY)
+	if(BUILD_SHARED_LIBRARIES)
 	    set(lib lib/${CMAKE_SHARED_LIBRARY_PREFIX}${lib_name}${CMAKE_SHARED_LIBRARY_SUFFIX})
 	    set(build_type SHARED)
-	else(BUILD_SHARED_LIBRARY)
+	else(BUILD_SHARED_LIBRARIES)
 	    set(lib lib/${D_LIB_PREFIX}${lib_name}${D_LIB_SUFFIX})
 	    set(build_type STATIC)
-	endif(BUILD_SHARED_LIBRARY)
+	endif(BUILD_SHARED_LIBRARIES)
 
 	foreach(req ${required})
 		set(is_found)
@@ -317,7 +317,7 @@ foreach(package_big ${all_packages})
 	set(link_cpp ${link_cpp} ${QT_QT${package_upper}_LIBRARY})
 	target_link_libraries(cpp_${package} ${link_cpp} )	
 	if(CMAKE_HOST_WIN32 AND D_IS_MARS) ## TODO: Replace by SEPAREATE_CPP_PART
-	    set(cpp_lib ${CMAKE_BINARY_DIR}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}cpp_${package}${CMAKE_SHARED_LIBRARY_SUFFIX})
+	    set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.dll)
 	    set(cpp_lib_native ${cpp_lib})
 	    make_native_path(cpp_lib_native)
 	    set(d_implib ${CMAKE_BINARY_DIR}/CMakeFiles/${package}.dir/cpp_${package}.lib)
