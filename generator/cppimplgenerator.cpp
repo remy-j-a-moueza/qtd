@@ -1375,7 +1375,10 @@ void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaCl
     AbstractMetaFunctionList signal_funcs = signalFunctions(java_class);
 
     if (cpp_shared)
-        s << "EmitCallback emit_callbacks_" << java_class->name() << "[" << signal_funcs.size() << "];" << endl;
+	if(signal_funcs.size() > 0)
+	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[" << signal_funcs.size() << "];" << endl;
+	else
+	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[1];" << endl; // Hack for msvc.
     else {
         // D-side signal callbacks
         for(int i = 0; i < signal_funcs.size(); i++) {
@@ -1383,7 +1386,10 @@ void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaCl
             writeSignalHandler(s, java_class, signal);
         }
 
-        s << "EmitCallback emit_callbacks_" << java_class->name() << "[" << signal_funcs.size() << "] = {" << endl;
+	if(signal_funcs.size() > 0)
+	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[" << signal_funcs.size() << "] = {" << endl;
+	else
+	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[1] = {" << endl; // Hack for msvc.
         for(int i = 0; i < signal_funcs.size(); i++) {
             AbstractMetaFunction *signal = signal_funcs.at(i);
             s << endl;

@@ -2,6 +2,13 @@ PROJECT(generator CXX C)
 cmake_minimum_required(VERSION 2.6)
 FIND_PACKAGE(Qt4 REQUIRED)
 
+## Force Release settings
+STRING(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
+set(CMAKE_CXX_FLAGS_${build_type_upper} ${CMAKE_CXX_FLAGS_RELEASE}) 
+get_property(dir_prop DIRECTORY 
+	    PROPERTY COMPILE_DEFINITIONS_RELEASE)
+set_property(DIRECTORY PROPERTY COMPILE_DEFINITIONS_${build_type_upper} ${dir_prop})
+
 ## Sources
 set(srcs
     classlistgenerator.cpp
@@ -57,73 +64,73 @@ set(srcs
 )
 ## Moc headers
 set(moc_hdrs
-    classlistgenerator.h
+    #classlistgenerator.h
     cppgenerator.h
     cppheadergenerator.h
     cppimplgenerator.h
-    docparser.h
+    #docparser.h
     generatorsetd.h
     dgenerator.h
     jumptable.h
-    metainfogenerator.h
-    metajavabuilder.h
-    qdocgenerator.h
-    uiconverter.h
+    #metainfogenerator.h
+    #metajavabuilder.h
+    #qdocgenerator.h
+    #uiconverter.h
     containergenerator.h
     generator.h
-    main.h
-    reporthandler.h
-    typeparser.h
-    typesystem.h
-    asttoxml.h
+    #main.h
+    #reporthandler.h
+    #typeparser.h
+    #typesystem.h
+    #asttoxml.h
     fileout.h
     generatorset.h
-    metajava.h
-    customtypes.h
-    abstractmetabuilder.h
-    abstractmetalang.h
+    #metajava.h
+    #customtypes.h
+    #abstractmetabuilder.h
+    #abstractmetalang.h
     prigenerator.h
     
     ## rxx
-    parser/ast.h
-    parser/lexer.h
-    parser/list.h
-    parser/parser.h
-    parser/rxx_allocator.h
-    parser/rpp-allocator.h
-    parser/smallobject.h
-    parser/tokens.h
-    parser/symbol.h
-    parser/control.h
-    parser/visitor.h
-    parser/default_visitor.h
-    parser/dumptree.h
-    parser/binder.h
-    parser/codemodel.h
-    parser/codemodel_pointer.h
-    parser/codemodel_fwd.h
-    parser/type_compiler.h
-    parser/name_compiler.h
-    parser/declarator_compiler.h
-    parser/class_compiler.h
-    parser/codemodel_finder.h
-    parser/compiler_utils.h
+    #parser/ast.h
+    #parser/lexer.h
+    #parser/list.h
+    #parser/parser.h
+    #parser/rxx_allocator.h
+    #parser/rpp-allocator.h
+    #parser/smallobject.h
+    #parser/tokens.h
+    #parser/symbol.h
+    #parser/control.h
+    #parser/visitor.h
+    #parser/default_visitor.h
+    #parser/dumptree.h
+    #parser/binder.h
+    #parser/codemodel.h
+    #parser/codemodel_pointer.h
+    #parser/codemodel_fwd.h
+    #parser/type_compiler.h
+    #parser/name_compiler.h
+    #parser/declarator_compiler.h
+    #parser/class_compiler.h
+    #parser/codemodel_finder.h
+    #parser/compiler_utils.h
     
     # rpp
-    parser/rpp/pp-cctype.h
-    parser/rpp/pp-engine-bits.h
-    parser/rpp/pp-engine.h
-    parser/rpp/pp-environment.h
-    parser/rpp/pp-fwd.h
-    parser/rpp/pp-internal.h
-    parser/rpp/pp-iterator.h
-    parser/rpp/pp-macro-expander.h
-    parser/rpp/pp-macro.h
-    parser/rpp/pp-scanner.h
-    parser/rpp/pp-string.h
-    parser/rpp/pp-symbol.h
-    parser/rpp/pp.h
-    parser/rpp/preprocessor.h
+    #parser/rpp/pp-cctype.h
+    #parser/rpp/pp-engine-bits.h
+    #parser/rpp/pp-engine.h
+    #parser/rpp/pp-environment.h
+    #parser/rpp/pp-fwd.h
+    #parser/rpp/pp-internal.h
+    #parser/rpp/pp-iterator.h
+    #parser/rpp/pp-macro-expander.h
+    #parser/rpp/pp-macro.h
+    #parser/rpp/pp-scanner.h
+    #parser/rpp/pp-string.h
+    #parser/rpp/pp-symbol.h
+    #parser/rpp/pp.h
+    #parser/rpp/preprocessor.h
     
 )
 
@@ -136,6 +143,10 @@ set(res_files
 #        QMAKE_CXXFLAGS += -wd4996
 #        QMAKE_CFLAGS += -wd4996
 #}
+
+#if(MSVC)
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500 /Zc:wchar_t-")
+#endif(MSVC)
 
 #win32-msvc.net {
 #        QMAKE_CXXFLAGS += /Zm500
@@ -159,6 +170,7 @@ find_package (Qt4 REQUIRED)
 set (QT_USE_QTMAIN true)
 set (QT_USE_QTGUI false)
 set (QT_USE_QTXML true)
+
 include(${QT_USE_FILE} ${CMAKE_CURRENT_SOURCE_DIR}) 
 
 set(inc_paths
@@ -182,6 +194,18 @@ set (all_srcs
 include_directories(${inc_paths})
 add_executable(generator ${all_srcs} )
 target_link_libraries(generator ${libs})
+
+## TODO: Precompilated header work well, but I don`t known license of PCHSupport_26.cmake.
+## downloaded from http://www.vtk.org/Bug/view.php?id=1260. 
+#OPTION(USEPCH "Build the project with precompiled-headers" ON)
+#include(../cmake/PCHSupport_26.cmake)
+#	
+#IF(NOT USEPCH)
+#    MESSAGE(STATUS "NOT using precompiled-header")
+#ELSE(NOT USEPCH)
+#    MESSAGE(STATUS "Using precompiled-header")
+#    add_precompiled_header(generator ${CMAKE_CURRENT_SOURCE_DIR}/generator_pch.h)
+#ENDIF(NOT USEPCH)
 
 macro(add_dgen_target package)
     string(TOLOWER ${package} package)
