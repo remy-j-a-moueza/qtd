@@ -704,7 +704,7 @@ private:
 	{
 		if (QAction action = cast(QAction) signalSender()) {
 			QVariant v = action.data();
-			if (v.canConvert(QVariant.Type.Int)) {
+			if (v.canConvert!(int)) {
 				int offset = cast(int) v;
 				BrowserMainWindow[] windows = BrowserApplication.instance().mainWindows();
 				windows[offset].activateWindow();
