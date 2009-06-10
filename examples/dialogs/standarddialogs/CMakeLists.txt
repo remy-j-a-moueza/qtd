@@ -1,0 +1,1 @@
+build_example(standarddialogs main.d dialog.d)
