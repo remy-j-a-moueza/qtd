@@ -1,2 +1,3 @@
 add_subdirectory(trivialwizard)
 add_subdirectory(standarddialogs)
+add_subdirectory(classwizard)
