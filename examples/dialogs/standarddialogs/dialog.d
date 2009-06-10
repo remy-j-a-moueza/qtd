@@ -209,7 +209,7 @@ private:
 		bool ok;
 		int i = QInputDialog.getInt(this, tr("QInputgetInteger()"), tr("Percentage:"), 25, 0, 100, 1, ok);
 		if (ok)
-			integerLabel.setText(Format(tr("%"), i));
+			integerLabel.setText(Format("{}", i));
 	}
 
 	void setDouble()
