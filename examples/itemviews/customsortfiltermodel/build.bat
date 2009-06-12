@@ -1,0 +1,1 @@
+dmd main.d window.d mysortfilterproxymodel.d libqtdcore.lib libqtdgui.lib -I../../../
