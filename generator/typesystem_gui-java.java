@@ -588,37 +588,18 @@ class QAccessibleInterface___ extends QAccessibleInterface {
 }// class
 
 class QDesktopServices___ extends QDesktopServices {
-/*
-    private static java.util.Hashtable<String, InternalUrlHandler> __rcUrlHandlers = new java.util.Hashtable<String, InternalUrlHandler>();
 
-    public static interface UrlHandler {
-        public void handleUrl(qt.core.QUrl url);
-    }
+    private static UrlHandler[string] __rcUrlHandlers;
+    public static void setUrlHandler(string scheme, void delegate(QUrl) dg) {
+        UrlHandler receiver = dg !is null ? new UrlHandler(dg) : null;
 
-    private static class InternalUrlHandler extends qt.core.QObject {
-
-        private UrlHandler urlHandler;
-
-        private InternalUrlHandler(UrlHandler urlHandler) {
-            this.urlHandler = urlHandler;
-        }
-
-        private void handleUrl(qt.core.QUrl url) {
-            urlHandler.handleUrl(url);
-        }
-
-    }
-
-    public static void setUrlHandler(String scheme, UrlHandler urlHandler) {
-        InternalUrlHandler receiver = urlHandler != null ? new InternalUrlHandler(urlHandler) : null;
-
-        if (receiver == null)
+        if (receiver is null)
             __rcUrlHandlers.remove(scheme);
         else
-            __rcUrlHandlers.put(scheme, receiver);
-        setUrlHandler(scheme, receiver, QNativePointer.createCharPointer("handleUrl"));
+            __rcUrlHandlers[scheme] = receiver;
+    
+        setUrlHandler(scheme, receiver, "handleUrl");
     }
-*/
 }// class
 
 class QWizardPage___ extends QWizardPage {

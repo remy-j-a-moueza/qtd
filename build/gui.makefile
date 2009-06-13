@@ -362,4 +362,5 @@ QShortcutEvent \
 QShortcut \
 QSizeGrip \
 QSortFilterProxyModel \
-QSound
+QSound \
+UrlHandler

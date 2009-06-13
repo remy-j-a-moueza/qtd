@@ -2844,6 +2844,9 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
   </object-type>
   <object-type name="QDateEdit"/>
   <object-type name="QDesktopServices">
+          <extra-includes>
+            <include file-name="qt.gui.UrlHandler" location="java"/>
+        </extra-includes>
     <modify-function signature="setUrlHandler(const QString &amp;, QObject *, const char *)" access="private">
         <modify-argument index="2">
             <reference-count action="ignore"/> <!-- Handled in injected code -->
