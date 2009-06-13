@@ -27,7 +27,7 @@ include build/$(SYSTEM).makefile
 ## Main settings.
 ## D compiler.
 ifndef $(DC)
-DC = ldmd
+DC = dmd
 endif
 ## C++ compiler.
 ifndef $(CC)

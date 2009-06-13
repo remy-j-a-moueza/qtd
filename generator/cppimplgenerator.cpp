@@ -747,8 +747,7 @@ void CppImplGenerator::writeVirtualDispatchFunction(QTextStream &s, const Abstra
                 s << "typedef " << return_type << " " << "(*pf" << f_name << ")";
                 writeVirtualDispatchArguments(s, function, false);
                 s << ";" << endl
-                  << "pf" << function->marshalledName() << "_dispatch "
-                  << function->marshalledName() << "_dispatch;";
+                  << "pf" << f_name << " " << f_name << ";";
             }
 
             s << endl;

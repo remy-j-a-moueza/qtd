@@ -207,7 +207,7 @@ AbstractMetaFunctionList signalFunctions(const AbstractMetaClass *cls)
             if (!f->isSignal()
                 || cls != f->implementingClass()
                 || notWrappedYet(f)
-                || f->isPrivate()
+// qtd2                || f->isPrivate() // we want private signals to be accessible as well
                 || f->isModifiedRemoved(TypeSystem::TargetLangCode))
                 continue;
 

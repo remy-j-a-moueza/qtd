@@ -1077,6 +1077,21 @@
   <object-type name="QDirIterator"/>
   <object-type name="QAbstractFileEngineIterator"/>
   <object-type name="QAbstractItemModel">
+    <modify-function signature="rowsAboutToBeInserted(QModelIndex,int,int)" private-signal="yes"/>
+    <modify-function signature="rowsInserted(QModelIndex,int,int)" private-signal="yes"/>
+
+    <modify-function signature="rowsAboutToBeRemoved(QModelIndex,int,int)" private-signal="yes"/>
+    <modify-function signature="rowsRemoved(QModelIndex,int,int)" private-signal="yes"/>
+
+    <modify-function signature="columnsAboutToBeInserted(QModelIndex,int,int)" private-signal="yes"/>
+    <modify-function signature="columnsInserted(QModelIndex,int,int)" private-signal="yes"/>
+
+    <modify-function signature="columnsAboutToBeRemoved(QModelIndex,int,int)" private-signal="yes"/>
+    <modify-function signature="columnsRemoved(QModelIndex,int,int)" private-signal="yes"/>
+
+    <modify-function signature="modelAboutToBeReset()" private-signal="yes"/>
+    <modify-function signature="modelReset()" private-signal="yes"/>
+    
         <modify-function signature="parent()const" remove="java"/>
         <extra-includes>
             <include file-name="QStringList" location="global"/>
@@ -1116,12 +1131,12 @@
         return qtjambi_from_qvariant(__jni_env, __qt_this-&gt;data(index, role));
     }
         </inject-code>
--->
+
         <modify-function signature="mimeData(QList&lt;QModelIndex&gt;)const">
             <modify-argument index="0">
                 <define-ownership class="shell" owner="c++"/>
             </modify-argument>
-        </modify-function>
+        </modify-function>-->
     </object-type>
 
   <object-type name="QAbstractListModel">
