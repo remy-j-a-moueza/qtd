@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>HistoryDialog</class>
- <widget class="QDialog" name="HistoryDialog" >
+ <class>BookmarksDialog</class>
+ <widget class="QDialog" name="BookmarksDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>History</string>
+   <string>Bookmarks</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" >
    <item row="0" column="0" >
@@ -42,9 +42,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="removeAllButton" >
+      <widget class="QPushButton" name="addFolderButton" >
        <property name="text" >
-        <string>Remove &amp;All</string>
+        <string>Add Folder</string>
        </property>
       </widget>
      </item>
@@ -76,12 +76,12 @@
   <customwidget>
    <class>SearchLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>searchlineedit.h</header>
+   <header>searchlineedit</header>
   </customwidget>
   <customwidget>
    <class>EditTreeView</class>
    <extends>QTreeView</extends>
-   <header>edittreeview.h</header>
+   <header>edittreeview</header>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -89,7 +89,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>HistoryDialog</receiver>
+   <receiver>BookmarksDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >

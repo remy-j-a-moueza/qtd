@@ -1,18 +1,18 @@
 <ui version="4.0" >
- <class>BookmarksDialog</class>
- <widget class="QDialog" name="BookmarksDialog" >
+ <class>CookiesDialog</class>
+ <widget class="QDialog" name="CookiesDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>758</width>
-    <height>450</height>
+    <width>550</width>
+    <height>370</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Bookmarks</string>
+   <string>Cookies</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" >
+  <layout class="QGridLayout" >
    <item row="0" column="0" >
     <spacer>
      <property name="orientation" >
@@ -30,7 +30,7 @@
     <widget class="SearchLineEdit" name="search" />
    </item>
    <item row="1" column="0" colspan="2" >
-    <widget class="EditTreeView" name="tree" />
+    <widget class="EditTableView" name="cookiesTable" />
    </item>
    <item row="2" column="0" colspan="2" >
     <layout class="QHBoxLayout" >
@@ -42,9 +42,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="addFolderButton" >
+      <widget class="QPushButton" name="removeAllButton" >
        <property name="text" >
-        <string>Add Folder</string>
+        <string>Remove &amp;All Cookies</string>
        </property>
       </widget>
      </item>
@@ -76,12 +76,12 @@
   <customwidget>
    <class>SearchLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>searchlineedit.h</header>
+   <header>searchlineedit</header>
   </customwidget>
   <customwidget>
-   <class>EditTreeView</class>
-   <extends>QTreeView</extends>
-   <header>edittreeview.h</header>
+   <class>EditTableView</class>
+   <extends>QTableView</extends>
+   <header>edittableview</header>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -89,7 +89,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>BookmarksDialog</receiver>
+   <receiver>CookiesDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >

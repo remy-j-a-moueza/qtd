@@ -126,7 +126,7 @@
   <customwidget>
    <class>SqueezeLabel</class>
    <extends>QWidget</extends>
-   <header>squeezelabel.h</header>
+   <header>squeezelabel</header>
   </customwidget>
  </customwidgets>
  <resources/>

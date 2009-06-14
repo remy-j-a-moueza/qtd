@@ -38,20 +38,16 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-
 module networkaccessmanager;
 
 
-import qt.network.QNetworkAccessManager;
-
 import qt.core.QSettings;
-
 import qt.gui.QDesktopServices;
 import qt.gui.QDialog;
 import qt.gui.QMessageBox;
 import qt.gui.QStyle;
 import qt.gui.QTextDocument;
-
+import qt.network.QNetworkAccessManager;
 import qt.network.QAuthenticator;
 import qt.network.QNetworkDiskCache;
 import qt.network.QNetworkProxy;
@@ -61,7 +57,7 @@ import qt.network.QSslError;
 import browserapplication;
 import browsermainwindow;
 import ui_passworddialog;
-import ui_proxy;
+import ui_proxydialog;
 
 
 class NetworkAccessManager : public QNetworkAccessManager

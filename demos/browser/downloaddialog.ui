@@ -75,7 +75,7 @@
   <customwidget>
    <class>EditTableView</class>
    <extends>QTableView</extends>
-   <header>edittableview.h</header>
+   <header>edittableview</header>
   </customwidget>
  </customwidgets>
  <resources/>

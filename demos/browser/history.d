@@ -1372,7 +1372,7 @@ protected:
 }
 
 
-import ui_history;
+import ui_historydialog;
 
 class HistoryDialog : public QDialog //, public Ui_HistoryDialog
 {

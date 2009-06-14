@@ -2,6 +2,5 @@ This is a very coarse port of ./demos/browser from the QT 4.5.1 linux sources.
 
 Todo:
 - implement functionality from QList, QString and QStringList
-- resolve multiple inheritance, commented for now
 - fix segfaults due to not initialized variables
 - ...

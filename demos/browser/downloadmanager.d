@@ -57,11 +57,10 @@ import qt.webkit.QWebSettings;
 
 import tango.text.convert.Format;
 
-//import math;
 import autosaver;
 import browserapplication;
 import networkaccessmanager;
-import ui_downloads;
+import ui_downloaddialog;
 import ui_downloaditem;
 
 

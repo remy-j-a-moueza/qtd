@@ -536,8 +536,8 @@ private:
 }
 
 
-import ui_cookies;
-import ui_cookiesexceptions;
+import ui_cookiesdialog;
+import ui_cookiesexceptionsdialog;
 
 
 class CookiesDialog : public QDialog //, public Ui_CookiesDialog

@@ -918,7 +918,7 @@ private:
 	AddBookmarkProxyModel m_proxyModel;
 }
 
-import ui_bookmarks;
+import ui_bookmarksdialog;
 
 //class TreeProxyModel;
 class BookmarksDialog : public QDialog //, public Ui_BookmarksDialog

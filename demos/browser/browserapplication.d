@@ -130,11 +130,11 @@ public:
 		version(QT_NO_OPENSSL) {} else {
 			if (!QSslSocket.supportsSsl()) {
 				QMessageBox.information(null, "Demo Browser",
-				"This system does not support OpenSSL. SSL websites will not be available.");
+					"This system does not support OpenSSL. SSL websites will not be available.");
 			}
 		}
 
-		QDesktopServices.setUrlHandler("http", this, "openUrl");
+		QDesktopServices.setUrlHandler("http", &this.openUrl);
 		string localSysName = QLocale.system().name();
 
 		installTranslator("qt_" ~ localSysName);
@@ -169,26 +169,26 @@ public:
 
 	void loadSettings()
 	{
-		QSettings settings;
+		QSettings settings = new QSettings;
 		settings.beginGroup("websettings");
 
 		QWebSettings defaultSettings = QWebSettings.globalSettings();
 		string standardFontFamily = defaultSettings.fontFamily(QWebSettings.StandardFont);
 		int standardFontSize = defaultSettings.fontSize(QWebSettings.DefaultFontSize);
 		QFont standardFont = new QFont(standardFontFamily, standardFontSize);
-		standardFont = qVariantValue!(QFont)(settings.value("standardFont", standardFont));
+		standardFont = QVariant.fromValue!(QFont)(settings.value("standardFont", standardFont));
 		defaultSettings.setFontFamily(QWebSettings.StandardFont, standardFont.family());
 		defaultSettings.setFontSize(QWebSettings.DefaultFontSize, standardFont.pointSize());
 
 		string fixedFontFamily = defaultSettings.fontFamily(QWebSettings.FixedFont);
 		int fixedFontSize = defaultSettings.fontSize(QWebSettings.DefaultFixedFontSize);
-		QFont fixedFont = QFont(fixedFontFamily, fixedFontSize);
-		fixedFont = qVariantValue!(QFont)(settings.value("fixedFont", fixedFont));
+		QFont fixedFont = new QFont(fixedFontFamily, fixedFontSize);
+		fixedFont = QVariant.fromValue!(QFont)(settings.value("fixedFont", fixedFont));
 		defaultSettings.setFontFamily(QWebSettings.FixedFont, fixedFont.family());
 		defaultSettings.setFontSize(QWebSettings.DefaultFixedFontSize, fixedFont.pointSize());
 
-		defaultSettings.setAttribute(QWebSettings.JavascriptEnabled, settings.value("enableJavascript", true).toBool());
-		defaultSettings.setAttribute(QWebSettings.PluginsEnabled, settings.value("enablePlugins", true).toBool());
+		defaultSettings.setAttribute(QWebSettings.JavascriptEnabled, settings.value("enableJavascript", new QVariant(true)).toBool());
+		defaultSettings.setAttribute(QWebSettings.PluginsEnabled, settings.value("enablePlugins", new QVariant(true)).toBool());
 
 		QUrl url = settings.value("userStyleSheet").toUrl();
 		defaultSettings.setUserStyleSheetUrl(url);
@@ -198,7 +198,7 @@ public:
 
 	bool isTheOnlyBrowser()
 	{
-		return (m_localServer != null);
+		return (m_localServer !is null);
 	}
 
 	BrowserMainWindow mainWindow()
@@ -236,15 +236,15 @@ public:
 
 		clean();
 
-		QSettings settings;
+		QSettings settings = new QSettings;
 		settings.beginGroup("sessions");
 
-		QByteArray data;
+		QByteArray data = new QByteArray;
 		auto buffer = new QBuffer(&data);
 		auto stream = new QDataStream(&buffer);
 		buffer.open(QIODevice.ReadWrite);
 
-		stream << m_mainWindows.length;
+		stream.writeLong(m_mainWindows.length);
 		for (int i = 0; i < m_mainWindows.length; ++i)
 			stream << m_mainWindows[i].saveState();
 		settings.setValue("lastSession", data);
@@ -347,7 +347,7 @@ public:
 			stream >> windowState;
 			windows ~= windowState;
 		}
-		for (int i = 0; i < windows.count(); ++i) {
+		for (int i = 0; i < windows.length; ++i) {
 			BrowserMainWindow newWindow = 0;
 			if (m_mainWindows.length == 1 && mainWindow().tabWidget().count() == 1
 				&& mainWindow().currentTab().getUrl() is null) {
@@ -413,7 +413,7 @@ private:
 		// newMainWindow() needs to be called in main() for this to happen
 		if (m_mainWindows.length > 0) {
 			string[] args = QCoreApplication.arguments();
-			if (args.count() > 1)
+			if (args.length > 1)
 				mainWindow().loadPage(args.last());
 			else
 				mainWindow().slotHome();
@@ -421,7 +421,7 @@ private:
 		BrowserApplication.historyManager();
 	}
 
-	void openUrl( QUrl url)
+	void openUrl(QUrl url)
 	{
 		mainWindow().loadPage(url.toString());
 	}
@@ -432,13 +432,13 @@ private:
 		if (!socket)
 			return;
 		socket.waitForReadyRead(1000);
-		QTextStream stream(socket);
+		auto stream = new QTextStream(socket);
 		string url;
 		stream >> url;
-		if (!url.isEmpty()) {
+		if (url.length) {
 			QSettings settings;
 			settings.beginGroup("general");
-			int openLinksIn = settings.value("openLinksIn", 0).toInt();
+			int openLinksIn = settings.value("openLinksIn", new QVariant(0)).toInt();
 			settings.endGroup();
 			if (openLinksIn == 1)
 				newMainWindow();
@@ -457,7 +457,7 @@ private:
 	{
 		// cleanup any deleted main windows first
 		for (int i = m_mainWindows.length - 1; i >= 0; --i)
-			if (m_mainWindows[i].isNull())
+			if (m_mainWindows[i] is null)
 				m_mainWindows.removeAt(i);
 	}
 

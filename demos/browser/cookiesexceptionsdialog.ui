@@ -154,12 +154,12 @@
   <customwidget>
    <class>SearchLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>searchlineedit.h</header>
+   <header>searchlineedit</header>
   </customwidget>
   <customwidget>
    <class>EditTableView</class>
    <extends>QTableView</extends>
-   <header>edittableview.h</header>
+   <header>edittableview</header>
   </customwidget>
  </customwidgets>
  <resources/>

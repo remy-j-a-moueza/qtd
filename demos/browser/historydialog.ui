@@ -1,18 +1,18 @@
 <ui version="4.0" >
- <class>CookiesDialog</class>
- <widget class="QDialog" name="CookiesDialog" >
+ <class>HistoryDialog</class>
+ <widget class="QDialog" name="HistoryDialog" >
   <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
-    <height>370</height>
+    <width>758</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Cookies</string>
+   <string>History</string>
   </property>
-  <layout class="QGridLayout" >
+  <layout class="QGridLayout" name="gridLayout" >
    <item row="0" column="0" >
     <spacer>
      <property name="orientation" >
@@ -30,7 +30,7 @@
     <widget class="SearchLineEdit" name="search" />
    </item>
    <item row="1" column="0" colspan="2" >
-    <widget class="EditTableView" name="cookiesTable" />
+    <widget class="EditTreeView" name="tree" />
    </item>
    <item row="2" column="0" colspan="2" >
     <layout class="QHBoxLayout" >
@@ -44,7 +44,7 @@
      <item>
       <widget class="QPushButton" name="removeAllButton" >
        <property name="text" >
-        <string>Remove &amp;All Cookies</string>
+        <string>Remove &amp;All</string>
        </property>
       </widget>
      </item>
@@ -76,12 +76,12 @@
   <customwidget>
    <class>SearchLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>searchlineedit.h</header>
+   <header>searchlineedit</header>
   </customwidget>
   <customwidget>
-   <class>EditTableView</class>
-   <extends>QTableView</extends>
-   <header>edittableview.h</header>
+   <class>EditTreeView</class>
+   <extends>QTreeView</extends>
+   <header>edittreeview</header>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -89,7 +89,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CookiesDialog</receiver>
+   <receiver>HistoryDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
