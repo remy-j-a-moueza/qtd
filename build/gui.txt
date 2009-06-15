@@ -346,4 +346,5 @@ set(classes
     QSizeGrip
     QSortFilterProxyModel
     QSound
+    UrlHandler
 )
