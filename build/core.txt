@@ -55,5 +55,6 @@ set (classes
     QProcess
     QBuffer
     QLibraryInfo
+    QXmlStreamEntityResolver
     )
 	

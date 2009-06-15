@@ -2474,7 +2474,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         writeQObjectFunctions(s, d_class);
 
 
-    if (d_class->needsConversionFunc)
+//    if (d_class->needsConversionFunc)
         writeConversionFunction(s, d_class);
 
     if (d_class->hasConstructors())
@@ -2590,6 +2590,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass *d_class)
 {
     const ComplexTypeEntry *ctype = d_class->typeEntry();
+    if(!ctype->isQObject() && !ctype->isObject())
+        return;
     QString class_name = ctype->name();
     QString return_type_name = class_name;
     if(ctype->designatedInterface())
@@ -2614,12 +2616,12 @@ void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass
     } else if (ctype->isObject()) {
         QString type_name = class_name;
         if(ctype->isAbstract())
-            type_name = type_name + "_ConcreteWrapper";
+            type_name = ctype->targetLangName() + "_ConcreteWrapper";
 
         // if class has virtual functions then it has classname_entity function so
         // we can look for D Object pointer. otherwise create new wrapper
         if (d_class->hasVirtualFunctions()) {
-            s << INDENT << "void* d_obj = __" << ctype->name() << "_entity(__qt_return_value);" << endl
+            s << INDENT << "void* d_obj = __" << ctype->targetLangName() << "_entity(__qt_return_value);" << endl
               << INDENT << "if (d_obj !is null) {" << endl
               << INDENT << "    auto d_obj_ref = cast (Object) d_obj;" << endl
               << INDENT << "    return cast(" << return_type_name << ") d_obj_ref;" << endl
@@ -2627,7 +2629,7 @@ void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass
               << INDENT << "    auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
               << INDENT << "    return_value.__no_real_delete = true;" << endl
               << INDENT << "    return return_value;" << endl
-              << INDENT << "}";
+              << INDENT << "}" << endl;
         } else {
             s << INDENT << "auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
               << INDENT << "return_value.__no_real_delete = true;" << endl
@@ -2659,58 +2661,17 @@ void DGenerator::marshallFromCppToD(QTextStream &s, const ComplexTypeEntry* ctyp
 {
     if(ctype->isQObject()) {
         QString type_name = ctype->name();
-
-        if(ctype->isAbstract())
-            type_name = type_name + "_ConcreteWrapper";
-
-        s << INDENT << "if (__qt_return_value is null)" << endl
-                << INDENT << "    return null;" << endl
-                << INDENT << "void* d_obj = __QObject_entity(__qt_return_value);" << endl
-                << INDENT << "if (d_obj is null) {" << endl
-                << INDENT << "    auto new_obj = new " << type_name << "(__qt_return_value, true);" << endl
-                << INDENT << "    new_obj.__no_real_delete = true;" << endl
-                << INDENT << "    return new_obj;" << endl
-                << INDENT << "} else" << endl
-                << INDENT << "    return cast(" << ctype->name() << ") d_obj;" << endl;
-    } else if (ctype->isValue() && !ctype->isStructInD())
+        s << "return qtd_" << type_name << "_from_ptr(__qt_return_value);" << endl;
+    } else if (ctype->isValue() && !ctype->isStructInD()) {
         s << INDENT << "return new " << ctype->name() << "(__qt_return_value, false);" << endl;
-    else if (ctype->isVariant())
+    } else if (ctype->isVariant()) {
         s << INDENT << "return new QVariant(__qt_return_value, false);" << endl;
-    else if (ctype->name() == "QModelIndex" || ctype->isStructInD())
+    } else if (ctype->name() == "QModelIndex" || ctype->isStructInD()) {
         s << INDENT << "return __qt_return_value;" << endl;
-    else if (ctype->isObject()) {
+    } else if (ctype->isObject()) {
         QString type_name = ctype->name();
-
-        if(ctype->isAbstract())
-            type_name = type_name + "_ConcreteWrapper";
-
-        QString return_type_name = ctype->name();
-        if(ctype->designatedInterface())
-            return_type_name = ctype->designatedInterface()->name();
-
-        AbstractMetaClass *d_class = NULL;
-        
-        d_class = ClassFromEntry::get(ctype);
-        
-        // if class has virtual functions then it has classname_entity function so
-        // we can look for D Object pointer. otherwise create new wrapper
-        if (d_class != NULL && d_class->hasVirtualFunctions()) {
-            s << INDENT << "void* d_obj = __" << ctype->name() << "_entity(__qt_return_value);" << endl
-              << INDENT << "if (d_obj !is null) {" << endl
-              << INDENT << "    auto d_obj_ref = cast (Object) d_obj;" << endl
-              << INDENT << "    return cast(" << return_type_name << ") d_obj_ref;" << endl
-              << INDENT << "} else {" << endl
-              << INDENT << "    auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
-              << INDENT << "    return_value.__no_real_delete = true;" << endl
-              << INDENT << "    return return_value;" << endl
-              << INDENT << "}" << endl;
-        } else {
-            s << INDENT << "auto return_value = new " << type_name << "(__qt_return_value, true);" << endl
-              << INDENT << "return_value.__no_real_delete = true;" << endl
-              << INDENT << "return return_value;" << endl;
-        }
+        s << "return qtd_" << type_name << "_from_ptr(__qt_return_value);" << endl;
     }
-
 }
 
 void DGenerator::writeNativeField(QTextStream &s, const AbstractMetaField *field)
@@ -2989,7 +2950,7 @@ void DGenerator::generate()
 
         foreach (AbstractMetaFunction *function, cls->functions())
             function->checkStoreResult();
-
+/* we don't need this anymore
         // generate QObject conversion functions only those that are required
         AbstractMetaFunctionList d_funcs = cls->functionsInTargetLang();
         for (int i=0; i<d_funcs.size(); ++i) {
@@ -3002,7 +2963,7 @@ void DGenerator::generate()
                 if (d_class)
                     d_class->needsConversionFunc = true;
             }
-        }
+        }*/
     }
 
     Generator::generate();

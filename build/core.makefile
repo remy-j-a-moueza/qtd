@@ -74,4 +74,5 @@ core_classes =  \
     QProcess \
     QBuffer \
     QMetaType \
-    QLibraryInfo 
+    QLibraryInfo \
+    QXmlStreamEntityResolver
