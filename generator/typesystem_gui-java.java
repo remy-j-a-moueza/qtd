@@ -1102,16 +1102,16 @@ class QApplication___ extends QApplication {
 
     public QApplication(String args[]) {
         this(argc(args), argv(args));
+    }*/
+
+    public static void setFont(QFont font, string className = null) {
+        setFont_private(font, className !is null ? toStringz(className) : null);
     }
 
-    public static void setFont(QFont font) {
-        setFont(font, null);
+    public static void setPalette(QPalette palette, string className = null) {
+        setPalette_private(palette, className !is null ? toStringz(className) : null);
     }
-
-    public static void setPalette(QPalette palette) {
-        setPalette(palette, null);
-    }
-
+/*
     public static QCursor overrideCursor() {
         QNativePointer np = overrideCursor_private();
         return np == null ? null : QCursor.fromNativePointer(np);

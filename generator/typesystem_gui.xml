@@ -7556,6 +7556,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <modify-argument index="2">
             <remove-default-expression/>
         </modify-argument>
+        <rename to="setFont_private"/>
     </modify-function>
 
     <modify-function signature="palette(const char*)">
@@ -7566,13 +7567,14 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <modify-argument index="2">
             <remove-default-expression/>
         </modify-argument>
+        <rename to="setPalette_private"/>
     </modify-function>
-
+<!--
     <modify-function signature="overrideCursor()">
         <access modifier="private"/>
         <rename to="overrideCursor_private"/>
     </modify-function>
-
+-->
     <modify-function signature="setInputContext(QInputContext*)">
         <modify-argument index="1">
             <define-ownership class="java" owner="c++"/>
