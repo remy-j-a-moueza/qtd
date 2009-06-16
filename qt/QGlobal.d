@@ -398,11 +398,12 @@ void qSwap_helper(T)(ref T value1, ref T value2, T*)
     value1.data_ptr() = value2.data_ptr();
     value2.data_ptr() = t;
 }
+
 void qSwap(T)(ref T value1, ref T value2)
 {
-    const T.DataPtr t = value1.data_ptr();
-    value1.data_ptr() = value2.data_ptr();
-    value2.data_ptr() = t;
+    T t = value1;
+    value1 = value2;
+    value2 = t;
 }
 
 /*
