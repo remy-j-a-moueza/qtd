@@ -1,0 +1,1 @@
+build_example(editabletreemodel main.d mainwindow.d treeitem.d treemodel.d ui_mainwindow.d qrc_editabletreemodel.d)
