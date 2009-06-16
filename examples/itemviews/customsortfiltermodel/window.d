@@ -149,8 +149,8 @@ private:
 		QRegExp.PatternSyntax syntax = cast(QRegExp.PatternSyntax) filterSyntaxComboBox.itemData(
 			filterSyntaxComboBox.currentIndex()).toInt();
 		Qt.CaseSensitivity caseSensitivity =
-		filterCaseSensitivityCheckBox.isChecked() ? Qt.CaseSensitive
-					       : Qt.CaseInsensitive;
+			filterCaseSensitivityCheckBox.isChecked() ? Qt.CaseSensitive
+				: Qt.CaseInsensitive;
 
 		auto regExp = new QRegExp(filterPatternLineEdit.text(), caseSensitivity, syntax);
 		proxyModel.setFilterRegExp(regExp);
