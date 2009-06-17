@@ -601,6 +601,10 @@ public class QVariant : QtDObject
     public final char* typeName() {
         return qtd_QVariant_typeName(nativeId);
     }
+    
+    public final Type type() {
+        return cast(Type)qtd_QVariant_type(nativeId);
+    }
 
     public final int userType() {
         return qtd_QVariant_userType(nativeId);
@@ -708,6 +712,7 @@ private extern(C) ulong  qtd_QVariant_toULongLong_nativepointerbool(void* __this
  bool* ok0);
 private extern(C) void*  qtd_QVariant_toUrl(void* __this_nativeId);
 private extern(C) char*  qtd_QVariant_typeName(void* __this_nativeId);
+private extern(C) int  qtd_QVariant_type(void* __this_nativeId);
 private extern(C) int  qtd_QVariant_userType(void* __this_nativeId);
 private extern(C) void *qtd_QVariant_data(void* __this_nativeId);
 

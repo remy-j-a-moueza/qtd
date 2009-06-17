@@ -926,6 +926,18 @@ extern "C" DLL_PUBLIC char* qtd_QVariant_typeName
     return __java_return_value;
 }
 
+// QVariant::type() const
+extern "C" DLL_PUBLIC int qtd_QVariant_type
+(void* __this_nativeId)
+{
+    QVariant_QtDShell *__qt_this = (QVariant_QtDShell *) __this_nativeId;
+    int  __qt_return_value = __qt_this->type();
+
+    int __java_return_value = __qt_return_value;
+
+    return __java_return_value;
+}
+
 // QVariant::userType() const
 extern "C" DLL_PUBLIC int qtd_QVariant_userType
 (void* __this_nativeId)
