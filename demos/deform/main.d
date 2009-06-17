@@ -38,38 +38,37 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+module main;
 
-import
-    pathdeform,
-    arthurstyle,
-    qt.gui.QApplication;
+
+import qt.gui.QApplication;
+import pathdeform;
+import arthurstyle;
 
 
 int main(string[] args)
 {
-    //Q_INIT_RESOURCE(deform);
+	scope app = new QApplication(args);
 
-    scope app = new QApplication(args);
+	bool smallScreen = false;
+	foreach (arg; args)
+	{
+		if (arg == "-small-screen")
+			smallScreen = true;
+	}
 
-    bool smallScreen = false;
-    foreach (arg; args)
-    {
-        if (arg == "-small-screen")
-            smallScreen = true;
-    }
+	scope deformWidget = new PathDeformWidget(null, smallScreen);
 
-    scope deformWidget = new PathDeformWidget(null, smallScreen);
+	QStyle arthurStyle = new ArthurStyle();
+	deformWidget.setWidgetStyle(arthurStyle);
+	QWidget[] widgets; // = qFindChildren!(QWidget)(deformWidget); //TODO
+	foreach (w; widgets)
+		w.setStyle(arthurStyle);
 
-    QStyle arthurStyle = new ArthurStyle();
-    deformWidget.setWidgetStyle(arthurStyle);
-    auto widgets = deformWidget.findChildren!(QWidget);
-    foreach (w; widgets)
-        w.setStyle(arthurStyle);
+	if (smallScreen)
+		deformWidget.showFullScreen();
+	else
+		deformWidget.show();
 
-    if (smallScreen)
-        deformWidget.showFullScreen();
-    else
-        deformWidget.show();
-
-    return app.exec();
+	return app.exec();
 }

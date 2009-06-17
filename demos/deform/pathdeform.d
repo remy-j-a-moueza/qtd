@@ -38,6 +38,8 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+module pathdeform;
+
 
 import arthurwidgets,
     qt.gui.QPainterPath,
@@ -61,6 +63,7 @@ import arthurwidgets,
     qt.gui.QRadialGradient,
     qt.opengl.QGLFormat,
     tango.math.Math;
+
 
 class PathDeformControls : QWidget
 {
@@ -324,7 +327,7 @@ public:
         {
             m_controls.setStyle(style);
 
-            auto widgets = m_controls.findChildren!(QWidget);
+            QWidget[] widgets; // = qFindChildren!(QWidget)(m_controls); //TODO
             foreach (w; widgets)
                 w.setStyle(style);
         }
@@ -333,7 +336,7 @@ public:
 
 private QRect circle_bounds(QPointF center, qreal radius, qreal compensation)
 {
-    return new QRect(qRound(center.x() - radius - compensation),
+    return QRect(qRound(center.x() - radius - compensation),
                  qRound(center.y() - radius - compensation),
                  qRound((radius + compensation) * 2),
                  qRound((radius + compensation) * 2));
@@ -415,7 +418,7 @@ public:
         f.setStyleHint(QFont.Times);
 
         m_paths = null;
-        m_pathBounds = new QRectF();
+        m_pathBounds = QRectF();
 
         QPointF advance;
 
@@ -481,7 +484,7 @@ public:
 
         if (e.timerId == m_repaintTimer.timerId) {
 
-            if ((new QLineF(QPointF(0,0), m_direction)).length > 1)
+            if ((QLineF(QPointF(0,0), m_direction)).length() > 1)
                 m_direction *= 0.995;
             qreal time = m_repaintTracker.restart();
 
@@ -544,10 +547,10 @@ public:
 
         m_repaintTimer.stop();
         m_offset = QPointF();
-        if ((new QLineF(m_pos, QPointF(e.pos))).length <= m_radius)
+        if ((QLineF(m_pos, QPointF(e.pos))).length <= m_radius)
             m_offset = m_pos - QPointF(e.pos);
 
-        m_mousePress = e.pos;
+        m_mousePress = QPointF(e.pos);
 
         // If we're not running in small screen mode, always assume we're dragging
         m_mouseDrag = !m_smallScreen;
@@ -570,13 +573,13 @@ public:
     {
         auto epos = QPointF(e.pos);
 
-        if (!m_mouseDrag && (new QLineF(m_mousePress, QPointF(e.pos))).length() > 25.0)
+        if (!m_mouseDrag && (QLineF(m_mousePress, QPointF(e.pos))).length() > 25.0)
             m_mouseDrag = true;
 
         if (m_mouseDrag) {
             QRect rectBefore = circle_bounds(m_pos, m_radius, m_fontSize);
             if (e.type() == QEvent.MouseMove) {
-                QLineF line = new QLineF(m_pos, epos + m_offset);
+                QLineF line = QLineF(m_pos, epos + m_offset);
                 line.setLength(line.length() * .1);
                 auto dir = QPointF(line.dx(), line.dy());
                 m_direction = (m_direction + dir) / 2;
