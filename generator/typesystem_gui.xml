@@ -7424,27 +7424,6 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         </modify-argument>
     </modify-function>
 
-    <modify-function signature="drawText(QRect,int,QString,QRect*)">
-        <access modifier="private"/>
-        <modify-argument index="4">
-            <remove-default-expression/>
-        </modify-argument>
-    </modify-function>
-
-    <modify-function signature="drawText(QRectF,int,QString,QRectF*)">
-        <access modifier="private"/>
-        <modify-argument index="4">
-            <remove-default-expression/>
-        </modify-argument>
-    </modify-function>
-
-    <modify-function signature="drawText(int,int,int,int,int,QString,QRect*)">
-        <access modifier="private"/>
-        <modify-argument index="7">
-            <remove-default-expression/>
-        </modify-argument>
-    </modify-function>
-
     <modify-function signature="redirected(const QPaintDevice*,QPoint*)">
         <access modifier="private"/>
         <modify-argument index="2">
