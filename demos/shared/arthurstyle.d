@@ -392,7 +392,7 @@ class ArthurStyle : QWindowsStyle
     override void polish(QWidget widget)
     {
         if (widget.layout() && cast(QGroupBox)(widget)) {
-            if (qFindChildren!(QGroupBox)(widget).length == 0) {
+            if (widget.findChildren!(QGroupBox).length == 0) {
                 widget.layout().setWidgetSpacing(0); // Why setSpacing was renamed to setWidgetSpacing?
                 widget.layout().setMargin(12);
             } else {

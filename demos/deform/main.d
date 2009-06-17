@@ -61,7 +61,7 @@ int main(string[] args)
 
 	QStyle arthurStyle = new ArthurStyle();
 	deformWidget.setWidgetStyle(arthurStyle);
-	QWidget[] widgets; // = qFindChildren!(QWidget)(deformWidget); //TODO
+	QWidget[] widgets = deformWidget.findChildren!(QWidget);
 	foreach (w; widgets)
 		w.setStyle(arthurStyle);
 
