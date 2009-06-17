@@ -428,7 +428,7 @@ public:
 		m_paths = null;
 		m_pathBounds = QRectF();
 
-		QPointF advance(0, 0);
+		QPointF advance;
 		
 		bool do_quick = true;
 		for (int i = 0; i < text.length; ++i) {
@@ -454,7 +454,7 @@ public:
 		}
 
 		for (int i = 0; i < m_paths.length; ++i)
-			m_paths[i] = m_paths[i] * (new QMatrix(1, 0, 0, 1, -m_pathBounds.x(), -m_pathBounds.y());
+			m_paths[i] = m_paths[i] * (new QMatrix(1, 0, 0, 1, -m_pathBounds.x(), -m_pathBounds.y()));
 
 		update();
 	}
