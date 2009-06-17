@@ -38,6 +38,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+module hoverpoints;
 
 version (QT_OPENGL_SUPPORT)
     import qt.opengl.QGLWidget;

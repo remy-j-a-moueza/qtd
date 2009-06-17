@@ -38,21 +38,22 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+module arthurstyle;
 
 
-//import arthurwidgets;
 import
-    qt.gui.QLayout,
-    qt.gui.QWindowsStyle,
-    qt.gui.QPainter,
-    qt.gui.QPainterPath,
-    qt.gui.QPixmapCache,
-    qt.gui.QRadioButton,
-    qt.gui.QPushButton,
-    qt.gui.QGroupBox,
-    qt.gui.QLinearGradient,
-    qt.gui.QstyleOptionFrameV2,
-    qt.gui.QStyleOption;
+	qt.gui.QLayout,
+	qt.gui.QWindowsStyle,
+	qt.gui.QPainter,
+	qt.gui.QPainterPath,
+	qt.gui.QPixmapCache,
+	qt.gui.QRadioButton,
+	qt.gui.QPushButton,
+	qt.gui.QGroupBox,
+	qt.gui.QLinearGradient,
+	qt.gui.QStyleOption,
+	qt.gui.QStyleOptionFrameV2;
+
 
 class ArthurStyle : QWindowsStyle
 {
@@ -74,13 +75,12 @@ class ArthurStyle : QWindowsStyle
     {
         //Q_INIT_RESOURCE(shared);
     }
-
-
+    
     void drawHoverRect(QPainter painter, QRect r)
     {
         qreal h = r.height();
         qreal h2 = r.height() / 2.0;
-        QPainterPath path;
+        QPainterPath path = new QPainterPath;
         path.addRect(r.x() + h2, r.y() + 0, r.width() - h2 * 2, r.height());
         path.addEllipse(r.x(), r.y(), h, h);
         path.addEllipse(r.x() + r.width() - h, r.y(), h, h);
@@ -91,9 +91,7 @@ class ArthurStyle : QWindowsStyle
         painter.drawPath(path);
     }
 
-
-    override void drawPrimitive(PrimitiveElement element, QStyleOption option,
-                                QPainter painter, QWidget widget)
+    override void drawPrimitive(PrimitiveElement element, QStyleOption option, QPainter painter, QWidget widget)
     {
         assert(option);
         switch (element)
@@ -153,7 +151,7 @@ class ArthurStyle : QWindowsStyle
                     mid = cached(":res/images/button_normal_stretch.png");
                 }
                 painter.drawPixmap(button.rect.topLeft, left);
-                painter.drawTiledPixmap(new QRect(button.rect.x + left.width,
+                painter.drawTiledPixmap(QRect(button.rect.x + left.width,
                                                button.rect.y,
                                                button.rect.width - left.width - right.width,
                                                left.height),
@@ -168,8 +166,7 @@ class ArthurStyle : QWindowsStyle
             break;
 
         case PE_FrameGroupBox:
-            if (QStyleOptionFrameV2 group
-                    = cast(QStyleOptionFrameV2)(option)) {
+            if (QStyleOptionFrameV2 group = cast(QStyleOptionFrameV2)(option)) {
                 auto r = group.rect;
 
                 painter.save();
@@ -201,11 +198,9 @@ class ArthurStyle : QWindowsStyle
 
                 int topFrameOffset = titleStretch.height()/2 - 2;
                 painter.drawPixmap(r.topLeft() + QPoint(0, topFrameOffset), topLeft);
-                painter.drawPixmap(r.topRight() - QPoint(topRight.width()-1, 0)
-                                    + QPoint(0, topFrameOffset), topRight);
+                painter.drawPixmap(r.topRight() - QPoint(topRight.width()-1, 0) + QPoint(0, topFrameOffset), topRight);
                 painter.drawPixmap(r.bottomLeft() - QPoint(0, bottomLeft.height()-1), bottomLeft);
-                painter.drawPixmap(r.bottomRight() - QPoint(bottomRight.width()-1,
-                                    bottomRight.height()-1), bottomRight);
+                painter.drawPixmap(r.bottomRight() - QPoint(bottomRight.width()-1, bottomRight.height()-1), bottomRight);
 
                 QRect left = r;
                 left.setY(r.y() + topLeft.height() + topFrameOffset);
@@ -224,8 +219,7 @@ class ArthurStyle : QWindowsStyle
                 right.setX(r.right() - rightStretch.width()+1);
                 right.setY(r.y() + topRight.height() + topFrameOffset);
                 right.setWidth(rightStretch.width());
-                right.setHeight(r.height() - topRight.height()
-                                - bottomRight.height() - topFrameOffset);
+                right.setHeight(r.height() - topRight.height() - bottomRight.height() - topFrameOffset);
                 painter.drawTiledPixmap(right, rightStretch);
 
                 QRect bottom = r;
@@ -264,7 +258,7 @@ class ArthurStyle : QWindowsStyle
 
                 if ((option.subControls & SC_SliderGroove) && groove.isValid()) {
                     QPixmap grv = cached(":res/images/slider_bar.png");
-                    painter.drawPixmap(new QRect(groove.x() + 5, groove.y(),
+                    painter.drawPixmap(QRect(groove.x() + 5, groove.y(),
                                               groove.width() - 10, grv.height()),
                                         grv);
                 }
@@ -344,7 +338,7 @@ class ArthurStyle : QWindowsStyle
                     QPixmap titleRight = cached(":res/images/title_cap_right.png");
                     QPixmap titleStretch = cached(":res/images/title_stretch.png");
                     int txt_width = group.fontMetrics.width(group.text) + 20;
-                    rect = new QRect(group.rect.center().x() - txt_width/2 + titleLeft.width(), 0,
+                    rect = QRect(group.rect.center().x() - txt_width/2 + titleLeft.width(), 0,
                                  txt_width - titleLeft.width() - titleRight.width(),
                                  titleStretch.height());
                     break;
@@ -398,7 +392,7 @@ class ArthurStyle : QWindowsStyle
     override void polish(QWidget widget)
     {
         if (widget.layout() && cast(QGroupBox)(widget)) {
-            if (widget.findChildren!(QGroupBox).length == 0) {
+            if (qFindChildren!(QGroupBox)(widget).length == 0) {
                 widget.layout().setWidgetSpacing(0); // Why setSpacing was renamed to setWidgetSpacing?
                 widget.layout().setMargin(12);
             } else {
@@ -417,7 +411,6 @@ class ArthurStyle : QWindowsStyle
             pal.setColor(QPalette.Window, new QColor(241, 241, 241));
             widget.setPalette(pal);
         }
-
     }
 
     override void unpolish(QWidget widget)

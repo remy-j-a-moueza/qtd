@@ -38,6 +38,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+module arthurwidgets;
 
 
 import qt.core.QFile,
@@ -48,7 +49,6 @@ import qt.core.QFile,
     qt.gui.QTextDocument,
     qt.gui.QAbstractTextDocumentLayout,
     qt.gui.QLinearGradient,
-
     qt.gui.QTextBrowser,
     qt.gui.QBoxLayout,
     qt.opengl.QGL,
