@@ -99,13 +99,12 @@ protected:
 			&& dateInRange(sourceModel().data(index2).toDate());
 	}
 
-
 	bool lessThan(QModelIndex left, QModelIndex right)
 	{
 		QVariant leftData = sourceModel().data(left);
 		QVariant rightData = sourceModel().data(right);
 
-		if (leftData.canConvert!(QDateTime)) {
+		if (leftData.type() == QVariant.Type.DateTime) {
 			return leftData.toDateTime() < rightData.toDateTime();
 		} else {
 			QRegExp emailPattern = new QRegExp("([\\w\\.]*@[\\w\\.]*)");
