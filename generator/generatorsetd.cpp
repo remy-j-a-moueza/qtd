@@ -147,7 +147,7 @@ QString GeneratorSetD::generate() {
     // Code generation
     QList<Generator *> generators;
     PriGenerator *priGenerator = new PriGenerator;
-    ContainerGenerator *cointainerGenerator = new ContainerGenerator;
+    ContainerGenerator *cointainerGenerator;
     DGenerator *d_generator = 0;
     CppHeaderGenerator *cpp_header_generator = 0;
     CppImplGenerator *cpp_impl_generator = 0;
@@ -208,6 +208,9 @@ QString GeneratorSetD::generate() {
         generators << new ClassListGenerator;
         contexts << "ClassListGenerator";
     }
+
+    cointainerGenerator = new ContainerGenerator(cpp_impl_generator);
+
 
     generators << priGenerator;
     contexts << "PriGenerator";

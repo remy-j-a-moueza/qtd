@@ -43,7 +43,6 @@
 #include "reporthandler.h"
 #include "docparser.h"
 #include "jumptable.h"
-#include "cppimplgenerator.h"
 #include "fileout.h"
 
 #include <QtCore/QDir>
@@ -1717,10 +1716,9 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
 
         s << "private " << attr << "extern(C) void " << sigExternName << "_connect(void* native_id);" << endl;
         s << "private " << attr << "extern(C) void " << sigExternName << "_disconnect(void* native_id);" << endl;
-
+/*
         QString extra_args;
 
-        AbstractMetaArgumentList arguments = signal->arguments();
         foreach (AbstractMetaArgument *argument, arguments) {
             if(argument->type()->isContainer()) {
                 QString arg_name = argument->indexedName();
@@ -1729,8 +1727,10 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
                 extra_args += ", " + type_string + " " + arg_name;
             }
         }
+*/
+        AbstractMetaArgumentList arguments = signal->arguments();
 
-        s << "private extern(C) void " << sigExternName << "_handle_in_d(void* d_entity, void** args" << extra_args<< ") {" << endl;
+        s << "private extern(C) void " << sigExternName << "_handle(void* d_entity, void** args) {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "auto d_object = cast(" << d_class->name() << ") d_entity;" << endl;
@@ -1744,10 +1744,13 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
 
                 QString arg_ptr = QString("args[%1]").arg(argument->argumentIndex() + 1);
 
-                if (type->isTargetLangString())
+                if (type->isContainer()) {
+                    s << INDENT << translateType(type, signal->implementingClass(), BoxedPrimitive) << " " << arg_name << ";" << endl
+                      << INDENT << fromCppContainerName(d_class, type) << "(" << arg_ptr << ", &" << arg_name << ");" << endl;
+                } else if (type->isTargetLangString()) {
                     s << INDENT << "auto " << arg_name << "_ptr = " << arg_ptr << ";" << endl
                       << INDENT << "string " << arg_name << " = QString.toNativeString(" << arg_name << "_ptr);";
-                else if(type->isPrimitive() || type->isEnum() || type->isFlags() || type->typeEntry()->isStructInD()) {
+                } else if(type->isPrimitive() || type->isEnum() || type->isFlags() || type->typeEntry()->isStructInD()) {
                     QString type_name = argument->type()->typeEntry()->qualifiedTargetLangName();
                     if (type->isFlags())
                         type_name = "int";
@@ -1755,14 +1758,14 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
                 } else if(type->isObject() || type->isQObject()
                         || (type->typeEntry()->isValue() && type->isNativePointer())
                         || type->isValue()) {
-                        QString type_name = type->name();
-                        const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(type->typeEntry());
-                        if(ctype->isAbstract())
-                            type_name = type_name + "_ConcreteWrapper";
-                        s << INDENT << "scope " << arg_name << " = new " << type_name
-                                    << "(cast(void*)(" << arg_ptr << "), true);" << endl
-                          << INDENT << arg_name << ".__no_real_delete = true;";
-                    }
+                    QString type_name = type->name();
+                    const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(type->typeEntry());
+                    if(ctype->isAbstract())
+                        type_name = type_name + "_ConcreteWrapper";
+                    s << INDENT << "scope " << arg_name << " = new " << type_name
+                                << "(cast(void*)(" << arg_ptr << "), true);" << endl
+                                << INDENT << arg_name << ".__no_real_delete = true;";
+                }
                 s << endl;
             }
 //            s << INDENT << "Stdout(\"" << d_class->name() << "\", \"" << signal->name() << "\").newline;" << endl;
@@ -1885,6 +1888,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             s << "private import qt.core.ArrayOps;" << endl;
         else if (d_class->name() == "QApplication")
             s << "private import qt.gui.ArrayOps;" << endl;
+
+        s << "private import " << d_class->package() << ".ArrayOps2;" << endl;
 
         if (!d_class->enums().isEmpty())
             s << "public import " << d_class->package() << "." << d_class->name() << "_enum;" << endl << endl;

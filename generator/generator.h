@@ -160,6 +160,14 @@ inline QString signalExternName(const AbstractMetaClass *cls, const AbstractMeta
     return "qtd_" + cls->name() + "_" + signal->name();
 }
 
+inline QString fromCppContainerName(const AbstractMetaClass *cls, const AbstractMetaType *type)
+{
+    QString package = cls->package().replace(".", "_");
+    const TypeEntry *te = type->instantiations().first()->typeEntry();
+
+    return "qtd_" + package + "_" + te->targetLangName() + "_from_" + type->typeEntry()->qualifiedCppName();
+}
+
 bool notWrappedYet(const AbstractMetaFunction *java_function);
 bool isLinearContainer(const ContainerTypeEntry *type);
 AbstractMetaFunctionList signalFunctions(const AbstractMetaClass *cls);

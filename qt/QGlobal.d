@@ -401,9 +401,15 @@ void qSwap_helper(T)(ref T value1, ref T value2, T*)
 
 void qSwap(T)(ref T value1, ref T value2)
 {
+<<<<<<< .mine
+    const T.nativeId t = value1.nativeId;
+    value1.nativeId = value2.nativeId;
+    value2.nativeId = t;
+=======
     T t = value1;
     value1 = value2;
     value2 = t;
+>>>>>>> .r170
 }
 
 /*

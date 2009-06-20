@@ -44,6 +44,7 @@
 
 #include "generator.h"
 #include "metajava.h"
+#include "cppimplgenerator.h"
 
 #include <QTextStream>
 

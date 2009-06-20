@@ -21,7 +21,7 @@ core_link_d +=
 core_cpp_files += cpp/qt_qtd/qtd_core.cpp cpp/qt_qtd/ArrayOpsPrimitive_shell.cpp
 
 ## Module specific d files.
-core_d_files += $(QTD_CORE:%=qt/%.d)
+core_d_files += $(QTD_CORE:%=qt/%.d) qt/core/ArrayOps2
 
 ## Classes.
 ## TODO: use list that genareted by dgen.

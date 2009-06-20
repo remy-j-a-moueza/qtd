@@ -1382,7 +1382,7 @@ void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaCl
         // D-side signal callbacks
         for(int i = 0; i < signal_funcs.size(); i++) {
             AbstractMetaFunction *signal = signal_funcs.at(i);
-            writeSignalHandler(s, java_class, signal);
+            s << "extern \"C\" DLL_PUBLIC void " << signalExternName(java_class, signal) << "_handle(void* d_entity, void** args);" << endl;
         }
 
 	if(signal_funcs.size() > 0)
@@ -3239,7 +3239,7 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
         cls_name.remove("_ConcreteWrapper");
 
         s << endl
-          << INDENT << "{" << endl // qtd2 hack, additional scope for avoiding duplicating of "i"
+//          << INDENT << "{" << endl // qtd2 hack, additional scope for avoiding duplicating of "i"
           << INDENT;
 
         switch (type->type()) {
@@ -3264,8 +3264,9 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
 
 
         writeTypeInfo(s, java_type, ForceValueType);
+        QString index = "i_" + qt_name;
         s << "::const_iterator " << qt_name << "_end_it = " << qt_name << ".constEnd();" << endl
-          << INDENT << "int i = 0;" << endl
+          << INDENT << QString("int %0 = 0;").arg(index) << endl
           << INDENT;
         s << "for (";
         writeTypeInfo(s, java_type, ForceValueType);
@@ -3278,15 +3279,15 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
             s << " __qt_tmp = *" << qt_name << "_it;" << endl;
 
             if(targ->isTargetLangString())
-                s << INDENT << "void *__java_tmp = qtd_string_from_array(" << java_name << ", i);" << endl;
+                s << INDENT << "void *__java_tmp = qtd_string_from_array(" << java_name << ", " << index << ");" << endl;
 
             writeQtToJava(s, targ, "__qt_tmp", "__java_tmp", 0, -1, BoxedPrimitive);
 
-            s << INDENT << "qtd_assign_" << cls_name << "_array_element(" << java_name << ", i, __java_tmp);" << endl;
-            s << INDENT << "++i;" << endl;
+            s << INDENT << "qtd_assign_" << cls_name << "_array_element(" << java_name << ", " << index << ", __java_tmp);" << endl;
+            s << INDENT << "++" << index << ";" << endl;
         }
-        s << INDENT << "}" << endl
-          << INDENT << "}" << endl;
+        s << INDENT << "}" << endl;
+//          << INDENT << "}" << endl;
 
     } else if (type->type() == ContainerTypeEntry::PairContainer) {
         QList<AbstractMetaType *> args = java_type->instantiations();

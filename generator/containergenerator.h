@@ -61,7 +61,7 @@ public:
 
     typedef void (ContainerGenerator::*WriteOut)(QTextStream &s, AbstractMetaClass *cls);
 
-    ContainerGenerator();
+    ContainerGenerator(CppImplGenerator *cpp_impl_generator);
 
     virtual void generate();
     virtual void write(QTextStream &s, const AbstractMetaClass *java_class);
@@ -71,6 +71,7 @@ public:
     void writeHeaderContent(QTextStream &s, AbstractMetaClass *cls);
     void writeCppContent(QTextStream &s, AbstractMetaClass *cls);
     void writeDContent(QTextStream &s, AbstractMetaClass *cls);
+    void writeDContent2(QTextStream &s, AbstractMetaClass *cls);
 
     void buildTypeList();
 
@@ -100,6 +101,10 @@ private:
     AbstractMetaClass* m_class;
 
     QString all_name, ass_name, get_name;
+//    QMap<QString, QMap<const TypeEntry*, AbstractMetaType*> > signalEntries;
+    QMap<QString, QSet<AbstractMetaType*> > signalEntries;
+
+    CppImplGenerator *m_cpp_impl_generator;
 };
 
 #endif // CONTAINERGENERATOR_H

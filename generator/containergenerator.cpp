@@ -45,8 +45,8 @@
 
 static Indentor INDENT;
 
-ContainerGenerator::ContainerGenerator():
-        DGenerator()
+ContainerGenerator::ContainerGenerator(CppImplGenerator *cpp_impl_generator):
+        DGenerator(), m_cpp_impl_generator(cpp_impl_generator)
 
 {
     setFilenameStub("ArrayOps");
@@ -133,6 +133,7 @@ m_class = d_class;
 
             processFunction(function);
         }
+
         AbstractMetaFieldList fields = d_class->fields();
         foreach (const AbstractMetaField *field, fields) {
             if (field->wasPublic() || (field->wasProtected() && !d_class->isFinal())) {
@@ -141,6 +142,27 @@ m_class = d_class;
             }
         }
 
+        AbstractMetaFunctionList signal_funcs = signalFunctions(d_class);
+        for(int i = 0; i < signal_funcs.size(); i++) {
+            AbstractMetaFunction *signal = signal_funcs.at(i);
+
+            AbstractMetaArgumentList arguments = signal->arguments();
+            foreach (AbstractMetaArgument *argument, arguments) {
+                if(argument->type()->isContainer()) {
+                    bool inList = false;
+                    foreach(AbstractMetaType* type, signalEntries[d_class->package()]) {
+                        const TypeEntry *teInList = type->instantiations().first()->typeEntry();
+                        const TypeEntry *te = argument->type()->instantiations().first()->typeEntry();
+
+                        if ((te == teInList) && (argument->type()->typeEntry() == type->typeEntry()))
+                            inList = true;
+                    }
+                    if (!inList)
+                        (signalEntries[d_class->package()]) << argument->type();
+//                    (signalEntries[d_class->package()])[argument->type()->instantiations().first()->typeEntry()] = argument->type();
+                }
+            }
+        }
     }
 }
 
@@ -151,6 +173,7 @@ void ContainerGenerator::generate()
     writeFile(cppFilename(), CppDirectory, &ContainerGenerator::writeCppContent); // cpp file
     writeFile("ArrayOps_%1.h", HDirectory, &ContainerGenerator::writeHeaderContent); // header file
     writeFile(dFilename(), DDirectory, &ContainerGenerator::writeDContent); // d file
+    writeFile("ArrayOps2.d", DDirectory, &ContainerGenerator::writeDContent2); // d file
 }
 
 void ContainerGenerator::writeFile(const QString& fileName, OutputDirectoryType dirType, WriteOut writeOut)
@@ -193,8 +216,13 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
     QString package = cls->package().replace(".", "_");
 
     s << "// stuff for passing D function pointers" << endl << endl
-      << "#ifdef CPP_SHARED" << endl << endl
-      << "#include \"ArrayOps_" << package << ".h\"" << endl << endl;
+      << "#include \"qtd_masterinclude.h\"" << endl << endl
+      << "#include \"qtd_core.h\"" << endl
+      << "#include \"ArrayOps_" << package << ".h\"" << endl
+      << "#include \"ArrayOps_qt_core.h\"" << endl
+      << "#include \"ArrayOpsPrimitive.h\"" << endl << endl
+      << "#ifdef CPP_SHARED" << endl << endl;
+
 
     foreach (const TypeEntry *te, containerTypes) {
         if (te->javaPackage() == cls->package()) {
@@ -228,6 +256,38 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
     }
     s << "}" << endl
       << "#endif" << endl;
+/*
+    QMap<const TypeEntry*, AbstractMetaType*> typeList = signalEntries[cls->package()];
+
+    QMapIterator<const TypeEntry*, AbstractMetaType*> i(typeList);
+    while (i.hasNext()) {
+        i.next();
+        s << "// " << i.key()->targetLangName() << endl
+          << "extern \"C\" DLL_PUBLIC void qtd_" << package << "_" << i.key()->targetLangName() << "_to_d_array(void *cpp_ptr, DArray* __d_container) {" << endl;
+
+        AbstractMetaType *arg_type = i.value();
+        m_cpp_impl_generator->writeTypeInfo(s, arg_type, NoOption);
+        s << "container = (*reinterpret_cast< ";
+        m_cpp_impl_generator->writeTypeInfo(s, arg_type, ExcludeReference);
+        s << "(*)>(cpp_ptr));" << endl;
+
+        m_cpp_impl_generator->writeQtToJavaContainer(s, arg_type, "container", "__d_container", 0, -1);
+        s << "}" << endl;
+    }*/
+
+    foreach(AbstractMetaType* arg_type, signalEntries[cls->package()]) {
+        const TypeEntry *te = arg_type->instantiations().first()->typeEntry();
+        s << "// " << te->targetLangName() << endl
+          << "extern \"C\" DLL_PUBLIC void " << fromCppContainerName(cls, arg_type) << "(void *cpp_ptr, DArray* __d_container) {" << endl;
+
+        m_cpp_impl_generator->writeTypeInfo(s, arg_type, NoOption);
+        s << "container = (*reinterpret_cast< ";
+        m_cpp_impl_generator->writeTypeInfo(s, arg_type, ExcludeReference);
+        s << "(*)>(cpp_ptr));" << endl;
+
+        m_cpp_impl_generator->writeQtToJavaContainer(s, arg_type, "container", "__d_container", 0, -1);
+        s << "}" << endl;
+    }
 }
 
 void ContainerGenerator::writeHeaderContent(QTextStream &s, AbstractMetaClass *cls)
@@ -334,6 +394,20 @@ void ContainerGenerator::writeDContent(QTextStream &s, AbstractMetaClass *cls)
     s << "        qtd_" << cls->package().replace(".", "_") << "_ArrayOps_initCallBacks(callbacks.ptr);" << endl
       << "    }" << endl
       << "}" << endl;
+
+
+}
+
+void ContainerGenerator::writeDContent2(QTextStream &s, AbstractMetaClass *cls)
+{
+    s << "module " << cls->package() << ".ArrayOps2;" << endl << endl;
+
+    foreach(AbstractMetaType* arg_type, signalEntries[cls->package()]) {
+        const TypeEntry *te = arg_type->instantiations().first()->typeEntry();
+        if(!te->isPrimitive() && !te->isString())
+            writeImportString(s, te);
+        s << "extern (C) void " << fromCppContainerName(cls, arg_type) << "(void *cpp_ptr, " << te->targetLangName() << "[]* __d_container);" << endl;
+    }
 }
 
 void ContainerGenerator::writeNotice(QTextStream &s)

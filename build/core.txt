@@ -8,6 +8,7 @@ set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
     qt_core/QModelIndex_shell qt_core/QMetaType_shell)
 ## Module specific d files.
 set (d_files qtd/Array qtd/Str QtDObject qtd/ArrayOpsPrimitive
+    core/ArrayOps2
     core/QPoint core/QPointF
     core/QSize core/QSizeF
     core/QLine core/QLineF
