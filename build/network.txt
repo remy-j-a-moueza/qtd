@@ -1,5 +1,6 @@
 set(required Core)
-set(classes 
+set(classes
+      QAbstractNetworkCache
       QAbstractSocket
       QAuthenticator
       QFtp
@@ -18,6 +19,7 @@ set(classes
       QNetworkCookie
       QNetworkInterface
       QNetworkProxy
+      QNetworkProxyFactory
       QNetworkReply
       QNetworkRequest
       QTcpServer
