@@ -1,4 +1,5 @@
 set(required Core)
+set (d_files network/ArrayOps2)
 set(classes
       QAbstractNetworkCache
       QAbstractSocket
