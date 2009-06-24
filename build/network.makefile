@@ -34,11 +34,13 @@ QLocalServer \
 QLocalSocket \
 QNetworkAccessManager \
 QNetworkAddressEntry \
+QNetworkCacheMetaData \
 QNetworkCookieJar \
 QNetworkCookie \
 QNetworkInterface \
 QNetworkProxy \
 QNetworkProxyFactory \
+QNetworkProxyQuery \
 QNetworkReply \
 QNetworkRequest \
 QSslCertificate \
