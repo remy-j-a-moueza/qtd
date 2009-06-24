@@ -41,6 +41,7 @@ QNetworkProxy \
 QNetworkProxyFactory \
 QNetworkReply \
 QNetworkRequest \
+QSsl \
 QSslCertificate \
 QSslCipher \
 QSslConfiguration \
