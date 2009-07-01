@@ -1,5 +1,5 @@
 set(required Core)
-set (d_files network/QSsl)
+
 set(classes
       QAbstractNetworkCache
       QAbstractSocket
@@ -32,6 +32,7 @@ set(classes
     )
 
 if(QT_QCONFIG MATCHES "openssl")
+    set(d_generated_files network/QSsl)
     set(classes 
       ${classes}
       QSslCertificate
