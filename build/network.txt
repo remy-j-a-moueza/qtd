@@ -1,5 +1,5 @@
 set(required Core)
-set (d_files network/ArrayOps2 network/QSsl)
+set (d_files network/QSsl)
 set(classes
       QAbstractNetworkCache
       QAbstractSocket

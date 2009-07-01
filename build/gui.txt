@@ -1,6 +1,6 @@
 set(required Core)
 set (cpp_files qt_gui/UrlHandler_shell)
-set (d_files gui/UrlHandler gui/ArrayOps2)
+set (d_files gui/UrlHandler)
 set(classes
     QPushButton
     QFileIconProvider
