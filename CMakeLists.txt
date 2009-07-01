@@ -238,7 +238,7 @@ foreach(package_big ${all_packages})
 	set(packages_big ${packages_big} ${package_big})
 	set(packages ${packages} ${package})
 	## Loading package sources list.
-	foreach(d_source ArrayOps2 ${d_generated_files})
+	foreach(d_source ${package}/ArrayOps2 ${d_generated_files})
 	    set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${d_source}.d)
 	endforeach(d_source ${d_generated_files})
 	set(classes ArrayOps ${classes})
