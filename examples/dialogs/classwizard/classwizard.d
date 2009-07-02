@@ -148,7 +148,7 @@ public:
 					headerFile.errorString()));
 			return;
 		}
-		headerFile.write(block.ptr, block.length);
+		headerFile.write(block);
 
 		block.length = 0;
 
@@ -202,7 +202,7 @@ public:
 					implementationFile.errorString()));
 			return;
 		}
-		implementationFile.write(block.ptr, block.length);
+		implementationFile.write(block);
 
 		QDialog.accept();
 	}

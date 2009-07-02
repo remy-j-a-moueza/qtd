@@ -1759,6 +1759,14 @@
             <access modifier="private"/>
             <rename to="getByte"/>
         </modify-function>
+	
+	<modify-function signature="write(const char*)">
+            <access modifier="private"/>
+        </modify-function>
+	
+	<modify-function signature="write(const char*,long long)">
+            <access modifier="private"/>
+        </modify-function>
 
 <!--
         <modify-function signature="peek(char*,long long)">

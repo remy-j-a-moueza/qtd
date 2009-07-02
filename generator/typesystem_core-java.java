@@ -462,6 +462,10 @@ class QIODevice___ extends QIODevice {
         return success ? np.byteValue() : -1;
     }
 */
+
+    public final long write(string str) {
+	return write(str.ptr, str.length);
+    } 
 }// class
 
 class QCryptographicHash___ extends QCryptographicHash {
