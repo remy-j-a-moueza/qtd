@@ -400,7 +400,8 @@ void ContainerGenerator::writeDContent(QTextStream &s, AbstractMetaClass *cls)
 
 void ContainerGenerator::writeDContent2(QTextStream &s, AbstractMetaClass *cls)
 {
-    s << "module " << cls->package() << ".ArrayOps2;" << endl << endl;
+    s << "module " << cls->package() << ".ArrayOps2;" << endl << endl
+	  << "import qt.QGlobal;" << endl << endl;
 
     foreach(AbstractMetaType* arg_type, signalEntries[cls->package()]) {
         const TypeEntry *te = arg_type->instantiations().first()->typeEntry();
