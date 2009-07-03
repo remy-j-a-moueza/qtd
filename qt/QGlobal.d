@@ -585,4 +585,53 @@ const ushort QT_EDITION_EDUCATIONAL = QT_EDITION_DESKTOP;
 const ushort QT_EDITION_EVALUATION =  QT_EDITION_DESKTOP;
 
 mixin QT_END_NAMESPACE;
+
+package import tango.stdc.stdlib;
+
+template sizeOf(C : Object)
+{
+    const sizeOf = sizeOfImpl!(C);
+}
+
+size_t sizeOfImpl(C)()
+{
+    size_t size;
+
+    foreach (i, _; typeof(C.tupleof))
+    {
+        auto newSize = C.tupleof[i].offsetof + C.tupleof[i].sizeof;
+        if (newSize > size)
+            size = newSize;
+    }
+
+    return size;
+}
+
+scope class StackObject(C)
+{
+    byte[sizeOf!(C)] data;
+    bool constructed;
+
+    C opCall(A...)(A args)
+    {
+        assert(!constructed);
+
+        auto r = new(&data)C(args);
+        r.__stackAllocated = true;
+        constructed = true;
+
+        return r;
+    }
+
+    ~this()
+    {
+        if (constructed)
+        {
+            auto obj = cast(C)&data;
+            delete obj;
+        }
+    }
+}
+
 mixin QT_END_HEADER;
+

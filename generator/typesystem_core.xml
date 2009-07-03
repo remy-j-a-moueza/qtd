@@ -2391,7 +2391,7 @@
         <modify-argument index="1">
             <reference-count action="ignore"/>
         </modify-argument>
-        <inject-code class="java" position="beginning">
+<!--        <inject-code class="java" position="beginning">
             <argument-map index="1" meta-name="%1"/>
             if (%1 is null &amp;&amp; !__gc_managed) {
                 remove(__gc_ref_list, this);
@@ -2400,7 +2400,7 @@
                 __gc_ref_list ~= this;
                 __gc_managed = false;
             }
-        </inject-code>
+        </inject-code> -->
     </modify-function>
 
     <modify-function signature="deleteLater()">

@@ -1321,6 +1321,13 @@ void CppImplGenerator::writeQObjectLink(QTextStream &s, const AbstractMetaClass 
 {
     QString linkName = java_class->name() + "_Link";
     QString className = java_class->name();
+
+    if (cpp_shared)
+        s << "extern \"C\" typedef void (*qtd_pf_D_" << java_class->name() << "_delete)(void *d_ptr);" << endl
+          << "qtd_pf_D_" << java_class->name() << "_delete qtd_D_" << java_class->name() << "_delete;" << endl << endl;
+    else
+        s << "extern \"C\" void qtd_D_" << java_class->name() << "_delete(void *d_ptr);" << endl << endl;
+
     s << "class " << linkName << " : public QObject, public QObjectUserData" << endl
       << "{" << endl
       << "public:" << endl
@@ -1328,6 +1335,7 @@ void CppImplGenerator::writeQObjectLink(QTextStream &s, const AbstractMetaClass 
       << "    virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl << endl
 
       << "    " << linkName << "(QObject *parent, void *d_ptr) : QObject() { _d_ptr = d_ptr; }" << endl
+      << "    ~" << linkName << "() { qtd_D_" << className << "_delete(_d_ptr); }" << endl
       << "    void *d_entity() const { return _d_ptr; }" << endl << endl
 
       << "private:" << endl
@@ -1463,24 +1471,13 @@ void CppImplGenerator::writeShellConstructor(QTextStream &s, const AbstractMetaF
 
 void CppImplGenerator::writeShellDestructor(QTextStream &s, const AbstractMetaClass *java_class)
 {
-
-    if (java_class->isQObject())
-    if (cpp_shared)
-        s << "extern \"C\" typedef void (*qtd_pf_D_" << java_class->name() << "_delete)(void *d_ptr);" << endl
-          << "qtd_pf_D_" << java_class->name() << "_delete qtd_D_" << java_class->name() << "_delete;" << endl << endl;
-    else
-        s << "extern \"C\" void qtd_D_" << java_class->name() << "_delete(void *d_ptr);" << endl << endl;
-
     s << shellClassName(java_class) << "::~"
       << shellClassName(java_class) << "()" << endl
       << "{" << endl;
     {
-        Indentation indent(INDENT);
-        if (java_class->isQObject())
-            s << INDENT << "if (QObject::parent())" << endl
-              << INDENT << "    qtd_D_" << java_class->name() << "_delete(this->d_entity());" << endl;
-
 /* qtd
+        Indentation indent(INDENT);
+
         s << "#ifdef QT_DEBUG" << endl
           << INDENT << "if (m_vtable)" << endl
           << INDENT << "    m_vtable->deref();" << endl

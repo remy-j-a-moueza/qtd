@@ -1,6 +1,6 @@
 SYSTEM = posix
 ifndef QTDIR
-#QTDIR = /usr/share/qt4
+QTDIR = /usr/share/qt4
 ifndef QTDIR_INC
 QTDIR_INC = /usr/include/qt4
 endif

@@ -45,15 +45,37 @@ import qt.*;
 import qt.core.*;
 
 class QObject___ extends QObject {
-	
-	// list of QObjects references to prevent them from garbage collecting if they are managed by Qt
-	private static QObject[] __gc_ref_list;
+    
+    public bool __stackAllocated = false;
+    
+    public bool __qobject_is_deleting = false;
+/*    
+    new(uint size, void* p = null)
+    {
+        if (!p)
+        {
+            p = malloc(size);
+            if (!p)
+                assert(false, "Out of memory");
+        }
+
+        return p;
+    }
+
+    delete(void* p)
+    {
+        if (!(cast(typeof(this))p).__stackAllocated)
+            free(p);
+    }
+*/    
+    // list of QObjects references to prevent them from garbage collecting if they are managed by Qt
+    private static QObject[] __gc_ref_list;
     
     // this flag controls whether QObject is managed by D's GC, or it has a parent and therefore managed by Qt
     private bool __gc_managed = true;
-	
-	// this flag needs to be set false when QObject is deleted from inside Qt so when deleting it from D it won't delete C++ object
-	public bool __no_real_delete = false;
+    
+    // this flag needs to be set false when QObject is deleted from inside Qt so when deleting it from D it won't delete C++ object
+    public bool __no_real_delete = false;
 }// class
 
 abstract class QAbstractItemModel___ extends QAbstractItemModel {

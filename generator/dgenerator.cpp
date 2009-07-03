@@ -1671,11 +1671,21 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
         {
             Indentation indent(INDENT);
 
+/*            if(d_class->name() == "QObject")
+                s << INDENT << "if(!__no_real_delete) {" << endl
+                  << INDENT << "    __qobject_is_deleting = true;" << endl
+                  << INDENT << "    scope(exit) __qobject_is_deleting = false;" << endl
+                  << INDENT << "    __free_native_resources();" << endl
+                  << INDENT << "}" << endl;*/
+
             if(d_class->name() == "QObject")
                 s << INDENT << "if(!__gc_managed)" << endl
-                  << INDENT << "    remove(__gc_ref_list, this);" << endl
-                  << INDENT << "if(!__no_real_delete && __gc_managed)" << endl
-                  << INDENT << "    __free_native_resources();" << endl;
+                        << INDENT << "    remove(__gc_ref_list, this);" << endl
+                        << INDENT << "if(!__no_real_delete && __gc_managed) {" << endl
+                        << INDENT << "    __qobject_is_deleting = true;" << endl
+                        << INDENT << "    scope(exit) __qobject_is_deleting = false;" << endl
+                        << INDENT << "    __free_native_resources();" << endl
+                        << INDENT << "}" << endl;
             else
                 s << INDENT << "if(!__no_real_delete)" << endl
                   << INDENT << "    __free_native_resources();" << endl;
@@ -2612,7 +2622,7 @@ void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass
           << INDENT << "    return null;" << endl
           << INDENT << "void* d_obj = qtd_" << class_name << "_d_pointer(__qt_return_value);" << endl
           << INDENT << "if (d_obj is null) {" << endl
-          << INDENT << "    auto new_obj = new " << type_name << "(__qt_return_value, true);" << endl
+          << INDENT << "    auto new_obj = new " << type_name << "(__qt_return_value, false);" << endl
           << INDENT << "    qtd_" << class_name << "_create_link(new_obj.nativeId, cast(void*) new_obj);" << endl
           << INDENT << "    new_obj.__no_real_delete = true;" << endl
           << INDENT << "    return new_obj;" << endl
@@ -2652,7 +2662,8 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
     s << "private extern (C) void qtd_D_" << d_class->name() << "_delete(void *d_ptr) {" << endl
       << "    auto d_ref = cast(QObject) d_ptr;" << endl
       << "    d_ref.__no_real_delete = true;" << endl
-      << "    delete d_ref;" << endl
+      << "    if(!d_ref.__qobject_is_deleting)"
+      << "        delete d_ref;" << endl
       << "}" << endl << endl;
 }
 
@@ -2834,7 +2845,11 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                     const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(type->typeEntry());
                     if(ctype->isAbstract())
                         type_name = type_name + "_ConcreteWrapper";
-
+/*
+                    s << INDENT << "scope " << arg_name << "_so = new StackObject!(" << type_name << ");" << endl
+                      << INDENT << "auto " << arg_name << "_d_ref = " << arg_name << "_so(" << arg_name <<", true);" << endl
+                      << INDENT << arg_name << "_d_ref.__no_real_delete = true;";
+                      */
                     s << INDENT << "scope " << arg_name << "_d_ref = new " << type_name << "(" << arg_name <<", true);" << endl
                       << INDENT << arg_name << "_d_ref.__no_real_delete = true;";
                 }
