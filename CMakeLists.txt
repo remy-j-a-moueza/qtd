@@ -81,34 +81,75 @@ set(GEN_OPT ${GEN_OPT} --d-target=${D_TARGET})
 
 ## Bootstrap settings for QtD.
 set(DRCC ${CMAKE_BINARY_DIR}/tools/drcc/drcc)
+set(DUIC ${CMAKE_BINARY_DIR}/tools/duic/duic)
 set(QTD_IMPORT_PATH ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION})
 set(QTD_LIBRARIES_PATH ${CMAKE_BINARY_DIR}/lib)
 
 ##--------------------------------------------
-## Macroses and functions.
+## Macros and functions.
 ##--------------------------------------------
 
-macro(qtd_add_resource name output)
-    set(${output})
-    foreach(res "${ARGN}")
+macro(qtd_add_resource output)
+    set (params NAME OPTIONS)
+    qtd_parse_params (RESOURCES  params ${ARGN})
+
+    if(NAME_tmp)
+	set(OPTIONS_tmp ${OPTIONS_tmp} -name ${NAME_tmp})
+    endif(NAME_tmp)
+
+    qtd_command ("${output}" "${DRCC}" "${OPTIONS_tmp}" "qrc_" 
+	"Generate" ${RESOURCES_tmp})
+endmacro(qtd_add_resource output)
+
+macro(qtd_wrap_ui output)
+    set (params OPTIONS)
+    qtd_parse_params (UI params ${ARGN})
+    qtd_command ("${output}" "${DUIC}" "${OPTIONS_tmp}"  "uic_" 
+	"Generate" ${UI_tmp})
+endmacro(qtd_wrap_ui output)
+
+macro(qtd_command output command options prefix comment)
+    foreach(file "${ARGN}")
 	## Test input file exists.
-	get_filename_component(res_path ${res} PATH)
-	get_filename_component(res_name ${res} NAME_WE)
-	get_filename_component(res_ext ${res} EXT)
-	#if(NOT ${req_ext} STREQUAL "qrc")	
-	#    get_filename_component(res_name ${res} NAME_WE)
-	#endif(NOT ${req_ext} STREQUAL "qrc")
-	set(out ${CMAKE_CURRENT_BINARY_DIR}/${res_path}qrc_${res_name}.d)
+	get_filename_component(file_path ${file} PATH)
+	get_filename_component(file_name ${file} NAME_WE)
+	get_filename_component(file_ext ${file} EXT)
+
+	set(out ${CMAKE_CURRENT_BINARY_DIR}/${file_path}${prefix}${file_name}.d)
 	add_custom_command(OUTPUT "${out}"
-		    COMMAND "${DRCC}"
-		    ARGS  -name ${name} ${res} -o ${out} 
+		    COMMAND "${command}"
+		    ARGS ${options} ${file} -o ${out} 
 		    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-		    DEPENDS ${res}
-		    COMMENT "Compile QtD resource ${res}"
+		    DEPENDS ${file}
+		    COMMENT "${comment} ${file}"
 		    )
 	set(${output} ${${output}} ${out})
-    endforeach(res "${ARGN}") 
-endmacro(qtd_add_resource output)
+    endforeach(file "${ARGN}")
+endmacro(qtd_command output command options files prefix comment)
+
+## Parse the parameters list.
+macro(qtd_parse_params default params)
+    set(type_tmp ${default})
+    set(params_tmp ${default} ${${params}})  
+    foreach(param_tmp ${params_tmp})	
+	set(${param_tmp}_tmp )
+    endforeach(param_tmp ${params_tmp})
+    foreach(arg_tmp ${ARGN})
+	set(founded_type_tmp)
+	if(NOT founded_type_tmp)
+	    foreach(param_tmp ${params_tmp})
+		if(arg_tmp STREQUAL param_tmp)	
+		    set(type_tmp ${param_tmp})
+		    set(founded_type_tmp 1)
+		    break(param_tmp ${params_tmp})
+		endif(arg_tmp STREQUAL param_tmp)
+	    endforeach(param_tmp ${params_tmp})	
+	endif(NOT founded_type_tmp)
+	if(NOT founded_type_tmp)
+	    set(${type_tmp}_tmp ${${type_tmp}_tmp} ${arg_tmp})
+	endif(NOT founded_type_tmp)
+    endforeach(arg_tmp ${ARGN})
+endmacro(qtd_parse_params default)
 
 ## Build example macro.
 ## name -- example name.
@@ -119,38 +160,30 @@ endmacro(qtd_add_resource output)
 ## Usage:
 ##	build_example(ExampleName PACKAGES QtCore QtGui QtXml  main.d another_d_file.d)
 macro(build_example name)
-    set(qtd_libs ${core_lib_param} ${gui_lib_param})
-    set(type_dat SOURCES)
-    set(RESOURCES)
-    set(SOURCES)
-    set(PACKAGES)
-    ## Parse parameters list.
-    set(params_dat RESOURCES SOURCES PACKAGES)
-    foreach(arg_dat ${ARGN})
-	set(founded_type_dat)
-	foreach(param_dat ${params_dat})
-	    if(${arg_dat} STREQUAL ${param_dat})		
-		set(type_dat ${param_dat})
-		set(founded_type_dat 1)
-		break(${arg_dat} STREQUAL ${param_dat})
-	    endif(${arg_dat} STREQUAL ${param_dat})
-	endforeach(param_dat ${params_dat})	
-	if(NOT founded_type_dat)
-	    set(${type_dat} ${${type_dat}} ${arg_dat})
-	endif(NOT founded_type_dat)
-    endforeach(arg_dat ${ARGN})
-    if(NOT PACKAGES)
-	set(PACKAGES QtCore QtGui)
-    endif(NOT PACKAGES)
-    ## TODO: Is the building tools activated ???    
-    if(RESOURCES)
+    set (params UIC RESOURCES PACKAGES)
+    qtd_parse_params (SOURCES params ${ARGN})
+
+    if(NOT PACKAGES_tmp)
+	set(PACKAGES_tmp QtCore QtGui)
+    endif(NOT PACKAGES_tmp)
+ 
+    if(RESOURCES_tmp)
 	if(NOT BUILD_TOOLS)
 	    message(STATUS "Example '${name}' required drcc. Example will not build")
 	    return(build_example name)
 	endif(NOT BUILD_TOOLS)
-	qtd_add_resource(${name} res_sources ${RESOURCES})
-    endif(RESOURCES)
-    foreach(package ${PACKAGES})
+	qtd_add_resource(res_sources ${RESOURCES_tmp} NAME ${name} )
+    endif(RESOURCES_tmp)
+
+    if(UIC_tmp)
+	if(NOT BUILD_TOOLS)
+	    message(STATUS "Example '${name}' required drcc. Example will not build")
+	    return(build_example name)
+	endif(NOT BUILD_TOOLS)
+	qtd_wrap_ui(uic_sources ${UIC_tmp})
+    endif(UIC_tmp)
+
+    foreach(package ${PACKAGES_tmp})
 	string(REGEX REPLACE "Qt([A-Za-z0-9])" "\\1" req "${package}")
 	set(is_founded)
 	foreach(package_big ${packages_big})
@@ -166,8 +199,9 @@ macro(build_example name)
 	else(NOT is_founded)
 	      set(qtd_libs ${${package}_lib_param} ${qtd_libs})
 	endif(NOT is_founded)	
-    endforeach(package ${PACKAGES})
-    add_d_program(${name} ${SOURCES} ${res_sources} DEPENDS ${res_sources} INCLUDES ${QTD_IMPORT_PATH} ${CMAKE_CURRENT_BINARY_DIR}
+    endforeach(package ${PACKAGES_tmp})
+    add_d_program(${name} ${SOURCES_tmp} ${res_sources} ${uic_sources}
+	DEPENDS ${res_sources} INCLUDES ${QTD_IMPORT_PATH} ${CMAKE_CURRENT_BINARY_DIR}
 	LIB_PATHS ${QTD_LIBRARIES_PATH} ${CMAKE_SOURCE_DIR}/lib LIBS ${qtd_libs})
     ## TODO: Enable on windows too.
     if(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX) ##
