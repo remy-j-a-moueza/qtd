@@ -586,30 +586,126 @@ const ushort QT_EDITION_EVALUATION =  QT_EDITION_DESKTOP;
 
 mixin QT_END_NAMESPACE;
 
-package import tango.stdc.stdlib;
+package import tango.stdc.stdlib,
+               tango.core.Memory;
 
-template sizeOf(C : Object)
+private
+struct Align
 {
-    const sizeOf = sizeOfImpl!(C);
+    ubyte a;
+    void* b;
 }
-
-size_t sizeOfImpl(C)()
+ 
+private
+const PTR_ALIGN = Align.tupleof[1].alignof;
+ 
+version( X86 )
+    const MEM_ALIGN = 8u;
+else
+    static assert(false, "Unknown memory alignment for this platform.");
+ 
+private
+template AlignPad(size_t base, size_t aligned)
 {
-    size_t size;
-
-    foreach (i, _; typeof(C.tupleof))
-    {
-        auto newSize = C.tupleof[i].offsetof + C.tupleof[i].sizeof;
-        if (newSize > size)
-            size = newSize;
-    }
-
-    return size;
+    static if( aligned == 0 )
+        const AlignPad = base;
+    else
+        const AlignPad = ((base+PTR_ALIGN-1)/PTR_ALIGN)*PTR_ALIGN
+            + aligned;
+}
+ 
+template InstanceSize(T)
+{
+    static if( is( T == Object ) )
+        const InstanceSize = 2*(void*).sizeof;
+    else
+        const InstanceSize = Max!(
+            AlignPad!(
+                InstanceSize!(Super!(T)),
+                InterfaceCount!(T)*(void*).sizeof),
+ 
+            AlignPad!(
+                InstanceSizeImpl!(T, 0),
+                + InterfaceCount!(T)*(void*).sizeof));
+}
+ 
+private
+template Super(T)
+{
+    static if( is( T S == super ) )
+        alias First!(S) Super;
+    else
+        static assert(false, "Can't get super of "~T.mangleof);
+}
+ 
+private
+template First(T)
+{
+    alias T First;
+}
+ 
+private
+template First(T, Ts...)
+{
+    alias T First;
+}
+ 
+private
+template InstanceSizeImpl(T, size_t i)
+{
+    static if( i < T.tupleof.length )
+        const InstanceSizeImpl = Max!(
+            T.tupleof[i].offsetof + T.tupleof[i].sizeof,
+            InstanceSizeImpl!(T, i+1));
+    else
+        // This is necessary to account for classes without member
+        // variables.
+        const InstanceSizeImpl = 2*(void*).sizeof;
+}
+ 
+private
+template Max(size_t a, size_t b)
+{
+    static if( a > b )
+        const Max = a;
+    else
+        const Max = b;
+}
+ 
+template InstanceSizeAligned(T, size_t alignment=MEM_ALIGN)
+{
+    static if( alignment == 0 )
+        const InstanceSizeAligned = InstanceSize!(T);
+    else
+        const uint InstanceSizeAligned
+            = InstanceSizeAlignImpl!(T, alignment).result;
+}
+ 
+private
+template InstanceSizeAlignedImpl(T, size_t alignment)
+{
+    private const base_size = InstanceSize!(T);
+    const result = ((base_size+alignment-1)/alignment)*alignment;
+}
+ 
+private
+template InterfaceCount(T)
+{
+    static if( is( T == Object ) )
+        const InterfaceCount = 0u;
+    else static if( is( T S == super ) )
+        const InterfaceCount = InterfaceCountImpl!(S);
+}
+ 
+private
+template InterfaceCountImpl(TBase, TInterfaces...)
+{
+    const InterfaceCountImpl = TInterfaces.length;
 }
 
 scope class StackObject(C)
 {
-    byte[sizeOf!(C)] data;
+    byte[InstanceSize!(C)] data;
     bool constructed;
 
     C opCall(A...)(A args)

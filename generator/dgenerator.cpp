@@ -2845,13 +2845,14 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                     const ComplexTypeEntry *ctype = static_cast<const ComplexTypeEntry *>(type->typeEntry());
                     if(ctype->isAbstract())
                         type_name = type_name + "_ConcreteWrapper";
-/*
+
                     s << INDENT << "scope " << arg_name << "_so = new StackObject!(" << type_name << ");" << endl
                       << INDENT << "auto " << arg_name << "_d_ref = " << arg_name << "_so(" << arg_name <<", true);" << endl
                       << INDENT << arg_name << "_d_ref.__no_real_delete = true;";
-                      */
+/*
                     s << INDENT << "scope " << arg_name << "_d_ref = new " << type_name << "(" << arg_name <<", true);" << endl
                       << INDENT << arg_name << "_d_ref.__no_real_delete = true;";
+*/
                 }
                 s << endl;
             }

@@ -49,25 +49,30 @@ class QObject___ extends QObject {
     public bool __stackAllocated = false;
     
     public bool __qobject_is_deleting = false;
-/*    
-    new(uint size, void* p = null)
+    
+    new(size_t size, void* p = null)
     {
         if (!p)
         {
             p = malloc(size);
             if (!p)
                 assert(false, "Out of memory");
+            GC.addRange(p, size);
         }
-
         return p;
     }
 
     delete(void* p)
     {
-        if (!(cast(typeof(this))p).__stackAllocated)
-            free(p);
+        if(p)
+        {
+            if (!(cast(typeof(this))p).__stackAllocated) {
+                free(p);
+                GC.removeRange(p);
+            }
+        }
     }
-*/    
+    
     // list of QObjects references to prevent them from garbage collecting if they are managed by Qt
     private static QObject[] __gc_ref_list;
     
