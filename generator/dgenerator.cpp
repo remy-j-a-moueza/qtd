@@ -1671,13 +1671,7 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
         {
             Indentation indent(INDENT);
 
-/*            if(d_class->name() == "QObject")
-                s << INDENT << "if(!__no_real_delete) {" << endl
-                  << INDENT << "    __qobject_is_deleting = true;" << endl
-                  << INDENT << "    scope(exit) __qobject_is_deleting = false;" << endl
-                  << INDENT << "    __free_native_resources();" << endl
-                  << INDENT << "}" << endl;*/
-
+/*
             if(d_class->name() == "QObject")
                 s << INDENT << "if(!__gc_managed)" << endl
                         << INDENT << "    remove(__gc_ref_list, this);" << endl
@@ -1686,6 +1680,13 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
                         << INDENT << "    scope(exit) __qobject_is_deleting = false;" << endl
                         << INDENT << "    __free_native_resources();" << endl
                         << INDENT << "}" << endl;
+*/
+            if(d_class->name() == "QObject")
+                s << INDENT << "if(!__no_real_delete) {" << endl
+                  << INDENT << "    __qobject_is_deleting = true;" << endl
+                  << INDENT << "    scope(exit) __qobject_is_deleting = false;" << endl
+                  << INDENT << "    __free_native_resources();" << endl
+                  << INDENT << "}" << endl;
             else
                 s << INDENT << "if(!__no_real_delete)" << endl
                   << INDENT << "    __free_native_resources();" << endl;
@@ -2238,9 +2239,9 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             {
                 Indentation indent(INDENT);
                 s << "(void* native_id, bool gc_managed) {" << endl
-                  << INDENT << "if(!gc_managed)" << endl
+/*                  << INDENT << "if(!gc_managed)" << endl
                   << INDENT << "    __gc_ref_list ~= this;" << endl
-                  << INDENT << "__gc_managed = gc_managed;" << endl
+                  << INDENT << "__gc_managed = gc_managed;" << endl */
                   << INDENT << "super(native_id);" << endl;
             }
         }
