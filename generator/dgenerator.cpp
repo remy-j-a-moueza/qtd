@@ -1900,7 +1900,14 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         else if (d_class->name() == "QApplication")
             s << "private import qt.gui.ArrayOps;" << endl;
 
-        s << "private import " << d_class->package() << ".ArrayOps2;" << endl;
+        /*
+           we don't need to import ArrayOps2 for anything else than QObjects,
+           for example if it is done in the namespaces, it may cause circular
+           imports forward references and shit. If ArrayOps2 is expanded later
+           for other usages - then restrict it just for namespaces/interfaces
+        */
+        if(d_class->isQObject())
+            s << "private import " << d_class->package() << ".ArrayOps2;" << endl;
 
         if (!d_class->enums().isEmpty())
             s << "public import " << d_class->package() << "." << d_class->name() << "_enum;" << endl << endl;
