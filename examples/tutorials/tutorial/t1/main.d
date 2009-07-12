@@ -38,7 +38,7 @@
 import qt.gui.QApplication;
 import qt.gui.QPushButton;
 
-int main(char[][] args)
+int main(string[] args)
 {
     QApplication app = new QApplication(args);
     QPushButton hello = new QPushButton("Hello world!");

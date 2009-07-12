@@ -88,9 +88,9 @@ struct Fn
 {
     void* funcptr;
 
-    static typeof(*this) opCall(R, A...)(R function(A) fn)
+    static typeof(this) opCall(R, A...)(R function(A) fn)
     {
-        typeof(*this) r;
+        typeof(this) r;
         r.funcptr = fn;
         return r;
     }
@@ -121,9 +121,9 @@ struct Dg
     void* context;
     void* funcptr;
 
-    static typeof(*this) opCall(R, A...)(R delegate(A) dg)
+    static typeof(this) opCall(R, A...)(R delegate(A) dg)
     {
-        typeof(*this) r;
+        typeof(this) r;
         r.context = dg.ptr;
         r.funcptr = dg.funcptr;
         return r;
@@ -692,7 +692,7 @@ public class SignalHandler
     // Adjusts signal arguments and calls the slot. S - slot signature, A - signal arguments
     private void invokeSlot(S, Receiver, A...)(Receiver r, A args)
     {
-        r.get!(S)()(args[0..ParameterTupleOf!(S).length]);
+        r.get!(S)()(args[0..ParameterTypeTuple!(S).length]);
     }
 
     void blockSignals()
@@ -769,14 +769,14 @@ public struct SignalOps(int sigId, A...)
 
 template CheckSlot(Slot, A...)
 {
-    static assert(ParameterTupleOf!(Slot).length <= A.length, "Slot " ~ ParameterTypeTuple!(Slot).stringof ~
+    static assert(ParameterTypeTuple!(Slot).length <= A.length, "Slot " ~ ParameterTypeTuple!(Slot).stringof ~
         " has more prameters than signal " ~ A.stringof);
     alias CheckSlotImpl!(Slot, 0, A) check;
 }
 
 template CheckSlotImpl(Slot, int i, A...)
 {
-    alias ParameterTupleOf!(Slot) SlotArgs;
+    alias ParameterTypeTuple!(Slot) SlotArgs;
     static if (i < SlotArgs.length)
     {
         static assert (is(SlotArgs[i] : A[i]), "Argument " ~ ToString!(i) ~

@@ -22,8 +22,8 @@ public struct QModelIndex
         return __qtd_QModelIndex_child_int_int(&this, row, column);
     }
 
-    public final int column() {
-        return __qtd_QModelIndex_column(&this);
+    public final int column() const {
+        return __qtd_QModelIndex_column(cast(void*)&this);
     }
 
     public final QVariant data(int role = 0) {
@@ -39,7 +39,7 @@ public struct QModelIndex
         return __qtd_QModelIndex_internalId(&this);
     }
 
-    public final void* internalPointer() {
+    public final const (void*) internalPointer() const {
         //return __qtd_QModelIndex_internalPointer(&this);
         return p;
     }
@@ -48,8 +48,8 @@ public struct QModelIndex
         return cast(Object) p;
     }
 
-    public final bool isValid() {
-        return __qtd_QModelIndex_isValid(&this);
+    public final bool isValid() const {
+        return __qtd_QModelIndex_isValid(cast(void*)&this);
     }
 
     public final QAbstractItemModel model() {
@@ -73,8 +73,8 @@ public struct QModelIndex
         return __qtd_QModelIndex_parent(&this);
     }
 
-    public final int row() {
-        return __qtd_QModelIndex_row(&this);
+    public final int row() const {
+        return __qtd_QModelIndex_row(cast(void*)&this);
     }
 
     public final QModelIndex sibling(int row, int column) {

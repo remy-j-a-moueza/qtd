@@ -293,7 +293,7 @@ class QMatrix___ extends QMatrix {
 class QImage___ extends QImage {
     private import qt.qtd.Str;
 
-    public this(in string[] xpm) {
+    public this(string[] xpm) {
         this(toStringzArray(xpm));
     }
 /*
@@ -479,7 +479,7 @@ class QPixmap___ extends QPixmap {
 
 	private import qt.qtd.Str;
 
-        public this(in string[] xpm) {
+    public this(string[] xpm) {
 		this(toStringzArray(xpm));
 	}
 	

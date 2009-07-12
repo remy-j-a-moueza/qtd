@@ -3716,13 +3716,15 @@ QString CppImplGenerator::translateType(const AbstractMetaType *java_type, Optio
         else
             return d_name + " "+ QString(java_type->actualIndirections(), '*');
     } else if (java_type->isNativePointer()) {
-        if (java_type->typeEntry()->isValue())
+        if (java_type->typeEntry()->isStructInD() && dVersion == 2 && java_type->isConstant() && d_export)
+            return "const(" + d_name + QString(java_type->indirections()-1, '*') + ")*";
+        else if (java_type->typeEntry()->isValue())
             return "void*";
         else if (java_type->typeEntry()->isEnum() && d_export)
             return "int" + QString(java_type->indirections(), '*');
         else {
             if (java_type->isConstant() && dVersion == 2 && d_export)
-                return "const (" + d_name + ")" + QString(java_type->indirections(), '*');
+                return "const (" + d_name + QString(java_type->indirections(), '*') + ")";
             else
                 return d_name + QString(java_type->indirections(), '*');
         }

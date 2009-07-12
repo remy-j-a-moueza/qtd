@@ -48,18 +48,17 @@ import qt.core.QModelIndex;
 import tango.core.Array;
 import Integer = tango.text.convert.Integer;
 
-import tango.io.Stdout;
-
-    class Node
+    
+class Node
+{
+    this(Node parent_ = null)
     {
-        this(Node parent_ = null)
-        {
-            parent = parent_;
-        }
-        
-        Node parent;
-        Node[] children;
+        parent = parent_;
     }
+        
+    Node parent;
+    Node[] children;
+}
     
 class Model : QAbstractItemModel
 {

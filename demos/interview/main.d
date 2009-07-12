@@ -34,8 +34,10 @@
 ** contact the sales department at qt-sales@nokia.com.
 **
 ****************************************************************************/
-
-import model;
+version(D_Version2)
+    import model_d2;
+else
+    import model;
 
 import qt.gui.QApplication;
 import qt.gui.QItemSelectionModel;
@@ -48,7 +50,7 @@ import qt.gui.QListView;
 import qt.gui.QIcon;
 import qt.gui.QPixmap;
 
-int main(char[][] args)
+int main(string[] args)
 {
     scope app = new QApplication(args);
     scope page = new QSplitter;

@@ -40,9 +40,8 @@ import qt.gui.QFont;
 import qt.gui.QPushButton;
 import qt.gui.QWidget;
 
-import tango.io.Stdout;
 
-int main(char[][] args)
+int main(string[] args)
 {
     QApplication app = new QApplication(args);
     QWidget window = new QWidget();
