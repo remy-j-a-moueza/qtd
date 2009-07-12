@@ -44,7 +44,7 @@ version(cpp_shared)
     }
 }
 
-char[] tr(char[] arg) {
+string tr(string arg) {
     return arg;
 }
 

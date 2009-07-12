@@ -63,8 +63,10 @@ import qt.gui.
 import qt.gui.
 import qt.gui.
 */
-import tango.text.Util;
-import tango.io.Stdout;
+version(Tango)
+    import tango.text.Util;
+else
+    import std.string;
 
 class MainWindow : public QMainWindow
 {
@@ -162,11 +164,12 @@ class MainWindow : public QMainWindow
             document.undo();
         }
 
-        void insertCustomer(char[] customer)
+        void insertCustomer(string customer)
         {
             if (customer == "")
                 return;
-            char[][] customerList = customer.split(", ");
+            
+            string[] customerList = customer.split(", ");
             auto document = textEdit.document();
             QTextCursor cursor = document.find("NAME");
             if (!cursor.isNull) {
@@ -186,7 +189,7 @@ class MainWindow : public QMainWindow
             }
         }
 
-        void addParagraph(char[] paragraph)
+        void addParagraph(string paragraph)
         {
             if (paragraph == "")
                 return;
