@@ -47,7 +47,6 @@ import qt.gui.QColor;
 import qt.gui.QPaintEvent;
 import qt.gui.QPainter;
 
-import tango.io.Stdout;
 
 class AnalogClock : public QWidget
 {
@@ -64,12 +63,12 @@ public:
 
     void paintEvent(QPaintEvent event)
     {
-        static const QPoint[3] hourHand = [
+        const QPoint[3] hourHand = [
             QPoint(7, 8),
             QPoint(-7, 8),
             QPoint(0, -40)
         ];
-        static const QPoint[3] minuteHand = [
+        const QPoint[3] minuteHand = [
             QPoint(7, 8),
             QPoint(-7, 8),
             QPoint(0, -70)

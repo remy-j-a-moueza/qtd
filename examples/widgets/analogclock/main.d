@@ -41,7 +41,7 @@ import qt.gui.QApplication;
 import AnalogClock;
 
 
-int main(char[][] args)
+int main(string[] args)
 {
     scope app = new QApplication(args);
     scope clock = new AnalogClock;

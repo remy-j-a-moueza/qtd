@@ -29,7 +29,10 @@ core_link_cpp +=
 core_link_d += 
 
 ## Module specific cpp files.
-core_cpp_files += cpp/qt_qtd/qtd_core.cpp cpp/qt_qtd/ArrayOpsPrimitive_shell.cpp
+core_cpp_files += cpp/qt_qtd/qtd_core.cpp cpp/qt_qtd/ArrayOpsPrimitive_shell.cpp \
+cpp/qt_core/QPoint_shell.cpp cpp/qt_core/QPointF_shell.cpp cpp/qt_core/QRect_shell.cpp cpp/qt_core/QRectF_shell.cpp \
+cpp/qt_core/QSize_shell.cpp cpp/qt_core/QSizeF_shell.cpp cpp/qt_core/QLine_shell.cpp cpp/qt_core/QLineF_shell.cpp \
+cpp/qt_core/QModelIndex_shell.cpp cpp/qt_core/QVariant_shell.cpp
 
 ## Module specific d files.
 core_d_files += $(QTD_CORE:%=qt/%.d) qt/core/ArrayOps2
