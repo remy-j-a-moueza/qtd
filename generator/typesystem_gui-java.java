@@ -1079,7 +1079,7 @@ class QPainter___ extends QPainter {
 
 class QApplication___ extends QApplication {
 
-        this(in string[] args)
+    this(string[] args)
 	{
 //        if (m_instance != null)
 //            throw new RuntimeException("QCoreApplication can only be initialized once");

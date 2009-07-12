@@ -9,9 +9,15 @@ version (Tango)
     {
         Stdout(s).newline;
     }
+    package import tango.stdc.stdlib,
+                   tango.core.Memory;
 }
 else
+{
     import std.stdio;
+    package import std.c.stdlib,
+                   core.memory;
+}
 
 template QT_BEGIN_NAMESPACE() {
 }

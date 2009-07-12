@@ -9,9 +9,15 @@ version (Tango)
     {
         Stdout(s).newline;
     }
+    package import tango.stdc.stdlib,
+                   tango.core.Memory;
 }
 else
+{
     import std.stdio;
+    package import std.c.stdlib,
+                   core.memory;
+}
 
 template QT_BEGIN_NAMESPACE() {
 }
@@ -586,9 +592,6 @@ const ushort QT_EDITION_EVALUATION =  QT_EDITION_DESKTOP;
 
 mixin QT_END_NAMESPACE;
 
-package import tango.stdc.stdlib,
-               tango.core.Memory;
-
 private
 struct Align
 {
@@ -598,11 +601,6 @@ struct Align
  
 private
 const PTR_ALIGN = Align.tupleof[1].alignof;
- 
-version( X86 )
-    const MEM_ALIGN = 8u;
-else
-    static assert(false, "Unknown memory alignment for this platform.");
  
 private
 template AlignPad(size_t base, size_t aligned)
@@ -670,22 +668,6 @@ template Max(size_t a, size_t b)
         const Max = a;
     else
         const Max = b;
-}
- 
-template InstanceSizeAligned(T, size_t alignment=MEM_ALIGN)
-{
-    static if( alignment == 0 )
-        const InstanceSizeAligned = InstanceSize!(T);
-    else
-        const uint InstanceSizeAligned
-            = InstanceSizeAlignImpl!(T, alignment).result;
-}
- 
-private
-template InstanceSizeAlignedImpl(T, size_t alignment)
-{
-    private const base_size = InstanceSize!(T);
-    const result = ((base_size+alignment-1)/alignment)*alignment;
 }
  
 private

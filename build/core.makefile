@@ -5,7 +5,18 @@ D_PATH = d2/qt
 endif
 
 ##--------------------------
-QTD_CORE += QGlobal qtd/Str core/Qt qtd/ArrayOpsPrimitive QtDObject $(D_PATH)/Signal
+QTD_CORE += QGlobal $(D_PATH)/qtd/Str core/Qt qtd/ArrayOpsPrimitive $(D_PATH)/QtDObject $(D_PATH)/Signal \
+$(D_PATH)/core/QPoint \
+$(D_PATH)/core/QPointF \
+$(D_PATH)/core/QRect \
+$(D_PATH)/core/QRectF \
+$(D_PATH)/core/QSize \
+$(D_PATH)/core/QSizeF \
+$(D_PATH)/core/QLine \
+$(D_PATH)/core/QLineF \
+$(D_PATH)/core/QModelIndex \
+$(D_PATH)/core/QVariant
+
 ##--------------------------
 
 ## Qt Lib name.
@@ -34,27 +45,17 @@ core_classes =  \
     QObject \
     QTimerEvent \
     QTranslator \
-    QPoint \
-    QPointF \
-    QRect \
-    QRectF \
     QByteArray \
     QLocale \
-    QSize \
-    QSizeF \
     QDataStream \
-    QLine \
-    QLineF \
     QMimeData \
     QIODevice \
     QDateTime \
     QDate \
     QTime \
-    QVariant \
     QBitArray \
     QRegExp \
     QUrl \
-    QModelIndex \
     QAbstractItemModel \
     QAbstractFileEngine \
     QFile \

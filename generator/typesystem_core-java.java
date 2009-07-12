@@ -137,7 +137,7 @@ class QCoreApplication___ extends QCoreApplication {
 
     protected static QCoreApplication m_instance = null;
 
-	this(in string[] args)
+	this(string[] args)
 	{
 //        if (m_instance != null)
 //            throw new RuntimeException("QCoreApplication can only be initialized once");

@@ -15,6 +15,7 @@ version (Tango)
 {
     import tango.text.convert.Utf : toString;
     alias char[] string;
+    alias wchar[] wstring;
 }
 else
 {

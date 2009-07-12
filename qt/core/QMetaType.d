@@ -110,4 +110,4 @@ public void qRegisterMetaTypeStreamOperators(T)(void function(ref QDataStream, T
 */
 private extern(C) void qtd_registerStreamOperators(char *typeName, StreamOp saveOp, StreamOp loadOp);
 private extern(C) int qtd_registerType(in char* namePtr, Ctor ctor, Dtor dtor);
-extern(C) int qtd_MetatypeId(char *id); // TODO: wrap to D.
+extern(C) int qtd_MetatypeId(in char *id); // TODO: wrap to D.

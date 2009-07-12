@@ -2197,7 +2197,7 @@
   </object-type>
 
   <object-type name="QBuffer">
-    <modify-function signature="buffer()">
+    <modify-function signature="buffer()const">
         <remove/>
     </modify-function>
   

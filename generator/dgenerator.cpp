@@ -123,6 +123,12 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
     if (context != 0 && d_type != 0 && context->typeEntry()->isGenericClass() && d_type->originalTemplateType() != 0)
         d_type = d_type->originalTemplateType();
 
+    QString constPrefix, constPostfix;
+    if (d_type && d_type->isConstant() && dVersion == 2) {
+        constPrefix = "const(";
+        constPostfix = ") ";
+    }
+
     if (!d_type) {
         s = "void";
     } else if (d_type->typeEntry()->qualifiedCppName() == "QChar") {
@@ -163,7 +169,7 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
             else if (d_type->typeEntry()->isEnum())
                 s = "int" + QString(d_type->actualIndirections(), '*');
             else
-                s = d_type->typeEntry()->lookupName() + QString(d_type->actualIndirections(), '*');
+                s = constPrefix + d_type->typeEntry()->lookupName() + QString(d_type->actualIndirections(), '*') + constPostfix;
         } else if (d_type->isContainer()) {
             const ContainerTypeEntry* c_entry = static_cast<const ContainerTypeEntry*>(d_type->typeEntry());
             Q_ASSERT(c_entry);
@@ -203,8 +209,10 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
                 type = type->designatedInterface();
             if (type->isString())
                 s = "string";
-            else if (type->isObject()){
+            else if (type->isObject()) {
                 s = type->name();
+            } else if (type->isValue()){
+                s = constPrefix + type->lookupName() + constPostfix;
             } else {
                 s = type->lookupName();
             }
@@ -755,8 +763,12 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         s << d_function->marshalledName() << "(";
     }
 
-    if (!d_function->isConstructor() && !d_function->isStatic())
-        s << "nativeId";
+    if (!d_function->isConstructor() && !d_function->isStatic()) {
+        if(dVersion == 2 && d_function->isConstant())
+            s << "(cast(" << d_function->ownerClass()->name() << ")this).nativeId";
+        else
+            s << "nativeId";
+    }
 
     if (d_function->isConstructor() &&
         ( d_function->implementingClass()->hasVirtualFunctions()
@@ -818,7 +830,10 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                     s << arg_name << " is null ? null : ";
                 } // else if (value type is abstract) then we will get a null pointer exception, which is all right
 
-                s << arg_name << ".nativeId";
+                if(dVersion == 2 && type->isConstant())
+                    s << "(cast(" << type->name() << ")" << arg_name << ").nativeId";
+                else
+                    s << arg_name << ".nativeId";
             }
         }
     }
@@ -1936,13 +1951,6 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << m_doc_parser->documentation(d_class) << endl << endl;
     }
 
-/* qtd    s << "@QtJambiGeneratedClass" << endl;
-
-    if ((d_class->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated) != 0) {
-        s << "@Deprecated" << endl;
-    }
-*/
-
     // Enums aliases outside of the class - hack
     if (!d_class->enums().isEmpty()) {
         QString fileName = QString("%1_enum.d").arg(d_class->name());
@@ -1955,6 +1963,14 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 
 
     s << endl;
+
+/* qtd    s << "@QtJambiGeneratedClass" << endl;
+
+    if ((d_class->typeEntry()->typeFlags() & ComplexTypeEntry::Deprecated) != 0) {
+        s << "@Deprecated" << endl;
+    }
+*/
+
 
     if (d_class->isInterface()) {
         s << "public interface ";
@@ -2828,7 +2844,7 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                     s << INDENT << "auto " << arg_name << "_d_ref = cast(wchar" << QString(type->actualIndirections(), '*')
                                 << ") " << arg_name << ";";
                 else if (type->isTargetLangString())
-                    s << INDENT << "string " << arg_name << "_d_ref = toString("
+                    s << INDENT << "string " << arg_name << "_d_ref = toUTF8("
                                 << arg_name << "[0.." << arg_name << "_size]);";
                 else if (type->typeEntry()->isValue() && type->isNativePointer() && type->typeEntry()->name() == "QString") {
                     s << INDENT << "auto " << arg_name << "_d_qstr = QString(" << arg_name << ", true);" << endl

@@ -394,9 +394,9 @@ extern "C" DLL_PUBLIC void* qtd_QVariant_QVariant_QSizeF
 
 // QVariant::QVariant(const QString & string)
 extern "C" DLL_PUBLIC void* qtd_QVariant_QVariant_String
-(char* string0, uint string0_size)
+(DArray string0)
 {
-    QString __qt_string0 = QString::fromUtf8(string0, string0_size);
+    QString __qt_string0 = QString::fromUtf8((const char *)string0.ptr, string0.length);
     QVariant_QtDShell *__qt_this = new QVariant_QtDShell((const QString& )__qt_string0);
     return (void *) __qt_this;
 

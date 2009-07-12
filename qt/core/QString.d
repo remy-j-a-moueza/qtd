@@ -4,11 +4,11 @@ import qt.QGlobal;
 
 version (Tango)
 {
-    import tango.text.convert.Utf : toString;
+    public import tango.text.convert.Utf : toUTF8 = toString;
 }
 else
 {
-    import std.utf : toString = toUTF8;
+    public import std.utf : toUTF8;
 }
 
 struct QString
@@ -21,25 +21,29 @@ struct QString
     
     private void* native_id;
     
-    public static final char[] toNativeString(void* qstring) {
+    public static final string toNativeString(void* qstring) {
         wchar* arr = __qtd_QString_utf16(qstring);
         int size = __qtd_QString_size(qstring);
-        return .toString(arr[0..size]);
+        return .toUTF8(arr[0..size]);
     }
     
-    public final char[] toNativeString() {
+    public final string toNativeString() {
         return toNativeString(native_id);
     }
     
-    public void assign(char[] text) {
-        __qtd_QString_operatorAssign(native_id, text.ptr, text.length);
+    public void assign(string text) {
+        __qtd_QString_operatorAssign(native_id, text);
     }
     
     public static string fromUtf8(string source) {
         return source;
     }
+/*    
+    public static string fromUtf16(wstring src) {
+        version(Tango)
+    }*/
 }
 
 private extern (C) wchar* __qtd_QString_utf16(void* __this_nativeId);
 private extern (C) int __qtd_QString_size(void* __this_nativeId);
-private extern (C) void __qtd_QString_operatorAssign(void* __this_nativeId, char* text, uint text_size);
+private extern (C) void __qtd_QString_operatorAssign(void* __this_nativeId, string text);

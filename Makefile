@@ -56,7 +56,7 @@ ifndef $(NAME_PREFIX)
 NAME_PREFIX = qtd
 endif
 ifndef $(PACKAGES)
-PACKAGES = core gui
+PACKAGES = core
 endif
 LIB_PREFIX = lib
 CC_INCLUDE += include $(QTDIR_INC) $(QTDIR_INC)$(SL)Qt $(QTDIR_INC)$(SL)QtCore $(QTDIR_INC)$(SL)QtGui $(QTDIR_INC)$(SL)QtOpenGL $(QTDIR_INC)$(SL)QtSvg
@@ -71,6 +71,7 @@ D_LIB_PATH += $(TMP_PATH)
 ifndef D_TARGET
 D_TARGET = d1-tango
 endif
+
 ifeq ($(D_TARGET), d1-tango)
 D_VERSION = 1
 else
@@ -151,7 +152,7 @@ make_gen:
 	cd generator && qmake && $(MAKE)
 
 dgen:  make_gen
-	cd generator && $(GEN) $(GEN_OPT) --d-target=$(D_TARGET) --output-directory=../ qtjambi_masterinclude.h build_gui.txt
+	cd generator && $(GEN) $(GEN_OPT) --d-target=$(D_TARGET) --output-directory=../ qtjambi_masterinclude.h build_core.txt
 ## DGenerator ## end
 
 mkdir:

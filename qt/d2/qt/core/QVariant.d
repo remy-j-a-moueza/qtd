@@ -24,13 +24,7 @@ private import qt.core.QLineF;
 private import qt.core.QRect;
 private import qt.core.QLocale;
 
-version (Tango)
-{
-    import tango.core.Array;
-    import tango.stdc.stringz;
-    import tango.text.convert.Utf;
-    import tango.core.Traits;
-}
+import std.string;
 
 
 public class QVariant : QtDObject
@@ -186,7 +180,7 @@ public class QVariant : QtDObject
 
 
     public this(string str) {
-        void* __qt_return_value = qtd_QVariant_QVariant_String(str.ptr, str.length);
+        void* __qt_return_value = qtd_QVariant_QVariant_String(str);
         super(__qt_return_value);
     }
 
@@ -310,7 +304,7 @@ public class QVariant : QtDObject
         super(__qt_return_value);
     }
 
-    private final bool canConvertImpl(char[] name)
+    private final bool canConvertImpl(string name)
     {
 	int i = qtd_MetatypeId(toStringz(name));
 	assert(i > 0);
@@ -639,7 +633,7 @@ private extern(C) void* qtd_QVariant_QVariant_QBitArray(void* bitarray0);
 private extern(C) void* qtd_QVariant_QVariant_QByteArray(void* bytearray0);
 private extern(C) void* qtd_QVariant_QVariant_QDate(void* date0);
 private extern(C) void* qtd_QVariant_QVariant_QDateTime(void* datetime0);
-private extern(C) void* qtd_QVariant_QVariant_String(char* string0, uint string0_size);
+private extern(C) void* qtd_QVariant_QVariant_String(string string0);
 private extern(C) void* qtd_QVariant_QVariant_QLine(void* line0);
 private extern(C) void* qtd_QVariant_QVariant_QLineF(void* line0);
 private extern(C) void* qtd_QVariant_QVariant_QLocale(void* locale0);

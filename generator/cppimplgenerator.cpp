@@ -2014,9 +2014,12 @@ void CppImplGenerator::writeFinalFunctionArguments(QTextStream &s, const Abstrac
                     } else
                         s << translateType(argument->type(), EnumAsInts, d_export);
                 }
-                else if (d_type->name() == "QModelIndex")
-                    s << "QModelIndexAccessor";
-                else if (te->isStructInD())
+                else if (d_type->name() == "QModelIndex") {
+                    if(d_export && dVersion == 2 && d_type->isConstant())
+                        s << "const(QModelIndexAccessor)";
+                    else
+                        s << "QModelIndexAccessor";
+                } else if (te->isStructInD())
                     s << te->qualifiedCppName();
                 else
                     s << "void*";
@@ -3717,8 +3720,12 @@ QString CppImplGenerator::translateType(const AbstractMetaType *java_type, Optio
             return "void*";
         else if (java_type->typeEntry()->isEnum() && d_export)
             return "int" + QString(java_type->indirections(), '*');
-        else
-            return d_name + QString(java_type->indirections(), '*');
+        else {
+            if (java_type->isConstant() && dVersion == 2 && d_export)
+                return "const (" + d_name + ")" + QString(java_type->indirections(), '*');
+            else
+                return d_name + QString(java_type->indirections(), '*');
+        }
     } else {
         return d_name + QString(java_type->indirections(), '*');
     }

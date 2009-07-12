@@ -17,8 +17,8 @@ extern "C" DLL_PUBLIC int __qtd_QString_size
 
 extern "C" DLL_PUBLIC void __qtd_QString_operatorAssign
 (void* __this_nativeId,
- char* text, uint text_size)
+ DArray text)
 {
     QString *__qt_this = (QString *) __this_nativeId;
-    *__qt_this = QString::fromUtf8(text, text_size);
+    *__qt_this = QString::fromUtf8((const char *)text.ptr, text.length);
 }

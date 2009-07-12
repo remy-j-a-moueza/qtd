@@ -17,7 +17,8 @@ import core.stdc.stdlib : crealloc = realloc, cfree = free;
 import core.stdc.string : memmove;
 import
     std.traits,
-    core.thread;
+    core.thread,
+    core.exception;
 
 
 
@@ -35,7 +36,7 @@ void realloc(T)(ref T[] a, size_t length)
 {
     a = (cast(T*)crealloc(a.ptr, length * T.sizeof))[0..length];
     if (!a.ptr)
-        new OutOfMemoryException(__FILE__, __LINE__);
+        new OutOfMemoryError(__FILE__, __LINE__);
 }
 
 unittest
