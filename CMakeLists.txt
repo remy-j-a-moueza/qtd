@@ -17,7 +17,6 @@ set(GENERATE_DI_FILES OFF) ## Very experemental option. Temporary disabled.
 
 set(QTD_VERSION_STR ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
 math(EXPR QTD_VERSION "(${QT_VERSION_MAJOR} << 16) + (${QT_VERSION_MINOR} << 8) + ${QT_VERSION_PATCH}")
-configure_file(qt/QGlobal.d.inc qt/QGlobal.d)
 
 set(all_packages Core Gui OpenGL Xml Svg Network WebKit) 
 

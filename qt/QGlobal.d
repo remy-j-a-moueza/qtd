@@ -1,6 +1,7 @@
 module qt.QGlobal;
 
 public import qt.qtd.Str;
+public import qt.QDefines;
 
 version (Tango)
 {
@@ -48,13 +49,6 @@ string tr(string arg) {
     return arg;
 }
 
-// TODO(katrina) get this from the C++ side
-const char[] QT_VERSION_STR = "4.5.0";
-/*
-   QT_VERSION is (major << 16) + (minor << 8) + patch.
-   //TODO(katrina) get this from the C++ side
-*/
-const int QT_VERSION = 0x040403;
 /*
    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 4, 0))
 */
