@@ -89,18 +89,18 @@ class Model : QAbstractItemModel
     }
 
 
-    QModelIndex index(int row, int column, const QModelIndex parent)
+    override QModelIndex index(int row, int column, const QModelIndex parent)
     {
         if (row < rc && row >= 0 && column < cc && column >= 0) {
             Node p = cast(Node) parent.internalPointer();
             Node n = getNode(row, p);
-        if (n !is null)
-            return createIndex(row, column, cast(void*)n);
+            if (n !is null)
+                return createIndex(row, column, cast(void*)n);
         }
         return QModelIndex();
     }
 
-    QModelIndex parent(const QModelIndex child)
+    override QModelIndex parent(const QModelIndex child)
     {
         if (child.isValid()) {
             Node n = cast(Node) child.internalPointer();
@@ -111,17 +111,17 @@ class Model : QAbstractItemModel
         return QModelIndex();
     }
 
-    int rowCount(const QModelIndex parent)
+    override int rowCount(const QModelIndex parent)
     {
         return (parent.isValid() && parent.column() != 0) ? 0 : rc;
     }
 
-    int columnCount(const QModelIndex parent)
+    override int columnCount(const QModelIndex parent)
     {
         return cc;
     }
     
-    QVariant data(const QModelIndex index, int role)
+    override QVariant data(const QModelIndex index, int role)
     {
         if (!index.isValid)
             return new QVariant;
@@ -136,7 +136,7 @@ class Model : QAbstractItemModel
         return new QVariant;
     }
     
-    QVariant headerData(int section, Qt.Orientation orientation, int role)
+    override QVariant headerData(int section, Qt.Orientation orientation, int role)
     {
         if (role == Qt.DisplayRole)
             return new QVariant(to!string(section));
@@ -145,14 +145,14 @@ class Model : QAbstractItemModel
         return QAbstractItemModel.headerData(section, orientation, role);
     }
 
-    bool hasChildren(const QModelIndex parent)
+    override bool hasChildren(const QModelIndex parent)
     {
         if (parent.isValid && parent.column != 0)
             return false;
         return rc > 0 && cc > 0;
     }
     
-    int flags(const QModelIndex index)
+    override int flags(const QModelIndex index)
     {
         if (!index.isValid)
             return 0;

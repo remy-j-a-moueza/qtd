@@ -81,7 +81,7 @@ class Model : QAbstractItemModel
     }
 
 
-    QModelIndex index(int row, int column, QModelIndex parent)
+    override QModelIndex index(int row, int column, QModelIndex parent)
     {
         if (row < rc && row >= 0 && column < cc && column >= 0) {
             Node p = cast(Node) parent.internalPointer();
@@ -92,7 +92,7 @@ class Model : QAbstractItemModel
         return QModelIndex();
     }
 
-    QModelIndex parent(QModelIndex child)
+    override QModelIndex parent(QModelIndex child)
     {
         if (child.isValid()) {
             Node n = cast(Node) child.internalPointer();
@@ -103,17 +103,17 @@ class Model : QAbstractItemModel
         return QModelIndex();
     }
 
-    int rowCount(QModelIndex parent)
+    override int rowCount(QModelIndex parent)
     {
         return (parent.isValid() && parent.column() != 0) ? 0 : rc;
     }
 
-    int columnCount(QModelIndex parent)
+    override int columnCount(QModelIndex parent)
     {
         return cc;
     }
     
-    QVariant data(QModelIndex index, int role)
+    override QVariant data(QModelIndex index, int role)
     {
         if (!index.isValid)
             return new QVariant;
@@ -128,7 +128,7 @@ class Model : QAbstractItemModel
         return new QVariant;
     }
     
-    QVariant headerData(int section, Qt.Orientation orientation, int role)
+    override QVariant headerData(int section, Qt.Orientation orientation, int role)
     {
         if (role == Qt.DisplayRole)
             return new QVariant(Integer.toString(section));
@@ -137,14 +137,14 @@ class Model : QAbstractItemModel
         return QAbstractItemModel.headerData(section, orientation, role);
     }
 
-    bool hasChildren(QModelIndex parent)
+    override bool hasChildren(QModelIndex parent)
     {
         if (parent.isValid && parent.column != 0)
             return false;
         return rc > 0 && cc > 0;
     }
     
-    int flags(QModelIndex index)
+    override int flags(QModelIndex index)
     {
         if (!index.isValid)
             return 0;
