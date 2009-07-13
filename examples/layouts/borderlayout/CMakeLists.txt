@@ -1,1 +1,1 @@
-build_example(borderlayout main.d borderlayout.d window.d)
+build_example(borderlayout DETECT_DEPENDS main.d)

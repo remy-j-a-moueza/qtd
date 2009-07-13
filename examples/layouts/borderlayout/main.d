@@ -47,9 +47,9 @@ import window;
 
 int main(string[] args)
 {
-	scope app = new QApplication(args);
-	scope window = new Window;
-	window.show();
-	return app.exec();
+    scope app = new QApplication(args);
+    scope window = new Window;
+    window.show();
+    return app.exec();
 }
 

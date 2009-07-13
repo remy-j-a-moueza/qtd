@@ -41,9 +41,13 @@
 
 module dropsitewindow;
 
-import tango.text.Util;
-import tango.text.Ascii;
-import tango.text.convert.Format;
+version(Tango) {
+    import tango.text.Util;
+    import tango.text.Ascii;
+    import tango.text.convert.Format: format = Format;
+} else {
+    import std.string;
+}
 
 import qt.gui.QWidget;
 import qt.gui.QLabel;

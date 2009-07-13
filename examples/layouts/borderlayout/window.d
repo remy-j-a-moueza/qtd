@@ -45,36 +45,39 @@ import qt.gui.QTextBrowser;
 import qt.gui.QWidget;
 import qt.gui.QLabel;
 
-import borderlayout;
+version(D_Version2)
+    import borderlayout;
+else
+    import borderlayout_d1;
 
 
 class Window : public QWidget
 {
 public:
 
-	this()
-	{
-		QTextBrowser centralWidget = new QTextBrowser;
-		centralWidget.setPlainText(tr("Central widget"));
+    this()
+    {
+        QTextBrowser centralWidget = new QTextBrowser;
+        centralWidget.setPlainText(tr("Central widget"));
 
-		BorderLayout layout = new BorderLayout;
-		layout.addWidget(centralWidget, BorderLayout.Position.Center);
-		layout.addWidget(createLabel("North"), BorderLayout.Position.North);
-		layout.addWidget(createLabel("West"), BorderLayout.Position.West);
-		layout.addWidget(createLabel("East 1"), BorderLayout.Position.East);
-		layout.addWidget(createLabel("East 2") , BorderLayout.Position.East);
-		layout.addWidget(createLabel("South"), BorderLayout.Position.South);
-		setLayout(layout);
+        BorderLayout layout = new BorderLayout;
+        layout.addWidget(centralWidget, BorderLayout.Position.Center);
+        layout.addWidget(createLabel("North"), BorderLayout.Position.North);
+        layout.addWidget(createLabel("West"), BorderLayout.Position.West);
+        layout.addWidget(createLabel("East 1"), BorderLayout.Position.East);
+        layout.addWidget(createLabel("East 2") , BorderLayout.Position.East);
+        layout.addWidget(createLabel("South"), BorderLayout.Position.South);
+        setLayout(layout);
 
-		setWindowTitle(tr("Border Layout"));
-	}
+        setWindowTitle(tr("Border Layout"));
+    }
 
 private:
 
-	QLabel createLabel(char[] text)
-	{
-		QLabel label = new QLabel(text);
-		label.setFrameStyle(QFrame.Box | QFrame.Raised);
-		return label;
-	}
+    QLabel createLabel(string text)
+    {
+        QLabel label = new QLabel(text);
+        label.setFrameStyle(QFrame.Box | QFrame.Raised);
+        return label;
+    }
 }

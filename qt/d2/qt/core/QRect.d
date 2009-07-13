@@ -41,31 +41,31 @@ public struct QRect
         y2 = (y1+asize.height() - 1);
     }
 
-    bool isNull() // const
+    bool isNull() const
     { return x2 == x1 - 1 && y2 == y1 - 1; }
 
-    bool isEmpty() // const
+    bool isEmpty() const
     { return x1 > x2 || y1 > y2; }
 
-    bool isValid() // const
+    bool isValid() const
     { return x1 <= x2 && y1 <= y2; }
 
-    int left() // const
+    int left() const
     { return x1; }
 
-    int top() // const
+    int top() const
     { return y1; }
 
-    int right() // const
+    int right() const
     { return x2; }
 
-    int bottom() // const
+    int bottom() const
     { return y2; }
 
-    int x() // const
+    int x() const
     { return x1; }
 
-    int y() // const
+    int y() const
     { return y1; }
 
     void left(int pos)
@@ -110,28 +110,28 @@ public struct QRect
     void setY(int ay)
     { y1 = ay; }
 
-    QPoint topLeft() // const
+    QPoint topLeft() const
     { return QPoint(x1, y1); }
 
-    QPoint bottomRight() // const
+    QPoint bottomRight() const
     { return QPoint(x2, y2); }
 
-    QPoint topRight() // const
+    QPoint topRight() const
     { return QPoint(x2, y1); }
 
-    QPoint bottomLeft() // const
+    QPoint bottomLeft() const
     { return QPoint(x1, y2); }
 
-    QPoint center() // const
+    QPoint center() const
     { return QPoint((x1+x2)/2, (y1+y2)/2); }
 
-    int width() // const
+    int width() const
     { return  x2 - x1 + 1; }
 
-    int height() // const
+    int height() const
     { return  y2 - y1 + 1; }
 
-    QSize size() // const
+    QSize size() const
     { return QSize(width(), height()); }
 
     void translate(int dx, int dy)
@@ -150,10 +150,10 @@ public struct QRect
         y2 += p.y();
     }
 
-    QRect translated(int dx, int dy) // const
+    QRect translated(int dx, int dy) const
     { return QRect(QPoint(x1 + dx, y1 + dy), QPoint(x2 + dx, y2 + dy)); }
 
-    QRect translated(ref QPoint p) // const
+    QRect translated(ref QPoint p) const
     { return QRect(QPoint(x1 + p.x(), y1 + p.y()), QPoint(x2 + p.x(), y2 + p.y())); }
 
     void moveTo(int ax, int ay)
@@ -214,7 +214,7 @@ public struct QRect
         moveBottom(p.y());
     }
 
-    void getRect(int *ax, int *ay, int *aw, int *ah) // const
+    void getRect(int *ax, int *ay, int *aw, int *ah) const
     {
         *ax = x1;
         *ay = y1;
@@ -230,7 +230,7 @@ public struct QRect
         y2 = (ay + ah - 1);
     }
 
-    void getCoords(int *xp1, int *yp1, int *xp2, int *yp2) // const
+    void getCoords(int *xp1, int *yp1, int *xp2, int *yp2) const
     {
         *xp1 = x1;
         *yp1 = y1;
@@ -246,7 +246,7 @@ public struct QRect
         y2 = yp2;
     }
 
-    QRect adjusted(int xp1, int yp1, int xp2, int yp2) // const
+    QRect adjusted(int xp1, int yp1, int xp2, int yp2) const
     { return QRect(QPoint(x1 + xp1, y1 + yp1), QPoint(x2 + xp2, y2 + yp2)); }
 
     void adjust(int dx1, int dy1, int dx2, int dy2)
@@ -269,12 +269,12 @@ public struct QRect
         y2 = (s.height() + y1 - 1);
     }
 
-    bool contains(int ax, int ay, bool aproper) // const
+    bool contains(int ax, int ay, bool aproper) const
     {
         return contains(QPoint(ax, ay), aproper);
     }
 
-    bool contains(int ax, int ay) // const
+    bool contains(int ax, int ay) const
     {
         return contains(QPoint(ax, ay), false);
     }
@@ -291,12 +291,12 @@ public struct QRect
         return this;
     }
 
-    QRect intersected(ref QRect other) // const
+    QRect intersected(ref QRect other) const
     {
         return this & other;
     }
 
-    QRect united(ref QRect r) // const
+    QRect united(ref QRect r) const
     {
         return this | r;
     }
@@ -314,28 +314,28 @@ public struct QRect
         qtd_QRect_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
     }
 
-    public final QRect opAnd(ref QRect r) {
-        return qtd_QRect_operator_and_QRect(&this, &r);
+    public final QRect opAnd(ref QRect r) const {
+        return qtd_QRect_operator_and_QRect(cast(void*)&this, &r);
     }
 
-    public final QRect opOr(ref QRect r) {
-        return qtd_QRect_operator_or_QRect(&this, &r);
+    public final QRect opOr(ref QRect r) const {
+        return qtd_QRect_operator_or_QRect(cast(void*)&this, &r);
     }
 
-    public final bool contains(QPoint p, bool proper = false) {
-        return qtd_QRect_contains_QPoint_bool(&this, &p, proper);
+    public final bool contains(QPoint p, bool proper = false) const {
+        return qtd_QRect_contains_QPoint_bool(cast(void*)&this, &p, proper);
     }
 
-    public final bool contains(QRect r, bool proper = false) {
-        return qtd_QRect_contains_QRect_bool(&this, &r, proper);
+    public final bool contains(QRect r, bool proper = false) const {
+        return qtd_QRect_contains_QRect_bool(cast(void*)&this, &r, proper);
     }
     
-    public final bool intersects(QRect r) {
-        return qtd_QRect_intersects_QRect(&this, &r);
+    public final bool intersects(QRect r) const {
+        return qtd_QRect_intersects_QRect(cast(void*)&this, &r);
     }
 
-    public final QRect normalized() {
-        return qtd_QRect_normalized(&this);
+    public final QRect normalized() const {
+        return qtd_QRect_normalized(cast(void*)&this);
     }
     
 private:

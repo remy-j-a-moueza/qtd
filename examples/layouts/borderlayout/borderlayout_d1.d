@@ -113,7 +113,7 @@ public:
         return calculateSize(SizeType.MinimumSize);
     }
 
-    void setGeometry(const QRect rect)
+    void setGeometry(QRect rect)
     {
         ItemWrapper center = null;
         int eastWidth = 0;
