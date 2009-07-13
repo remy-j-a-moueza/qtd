@@ -46,7 +46,7 @@ import qt.core.QVariant;
 import qt.core.QModelIndex;
 
 import std.conv; //, std.algorithm;
-
+import std.stdio;
 
 class Node
 {
@@ -58,7 +58,7 @@ class Node
     Node parent;
     Node[] children;
 }
-/*
+
 size_t find(Node[] arr, Node elem)
 {
     size_t res = arr.length;
@@ -67,7 +67,7 @@ size_t find(Node[] arr, Node elem)
             res = i;
     return res;
 }
-*/
+
 class Model : QAbstractItemModel
 {
 
@@ -178,8 +178,7 @@ class Model : QAbstractItemModel
     int row(Node node)
     {
         Node[] v = node.parent !is null ? node.parent.children : tree;
-        //return find(v, node);
-        return 5;
+        return find(v, node);
     }
 
 
