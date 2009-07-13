@@ -2,7 +2,6 @@ module qt.core.QRect;
 
 public import qt.QGlobal;
 public import qt.core.Qt;
-
 public import qt.core.QDataStream;
 public import qt.core.QSize;
 public import qt.core.QPoint;
@@ -92,16 +91,16 @@ public struct QRect
     void setBottom(int pos)
     { y2 = pos; }
 
-    void setTopLeft(ref QPoint p)
+    void setTopLeft(const QPoint p)
     { x1 = p.x(); y1 = p.y(); }
 
-    void setBottomRight(ref QPoint p)
+    void setBottomRight(const QPoint p)
     { x2 = p.x(); y2 = p.y(); }
 
-    void setTopRight(ref QPoint p)
+    void setTopRight(const QPoint p)
     { x2 = p.x(); y1 = p.y(); }
 
-    void setBottomLeft(ref QPoint p)
+    void setBottomLeft(const QPoint p)
     { x1 = p.x(); y2 = p.y(); }
 
     void setX(int ax)
@@ -142,7 +141,7 @@ public struct QRect
         y2 += dy;
     }
 
-    void translate(ref QPoint p)
+    void translate(const QPoint p)
     {
         x1 += p.x();
         y1 += p.y();
@@ -153,7 +152,7 @@ public struct QRect
     QRect translated(int dx, int dy) const
     { return QRect(QPoint(x1 + dx, y1 + dy), QPoint(x2 + dx, y2 + dy)); }
 
-    QRect translated(ref QPoint p) const
+    QRect translated(const QPoint p) const
     { return QRect(QPoint(x1 + p.x(), y1 + p.y()), QPoint(x2 + p.x(), y2 + p.y())); }
 
     void moveTo(int ax, int ay)
@@ -164,7 +163,7 @@ public struct QRect
         y1 = ay;
     }
 
-    void moveTo(ref QPoint p)
+    void moveTo(const QPoint p)
     {
         x2 += p.x() - x1;
         y2 += p.y() - y1;
@@ -190,25 +189,25 @@ public struct QRect
         y2 = pos;
     }
 
-    void moveTopLeft(ref QPoint p)
+    void moveTopLeft(const QPoint p)
     {
         moveLeft(p.x());
         moveTop(p.y());
     }
 
-    void moveBottomRight(ref QPoint p)
+    void moveBottomRight(const QPoint p)
     {
         moveRight(p.x());
         moveBottom(p.y());
     }
 
-    void moveTopRight(ref QPoint p)
+    void moveTopRight(const QPoint p)
     {
         moveRight(p.x());
         moveTop(p.y());
     }
 
-    void moveBottomLeft(ref QPoint p)
+    void moveBottomLeft(const QPoint p)
     {
         moveLeft(p.x());
         moveBottom(p.y());
@@ -263,7 +262,7 @@ public struct QRect
     void setHeight(int h)
     { y2 = (y1 + h - 1); }
 
-    void setSize(ref QSize s)
+    void setSize(const QSize s)
     {
         x2 = (s.width()  + x1 - 1);
         y2 = (s.height() + y1 - 1);
@@ -279,29 +278,29 @@ public struct QRect
         return contains(QPoint(ax, ay), false);
     }
 
-    QRect opOrAssign(ref QRect r)
+    QRect opOrAssign(const QRect r)
     {
         this = this | r;
         return this;
     }
 
-    QRect opAndAssign(ref QRect r)
+    QRect opAndAssign(const QRect r)
     {
         this = this & r;
         return this;
     }
 
-    QRect intersected(ref QRect other) const
+    QRect intersected(const QRect other) const
     {
         return this & other;
     }
 
-    QRect united(ref QRect r) const
+    QRect united(const QRect r) const
     {
         return this | r;
     }
 
-    bool opEquals(ref QRect r)
+    bool opEquals(const QRect r)
     {
         return x1==r.x1 && x2==r.x2 && y1==r.y1 && y2==r.y2;
     }
@@ -314,28 +313,28 @@ public struct QRect
         qtd_QRect_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
     }
 
-    public final QRect opAnd(ref QRect r) const {
-        return qtd_QRect_operator_and_QRect(cast(void*)&this, &r);
+    public final QRect opAnd(const QRect r) const {
+        return qtd_QRect_operator_and_QRect(&this, &r);
     }
 
-    public final QRect opOr(ref QRect r) const {
-        return qtd_QRect_operator_or_QRect(cast(void*)&this, &r);
+    public final QRect opOr(const QRect r) const {
+        return qtd_QRect_operator_or_QRect(&this, &r);
     }
 
-    public final bool contains(QPoint p, bool proper = false) const {
-        return qtd_QRect_contains_QPoint_bool(cast(void*)&this, &p, proper);
+    public final bool contains(const QPoint p, bool proper = false) const {
+        return qtd_QRect_contains_QPoint_bool(&this, &p, proper);
     }
 
-    public final bool contains(QRect r, bool proper = false) const {
-        return qtd_QRect_contains_QRect_bool(cast(void*)&this, &r, proper);
+    public final bool contains(const QRect r, bool proper = false) const {
+        return qtd_QRect_contains_QRect_bool(&this, &r, proper);
     }
     
-    public final bool intersects(QRect r) const {
-        return qtd_QRect_intersects_QRect(cast(void*)&this, &r);
+    public final bool intersects(const QRect r) const {
+        return qtd_QRect_intersects_QRect(&this, &r);
     }
 
     public final QRect normalized() const {
-        return qtd_QRect_normalized(cast(void*)&this);
+        return qtd_QRect_normalized(&this);
     }
     
 private:
@@ -357,20 +356,20 @@ private:
 
 
 // C wrappers
-private extern(C) bool  qtd_QRect_contains_QPoint_bool(void* __this_nativeId,
- void* p0,
+private extern(C) bool  qtd_QRect_contains_QPoint_bool(const void* __this_nativeId,
+ const void* p0,
  bool proper1);
-private extern(C) bool  qtd_QRect_contains_QRect_bool(void* __this_nativeId,
- void* r0,
+private extern(C) bool  qtd_QRect_contains_QRect_bool(const void* __this_nativeId,
+ const void* r0,
  bool proper1);
-private extern(C) bool  qtd_QRect_intersects_QRect(void* __this_nativeId,
- void* r0);
-private extern(C) QRect  qtd_QRect_normalized(void* __this_nativeId);
+private extern(C) bool  qtd_QRect_intersects_QRect(const void* __this_nativeId,
+ const void* r0);
+private extern(C) QRect  qtd_QRect_normalized(const void* __this_nativeId);
 private extern(C) void  qtd_QRect_writeTo_QDataStream(void* __this_nativeId,
  void* arg__1);
 private extern(C) void  qtd_QRect_readFrom_QDataStream(void* __this_nativeId,
  void* arg__1);
-private extern(C) QRect  qtd_QRect_operator_and_QRect(void* __this_nativeId,
- void* r0);
-private extern(C) QRect  qtd_QRect_operator_or_QRect(void* __this_nativeId,
- void* r0);
+private extern(C) QRect  qtd_QRect_operator_and_QRect(const void* __this_nativeId,
+ const void* r0);
+private extern(C) QRect  qtd_QRect_operator_or_QRect(const void* __this_nativeId,
+ const void* r0);

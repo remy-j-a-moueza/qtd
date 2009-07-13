@@ -7,9 +7,9 @@ public import qt.core.QRect;
 public import qt.core.QSizeF;
 public import qt.core.QDataStream;
 
+
 public struct QRectF
 {
-
     public static QRectF opCall()
     {
         QRectF rt;

@@ -34,10 +34,10 @@ public struct QSize
     final bool isValid()
     { return wd>=0 && ht>=0; }
 
-    final int width()
+    final int width() const
     { return wd; }
     
-    final int height()
+    final int height() const
     { return ht; }
     
     final void width(int w)

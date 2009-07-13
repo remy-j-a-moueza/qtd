@@ -23,10 +23,10 @@ public struct QPoint
     bool isNull() // const
     { return xp == 0 && yp == 0; }
 
-    int x() // const
+    int x() const
     { return xp; }
 
-    int y() // const
+    int y() const
     { return yp; }
 
     void x(int xpos)
