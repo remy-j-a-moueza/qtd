@@ -199,7 +199,7 @@ macro(build_example name)
 	      set(qtd_libs ${${package}_lib_param} ${qtd_libs})
 	endif(NOT is_founded)	
     endforeach(package ${PACKAGES_tmp})
-    add_d_program(${name} ${SOURCES_tmp} ${res_sources} ${uic_sources}
+    add_d_program(${name} ${SOURCES_tmp} NO_DEPS_SOURCES ${res_sources} ${uic_sources}
 	DEPENDS ${res_sources} INCLUDES ${QTD_IMPORT_PATH} ${CMAKE_CURRENT_BINARY_DIR}
 	LIB_PATHS ${QTD_LIBRARIES_PATH} ${CMAKE_SOURCE_DIR}/lib LIBS ${qtd_libs})
     ## TODO: Enable on windows too.
