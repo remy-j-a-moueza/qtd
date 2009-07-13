@@ -45,7 +45,7 @@ import qt.core.QAbstractItemModel;
 import qt.core.QVariant;
 import qt.core.QModelIndex;
 
-import std.conv, std.algorithm;
+import std.conv; //, std.algorithm;
 
 
 class Node
@@ -54,12 +54,20 @@ class Node
     {
         parent = parent_;
     }
-//    bool empty() { return false; }
         
     Node parent;
     Node[] children;
 }
-    
+/*
+size_t find(Node[] arr, Node elem)
+{
+    size_t res = arr.length;
+    for(size_t i = 0; i < arr.length; i++)
+        if (arr[i] is elem)
+            res = i;
+    return res;
+}
+*/
 class Model : QAbstractItemModel
 {
 
@@ -137,14 +145,14 @@ class Model : QAbstractItemModel
         return QAbstractItemModel.headerData(section, orientation, role);
     }
 
-    bool hasChildren(QModelIndex parent)
+    bool hasChildren(const QModelIndex parent)
     {
         if (parent.isValid && parent.column != 0)
             return false;
         return rc > 0 && cc > 0;
     }
     
-    int flags(QModelIndex index)
+    int flags(const QModelIndex index)
     {
         if (!index.isValid)
             return 0;
@@ -170,7 +178,8 @@ class Model : QAbstractItemModel
     int row(Node node)
     {
         Node[] v = node.parent !is null ? node.parent.children : tree;
-        return find(v, node);
+        //return find(v, node);
+        return 5;
     }
 
 

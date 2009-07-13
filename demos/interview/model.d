@@ -81,7 +81,7 @@ class Model : QAbstractItemModel
     }
 
 
-    QModelIndex index(int row, int column, QModelIndex parent)
+    QModelIndex index(int row, int column, const QModelIndex parent)
     {
         if (row < rc && row >= 0 && column < cc && column >= 0) {
             Node p = cast(Node) parent.internalPointer();
@@ -92,7 +92,7 @@ class Model : QAbstractItemModel
         return QModelIndex();
     }
 
-    QModelIndex parent(QModelIndex child)
+    QModelIndex parent(const QModelIndex child)
     {
         if (child.isValid()) {
             Node n = cast(Node) child.internalPointer();
@@ -103,17 +103,17 @@ class Model : QAbstractItemModel
         return QModelIndex();
     }
 
-    int rowCount(QModelIndex parent)
+    int rowCount(const QModelIndex parent)
     {
         return (parent.isValid() && parent.column() != 0) ? 0 : rc;
     }
 
-    int columnCount(QModelIndex parent)
+    int columnCount(const QModelIndex parent)
     {
         return cc;
     }
     
-    QVariant data(QModelIndex index, int role)
+    QVariant data(const QModelIndex index, int role)
     {
         if (!index.isValid)
             return new QVariant;
@@ -137,14 +137,14 @@ class Model : QAbstractItemModel
         return QAbstractItemModel.headerData(section, orientation, role);
     }
 
-    bool hasChildren(QModelIndex parent)
+    bool hasChildren(const QModelIndex parent)
     {
         if (parent.isValid && parent.column != 0)
             return false;
         return rc > 0 && cc > 0;
     }
     
-    int flags(QModelIndex index)
+    int flags(const QModelIndex index)
     {
         if (!index.isValid)
             return 0;
