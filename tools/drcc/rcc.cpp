@@ -894,8 +894,8 @@ bool RCCResourceLibrary::writeInitializer()
         if (m_useNameSpace)
             writeString("// QT_BEGIN_NAMESPACE\n\n");
         if (m_root) {
-            writeString("extern(C) bool qtd_register_resource_data(int version_, ubyte *tree, ubyte *name, ubyte *data);\n\n");
-            writeString("extern(C) bool qtd_unregister_resource_data(int version_, ubyte *tree, ubyte *name, ubyte *data);\n\n");
+            writeString("extern(C) bool qtd_register_resource_data(int version_, in ubyte *tree, in ubyte *name, in ubyte *data);\n\n");
+            writeString("extern(C) bool qtd_unregister_resource_data(int version_, in ubyte *tree, in ubyte *name, in ubyte *data);\n\n");
         }
         if (m_useNameSpace)
             writeString("// QT_END_NAMESPACE\n\n\n");
