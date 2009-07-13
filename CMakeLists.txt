@@ -40,7 +40,7 @@ if(D_VERSION EQUAL "1")
     endif(D_FRONTEND LESS "041")
     set(D_TARGET d1-tango)   
 elseif(D_VERSION EQUAL "2")
-    set(D_TARGET ) ## TODO: hm... I don`t known this parameter for D2 ^(
+    set(D_TARGET d2-phobos)
 endif(D_VERSION EQUAL "1")
 
 # Debug and release flags.
