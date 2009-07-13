@@ -170,7 +170,7 @@ class Model : QAbstractItemModel
         return v[row];
     }
 
-    Node parent(Node child)
+    Node parent(const Node child)
     {
         return child !is null ? child.parent : null;
     }

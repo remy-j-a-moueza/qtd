@@ -39,9 +39,9 @@ public struct QModelIndex
         return __qtd_QModelIndex_internalId(&this);
     }
 
-    public final const (void*) internalPointer() const {
+    public final void* internalPointer() const {
         //return __qtd_QModelIndex_internalPointer(&this);
-        return p;
+        return cast(void*)p;
     }
 
     public final Object object() {
