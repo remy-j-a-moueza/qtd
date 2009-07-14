@@ -35,9 +35,9 @@
 **
 ****************************************************************************/
 version(D_Version2)
-    import model_d2;
-else
     import model;
+else
+    import model_d1;
 
 import qt.gui.QApplication;
 import qt.gui.QItemSelectionModel;

@@ -35,7 +35,7 @@
 **
 ****************************************************************************/
 
-module model;
+module model_d2;
 
 import qt.gui.QIcon;
 import qt.gui.QPixmap;
@@ -45,10 +45,9 @@ import qt.core.QAbstractItemModel;
 import qt.core.QVariant;
 import qt.core.QModelIndex;
 
-import tango.core.Array;
-import Integer = tango.text.convert.Integer;
+import std.conv; //, std.algorithm;
+import std.stdio;
 
-    
 class Node
 {
     this(Node parent_ = null)
@@ -59,7 +58,16 @@ class Node
     Node parent;
     Node[] children;
 }
-    
+
+size_t find(Node[] arr, Node elem)
+{
+    size_t res = arr.length;
+    for(size_t i = 0; i < arr.length; i++)
+        if (arr[i] is elem)
+            res = i;
+    return res;
+}
+
 class Model : QAbstractItemModel
 {
 
@@ -81,18 +89,18 @@ class Model : QAbstractItemModel
     }
 
 
-    override QModelIndex index(int row, int column, QModelIndex parent)
+    override QModelIndex index(int row, int column, const QModelIndex parent)
     {
         if (row < rc && row >= 0 && column < cc && column >= 0) {
             Node p = cast(Node) parent.internalPointer();
             Node n = getNode(row, p);
-        if (n !is null)
-            return createIndex(row, column, cast(void*)n);
+            if (n !is null)
+                return createIndex(row, column, cast(void*)n);
         }
         return QModelIndex();
     }
 
-    override QModelIndex parent(QModelIndex child)
+    override QModelIndex parent(const QModelIndex child)
     {
         if (child.isValid()) {
             Node n = cast(Node) child.internalPointer();
@@ -103,22 +111,22 @@ class Model : QAbstractItemModel
         return QModelIndex();
     }
 
-    override int rowCount(QModelIndex parent)
+    override int rowCount(const QModelIndex parent)
     {
         return (parent.isValid() && parent.column() != 0) ? 0 : rc;
     }
 
-    override int columnCount(QModelIndex parent)
+    override int columnCount(const QModelIndex parent)
     {
         return cc;
     }
     
-    override QVariant data(QModelIndex index, int role)
+    override QVariant data(const QModelIndex index, int role)
     {
         if (!index.isValid)
             return new QVariant;
         if (role == Qt.DisplayRole)
-            return new QVariant("Item " ~ Integer.toString(index.row) ~ ":" ~ Integer.toString(index.column));
+            return new QVariant("Item " ~ to!string(index.row) ~ ":" ~ to!string(index.column));
         if (role == Qt.DecorationRole) {
             if (index.column == 0)
                 //return iconProvider.icon(QFileIconProvider::Folder);
@@ -131,20 +139,20 @@ class Model : QAbstractItemModel
     override QVariant headerData(int section, Qt.Orientation orientation, int role)
     {
         if (role == Qt.DisplayRole)
-            return new QVariant(Integer.toString(section));
+            return new QVariant(to!string(section));
         if (role == Qt.DecorationRole)
             return services.toVariant;
         return QAbstractItemModel.headerData(section, orientation, role);
     }
 
-    override bool hasChildren(QModelIndex parent)
+    override bool hasChildren(const QModelIndex parent)
     {
         if (parent.isValid && parent.column != 0)
             return false;
         return rc > 0 && cc > 0;
     }
     
-    override int flags(QModelIndex index)
+    override int flags(const QModelIndex index)
     {
         if (!index.isValid)
             return 0;
