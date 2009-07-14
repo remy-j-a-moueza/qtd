@@ -48,7 +48,7 @@ import qt.gui.QSystemTrayIcon;
 import window;
 
 
-int main(char[][] args)
+int main(string[] args)
 {
 	auto app = new QApplication(args);
 

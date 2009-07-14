@@ -1711,3 +1711,12 @@ class QInputDialog___ extends QInputDialog {
         return res;
     }
 }// class
+
+class QFont___ extends QFont {
+    version(D_Version2) 
+    {
+	void opAssign(in QFont arg__1)  {
+	    this.nativeId = qtd_QFont_QFont_QFont(arg__1 is null ? null : (cast(QFont)arg__1).nativeId);
+	}
+    }
+}// class"

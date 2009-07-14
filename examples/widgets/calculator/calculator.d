@@ -41,18 +41,62 @@
 
 module calculator;
 
+import button;
 import qt.gui.QDialog;
 import qt.gui.QGridLayout;
 import qt.gui.QLineEdit;
 import qt.gui.QFont;
 
-import tango.math.Math : pow, sqrt;
-import Float = tango.text.convert.Float;
-import Integer = tango.text.convert.Integer;
-import tango.core.Array;
-
-import button;
-
+version(Tango) 
+{
+    import tango.math.Math;     
+    import tango.math.Math : pow, sqrt;
+    import Float = tango.text.convert.Float;
+    import Integer = tango.text.convert.Integer;
+    import tango.core.Array;    
+    string ToString(int x)
+    {
+	return Integer.toString(x);
+    }
+    string ToString(double x, int c = 0)
+    {
+	return Float.toString(x, c);
+    }
+    int ToInt(string s)
+    {
+	return Integer.toInt(s);
+    }
+    float ToFloat(string s)
+    {
+	return Float.toFloat(s);
+    }
+}
+else 
+{ 
+    import std.math; 
+    import std.conv;
+    import std.string; 
+    string ToString(int x)
+    {
+	return std.string.format("%d", x);
+    }
+    string ToString(double x, int c = 0)
+    {
+	return std.string.format("%g", x);
+    }
+    int ToInt(string s)
+    {
+	return to!int(s);
+    }
+    float ToFloat(string s)
+    {
+	return to!float(s);
+    }
+    int find(string s, dchar c)
+    {
+	return indexOf(s,c);
+    }
+}
 
 class Calculator : public QDialog
 {
@@ -73,12 +117,12 @@ public:
                 display.setAlignment(Qt.AlignRight);
                 display.setMaxLength(15);
 
-                QFont font = display.font();
+		auto font = new QFont(display.font());
                 font.setPointSize(font.pointSize() + 8);
                 display.setFont(font);
 
                 for (int i = 0; i < NumDigitButtons; ++i) {
-                        digitButtons[i] = createButton(Integer.toString(i), &digitClicked);
+                        digitButtons[i] = createButton(ToString(i), &digitClicked);
                 }
 
                 Button pointButton = createButton(tr("."), &pointClicked);
@@ -145,7 +189,7 @@ public:
         void digitClicked()
         {
                 Button clickedButton = cast(Button) signalSender();
-                int digitValue = Integer.toInt(clickedButton.text);
+                int digitValue = ToInt(clickedButton.text);
                 if (display.text() == "0" && digitValue == 0.0)
                         return;
 
@@ -153,14 +197,14 @@ public:
                         display.clear();
                         waitingForOperand = false;
                 }
-                display.setText(display.text() ~ Integer.toString(digitValue));
+                display.setText(display.text() ~ ToString(digitValue));
         }
 
         void unaryOperatorClicked()
         {
                 Button clickedButton = cast(Button) signalSender();
-                char[] clickedOperator = clickedButton.text();
-                double operand = Float.toFloat(display.text);
+                string clickedOperator = clickedButton.text();
+                double operand = ToFloat(display.text);
                 double result = 0.0;
 
                 if (clickedOperator == tr("Sqrt")) {
@@ -178,22 +222,22 @@ public:
                         }
                         result = 1.0 / operand;
                 }
-                display.setText(Float.toString(result, 4));
+                display.setText(ToString(result, 4));
                 waitingForOperand = true;
         }
 
         void additiveOperatorClicked()
         {
                 Button clickedButton = cast(Button) signalSender();
-                char[] clickedOperator = clickedButton.text();
-                double operand = Float.toFloat(display.text);
+                string clickedOperator = clickedButton.text();
+                double operand = ToFloat(display.text);
 
                 if (pendingMultiplicativeOperator.length) {
                         if (!calculate(operand, pendingMultiplicativeOperator)) {
                                 abortOperation();
                                 return;
                         }
-                        display.setText(Float.toString(factorSoFar, 4));
+                        display.setText(ToString(factorSoFar, 4));
                         operand = factorSoFar;
                         factorSoFar = 0.0;
                         pendingMultiplicativeOperator = null;
@@ -204,7 +248,7 @@ public:
                                 abortOperation();
                                 return;
                         }
-                        display.setText(Float.toString(sumSoFar, 4));
+                        display.setText(ToString(sumSoFar, 4));
                 } else {
                         sumSoFar = operand;
                 }
@@ -216,15 +260,15 @@ public:
         void multiplicativeOperatorClicked()
         {
                 Button clickedButton = cast(Button) signalSender();
-                char[] clickedOperator = clickedButton.text();
-                double operand = Float.toFloat(display.text);
+                string clickedOperator = clickedButton.text();
+                double operand = ToFloat(display.text);
 
                 if (pendingMultiplicativeOperator.length) {
                         if (!calculate(operand, pendingMultiplicativeOperator)) {
                                 abortOperation();
                                 return;
                         }
-                        display.setText(Float.toString(factorSoFar, 4));
+                        display.setText(ToString(factorSoFar/*, 4*/));
                 } else {
                         factorSoFar = operand;
                 }
@@ -235,7 +279,7 @@ public:
 
         void equalClicked()
         {
-                double operand = Float.toFloat(display.text);
+                double operand = ToFloat(display.text);
 
                 if (pendingMultiplicativeOperator.length) {
                         if (!calculate(operand, pendingMultiplicativeOperator)) {
@@ -256,14 +300,14 @@ public:
                         sumSoFar = operand;
                 }
 
-                display.setText(Float.toString(sumSoFar, 4));
+                display.setText(ToString(sumSoFar, 4));
                 sumSoFar = 0.0;
                 waitingForOperand = true;
         }
 
         void pointClicked()
         {
-                char[] text = display.text;
+                string text = display.text;
 
                 if (waitingForOperand)
                         display.setText("0");
@@ -276,8 +320,8 @@ public:
 
         void changeSignClicked()
         {
-                char[] text = display.text();
-                double value = Float.toFloat(text);
+                string text = display.text();
+                double value = ToFloat(text);
 
                 if (value > 0.0) {
                         text = "-" ~ text;
@@ -292,7 +336,7 @@ public:
                 if (waitingForOperand)
                         return;
 
-                char[] text = display.text();
+                string text = display.text();
                 text = text[0..$-1];
                 if (text.length == 0) {
                         text = "0";
@@ -328,25 +372,25 @@ public:
 
         void readMemory()
         {
-                display.setText(Float.toString(sumInMemory, 4));
+                display.setText(ToString(sumInMemory, 4));
                 waitingForOperand = true;
         }
 
         void setMemory()
         {
                 equalClicked();
-                sumInMemory = Float.toFloat(display.text);
+                sumInMemory = ToFloat(display.text);
         }
 
         void addToMemory()
         {
                 equalClicked();
-                sumInMemory += Float.toFloat(display.text);
+                sumInMemory += ToFloat(display.text);
         }
 
 private:
 
-        Button createButton(char[] text, void delegate() member)
+        Button createButton(string text, void delegate() member)
         {
                 Button button = new Button(text);
                 button.clicked.connect(member);
@@ -359,7 +403,7 @@ private:
                 display.setText(tr("####"));
         }
 
-        bool calculate(double rightOperand, char[] pendingOperator)
+        bool calculate(double rightOperand, string pendingOperator)
         {
                 if (pendingOperator == tr("+")) {
                         sumSoFar += rightOperand;
@@ -378,8 +422,8 @@ private:
         double sumInMemory;
         double sumSoFar;
         double factorSoFar;
-        char[] pendingAdditiveOperator;
-        char[] pendingMultiplicativeOperator;
+        string pendingAdditiveOperator;
+        string pendingMultiplicativeOperator;
         bool waitingForOperand;
 
         QLineEdit display;

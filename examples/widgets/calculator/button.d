@@ -50,7 +50,7 @@ class Button : public QToolButton
 {
 public:
         
-        this(char[] text, QWidget parent = null)
+        this(string text, QWidget parent = null)
         {
                 super(parent);
                 setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred);
