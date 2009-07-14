@@ -39,7 +39,10 @@ import qt.gui.QWidget;
 import qt.gui.QSlider;
 import qt.gui.QHBoxLayout;
 
-import glwidget;
+version(D_Version2)
+    import glwidget;
+else
+    import glwidget_d1;
 
 class Window : public QWidget
 {

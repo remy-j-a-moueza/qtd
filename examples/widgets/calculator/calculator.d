@@ -47,56 +47,9 @@ import qt.gui.QGridLayout;
 import qt.gui.QLineEdit;
 import qt.gui.QFont;
 
-version(Tango) 
-{
-    import tango.math.Math;     
-    import tango.math.Math : pow, sqrt;
-    import Float = tango.text.convert.Float;
-    import Integer = tango.text.convert.Integer;
-    import tango.core.Array;    
-    string ToString(int x)
-    {
-	return Integer.toString(x);
-    }
-    string ToString(double x, int c = 0)
-    {
-	return Float.toString(x, c);
-    }
-    int ToInt(string s)
-    {
-	return Integer.toInt(s);
-    }
-    float ToFloat(string s)
-    {
-	return Float.toFloat(s);
-    }
-}
-else 
-{ 
-    import std.math; 
-    import std.conv;
-    import std.string; 
-    string ToString(int x)
-    {
-	return std.string.format("%d", x);
-    }
-    string ToString(double x, int c = 0)
-    {
-	return std.string.format("%g", x);
-    }
-    int ToInt(string s)
-    {
-	return to!(int)(s);
-    }
-    float ToFloat(string s)
-    {
-	return to!(float)(s);
-    }
-    int find(string s, dchar c)
-    {
-	return indexOf(s,c);
-    }
-}
+import std.math; 
+import std.conv;
+import std.string; 
 
 class Calculator : public QDialog
 {
@@ -122,7 +75,7 @@ public:
                 display.setFont(font);
 
                 for (int i = 0; i < NumDigitButtons; ++i) {
-                        digitButtons[i] = createButton(ToString(i), &digitClicked);
+                        digitButtons[i] = createButton(format("%d", i), &digitClicked);
                 }
 
                 Button pointButton = createButton(tr("."), &pointClicked);
@@ -189,7 +142,7 @@ public:
         void digitClicked()
         {
                 Button clickedButton = cast(Button) signalSender();
-                int digitValue = ToInt(clickedButton.text);
+                int digitValue = to!int(clickedButton.text);
                 if (display.text() == "0" && digitValue == 0.0)
                         return;
 
@@ -197,14 +150,14 @@ public:
                         display.clear();
                         waitingForOperand = false;
                 }
-                display.setText(display.text() ~ ToString(digitValue));
+                display.setText(display.text() ~ format("%g", digitValue));
         }
 
         void unaryOperatorClicked()
         {
                 Button clickedButton = cast(Button) signalSender();
                 string clickedOperator = clickedButton.text();
-                double operand = ToFloat(display.text);
+                double operand = to!float(display.text);
                 double result = 0.0;
 
                 if (clickedOperator == tr("Sqrt")) {
@@ -222,7 +175,7 @@ public:
                         }
                         result = 1.0 / operand;
                 }
-                display.setText(ToString(result, 4));
+                display.setText(format("%g", result));
                 waitingForOperand = true;
         }
 
@@ -230,14 +183,14 @@ public:
         {
                 Button clickedButton = cast(Button) signalSender();
                 string clickedOperator = clickedButton.text();
-                double operand = ToFloat(display.text);
+                double operand = to!float(display.text);
 
                 if (pendingMultiplicativeOperator.length) {
                         if (!calculate(operand, pendingMultiplicativeOperator)) {
                                 abortOperation();
                                 return;
                         }
-                        display.setText(ToString(factorSoFar, 4));
+                        display.setText(format("%g", factorSoFar));
                         operand = factorSoFar;
                         factorSoFar = 0.0;
                         pendingMultiplicativeOperator = null;
@@ -248,7 +201,7 @@ public:
                                 abortOperation();
                                 return;
                         }
-                        display.setText(ToString(sumSoFar, 4));
+                        display.setText(format("%g", sumSoFar));
                 } else {
                         sumSoFar = operand;
                 }
@@ -261,14 +214,14 @@ public:
         {
                 Button clickedButton = cast(Button) signalSender();
                 string clickedOperator = clickedButton.text();
-                double operand = ToFloat(display.text);
+                double operand = to!float(display.text);
 
                 if (pendingMultiplicativeOperator.length) {
                         if (!calculate(operand, pendingMultiplicativeOperator)) {
                                 abortOperation();
                                 return;
                         }
-                        display.setText(ToString(factorSoFar/*, 4*/));
+                        display.setText(format("%g", factorSoFar));
                 } else {
                         factorSoFar = operand;
                 }
@@ -279,7 +232,7 @@ public:
 
         void equalClicked()
         {
-                double operand = ToFloat(display.text);
+                double operand = to!float(display.text);
 
                 if (pendingMultiplicativeOperator.length) {
                         if (!calculate(operand, pendingMultiplicativeOperator)) {
@@ -300,7 +253,7 @@ public:
                         sumSoFar = operand;
                 }
 
-                display.setText(ToString(sumSoFar, 4));
+                display.setText(format("%g", sumSoFar));
                 sumSoFar = 0.0;
                 waitingForOperand = true;
         }
@@ -312,7 +265,7 @@ public:
                 if (waitingForOperand)
                         display.setText("0");
 
-                if (find(text, '.') >= text.length)
+                if (indexOf(text, '.') >= text.length)
                         display.setText(text ~ tr("."));
                 
                 waitingForOperand = false;
@@ -321,7 +274,7 @@ public:
         void changeSignClicked()
         {
                 string text = display.text();
-                double value = ToFloat(text);
+                double value = to!float(text);
 
                 if (value > 0.0) {
                         text = "-" ~ text;
@@ -372,20 +325,20 @@ public:
 
         void readMemory()
         {
-                display.setText(ToString(sumInMemory, 4));
+                display.setText(format("%g", sumInMemory));
                 waitingForOperand = true;
         }
 
         void setMemory()
         {
                 equalClicked();
-                sumInMemory = ToFloat(display.text);
+                sumInMemory = to!float(display.text);
         }
 
         void addToMemory()
         {
                 equalClicked();
-                sumInMemory += ToFloat(display.text);
+                sumInMemory += to!float(display.text);
         }
 
 private:

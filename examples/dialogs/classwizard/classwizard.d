@@ -54,21 +54,7 @@ import qt.core.QFile;
 import qt.core.QDir;
 import qt.core.QRegExp;
 
-version(Tango)
-{
-	import tango.text.convert.Format: Format = format;
-	import tango.core.Array;
-	import tango.text.Ascii;
-	alias toUpper toupper;
-	alias toLower tolower;
-	
-	const string cannot_write_file_str = tr("Cannot write file {}:\n{}");
-}
-else { 
-	import std.string; 
-	import std.algorithm;
-	const string cannot_write_file_str = tr("Cannot write file %s:\n%s");
-}
+import std.string; 
 
 
 class ClassWizard : public QWizard
@@ -92,12 +78,6 @@ public:
 
 	void accept()
 	{
-		version(Tango)
-			const string cannot_write_file_str = tr("Cannot write file {}:\n{}");
-		else 
-			const string cannot_write_file_str = tr("Cannot write file %s:\n%s");
-
-	    
 		string className = field("className").toString();
 		string baseClass = field("baseClass").toString();
 		string macroName = field("macroName").toString();
@@ -161,7 +141,7 @@ public:
 		auto headerFile = new QFile(outputDir ~ "/" ~ header);
 		if (!headerFile.open(QFile.WriteOnly | QFile.Text)) {
 			QMessageBox.warning(null, tr("Simple Wizard"),
-					format(cannot_write_file_str,
+					format(tr("Cannot write file %s:\n%s"),
 					headerFile.fileName(),
 					headerFile.errorString()));
 			return;
@@ -215,7 +195,7 @@ public:
 		auto implementationFile = new QFile(outputDir ~ "/" ~ implementation);
 		if (!implementationFile.open(QFile.WriteOnly | QFile.Text)) {
 			QMessageBox.warning(null, tr("Simple Wizard"),
-					format(cannot_write_file_str,
+					format(tr("Cannot write file %s:\n%s"),
 					implementationFile.fileName(),
 					implementationFile.errorString()));
 			return;
@@ -489,17 +469,8 @@ protected:
 	void initializePage()
 	{
 		string finishText = wizard().buttonText(QWizard.FinishButton);	
-		version(Tango)
-		{
-			auto pos = remove(finishText, '&');
-			const string str = tr("Click {} to generate the class skeleton.");
-		}
-		else
-		{
-			const string str = tr("Click %s to generate the class skeleton.");
-			// TODO: port to D2.
-		}
-		label.setText(format(str, finishText));
+		// TODO: port to D2: auto pos = remove(finishText, '&');
+		label.setText(format(tr("Click %s to generate the class skeleton."), finishText));
 	}
 
 private:

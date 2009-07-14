@@ -35,23 +35,14 @@
 **
 ****************************************************************************/
 
-version(Tango)
-    import tango.math.Math;
-else
-{
-    import std.math;
-    int rndint(real x)
-    {
-	return cast(int)rndtol(x);
-    }
-}
+import std.math;
+import std.conv;
 
 import qt.core.QPoint;
 import qt.gui.QMouseEvent;
 import qt.opengl.QGLWidget;
 import qt.gui.QColor;
 import qt.core.QSize;
-
 import qt.opengl.gl;
 import qt.opengl.glu;
 
@@ -250,7 +241,7 @@ class GLWidget : QGLWidget
 
         void extrude(GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2)
         {
-            qglColor(trolltechGreen.darker(rndint(250 + (100 * x1))));
+            qglColor(trolltechGreen.darker(to!(int)(rndtol(250 + (100 * x1)))));
 
             glVertex3d(x1, y1, +0.05);
             glVertex3d(x2, y2, +0.05);

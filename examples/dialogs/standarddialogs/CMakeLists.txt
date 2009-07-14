@@ -1,1 +1,1 @@
-build_example(standarddialogs main.d dialog.d)
+build_example(standarddialogs main.d)

@@ -40,7 +40,12 @@
 ****************************************************************************/
 
 import qt.gui.QApplication;
-import dropsitewindow;
+
+version(D_Version2) 
+	import dropsitewindow;
+else 
+ 	import dropsitewindow_d1; 
+
 
 int main(string[] args)
 {

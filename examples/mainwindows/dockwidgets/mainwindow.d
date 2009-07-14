@@ -54,15 +54,8 @@ import qt.gui.QAction;
 import qt.gui.QStatusBar;
 import qt.gui.QFont;
 import qt.gui.QIcon;
-
 import qt.core.QDate;
-/*import qt.gui.
-import qt.gui.
-import qt.gui.
-import qt.gui.
-import qt.gui.
-import qt.gui.
-*/
+
 version(Tango)
     import tango.text.Util;
 else

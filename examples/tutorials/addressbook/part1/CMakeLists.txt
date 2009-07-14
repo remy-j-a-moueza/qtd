@@ -1,1 +1,1 @@
-build_example(addressbook main.d addressbook.d)
+build_example(addressbook main.d)

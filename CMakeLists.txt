@@ -367,7 +367,7 @@ foreach(package_big ${all_packages})
 	else(CMAKE_HOST_WIN32 AND D_IS_MARS)
 	    set(${package}_lib_param Qt${package_big}) ## Paths for QtD libs. Needed by examples.
 	endif(CMAKE_HOST_WIN32 AND D_IS_MARS) 
-	add_d_target(${lib_name} TYPE ${build_type} INCLUDES ${QTD_IMPORT_PATH} SOURCES ${d_sources} OBJECTS ${cpp_objs} ${d_implib}
+	add_d_target(${lib_name} NOT_DETECT_DEPENDS TYPE ${build_type} INCLUDES ${QTD_IMPORT_PATH} SOURCES ${d_sources} OBJECTS ${cpp_objs} ${d_implib}
 	      OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib DEPENDS ${d_implib})
 	install(FILES ${CMAKE_BINARY_DIR}/${lib} COMPONENT qtd DESTINATION lib)
 	

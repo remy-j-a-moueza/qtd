@@ -41,14 +41,7 @@
 
 module dropsitewindow;
 
-version(Tango) {
-    import tango.text.Util;
-    import tango.text.Ascii;
-    import tango.text.convert.Format;
-} else {
-    import std.string;
-    alias strip trim;
-}
+import std.string;
 
 import qt.gui.QWidget;
 import qt.gui.QLabel;
@@ -120,9 +113,9 @@ public:
 
 			string text;
 			if (format == "text/plain") {
-				text = trim(mimeData.text());
+				text = strip(mimeData.text());
 			} else if (format == "text/html") {
-				text = trim(mimeData.html());
+				text = strip(mimeData.html());
 			} else if (format == "text/uri-list") {
 				QUrl[] urlList = mimeData.urls();
 				for (int i = 0; i < urlList.length && i < 32; ++i) {
@@ -132,10 +125,7 @@ public:
 			} else {
 				QByteArray data = mimeData.data(format);
 				for (int i = 0; i < data.size() && i < 32; ++i) {
-					version(Tango)
-					    string hex = toUpper(Format("{0:x}", data.at(i)));
-					else
-					    string hex = toupper(std.string.format("%x", data.at(i)));					
+					string hex = toupper(std.string.format("%x", data.at(i)));					
 					text ~= hex ~ " ";
 				}
 			}

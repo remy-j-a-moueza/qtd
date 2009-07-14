@@ -40,16 +40,15 @@
 ****************************************************************************/
 module main;
 
-
 import qt.gui.QApplication;
 import qt.core.QTranslator;
 import qt.core.QLocale;
 import qt.core.QLibraryInfo;
 
-
-import classwizard;
-import qrc_classwizard;
-
+version(D_Version2) 
+	import classwizard; 
+else 
+ 	import classwizard_d1; 
 
 int main(string[] args)
 {

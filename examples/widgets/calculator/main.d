@@ -43,8 +43,10 @@ module main;
 
 import qt.gui.QApplication;
 
-import calculator;
-
+version(D_Version2) 
+	import calculator; 
+else 
+ 	import calculator_d1; 
 
 int main(string[] args)
 {

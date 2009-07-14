@@ -55,10 +55,7 @@ import qt.gui.QFontDialog;
 import qt.gui.QFileDialog;
 import qt.core.QFile;
 
-version(Tango)  
-    import tango.text.convert.Format;
-else
-    import std.string;
+import std.string;
 
 
 string MESSAGE = tr("<p>Message boxes have a caption, a text, "
@@ -212,10 +209,7 @@ private:
 		bool ok;
 		int i = QInputDialog.getInt(this, tr("QInputgetInteger()"), tr("Percentage:"), 25, 0, 100, 1, ok);
 		if (ok)
-			version(Tango) 
-				integerLabel.setText(Format("{}", i)); 
-			else
-				integerLabel.setText(format("%d", i)); 
+			integerLabel.setText(format("%d", i)); 
 	}
 
 	void setDouble()
@@ -224,10 +218,7 @@ private:
 		double d = QInputDialog.getDouble(this, tr("QInputgetDouble()"),
 						tr("Amount:"), 37.56, -10000, 10000, 2, ok);
 		if (ok)
-			version(Tango) 
-				doubleLabel.setText(Format("${}", d));
-			else
-				integerLabel.setText(format("%g", d)); 	
+			integerLabel.setText(format("%g", d)); 	
 	}
 
 	void setItem()
@@ -314,12 +305,7 @@ private:
 						options);
 		if (files.length) {
 			openFilesPath = files[0];
-			version(Tango) 
-				openFileNamesLabel.setText(Format("{}", files));
-			else
-			{
-				openFileNamesLabel.setText(join(files, "; "));
-			}
+			openFileNamesLabel.setText(join(files, "; "));
 		}
 	}
 

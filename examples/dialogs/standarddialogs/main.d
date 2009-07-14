@@ -46,7 +46,11 @@ import qt.core.QLocale;
 import qt.core.QLibraryInfo;
 import qt.gui.QApplication;
 
-import dialog;
+version(D_Version2) 
+	import dialog;
+else 
+ 	import dialog_d1; 
+
 
 
 int main(string[] args)

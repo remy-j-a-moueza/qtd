@@ -1,1 +1,1 @@
-build_example(dynamiclayouts main.d dialog.d)
+build_example(dynamiclayouts main.d)

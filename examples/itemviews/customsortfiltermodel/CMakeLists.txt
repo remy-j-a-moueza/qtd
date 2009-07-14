@@ -1,1 +1,1 @@
-build_example(mysortfilterproxymodel DETECT_DEPENDS main.d)
+build_example(mysortfilterproxymodel main.d)
