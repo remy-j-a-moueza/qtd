@@ -41,3 +41,14 @@ private extern(C) void qtd_UrlHandler_handleUrl_QUrl_dispatch(void *d_entity, vo
     scope name1_d_ref = new QUrl(name1, true);
     d_object.handleUrl(name1_d_ref);
 }
+
+private extern (C) void qtd_UrlHandler_initCallBacks(void* virtuals, void* qobj_del);
+
+static this() {
+    void*[1] virt_arr;
+    virt_arr[0] = &qtd_UrlHandler_handleUrl_QUrl_dispatch;
+
+    void *qobj_del;
+//    qobj_del = &qtd_D_QWidget_delete;
+    qtd_UrlHandler_initCallBacks(virt_arr.ptr, null);
+}
