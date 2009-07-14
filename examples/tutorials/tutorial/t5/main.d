@@ -71,7 +71,7 @@ public:
     }
 }
 
-int main(char[][] args)
+int main(string[] args)
 {
     auto app = new QApplication(args);
     auto widget = new MyWidget;

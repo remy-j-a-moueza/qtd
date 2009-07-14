@@ -54,10 +54,9 @@ public:
 		quit.clicked.connect(&QApplication.quit);
 	}
 }
-import tango.io.Stdout;
-int main(char[][] args)
+
+int main(string[] args)
 {
-    Stdout("hi!").newline;
     auto app = new QApplication(args);
     auto widget = new MyWidget;
     widget.show();

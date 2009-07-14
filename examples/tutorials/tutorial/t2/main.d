@@ -40,7 +40,7 @@ import qt.gui.QFont;
 import qt.gui.QPushButton;
 
 
-int main(char[][] args)
+int main(string[] args)
 {
     auto app = new QApplication(args);
     auto quit = new QPushButton("Quit");
