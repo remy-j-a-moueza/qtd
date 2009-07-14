@@ -88,7 +88,7 @@ protected:
 		QModelIndex index1 = sourceModel().index(sourceRow, 1, sourceParent);
 		QModelIndex index2 = sourceModel().index(sourceRow, 2, sourceParent);
 
-		static bool contains(char[] str, QRegExp rx1)
+		static bool contains(string str, QRegExp rx1)
 		{
 			auto rx2 = new QRegExp(rx1);
 			return (rx2.indexIn(str, 0) != -1);

@@ -39,7 +39,7 @@ import qt.gui.QApplication;
 import qt.gui.QDirModel;
 import qt.gui.QTreeView;
 
-int main(char[][] args)
+int main(string[] args)
 {
     scope app = new QApplication(args);
 

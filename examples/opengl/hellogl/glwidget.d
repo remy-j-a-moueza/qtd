@@ -35,8 +35,16 @@
 **
 ****************************************************************************/
 
-
-import tango.math.Math;
+version(Tango)
+    import tango.math.Math;
+else
+{
+    import std.math;
+    int rndint(real x)
+    {
+	return cast(int)rndtol(x);
+    }
+}
 
 import qt.core.QPoint;
 import qt.gui.QMouseEvent;

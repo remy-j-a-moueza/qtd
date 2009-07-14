@@ -39,7 +39,7 @@ import qt.gui.QApplication;
 
 import window;
 
-int main(char[][] args)
+int main(string[] args)
 {
     scope app = new QApplication(args);
     scope window = new Window;
