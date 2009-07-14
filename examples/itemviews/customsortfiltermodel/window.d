@@ -54,8 +54,10 @@ import qt.gui.QHBoxLayout;
 import qt.gui.QVBoxLayout;
 import qt.gui.QGridLayout;
 
-import mysortfilterproxymodel;
-
+version(D_Version2)
+    import mysortfilterproxymodel;
+else
+    import mysortfilterproxymodel_d1;
 
 class Window : public QWidget
 {

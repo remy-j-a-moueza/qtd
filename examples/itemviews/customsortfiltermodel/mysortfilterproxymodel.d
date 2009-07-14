@@ -82,7 +82,7 @@ public:
 
 protected:
 
-	bool filterAcceptsRow(int sourceRow, QModelIndex sourceParent)
+	override bool filterAcceptsRow(int sourceRow, const QModelIndex sourceParent)
 	{
 		QModelIndex index0 = sourceModel().index(sourceRow, 0, sourceParent);
 		QModelIndex index1 = sourceModel().index(sourceRow, 1, sourceParent);
@@ -99,7 +99,7 @@ protected:
 			&& dateInRange(sourceModel().data(index2).toDate());
 	}
 
-	bool lessThan(QModelIndex left, QModelIndex right)
+	override bool lessThan(const QModelIndex left, const QModelIndex right)
 	{
 		QVariant leftData = sourceModel().data(left);
 		QVariant rightData = sourceModel().data(right);

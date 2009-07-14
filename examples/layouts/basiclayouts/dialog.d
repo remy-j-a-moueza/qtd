@@ -110,7 +110,11 @@ class Dialog : public QDialog
         QHBoxLayout layout = new QHBoxLayout;
 
         for (int i = 0; i < NumButtons; ++i) {
-            buttons[i] = new QPushButton(format(tr("Button {}"), i + 1));
+	    version(Tango)
+		const string str = tr("Button {}:");
+	    else
+		const string str = tr("Button %s:");
+            buttons[i] = new QPushButton(format(str, i + 1));
             layout.addWidget(buttons[i]);
         }
         horizontalGroupBox.setLayout(layout);
@@ -122,7 +126,11 @@ class Dialog : public QDialog
         QGridLayout layout = new QGridLayout;
 
         for (int i = 0; i < NumGridRows; ++i) {
-            labels[i] = new QLabel(format(tr("Line {}:"), i + 1));
+	    version(Tango)
+		const string str = tr("Line {}:");
+	    else
+		const string str = tr("Line %s:");
+            labels[i] = new QLabel(format(str, i + 1));
             lineEdits[i] = new QLineEdit;
             layout.addWidget(labels[i], i + 1, 0);
             layout.addWidget(lineEdits[i], i + 1, 1);
