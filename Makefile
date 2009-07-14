@@ -55,10 +55,15 @@ endif
 ifndef $(NAME_PREFIX)
 NAME_PREFIX = qtd
 endif
+
 ifndef $(PACKAGES)
 PACKAGES = core gui
 endif
+
+ifeq ($(DMD_WIN), false)
 LIB_PREFIX = lib
+endif
+
 CC_INCLUDE += include $(QTDIR_INC) $(QTDIR_INC)$(SL)Qt $(QTDIR_INC)$(SL)QtCore $(QTDIR_INC)$(SL)QtGui $(QTDIR_INC)$(SL)QtOpenGL $(QTDIR_INC)$(SL)QtSvg
 D_INCLUDE +=
 CC_LFLAGS += -enable-stdcall-fixup -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc -Wl,-s -mthreads
