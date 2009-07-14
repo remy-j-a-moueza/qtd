@@ -1,1 +1,1 @@
-dmd main.d mainwindow.d libqtdcore.lib libqtdgui.lib -I../../../ -I../../../qt/d1
+dmd main.d mainwindow.d qtdcore.lib qtdgui.lib -I../../../ -I../../../qt/d2 -ofdockwidgets

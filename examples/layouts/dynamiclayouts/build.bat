@@ -1,1 +1,1 @@
-dmd main.d dialog.d libqtdcore.lib libqtdgui.lib -I../../../ -I../../../qt/d1 -ofdynamiclayouts
+dmd main.d dialog.d qtdcore.lib qtdgui.lib -I../../../ -I../../../qt/d2 -ofdynamiclayouts
