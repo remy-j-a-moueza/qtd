@@ -86,11 +86,11 @@ else
     }
     int ToInt(string s)
     {
-	return to!int(s);
+	return to!(int)(s);
     }
     float ToFloat(string s)
     {
-	return to!float(s);
+	return to!(float)(s);
     }
     int find(string s, dchar c)
     {

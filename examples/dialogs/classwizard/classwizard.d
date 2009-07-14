@@ -54,9 +54,21 @@ import qt.core.QFile;
 import qt.core.QDir;
 import qt.core.QRegExp;
 
-import tango.text.convert.Format;
-import tango.core.Array;
-import tango.text.Ascii;
+version(Tango)
+{
+	import tango.text.convert.Format: Format = format;
+	import tango.core.Array;
+	import tango.text.Ascii;
+	alias toUpper toupper;
+	alias toLower tolower;
+	
+	const string cannot_write_file_str = tr("Cannot write file {}:\n{}");
+}
+else { 
+	import std.string; 
+	import std.algorithm;
+	const string cannot_write_file_str = tr("Cannot write file %s:\n%s");
+}
 
 
 class ClassWizard : public QWizard
@@ -80,6 +92,12 @@ public:
 
 	void accept()
 	{
+		version(Tango)
+			const string cannot_write_file_str = tr("Cannot write file {}:\n{}");
+		else 
+			const string cannot_write_file_str = tr("Cannot write file %s:\n%s");
+
+	    
 		string className = field("className").toString();
 		string baseClass = field("baseClass").toString();
 		string macroName = field("macroName").toString();
@@ -143,7 +161,7 @@ public:
 		auto headerFile = new QFile(outputDir ~ "/" ~ header);
 		if (!headerFile.open(QFile.WriteOnly | QFile.Text)) {
 			QMessageBox.warning(null, tr("Simple Wizard"),
-					Format("Cannot write file {}:\n{}",
+					format(cannot_write_file_str,
 					headerFile.fileName(),
 					headerFile.errorString()));
 			return;
@@ -197,7 +215,7 @@ public:
 		auto implementationFile = new QFile(outputDir ~ "/" ~ implementation);
 		if (!implementationFile.open(QFile.WriteOnly | QFile.Text)) {
 			QMessageBox.warning(null, tr("Simple Wizard"),
-					Format(tr("Cannot write file {}:\n{}"),
+					format(cannot_write_file_str,
 					implementationFile.fileName(),
 					implementationFile.errorString()));
 			return;
@@ -362,7 +380,7 @@ protected:
 	void initializePage()
 	{
 		string className = field("className").toString();
-		macroNameLineEdit.setText(className.toUpper() ~ "_H");
+		macroNameLineEdit.setText(toupper(className) ~ "_H");
 
 		string baseClass = field("baseClass").toString();
 
@@ -376,7 +394,7 @@ protected:
 		} else if ((new QRegExp("Q[A-Z].*")).exactMatch(baseClass)) {
 			baseIncludeLineEdit.setText("<" ~ baseClass ~ ">");
 		} else {
-			baseIncludeLineEdit.setText("\"" ~ baseClass.toLower() ~ ".h\"");
+			baseIncludeLineEdit.setText("\"" ~ tolower(baseClass) ~ ".h\"");
 		}
 	}
 
@@ -433,8 +451,8 @@ protected:
 	void initializePage()
 	{
 		string className = field("className").toString();
-		headerLineEdit.setText(toLower(className) ~ ".h");
-		implementationLineEdit.setText(toLower(className) ~ ".cpp");
+		headerLineEdit.setText(tolower(className) ~ ".h");
+		implementationLineEdit.setText(tolower(className) ~ ".cpp");
 		outputDirLineEdit.setText(QDir.convertSeparators(QDir.tempPath()));
 	}
 
@@ -470,9 +488,18 @@ protected:
 
 	void initializePage()
 	{
-		string finishText = wizard().buttonText(QWizard.FinishButton).dup;
-		auto pos = remove(finishText, '&');
-		label.setText(Format(tr("Click {} to generate the class skeleton."), finishText));
+		string finishText = wizard().buttonText(QWizard.FinishButton);	
+		version(Tango)
+		{
+			auto pos = remove(finishText, '&');
+			const string str = tr("Click {} to generate the class skeleton.");
+		}
+		else
+		{
+			const string str = tr("Click %s to generate the class skeleton.");
+			// TODO: port to D2.
+		}
+		label.setText(format(str, finishText));
 	}
 
 private:

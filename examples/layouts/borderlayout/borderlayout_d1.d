@@ -38,7 +38,7 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
-module borderlayout;
+module borderlayout_d1;
 
 
 import qt.gui.QLayout;

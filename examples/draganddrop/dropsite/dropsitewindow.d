@@ -44,7 +44,7 @@ module dropsitewindow;
 version(Tango) {
     import tango.text.Util;
     import tango.text.Ascii;
-    import tango.text.convert.Format: format = Format;
+    import tango.text.convert.Format;
 } else {
     import std.string;
     alias strip trim;
@@ -133,7 +133,7 @@ public:
 				QByteArray data = mimeData.data(format);
 				for (int i = 0; i < data.size() && i < 32; ++i) {
 					version(Tango)
-					    string hex = toUupper(Format("{0:x}", data.at(i)));
+					    string hex = toUpper(Format("{0:x}", data.at(i)));
 					else
 					    string hex = toupper(std.string.format("%x", data.at(i)));					
 					text ~= hex ~ " ";

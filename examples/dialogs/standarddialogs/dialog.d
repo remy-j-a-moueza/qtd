@@ -55,10 +55,13 @@ import qt.gui.QFontDialog;
 import qt.gui.QFileDialog;
 import qt.core.QFile;
 
-import tango.text.convert.Format;
+version(Tango)  
+    import tango.text.convert.Format;
+else
+    import std.string;
 
 
-char[] MESSAGE = tr("<p>Message boxes have a caption, a text, "
+string MESSAGE = tr("<p>Message boxes have a caption, a text, "
                "and any number of buttons, each with standard or custom texts."
                "<p>Click a button to close the message box. Pressing the Esc button "
                "will activate the detected escape button (if any).");
@@ -209,7 +212,10 @@ private:
 		bool ok;
 		int i = QInputDialog.getInt(this, tr("QInputgetInteger()"), tr("Percentage:"), 25, 0, 100, 1, ok);
 		if (ok)
-			integerLabel.setText(Format("{}", i));
+			version(Tango) 
+				integerLabel.setText(Format("{}", i)); 
+			else
+				integerLabel.setText(format("%d", i)); 
 	}
 
 	void setDouble()
@@ -218,7 +224,10 @@ private:
 		double d = QInputDialog.getDouble(this, tr("QInputgetDouble()"),
 						tr("Amount:"), 37.56, -10000, 10000, 2, ok);
 		if (ok)
-			doubleLabel.setText(Format("${}", d));
+			version(Tango) 
+				doubleLabel.setText(Format("${}", d));
+			else
+				integerLabel.setText(format("%g", d)); 	
 	}
 
 	void setItem()
@@ -305,7 +314,12 @@ private:
 						options);
 		if (files.length) {
 			openFilesPath = files[0];
-			openFileNamesLabel.setText(Format("{}", files));
+			version(Tango) 
+				openFileNamesLabel.setText(Format("{}", files));
+			else
+			{
+				openFileNamesLabel.setText(join(files, "; "));
+			}
 		}
 	}
 
@@ -406,5 +420,5 @@ private:
 	QLabel errorLabel;
 	QErrorMessage errorMessageDialog;
 
-	char[] openFilesPath;
+	string openFilesPath;
 }

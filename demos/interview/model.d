@@ -35,7 +35,7 @@
 **
 ****************************************************************************/
 
-module model_d2;
+module model;
 
 import qt.gui.QIcon;
 import qt.gui.QPixmap;
