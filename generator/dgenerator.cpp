@@ -2592,7 +2592,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                 s << endl << INDENT << "void*[" << signal_funcs.size() << "] sign_arr;" << endl;
                 for(int i = 0; i < signal_funcs.size(); i++) {
                     AbstractMetaFunction *signal = signal_funcs.at(i);
-                    s << INDENT << "sign_arr[" << i << "] = &" << signalExternName(d_class, signal) << "_handle_in_d;" << endl;
+                    s << INDENT << "sign_arr[" << i << "] = &" << signalExternName(d_class, signal) << "_handle;" << endl;
                 }
                 if(signal_funcs.size() == 0)
                     initArgs += ", null";

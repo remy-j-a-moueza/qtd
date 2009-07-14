@@ -11,18 +11,10 @@
 
 module qt.qtd.Str;
 
-version (Tango)
-{
-    public import tango.text.convert.Utf : toUTF8 = toString;
-    alias char[] string;
-}
-else
-{
-    import std.utf : toUTF8;
-}
+import std.utf : toUTF8;
 
 version(D_Version2) {
-    private import core.sys.posix.stdio;
+//    private import core.sys.posix.stdio;
     private import core.stdc.string;
 
     version = druntime;
@@ -44,11 +36,6 @@ public static char** toStringzArray(string[] args)
         
     return argv;
 }
-
-version(Tango) {
-    import tango.stdc.stringz : toStringz, fromStringz;
-}
-
 
 public string fromStringz(const (char) *s)
 {
