@@ -33,10 +33,12 @@ extern "C" DLL_PUBLIC void* qtd_UrlHandler_UrlHandler_QObject
     return (void *) __qt_this;
 }
 
+#ifdef CPP_SHARED
 extern "C" DLL_PUBLIC void qtd_UrlHandler_initCallBacks(pfunc_abstr *virts, pfunc_abstr qobj_del) {
     qtd_UrlHandler_handleUrl_QUrl_dispatch = (pfqtd_UrlHandler_handleUrl_QUrl_dispatch) virts[0];
 //    qtd_D_QWidget_delete = (qtd_pf_D_QWidget_delete)qobj_del;
 }
+#endif
 /* ---------------------------------------- */
 
 #if !defined(Q_MOC_OUTPUT_REVISION)
