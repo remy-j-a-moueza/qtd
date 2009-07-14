@@ -43,9 +43,6 @@ module droparea;
 
 import qt.gui.QLabel;
 
-import tango.io.Stdout;
-
-
 class DropArea : public QLabel
 {
 public:
@@ -107,7 +104,7 @@ protected:
 			setTextFormat(Qt.PlainText);
 		} else if (mimeData.hasUrls()) {
 			QUrl[] urlList = mimeData.urls();
-			char[] text;
+			string text;
 			for (int i = 0; i < urlList.length && i < 32; ++i) {
 				text ~= urlList[i].path() ~ "\n";
 			}

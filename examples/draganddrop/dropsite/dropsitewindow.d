@@ -47,6 +47,7 @@ version(Tango) {
     import tango.text.convert.Format: format = Format;
 } else {
     import std.string;
+    alias strip trim;
 }
 
 import qt.gui.QWidget;
@@ -75,7 +76,7 @@ public:
 		dropArea = new DropArea;
 		dropArea.changed.connect(&updateFormatsTable);
 
-		char[][] labels;
+		string[] labels;
 		labels ~= tr("Format");
 		labels ~= tr("Content");
 
@@ -112,12 +113,12 @@ public:
 		if (!mimeData)
 			return;
 
-		foreach (char[] format; mimeData.formats()) {
+		foreach (string format; mimeData.formats()) {
 			QTableWidgetItem formatItem = new QTableWidgetItem(format);
 			formatItem.setFlags(Qt.ItemIsEnabled);
 			formatItem.setTextAlignment(Qt.AlignTop | Qt.AlignLeft);
 
-			char[] text;
+			string text;
 			if (format == "text/plain") {
 				text = trim(mimeData.text());
 			} else if (format == "text/html") {
@@ -125,13 +126,16 @@ public:
 			} else if (format == "text/uri-list") {
 				QUrl[] urlList = mimeData.urls();
 				for (int i = 0; i < urlList.length && i < 32; ++i) {
-					char[] url = urlList[i].path();
+					string url = urlList[i].path();
 					text ~= url ~ " ";
 				}
 			} else {
 				QByteArray data = mimeData.data(format);
 				for (int i = 0; i < data.size() && i < 32; ++i) {
-					char[] hex = toUpper(Format("{0:x}", data.at(i)));
+					version(Tango)
+					    string hex = toUupper(Format("{0:x}", data.at(i)));
+					else
+					    string hex = toupper(std.string.format("%x", data.at(i)));					
 					text ~= hex ~ " ";
 				}
 			}
