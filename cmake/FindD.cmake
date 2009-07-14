@@ -409,7 +409,7 @@ macro(add_d_target name)
 	get_files_depends(tmp ${SOURCES_tmp})
 	set(SOURCES_tmp ${tmp})
     endif(auto_detect_depentes_tmp)
-    set(SOURCES_tmp ${SOURCES_tmp} ${NO_DEPS_SOURCES})
+    set(SOURCES_tmp ${SOURCES_tmp} ${NO_DEPS_SOURCES_tmp})
     
     set(used_ar_tmp)
     get_filename_component(output_path_tmp ${output_name_tmp} PATH)
