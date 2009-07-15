@@ -57,7 +57,6 @@ endif("${dc_parent_dir}" STREQUAL "bin")
 set(ONE_BUILD_COMMAND OFF) ## TODO: test it and uncomment the previous line.
 
 if (NOT ONE_BUILD_COMMAND)
-    ## TODO: disable SINGLE_D_OBJECT option for ldc < rev. 1433.
     if(D_IS_MARS)
 	set(opt_tmp "ON")
     else(D_IS_MARS)
@@ -103,10 +102,10 @@ elseif(CMAKE_HOST_UNIX)
 endif(CMAKE_HOST_WIN32) 
 
 ##--------------------------------------------
-## Macroses and functions.
+## Macros and functions.
 ##--------------------------------------------
 
-## Make native path.
+## Make a native path.
 ## Usage:
 ##	set(path c:/file_path/file_name.cpp)
 ##	make_native_path(path)
