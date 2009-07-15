@@ -2277,7 +2277,11 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                 s << "(void* native_id, bool no_real_delete = false) {" << endl
                   << INDENT << "super(native_id, no_real_delete);" << endl;
         }
-
+        if (cpp_shared) {
+            if (d_class->generateShellClass() && !d_class->isInterface())
+                s << INDENT << "if (!init_flag_" << d_class->name() << ")" << endl
+                  << INDENT << "    static_init_" << d_class->name() << "();" << endl << endl;
+        }
         // customized store-result instances
         d_funcs = d_class->functionsInTargetLang();
         for (int i=0; i<d_funcs.size(); ++i) {
@@ -2425,7 +2429,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         {
             Indentation indent(INDENT);
             s << INDENT << "public this(void* native_id, bool no_real_delete = true) {" << endl
-                    << INDENT << "    super(native_id, no_real_delete);" << endl;
+              << INDENT << "    super(native_id, no_real_delete);" << endl;
 
 
 
@@ -3232,11 +3236,7 @@ void DGenerator::writeConstructorContents(QTextStream &s, const AbstractMetaFunc
     {
         Indentation indent(INDENT);
         bool shellClass = d_function->ownerClass()->generateShellClass();
-        if (cpp_shared) {
-            if (shellClass && !d_function->ownerClass()->isInterface())
-                s << INDENT << "if (!init_flag_" << d_function->ownerClass()->name() << ")" << endl
-                  << INDENT << "    static_init_" << d_function->ownerClass()->name() << "();" << endl << endl;
-        }
+
         writeJavaCallThroughContents(s, d_function);
 
         // Write out expense checks if present...
