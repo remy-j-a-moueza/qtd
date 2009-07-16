@@ -306,7 +306,7 @@ foreach(package_big ${all_packages})
 	endif(NOT GENERATE_DI_FILES)
 
 	## Link CPP library.
-	add_library(cpp_${package} SHARED ${cpp_sources})
+	add_library(cpp_${package} STATIC ${cpp_sources})
 	set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
 	if(CMAKE_HOST_WIN32 AND D_IS_MARS) ## TODO: Replace by SEPAREATE_CPP_PART	    
 	else(CMAKE_HOST_WIN32 AND D_IS_MARS)

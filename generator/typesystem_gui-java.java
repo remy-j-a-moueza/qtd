@@ -588,7 +588,7 @@ class QAccessibleInterface___ extends QAccessibleInterface {
 }// class
 
 class QDesktopServices___ extends QDesktopServices {
-
+/*
     private static UrlHandler[string] __rcUrlHandlers;
     public static void setUrlHandler(string scheme, void delegate(QUrl) dg) {
         UrlHandler receiver = dg !is null ? new UrlHandler(dg) : null;
@@ -599,7 +599,7 @@ class QDesktopServices___ extends QDesktopServices {
             __rcUrlHandlers[scheme] = receiver;
     
         setUrlHandler(scheme, receiver, "handleUrl");
-    }
+    }*/
 }// class
 
 class QWizardPage___ extends QWizardPage {
