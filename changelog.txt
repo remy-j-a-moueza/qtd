@@ -13,5 +13,6 @@ changes since 0.1
  
  changes since 0.2
 
+ * D2 port
  * new CMake module for D
  * support for MSVC
