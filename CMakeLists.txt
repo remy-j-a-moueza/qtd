@@ -77,6 +77,10 @@ if(CMAKE_HOST_WIN32)
     string(REGEX REPLACE ".dll([A-Za-z\\.0-9]+)" "\\1" CMAKE_IMPORT_LIBRARY_SUFFIX "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 endif(CMAKE_HOST_WIN32) 
 
+if(CMAKE_HOST_WIN32 AND D_IS_MARS)
+    set(CPP_SHARED 1)
+endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
+
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ./)
 set(GEN_OPT ${GEN_OPT} --d-target=${D_TARGET})
 
@@ -312,16 +316,21 @@ foreach(package_big ${all_packages})
 	endif(NOT GENERATE_DI_FILES)
 
 	## Link CPP library.
-	add_library(cpp_${package} STATIC ${cpp_sources})
+	if(CPP_SHARED)
+	    set(cpp_method SHARED)
+	else(CPP_SHARED)
+	    set(cpp_method STATIC)
+	endif(CPP_SHARED)
+	add_library(cpp_${package} ${cpp_method} ${cpp_sources})
 	set_property(TARGET cpp_${package} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
-	if(CMAKE_HOST_WIN32 AND D_IS_MARS) ## TODO: Replace by SEPAREATE_CPP_PART	    
-	else(CMAKE_HOST_WIN32 AND D_IS_MARS)
+	if(CPP_SHARED) 
+	else(CPP_SHARED)
 	    foreach(cpp_source ${cpp_sources})
 		set(cpp_source ${cpp_source})
 		obj_path(cpp_source)
 		set(cpp_objs ${cpp_objs} ${CMAKE_BINARY_DIR}/CMakeFiles/cpp_${package}.dir/${cpp_source}${CMAKE_CXX_OUTPUT_EXTENSION})
 	    endforeach(cpp_source ${cpp_sources})
-	endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
+	endif(CPP_SHARED)
 
 	## Link D library.
 	set(lib_name qtd${package})
@@ -355,7 +364,7 @@ foreach(package_big ${all_packages})
 	string(TOUPPER ${package} package_upper)
 	set(link_cpp ${link_cpp} ${QT_QT${package_upper}_LIBRARY})
 	target_link_libraries(cpp_${package} ${link_cpp} )	
-	if(CMAKE_HOST_WIN32 AND D_IS_MARS) ## TODO: Replace by SEPAREATE_CPP_PART
+	if(CPP_SHARED)
 	    set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.dll)
 	    set(cpp_lib_native ${cpp_lib})
 	    make_native_path(cpp_lib_native)
@@ -370,9 +379,9 @@ foreach(package_big ${all_packages})
 			COMMENT "Creating implib ${lib_name}"
 		    )
 	    install(FILES ${cpp_lib} COMPONENT qtd DESTINATION lib)
-	else(CMAKE_HOST_WIN32 AND D_IS_MARS)
+	else(CPP_SHARED)
 	    set(${package}_lib_param Qt${package_big}) ## Paths for QtD libs. Needed by examples.
-	endif(CMAKE_HOST_WIN32 AND D_IS_MARS) 
+	endif(CPP_SHARED) 
 	add_d_target(${lib_name} NOT_DETECT_DEPENDS TYPE ${build_type} INCLUDES ${QTD_IMPORT_PATH} SOURCES ${d_sources} OBJECTS ${cpp_objs} ${d_implib}
 	      OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib DEPENDS ${d_implib})
 	install(FILES ${CMAKE_BINARY_DIR}/${lib} COMPONENT qtd DESTINATION lib)
