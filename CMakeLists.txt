@@ -3,7 +3,6 @@ PROJECT(qtd CXX C)
 FIND_PACKAGE(Qt4 REQUIRED)
 set (QT_USE_QTMAIN false)
 set (QT_USE_QTGUI false)
-include(${QT_USE_FILE} ${CMAKE_CURRENT_SOURCE_DIR}) 
 
 ##--------------------------------------------
 ## Settings.
@@ -290,7 +289,6 @@ foreach(package_big ${all_packages})
 	endforeach(cpp_source ${cpp_files})
 	foreach (cpp_source ${cpp_generated_files})
 	    set(cpp_sources ${cpp_sources} ${CMAKE_BINARY_DIR}/cpp/${cpp_source}.cpp)
-	    message(${CMAKE_BINARY_DIR}/cpp/${cpp_source}.cpp)
 	endforeach(cpp_source ${cpp_generated_files})
 	foreach(d_source ${d_version_files})
 	    set(d_sources ${d_sources} ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION}/qt/${d_source}.d)
