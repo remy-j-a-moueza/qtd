@@ -15,16 +15,16 @@ public struct QSize
 */
 
     public static QSize opCall() {
-    	QSize sz;
-    	sz.wd = sz.ht = -1;
-    	return sz;
+        QSize sz;
+        sz.wd = sz.ht = -1;
+        return sz;
     }
 
     public static QSize opCall(int w, int h) {
-    	QSize sz;
-    	sz.wd = w;
-    	sz.ht = h;
-    	return sz;
+        QSize sz;
+        sz.wd = w;
+        sz.ht = h;
+        return sz;
     }
 
     final bool isNull()
@@ -55,26 +55,26 @@ public struct QSize
     { ht = h; }
     
     void transpose() {
-		int tmp = wd;
-		wd = ht;
-		ht = tmp;
-	}
+        int tmp = wd;
+        wd = ht;
+        ht = tmp;
+    }
 
     void scale(int w, int h, Qt.AspectRatioMode mode) {
-    	scale(QSize(w, h), mode);
+        scale(QSize(w, h), mode);
     }
     
-    void scale(ref QSize s, Qt.AspectRatioMode mode) {
-    	__qtd_QSize_scale_QSize_AspectRatioMode(this, &s, mode);
+    void scale(in QSize s, Qt.AspectRatioMode mode) {
+        __qtd_QSize_scale_QSize_AspectRatioMode(this, &s, mode);
     }
 
-    QSize expandedTo(ref QSize otherSize) {
+    QSize expandedTo(in QSize otherSize) {
         return QSize(qMax(wd,otherSize.wd), qMax(ht,otherSize.ht));
-	}
+    }
 
-    QSize boundedTo(ref QSize otherSize) {
-    	return QSize(qMin(wd,otherSize.wd), qMin(ht,otherSize.ht));
-	}
+    QSize boundedTo(in QSize otherSize) {
+        return QSize(qMin(wd,otherSize.wd), qMin(ht,otherSize.ht));
+    }
 /*
     public final void writeTo(QDataStream arg__1)    {
         __qtd_QSize_writeTo_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
@@ -84,37 +84,37 @@ public struct QSize
         __qtd_QSize_readFrom_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
     }
 */
-	QSize opAddAssign(ref QSize s)
-	{ wd+=s.wd; ht+=s.ht; return *this; }
+    QSize opAddAssign(in QSize s)
+    { wd+=s.wd; ht+=s.ht; return *this; }
 
-	QSize opSubAssign(ref QSize s)
-	{ wd-=s.wd; ht-=s.ht; return *this; }
+    QSize opSubAssign(in QSize s)
+    { wd-=s.wd; ht-=s.ht; return *this; }
 
-	QSize opMulAssign(qreal c)
-	{ wd = qRound(wd*c); ht = qRound(ht*c); return *this; }
+    QSize opMulAssign(qreal c)
+    { wd = qRound(wd*c); ht = qRound(ht*c); return *this; }
 
-	bool opEquals(ref QSize s)
-	{ return wd == s.wd && ht == s.ht; }
+    bool opEquals(in QSize s)
+    { return wd == s.wd && ht == s.ht; }
 
-	QSize opAdd(ref QSize s)
-	{ return QSize(this.wd+s.wd, this.ht+s.ht); }
+    QSize opAdd(in QSize s)
+    { return QSize(this.wd+s.wd, this.ht+s.ht); }
 
-	QSize opSub(ref QSize s)
-	{ return QSize(this.wd-s.wd, this.ht-s.ht); }
+    QSize opSub(in QSize s)
+    { return QSize(this.wd-s.wd, this.ht-s.ht); }
 
-	QSize opMul(qreal c)
-	{ return QSize(qRound(this.wd*c), qRound(this.ht*c)); }
+    QSize opMul(qreal c)
+    { return QSize(qRound(this.wd*c), qRound(this.ht*c)); }
 
-	QSize opDivAssign(qreal c) {
-    	assert(!qFuzzyCompare(c + 1, 1.));
-    	wd = qRound(wd/c); ht = qRound(ht/c);
-    	return *this;
-	}
+    QSize opDivAssign(qreal c) {
+        assert(!qFuzzyCompare(c + 1, 1.));
+        wd = qRound(wd/c); ht = qRound(ht/c);
+        return *this;
+    }
 
-	QSize opDiv(qreal c) {
-    	assert(!qFuzzyCompare(c + 1, 1.));
-    	return QSize(qRound(this.wd/c), qRound(this.ht/c));
-	}
+    QSize opDiv(qreal c) {
+        assert(!qFuzzyCompare(c + 1, 1.));
+        return QSize(qRound(this.wd/c), qRound(this.ht/c));
+    }
 
 private:
     int wd;
@@ -125,80 +125,80 @@ private:
 public struct QSizeF
 {
 /* ctors, reserved for D2
-	this()
-	{ wd = ht = -1.; }
+    this()
+    { wd = ht = -1.; }
 
-	this(ref QSize sz)
-	{ wd = sz.width(); ht = sz.height(); }
+    this(ref QSize sz)
+    { wd = sz.width(); ht = sz.height(); }
 
-	this(qreal w, qreal h)
-	{ wd = w; ht = h; }
+    this(qreal w, qreal h)
+    { wd = w; ht = h; }
 */
-	public static QSizeF opCall() {
-    	QSizeF sz;
-		sz.wd = sz.ht = -1.;
-		return sz;
-	}
+    public static QSizeF opCall() {
+        QSizeF sz;
+        sz.wd = sz.ht = -1.;
+        return sz;
+    }
 
-	public static QSizeF opCall(ref QSizeF s) {
-		QSizeF sz;
-		sz.wd = s.width(); sz.ht = s.height();
-		return sz;
-	}
+    public static QSizeF opCall(in QSizeF s) {
+        QSizeF sz;
+        sz.wd = s.width(); sz.ht = s.height();
+        return sz;
+    }
 
-	public static QSizeF opCall(qreal w, qreal h) {
-		QSizeF sz;
-		sz.wd = w; sz.ht = h;
-		return sz;
-	}
+    public static QSizeF opCall(qreal w, qreal h) {
+        QSizeF sz;
+        sz.wd = w; sz.ht = h;
+        return sz;
+    }
 
-	bool isNull()
-	{ return qIsNull(wd) && qIsNull(ht); }
+    bool isNull()
+    { return qIsNull(wd) && qIsNull(ht); }
 
-	bool isEmpty()
-	{ return wd <= 0. || ht <= 0.; }
+    bool isEmpty()
+    { return wd <= 0. || ht <= 0.; }
 
-	bool isValid()
-	{ return wd >= 0. && ht >= 0.; }
+    bool isValid()
+    { return wd >= 0. && ht >= 0.; }
 
-	qreal width()
-	{ return wd; }
+    qreal width()
+    { return wd; }
 
-	qreal height()
-	{ return ht; }
+    qreal height()
+    { return ht; }
 
-	void width(qreal w)
-	{ wd = w; }
+    void width(qreal w)
+    { wd = w; }
 
-	void height(qreal h)
-	{ ht = h; }
+    void height(qreal h)
+    { ht = h; }
 
-	void setWidth(qreal w)
-	{ wd = w; }
+    void setWidth(qreal w)
+    { wd = w; }
 
-	void setHeight(qreal h)
-	{ ht = h; }
+    void setHeight(qreal h)
+    { ht = h; }
 
-	void scale(qreal w, qreal h, Qt.AspectRatioMode mode)
-	{ scale(QSizeF(w, h), mode); }
+    void scale(qreal w, qreal h, Qt.AspectRatioMode mode)
+    { scale(QSizeF(w, h), mode); }
 
     public final void scale(QSizeF s, Qt.AspectRatioMode mode)
     { __qtd_QSizeF_scale_QSizeF_AspectRatioMode(this, &s, mode); }
 
-	void transpose() {
-    	qreal tmp = wd;
-    	wd = ht;
-    	ht = tmp;
-	}
+    void transpose() {
+        qreal tmp = wd;
+        wd = ht;
+        ht = tmp;
+    }
 
-	QSizeF expandedTo(ref QSizeF otherSize)
-	{ return QSizeF(qMax(wd,otherSize.wd), qMax(ht,otherSize.ht)); }
+    QSizeF expandedTo(in QSizeF otherSize)
+    { return QSizeF(qMax(wd,otherSize.wd), qMax(ht,otherSize.ht)); }
 
-	QSizeF boundedTo(ref QSizeF otherSize)
-	{ return QSizeF(qMin(wd,otherSize.wd), qMin(ht,otherSize.ht)); }
+    QSizeF boundedTo(in QSizeF otherSize)
+    { return QSizeF(qMin(wd,otherSize.wd), qMin(ht,otherSize.ht)); }
 
-	QSize toSize()
-	{ return QSize(qRound(wd), qRound(ht));	}
+    QSize toSize()
+    { return QSize(qRound(wd), qRound(ht));    }
 /*
     public final void writeTo(QDataStream arg__1) {
         __qtd_QSizeF_writeTo_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
@@ -207,39 +207,39 @@ public struct QSizeF
     public final void readFrom(QDataStream arg__1) {
         __qtd_QSizeF_readFrom_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
 */
-	QSizeF opAddAssign(ref QSizeF s)
-	{ wd += s.wd; ht += s.ht; return *this; }
+    QSizeF opAddAssign(in QSizeF s)
+    { wd += s.wd; ht += s.ht; return *this; }
 
-	QSizeF opSubAssign(ref QSizeF s)
-	{ wd -= s.wd; ht -= s.ht; return *this; }
+    QSizeF opSubAssign(in QSizeF s)
+    { wd -= s.wd; ht -= s.ht; return *this; }
 
-	QSizeF opMulAssign(qreal c)
-	{ wd *= c; ht *= c; return *this; }
+    QSizeF opMulAssign(qreal c)
+    { wd *= c; ht *= c; return *this; }
 
-	bool opEquals(ref QSizeF s)
-	{ return qFuzzyCompare(wd, s.wd) && qFuzzyCompare(ht, s.ht); }
+    bool opEquals(in QSizeF s)
+    { return qFuzzyCompare(wd, s.wd) && qFuzzyCompare(ht, s.ht); }
 
-	QSizeF opAdd(ref QSizeF s)
-	{ return QSizeF(this.wd+s.wd, this.ht+s.ht); }
+    QSizeF opAdd(in QSizeF s)
+    { return QSizeF(this.wd+s.wd, this.ht+s.ht); }
 
-	QSizeF opSub(ref QSizeF s)
-	{ return QSizeF(this.wd-s.wd, this.ht-s.ht); }
+    QSizeF opSub(in QSizeF s)
+    { return QSizeF(this.wd-s.wd, this.ht-s.ht); }
 
-	QSizeF opMul(qreal c)
-	{ return QSizeF(this.wd*c, this.ht*c); }
+    QSizeF opMul(qreal c)
+    { return QSizeF(this.wd*c, this.ht*c); }
 
-	QSizeF opDivAssign(qreal c)
-	{
-	    assert(!qFuzzyCompare(c + 1, 1.));
-	    wd = wd/c; ht = ht/c;
-	    return *this;
-	}
+    QSizeF opDivAssign(qreal c)
+    {
+        assert(!qFuzzyCompare(c + 1, 1.));
+        wd = wd/c; ht = ht/c;
+        return *this;
+    }
 
-	QSizeF opDiv(qreal c)
-	{
-	    assert(!qFuzzyCompare(c + 1, 1.));
-	    return QSizeF(this.wd/c, this.ht/c);
-	}
+    QSizeF opDiv(qreal c)
+    {
+        assert(!qFuzzyCompare(c + 1, 1.));
+        return QSizeF(this.wd/c, this.ht/c);
+    }
 
 private:
     qreal wd;

@@ -29,7 +29,7 @@ public struct QRectF
         return rt;
     }
 
-    public static QRectF opCall(ref QPointF atopLeft, ref QSizeF asize)
+    public static QRectF opCall(in QPointF atopLeft, in QSizeF asize)
     {
         QRectF rt;
         rt.xp = atopLeft.x();
@@ -39,7 +39,7 @@ public struct QRectF
         return rt;
     }
 
-    public static QRectF opCall(ref QPointF atopLeft, ref QPointF abottomRight)
+    public static QRectF opCall(in QPointF atopLeft, in QPointF abottomRight)
     {
         QRectF rt;
         rt.xp = atopLeft.x();
@@ -49,7 +49,7 @@ public struct QRectF
         return rt;
     }
 
-    public static QRectF opCall(ref QRect r)
+    public static QRectF opCall(in QRect r)
     {
         QRectF rt;
         rt.xp = r.x();
@@ -106,13 +106,13 @@ public struct QRectF
 
     void setBottom(qreal pos) { h = pos - yp; }
 
-    void setTopLeft(ref QPointF p) { setLeft(p.x()); setTop(p.y()); }
+    void setTopLeft(in QPointF p) { setLeft(p.x()); setTop(p.y()); }
 
-    void setTopRight(ref QPointF p) { setRight(p.x()); setTop(p.y()); }
+    void setTopRight(in QPointF p) { setRight(p.x()); setTop(p.y()); }
 
-    void setBottomLeft(ref QPointF p) { setLeft(p.x()); setBottom(p.y()); }
+    void setBottomLeft(in QPointF p) { setLeft(p.x()); setBottom(p.y()); }
 
-    void setBottomRight(ref QPointF p) { setRight(p.x()); setBottom(p.y()); }
+    void setBottomRight(in QPointF p) { setRight(p.x()); setBottom(p.y()); }
 
     QPointF center() // conts
     { return QPointF(xp + w/2, yp + h/2); }
@@ -125,15 +125,15 @@ public struct QRectF
 
     void moveBottom(qreal pos) { yp = pos - h; }
 
-    void moveTopLeft(ref QPointF p) { moveLeft(p.x()); moveTop(p.y()); }
+    void moveTopLeft(in QPointF p) { moveLeft(p.x()); moveTop(p.y()); }
 
-    void moveTopRight(ref QPointF p) { moveRight(p.x()); moveTop(p.y()); }
+    void moveTopRight(in QPointF p) { moveRight(p.x()); moveTop(p.y()); }
 
-    void moveBottomLeft(ref QPointF p) { moveLeft(p.x()); moveBottom(p.y()); }
+    void moveBottomLeft(in QPointF p) { moveLeft(p.x()); moveBottom(p.y()); }
 
-    void moveBottomRight(ref QPointF p) { moveRight(p.x()); moveBottom(p.y()); }
+    void moveBottomRight(in QPointF p) { moveRight(p.x()); moveBottom(p.y()); }
 
-    void moveCenter(ref QPointF p) { xp = p.x() - w/2; yp = p.y() - h/2; }
+    void moveCenter(in QPointF p) { xp = p.x() - w/2; yp = p.y() - h/2; }
 
     qreal width() // conts
     { return w; }
@@ -150,7 +150,7 @@ public struct QRectF
         yp += dy;
     }
 
-    void translate(ref QPointF p)
+    void translate(in QPointF p)
     {
         xp += p.x();
         yp += p.y();
@@ -162,7 +162,7 @@ public struct QRectF
         yp = ay;
     }
 
-    void moveTo(ref QPointF p)
+    void moveTo(in QPointF p)
     {
         xp = p.x();
         yp = p.y();
@@ -171,7 +171,7 @@ public struct QRectF
     QRectF translated(qreal dx, qreal dy) // conts
     { return QRectF(xp + dx, yp + dy, w, h); }
 
-    QRectF translated(ref QPointF p) // conts
+    QRectF translated(in QPointF p) // conts
     { return QRectF(xp + p.x(), yp + p.y(), w, h); }
 
     void getRect(qreal *ax, qreal *ay, qreal *aaw, qreal *aah) // conts
@@ -218,7 +218,7 @@ public struct QRectF
     void setHeight(qreal ah) // for convenience
     { this.h = ah; }
 
-    void setSize(ref QSizeF s) // for convenience
+    void setSize(in QSizeF s) // for convenience
     {
         w = s.width();
         h = s.height();
@@ -230,7 +230,7 @@ public struct QRectF
     void height(qreal ah)
     { this.h = ah; }
 
-    void size(ref QSizeF s)
+    void size(in QSizeF s)
     {
         w = s.width();
         h = s.height();
@@ -241,29 +241,29 @@ public struct QRectF
         return contains(QPointF(ax, ay));
     }
 
-    QRectF opOrAssign(ref QRectF r)
+    QRectF opOrAssign(in QRectF r)
     {
         *this = *this | r;
         return *this;
     }
 
-    QRectF opAndAssign(ref QRectF r)
+    QRectF opAndAssign(in QRectF r)
     {
         *this = *this & r;
         return *this;
     }
 
-    QRectF intersected(ref QRectF r) // conts
+    QRectF intersected(in QRectF r) // conts
     {
         return *this & r;
     }
 
-    QRectF united(ref QRectF r) // conts
+    QRectF united(in QRectF r) // conts
     {
         return *this | r;
     }
 
-    bool opEquals(ref QRectF r)
+    bool opEquals(in QRectF r)
     {
         return qFuzzyCompare(xp, r.xp) && qFuzzyCompare(yp, r.yp)
             && qFuzzyCompare(w, r.w) && qFuzzyCompare(h, r.h);
@@ -290,7 +290,7 @@ public struct QRectF
         return qtd_QRectF_normalized(this);
     }
 
-    public final QRectF opAnd(ref QRectF r) {
+    public final QRectF opAnd(in QRectF r) {
         return qtd_QRectF_operator_and_QRectF(this, &r);
     }
 
@@ -302,7 +302,7 @@ public struct QRectF
         qtd_QRectF_readFrom_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
     }
 
-    public final QRectF opOr(ref QRectF r) {
+    public final QRectF opOr(in QRectF r) {
         return qtd_QRectF_operator_or_QRectF(this, &r);
     }
 

@@ -15,7 +15,7 @@ public struct QLine
         return ln;
     }
 
-    public static QLine opCall(ref QPoint pt1_, ref QPoint pt2_) {
+    public static QLine opCall(in QPoint pt1_, in QPoint pt2_) {
         QLine ln;
         ln.pt1 = pt1_;
         ln.pt2 = pt2_;
@@ -74,7 +74,7 @@ public struct QLine
         return pt2.y() - pt1.y();
     }
     
-    void translate(ref QPoint point)
+    void translate(in QPoint point)
     {
         pt1 += point;
         pt2 += point;
@@ -85,7 +85,7 @@ public struct QLine
         translate(QPoint(adx, ady));
     }
     
-    QLine translated(ref QPoint p) // const
+    QLine translated(in QPoint p) // const
     {
         return QLine(pt1 + p, pt2 + p);
     }
@@ -95,27 +95,27 @@ public struct QLine
         return translated(QPoint(adx, ady));
     }
 
-    void p1(ref QPoint aP1)
+    void p1(in QPoint aP1)
     {
         pt1 = aP1;
     }
 
-    void p2(ref QPoint aP2)
+    void p2(in QPoint aP2)
     {
         pt2 = aP2;
     }
 
-    void setP1(ref QPoint aP1) // for convenience
+    void setP1(in QPoint aP1) // for convenience
     {
         pt1 = aP1;
     }
     
-    void setP2(ref QPoint aP2) // for convenience
+    void setP2(in QPoint aP2) // for convenience
     {
         pt2 = aP2;
     }
     
-    void setPoints(ref QPoint aP1, ref QPoint aP2)
+    void setPoints(in QPoint aP1, in QPoint aP2)
     {
         pt1 = aP1;
         pt2 = aP2;
@@ -127,7 +127,7 @@ public struct QLine
         pt2 = QPoint(aX2, aY2);
     }
     
-    bool opEquals(ref QLine d) // const
+    bool opEquals(in QLine d) // const
     {
         return pt1 == d.pt1 && pt2 == d.pt2;
     }
@@ -167,7 +167,7 @@ public struct QLineF
         return ln;
     }
     
-    public static QLineF opCall(ref QPointF apt1, ref QPointF apt2) {
+    public static QLineF opCall(in QPointF apt1, in QPointF apt2) {
         QLineF ln;
         ln.pt1 = apt1;
         ln.pt2 = apt2;
@@ -181,7 +181,7 @@ public struct QLineF
         return ln;
     }
     
-    public static QLineF opCall(ref QLine line){ 
+    public static QLineF opCall(in QLine line){ 
         QLineF ln;
         ln.pt1 = QPointF(line.p1());
         ln.pt2 = QPointF(line.p2());
@@ -238,7 +238,7 @@ public struct QLineF
         return QLineF(p1(), p1() + QPointF(dy(), -dx()));
     }
     
-    void translate(ref QPointF point)
+    void translate(in QPointF point)
     {
         pt1 += point;
         pt2 += point;
@@ -249,7 +249,7 @@ public struct QLineF
         this.translate(QPointF(adx, ady));
     }
     
-    QLineF translated(ref QPointF p) // const
+    QLineF translated(in QPointF p) // const
     {
         return QLineF(pt1 + p, pt2 + p);
     }
@@ -287,27 +287,27 @@ public struct QLineF
         return QLine(pt1.toPoint(), pt2.toPoint());
     }
     
-    void setP1(ref QPointF aP1)
+    void setP1(in QPointF aP1)
     {
         pt1 = aP1;
     }
     
-    void setP2(ref QPointF aP2)
+    void setP2(in QPointF aP2)
     {
         pt2 = aP2;
     }
     
-    void p1(ref QPointF aP1)
+    void p1(in QPointF aP1)
     {
         pt1 = aP1;
     }
     
-    void p2(ref QPointF aP2)
+    void p2(in QPointF aP2)
     {
         pt2 = aP2;
     }
     
-    void setPoints(ref QPointF aP1, ref QPointF aP2)
+    void setPoints(in QPointF aP1, in QPointF aP2)
     {
         pt1 = aP1;
         pt2 = aP2;
@@ -319,7 +319,7 @@ public struct QLineF
         pt2 = QPointF(aX2, aY2);
     }
     
-    bool opEquals(ref QLineF d) // const
+    bool opEquals(in QLineF d) // const
     {
         return pt1 == d.pt1 && pt2 == d.pt2;
     }
@@ -328,16 +328,16 @@ public struct QLineF
         return qtd_QLineF_angle(this);
     }
     
-    public final double angle(ref QLineF l) {
+    public final double angle(in QLineF l) {
         return qtd_QLineF_angle_QLineF(this, &l);
     }
     
-    public final double angleTo(ref QLineF l) {
+    public final double angleTo(in QLineF l) {
         return qtd_QLineF_angleTo_QLineF(this, &l);
     }
     
     // ### Qt 5: rename intersects() or intersection() and rename IntersectType IntersectionType
-    private final QLineF_IntersectType intersect(ref QLineF l, QPointF* intersectionPoint) {
+    private final QLineF_IntersectType intersect(in QLineF l, QPointF* intersectionPoint) {
         return cast(QLineF_IntersectType) qtd_QLineF_intersect_QLineF_nativepointerQPointF(this, &l, intersectionPoint);
     }
     

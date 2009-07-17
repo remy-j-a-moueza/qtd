@@ -27,7 +27,7 @@ public struct QRect
         return rt;
     }
 
-    public static QRect opCall(ref QPoint atopLeft, ref QPoint abottomRight)
+    public static QRect opCall(in QPoint atopLeft, in QPoint abottomRight)
     {
         QRect rt;
         rt.x1 = atopLeft.x();
@@ -37,7 +37,7 @@ public struct QRect
         return rt;
     }
 
-    public static QRect opCall(ref QPoint atopLeft, ref QSize asize)
+    public static QRect opCall(in QPoint atopLeft, in QSize asize)
     {
         QRect rt;
         rt.x1 = atopLeft.x();
@@ -98,16 +98,16 @@ public struct QRect
     void setBottom(int pos)
     { y2 = pos; }
 
-    void setTopLeft(ref QPoint p)
+    void setTopLeft(in QPoint p)
     { x1 = p.x(); y1 = p.y(); }
 
-    void setBottomRight(ref QPoint p)
+    void setBottomRight(in QPoint p)
     { x2 = p.x(); y2 = p.y(); }
 
-    void setTopRight(ref QPoint p)
+    void setTopRight(in QPoint p)
     { x2 = p.x(); y1 = p.y(); }
 
-    void setBottomLeft(ref QPoint p)
+    void setBottomLeft(in QPoint p)
     { x1 = p.x(); y2 = p.y(); }
 
     void setX(int ax)
@@ -148,7 +148,7 @@ public struct QRect
         y2 += dy;
     }
 
-    void translate(ref QPoint p)
+    void translate(in QPoint p)
     {
         x1 += p.x();
         y1 += p.y();
@@ -159,7 +159,7 @@ public struct QRect
     QRect translated(int dx, int dy) // const
     { return QRect(QPoint(x1 + dx, y1 + dy), QPoint(x2 + dx, y2 + dy)); }
 
-    QRect translated(ref QPoint p) // const
+    QRect translated(in QPoint p) // const
     { return QRect(QPoint(x1 + p.x(), y1 + p.y()), QPoint(x2 + p.x(), y2 + p.y())); }
 
     void moveTo(int ax, int ay)
@@ -170,7 +170,7 @@ public struct QRect
         y1 = ay;
     }
 
-    void moveTo(ref QPoint p)
+    void moveTo(in QPoint p)
     {
         x2 += p.x() - x1;
         y2 += p.y() - y1;
@@ -196,25 +196,25 @@ public struct QRect
         y2 = pos;
     }
 
-    void moveTopLeft(ref QPoint p)
+    void moveTopLeft(in QPoint p)
     {
         moveLeft(p.x());
         moveTop(p.y());
     }
 
-    void moveBottomRight(ref QPoint p)
+    void moveBottomRight(in QPoint p)
     {
         moveRight(p.x());
         moveBottom(p.y());
     }
 
-    void moveTopRight(ref QPoint p)
+    void moveTopRight(in QPoint p)
     {
         moveRight(p.x());
         moveTop(p.y());
     }
 
-    void moveBottomLeft(ref QPoint p)
+    void moveBottomLeft(in QPoint p)
     {
         moveLeft(p.x());
         moveBottom(p.y());
@@ -269,7 +269,7 @@ public struct QRect
     void setHeight(int h)
     { y2 = (y1 + h - 1); }
 
-    void setSize(ref QSize s)
+    void setSize(in QSize s)
     {
         x2 = (s.width()  + x1 - 1);
         y2 = (s.height() + y1 - 1);
@@ -285,29 +285,29 @@ public struct QRect
         return contains(QPoint(ax, ay), false);
     }
 
-    QRect opOrAssign(ref QRect r)
+    QRect opOrAssign(in QRect r)
     {
         *this = *this | r;
         return *this;
     }
 
-    QRect opAndAssign(ref QRect r)
+    QRect opAndAssign(in QRect r)
     {
         *this = *this & r;
         return *this;
     }
 
-    QRect intersected(ref QRect other) // const
+    QRect intersected(in QRect other) // const
     {
         return *this & other;
     }
 
-    QRect united(ref QRect r) // const
+    QRect united(in QRect r) // const
     {
         return *this | r;
     }
 
-    bool opEquals(ref QRect r)
+    bool opEquals(in QRect r)
     {
         return x1==r.x1 && x2==r.x2 && y1==r.y1 && y2==r.y2;
     }
@@ -320,11 +320,11 @@ public struct QRect
         qtd_QRect_readFrom_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
     }
 
-    public final QRect opAnd(ref QRect r) {
+    public final QRect opAnd(in QRect r) {
         return qtd_QRect_operator_and_QRect(this, &r);
     }
 
-    public final QRect opOr(ref QRect r) {
+    public final QRect opOr(in QRect r) {
         return qtd_QRect_operator_or_QRect(this, &r);
     }
 

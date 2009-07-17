@@ -53,22 +53,22 @@ inline int &ry()
 { return yp; }
 */
 
-    QPoint opAddAssign(ref QPoint p)
+    QPoint opAddAssign(in QPoint p)
     { xp+=p.xp; yp+=p.yp; return *this; }
 
-    QPoint opSubAssign(ref QPoint p)
+    QPoint opSubAssign(in QPoint p)
     { xp-=p.xp; yp-=p.yp; return *this; }
 
     QPoint opMulAssign(qreal c)
     { xp = qRound(xp*c); yp = qRound(yp*c); return *this; }
     
-    bool opEquals(ref QPoint p)
+    bool opEquals(in QPoint p)
     { return xp == p.xp && yp == p.yp; }
 
-    QPoint opAdd(ref QPoint p)
+    QPoint opAdd(in QPoint p)
     { return QPoint(this.xp+p.xp, this.yp+p.yp); }
 
-    QPoint opSub(ref QPoint p)
+    QPoint opSub(in QPoint p)
     { return QPoint(this.xp-p.xp, this.yp-p.yp); }
     
     QPoint opMul(qreal c)
@@ -124,7 +124,7 @@ public struct QPointF
         return pt;
     }
     
-    public static QPointF opCall(ref QPoint p) {
+    public static QPointF opCall(in QPoint p) {
         QPointF pt;
         pt.xp = p.x();
         pt.yp = p.y();
@@ -167,22 +167,22 @@ inline qreal &QPointF::ry()
 }
 */
     
-    QPointF opAddAssign(ref QPointF p)
+    QPointF opAddAssign(in QPointF p)
     { xp+=p.xp; yp+=p.yp; return *this; }
     
-    QPointF opSubAssign(ref QPointF p)
+    QPointF opSubAssign(in QPointF p)
     { xp-=p.xp; yp-=p.yp; return *this; }
     
     QPointF opMulAssign(qreal c)
     { xp*=c; yp*=c; return *this; }
     
-    bool opEquals(ref QPointF p)
+    bool opEquals(in QPointF p)
     { return qFuzzyCompare(xp, p.xp) && qFuzzyCompare(yp, p.yp); }
     
-    QPointF opAdd(ref QPointF p)
+    QPointF opAdd(in QPointF p)
     { return QPointF(this.xp+p.xp, this.yp+p.yp); }
     
-    QPointF opSub(ref QPointF p)
+    QPointF opSub(in QPointF p)
     { return QPointF(this.xp-p.xp, this.yp-p.yp); }
     
     QPointF opMul(qreal c)
