@@ -40,19 +40,19 @@
 ****************************************************************************/
 
 #define QT_NO_STL
-#include <QtCore>
-#include <QtGui>
-#include <QtNetwork>
-#include <QtSql>
-#include <QtSvg>
-#include <QtXml>
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+#include <QtNetwork/QtNetwork>
+#include <QtSql/QtSql>
+#include <QtSvg/QtSvg>
+#include <QtXml/QtXml>
 
 #ifndef QT_NO_XMLPATTERNS
-#  include <QtXmlPatterns>
+#  include <QtXmlPatterns/QtXmlPatterns>
 #endif
 
 #ifndef QT_NO_WEBKIT
-#  include <QtWebKit>
+#  include <QtWebKit/QtWebKit>
 #endif
 
 #ifndef QT_NO_PHONON
@@ -1144,5 +1144,5 @@
 /* For compatibility with OpenGL v1.0 */
 #define GL_LOGIC_OP GL_INDEX_LOGIC_OP
 #define GL_TEXTURE_COMPONENTS GL_TEXTURE_INTERNAL_FORMAT
-#include <QtOpenGL>
+#include <QtOpenGL/QtOpenGL>
 #endif // QT_NO_OPENGL
