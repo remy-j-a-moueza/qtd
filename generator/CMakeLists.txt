@@ -311,10 +311,18 @@ foreach(package ${packages})
     break(package ${packages}) 
 endforeach(package ${packages})    
 
+if(CMAKE_HOST_WIN32)
+    set(sep ";")
+else(CMAKE_HOST_WIN32)
+    set(sep ":")
+endif(CMAKE_HOST_WIN32)
+foreach(path ${QT_INCLUDES})
+    set(inc_paths ${path}${sep})
+endforeach(path ${QT_INCLUDES})
 add_custom_command(OUTPUT ${dgen_impl}
 	COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
 	COMMAND "generator"
-	ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
+	ARGS ${GEN_OPT}  --include-paths=${inc_paths} --output-directory=${CMAKE_BINARY_DIR}
 	    --source-directory=${CMAKE_SOURCE_DIR}/generator 
 	    qtjambi_masterinclude.h  
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
