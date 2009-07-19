@@ -318,7 +318,7 @@ endforeach(path ${QT_INCLUDES})
 add_custom_command(OUTPUT ${dgen_impl}
 	COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
 	COMMAND "generator"
-	ARGS ${GEN_OPT} --qt-include-directory=${QT_INCLUDE_DIR} 
+	ARGS ${GEN_OPT} --include-paths=${inc_paths}
 	    --output-directory=${CMAKE_BINARY_DIR}/build
 	    --source-directory=${CMAKE_SOURCE_DIR}/generator 
 	    qtjambi_masterinclude.h  
