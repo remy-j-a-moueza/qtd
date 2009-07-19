@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(qtd CXX C)
+
+##########################################################
+## Building generator and settings.
+##########################################################
+if(NOT SECOND_RUN)
+
 FIND_PACKAGE(Qt4 REQUIRED)
 set (QT_USE_QTMAIN false)
 set (QT_USE_QTGUI false)
@@ -8,8 +14,6 @@ set (QT_USE_QTGUI false)
 ## Settings.
 ##--------------------------------------------
 
-include_directories(${QT_INCLUDES} include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
 ## Options.
 option(BUILD_EXAMPLES "Build examples" "OFF")
 option(BUILD_SHARED_LIBRARIES "Build shared library (very experemental and only for ldc)" "OFF")
@@ -17,17 +21,11 @@ option(BUILD_TOOLS "Build tools" "ON")
 #option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
 set(GENERATE_DI_FILES OFF) ## Very experemental option. Temporary disabled.
 
-set(QTD_VERSION_STR ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
-math(EXPR QTD_VERSION "(${QT_VERSION_MAJOR} << 16) + (${QT_VERSION_MINOR} << 8) + ${QT_VERSION_PATCH}")
-
-set(all_packages Core Gui OpenGL Xml Svg Network WebKit) 
+set(all_packages Core Gui OpenGL Xml Svg Network WebKit CACHE INTERNAL "") 
 
 ## Init D toolkit.
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(D REQUIRED)
-
-## Strip utility.
-find_program(STRIP strip)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "")
     set(CMAKE_INSTALL_PREFIX
@@ -40,9 +38,9 @@ if(D_VERSION EQUAL "1")
     if (D_FRONTEND LESS "041")
 	message(STATUS "Minimum required version of D compiler is 1.041 (or compiler based on this version)")
     endif(D_FRONTEND LESS "041")
-    set(D_TARGET d1-tango)   
+    set(D_TARGET d1-tango CACHE INTERNAL "")   
 elseif(D_VERSION EQUAL "2")
-    set(D_TARGET d2-phobos)
+    set(D_TARGET d2-phobos CACHE INTERNAL "")
 endif(D_VERSION EQUAL "1")
 
 # Debug and release flags.
@@ -70,29 +68,122 @@ if(CMAKE_HOST_WIN32)
 	message(FATAL_ERROR "implib not found. You can donwload it from http://ftp.digitalmars.com/bup.zip")
     endif (NOT IMPLIB)
     if(D_IS_MARS)
-      set(D_FLAGS ${D_FLAGS} -version=cpp_shared)    
       set(GEN_OPT ${GEN_OPT} --cpp_shared)
       add_definitions(-DCPP_SHARED)
     endif(D_IS_MARS)
-    string(REGEX REPLACE ".dll([A-Za-z\\.0-9]+)" "\\1" CMAKE_IMPORT_LIBRARY_SUFFIX "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
 endif(CMAKE_HOST_WIN32) 
-
-if(CMAKE_HOST_WIN32 AND D_IS_MARS)
-    set(CPP_SHARED 1)
-endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ./)
 set(GEN_OPT ${GEN_OPT} --d-target=${D_TARGET})
 
+set(packages CACHE INTERNAL "")
+foreach(package_big ${all_packages})
+    string(TOLOWER ${package_big} package) 
+    string(TOUPPER ${package_big} package_upper) 
+    option(BUILD_QT_${package_upper} "Build Qt${package_big}" "ON")
+    set(packages ${packages} ${package})
+endforeach(package_big ${all_packages})
+
+add_subdirectory(generator)
+
+add_custom_target(main ALL)
+add_dependencies(main dgen)
+
+if(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
+    set(make_util nmake)
+elseif(${CMAKE_GENERATOR} STREQUAL "MinGW Makefiles" OR
+    ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
+    set(make_util $(MAKE))
+else(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
+    message(FATAL_ERROR "${CMAKE_GENERATOR} isn't supported")
+endif(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
+
+set(cd_path ${CMAKE_BINARY_DIR}/build)
+make_native_path(cd_path)
+add_custom_command(TARGET main POST_BUILD	
+	COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/build
+	COMMAND cd  ARGS ${cd_path} && ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DSECOND_RUN=1 ${CMAKE_SOURCE_DIR} && ${make_util} allpackages
+	COMMENT ""	
+	)  
+
+## Make commands.
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/build)
+add_custom_target(install
+	COMMAND cd ${CMAKE_BINARY_DIR}/build && ${make_util} install
+	COMMENT ""
+	)  
+add_dependencies(install preinstall)
+
+##--------------------------------------------
+## CPack.
+##--------------------------------------------
+set(CPACK_PACKAGE_VERSION_PATCH 1)
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application and UI framework. 
+QtD is a D binding to the Qt application and UI framework. 
+This package installs binding and static library for qt port on D programming language.
+")
+#SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
+SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
+set(CPACK_PACKAGE_VENDOR "QtD team")
+set(CPACK_PACKAGE_CONTACT "e@mail.ru" )
+SET(CPACK_PACKAGE_VERSION "0.1")
+#set(CPACK_PACKAGE_VERSION_PATCH "${RFS_VERSION_BUILD}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "qtd ${CPACK_PACKAGE_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
+if(CMAKE_HOST_WIN32)
+    set(CPACK_GENERATOR "ZIP")
+elseif(CMAKE_HOST_UNIX)
+    set(CPACK_GENERATOR "TBZ2;DEB;RPM")
+endif(CMAKE_HOST_WIN32)
+include(CPack)
+
+##########################################################
+## Building QtD.
+##########################################################
+else(NOT SECOND_RUN)
+
+PROJECT(qtd CXX C)
+load_cache(${CMAKE_BINARY_DIR}/.. INCLUDE_INTERNALS all_packages QTD_VERSION_STR QTD_VERSION)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+FIND_PACKAGE(D REQUIRED)
+FIND_PACKAGE(Qt4 REQUIRED)
+
+set(QTD_VERSION_STR ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
+math(EXPR QTD_VERSION "(${QT_VERSION_MAJOR} << 16) + (${QT_VERSION_MINOR} << 8) + ${QT_VERSION_PATCH}")
+
+include_directories(${QT_INCLUDES} ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+## Strip utility.
+find_program(STRIP strip)
+
+# System specifc settings.
+if(CMAKE_HOST_WIN32)
+    string(REGEX REPLACE ".dll([A-Za-z\\.0-9]+)" "\\1" CMAKE_IMPORT_LIBRARY_SUFFIX "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
+endif(CMAKE_HOST_WIN32) 
+
+if(CMAKE_HOST_WIN32 AND D_IS_MARS)
+    set(CPP_SHARED 1 CACHE INTERNAL "")
+endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
+
+if(D_IS_MARS)
+    set(D_FLAGS -version=cpp_shared)    
+    add_definitions(-DCPP_SHARED)
+endif(D_IS_MARS)
+
 ## Bootstrap settings for QtD.
-set(DRCC ${CMAKE_BINARY_DIR}/tools/drcc/drcc)
-set(DUIC ${CMAKE_BINARY_DIR}/tools/duic/duic)
-set(QTD_IMPORT_PATH ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION})
-set(QTD_LIBRARIES_PATH ${CMAKE_BINARY_DIR}/lib)
+set(DRCC ${CMAKE_BINARY_DIR}/tools/drcc/drcc CACHE INTERNAL "")
+set(DUIC ${CMAKE_BINARY_DIR}/tools/duic/duic CACHE INTERNAL "")
+set(QTD_IMPORT_PATH ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/qt/d${D_VERSION} CACHE INTERNAL "")
+set(QTD_LIBRARIES_PATH ${CMAKE_BINARY_DIR}/lib CACHE INTERNAL "")
 
 ##--------------------------------------------
 ## Macros and functions.
 ##--------------------------------------------
+
+macro(load_generated_classes )
+    include(cpp/qt_${package}/qt_${package}.txt)
+endmacro(load_generated_classes )
 
 macro(qtd_add_resource output)
     set (params NAME OPTIONS)
@@ -208,10 +299,10 @@ macro(build_example name)
     add_d_program(${name} ${SOURCES_tmp} NO_DEPS_SOURCES ${res_sources} ${uic_sources}
 	DEPENDS ${res_sources} INCLUDES ${QTD_IMPORT_PATH} ${CMAKE_CURRENT_BINARY_DIR}
 	LIB_PATHS ${QTD_LIBRARIES_PATH} ${CMAKE_SOURCE_DIR}/lib LIBS ${qtd_libs})
-    ## TODO: Enable on windows too.
-    if(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX) ##
-	add_custom_command(TARGET example_${name} POST_BUILD COMMAND "${STRIP}" ARGS "${output}")
-    endif(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX)
+    ## TODO: Enable.
+    #if(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX) ##
+    #	add_custom_command(TARGET example_${name} POST_BUILD COMMAND "${STRIP}" ARGS "${output}")
+    #endif(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX)
     add_dependencies(${name} allpackages)
 endmacro(build_example sources)
 
@@ -245,7 +336,6 @@ foreach(package_big ${all_packages})
 
     set(all_req_found 1)
     string(TOUPPER ${package} package_upper)
-    option(BUILD_QT_${package_upper} "Build Qt${package_big}" "ON")
     if(BUILD_QT_${package_upper})
 	foreach(req ${required})
 	    set(req_found)
@@ -383,14 +473,16 @@ foreach(package_big ${all_packages})
 	    set(${package}_lib_param Qt${package_big}) ## Paths for QtD libs. Needed by examples.
 	endif(CPP_SHARED) 
 	add_d_target(${lib_name} NOT_DETECT_DEPENDS TYPE ${build_type} INCLUDES ${QTD_IMPORT_PATH} SOURCES ${d_sources} OBJECTS ${cpp_objs} ${d_implib}
-	      OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib DEPENDS ${d_implib})
-	install(FILES ${CMAKE_BINARY_DIR}/${lib} COMPONENT qtd DESTINATION lib)
+	      OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib DEPENDS ${d_implib} )
 	
+	install(FILES ${CMAKE_BINARY_DIR}/${lib} COMPONENT qtd DESTINATION lib)	
 	## Paths for QtD libs. Needed by examples.
 	set(${package}_lib_param qtd${package} ${${package}_lib_param} ${link_example})
 
 	## Dependences.
-	add_custom_target(${package} DEPENDS ${lib})
+	add_custom_target(${package})
+	add_dependencies(${package} ${lib_name})
+	add_dependencies(${lib_name} cpp_${package})
 	foreach(depend ${required})
 	    string(TOLOWER ${depend} depend)
 	    add_dependencies(cpp_${package} cpp_${depend})
@@ -437,12 +529,6 @@ if(GENERATE_DI_FILES)
     add_custom_target(generate_headers ALL DEPENDS ${interfaces_list})
 endif(GENERATE_DI_FILES)
 
-add_subdirectory(generator)
-## Dependences.
-foreach(package ${packages})
-    add_dependencies(cpp_${package} dgen)
-endforeach(package ${packages})
-add_sources_for_generating(${files_for_gen})	
 
 set(CPACK_COMPONENTS_ALL qtd qtd_tools)
 
@@ -460,26 +546,6 @@ if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLES)
 
-##--------------------------------------------
-## CPack.
-##--------------------------------------------
-set(CPACK_PACKAGE_VERSION_PATCH 1)
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application and UI framework. 
-QtD is a D binding to the Qt application and UI framework. 
-This package installs binding and static library for qt port on D programming language.
-")
-#SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
-set(CPACK_PACKAGE_VENDOR "QtD team")
-set(CPACK_PACKAGE_CONTACT "e@mail.ru" )
-SET(CPACK_PACKAGE_VERSION "0.1")
-#set(CPACK_PACKAGE_VERSION_PATCH "${RFS_VERSION_BUILD}")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "qtd ${CPACK_PACKAGE_VERSION}")
-set(CPACK_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
-if(CMAKE_HOST_WIN32)
-    set(CPACK_GENERATOR "ZIP")
-elseif(CMAKE_HOST_UNIX)
-    set(CPACK_GENERATOR "TBZ2;DEB;RPM")
-endif(CMAKE_HOST_WIN32)
-include(CPack)
+#execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/CMakeCache.txt)
+
+endif(NOT SECOND_RUN)

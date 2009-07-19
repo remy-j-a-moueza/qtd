@@ -302,15 +302,11 @@ foreach(package ${packages})
     if(d_inc_file_found)
 	set(${CMAKE_SOURCE_DIR}/generator/typesystem_${package}-java.java)
     endif(d_inc_file_found)
-endforeach(package ${packages})
+endforeach(package ${all_packages})
 mark_as_advanced(d_inc_file_found)
 set(d_inc_file_found 1)
 	
-foreach(package ${packages})   
-    set(dgen_impl ${CMAKE_BINARY_DIR}/cpp/qt_${package}/qt_${package}.pri) 
-    break(package ${packages}) 
-endforeach(package ${packages})    
-
+set(dgen_impl ${CMAKE_BINARY_DIR}/build/cpp/qt_core/ArrayOps_shell.cpp)
 if(CMAKE_HOST_WIN32)
     set(sep ";")
 else(CMAKE_HOST_WIN32)
@@ -322,22 +318,12 @@ endforeach(path ${QT_INCLUDES})
 add_custom_command(OUTPUT ${dgen_impl}
 	COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
 	COMMAND "generator"
-	ARGS ${GEN_OPT}  --include-paths=${inc_paths} --output-directory=${CMAKE_BINARY_DIR}
+	ARGS ${GEN_OPT} --qt-include-directory=${QT_INCLUDE_DIR} 
+	    --output-directory=${CMAKE_BINARY_DIR}/build
 	    --source-directory=${CMAKE_SOURCE_DIR}/generator 
 	    qtjambi_masterinclude.h  
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
 	COMMENT "Generating binding..."
-	DEPENDS  generator ${gen_sources}
-	)       
-add_custom_target(dgen DEPENDS ${dgen_impl} COMMENT "")
-
-macro(add_sources_for_generating)
-    foreach(source ${ARGN})
-	add_custom_command(OUTPUT "${source}"
-		COMMAND ""
-		ARGS ""
-		DEPENDS ${dgen_impl}
-		COMMENT ""
-		)
-    endforeach(source ${ARGN})
-endmacro(add_sources_for_generating)
+	DEPENDS ${gen_sources} ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
+)       
+add_custom_target(dgen ALL DEPENDS ${dgen_impl} COMMENT "")     

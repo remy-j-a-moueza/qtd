@@ -2,7 +2,7 @@
 ## Variables.
 ##--------------------------------------------
 
-## Find D compiler and parsing its version.
+## Find D compiler and parse its version.
 find_program(DC NAMES dmd ldc)
 if (DC)   
     get_filename_component(dc_path ${DC} PATH)
@@ -30,15 +30,15 @@ if (DC)
 		string(REGEX REPLACE "based on DMD v([0-9])\\.[0-9]+" "\\1" D_VERSION "${ldc_version}")
 		string(REGEX REPLACE "based on DMD v[0-9]\\.([0-9]+)" "\\1" D_FRONTEND "${ldc_version}")	    
 	    else(ldc_version)
-		message(FATAL_ERROR "LDC compiler was found, but the version can not be processed")
+		message(FATAL_ERROR "LDC compiler found, but the version can not be processed")
 	    endif(ldc_version)
 	else (is_ldc) 
-	    message(FATAL_ERROR "D compliler not found")
+	    message(FATAL_ERROR "D compiler are not found")
 	endif(is_ldc)
     endif(dmd_version) 
     message(STATUS "D compiler found -- ${D_COMPILER_NAME} v${D_VERSION}.${D_FRONTEND}")
 else (DC)
-    message(FATAL_ERROR "D compliler not found")
+    message(FATAL_ERROR "D compliler are not found")
 endif (DC)
 
 ## Get D compiler path.
@@ -69,7 +69,7 @@ if (NOT ONE_BUILD_COMMAND)
     set(D_MODULES_PER_OBJECT 10000 CACHE STRING "Max number of modules per object file")
 endif(NOT ONE_BUILD_COMMAND)
 
-## Specifics flags for build configurations.
+## Specific flags for build configurations.
 ## TODO: Add another targets.
 set(D_RELEASE_FLAGS -O -release)
 set(D_DEBUG_FLAGS -g )
@@ -488,7 +488,7 @@ macro(add_d_shared_lib name)
 endmacro(add_d_shared_lib name)
 
 ## Add library target.
-## If it support library would shared.
+## Library would shared if it supported.
 macro(add_d_lib name)
     if(D_IS_MARS)
 	add_d_target(${name} TYPE STATIC ${ARGN})
