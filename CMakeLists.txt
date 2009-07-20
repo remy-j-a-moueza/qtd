@@ -127,7 +127,7 @@ add_custom_command(TARGET main POST_BUILD
 ## Make commands.
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/build)
 add_custom_target(install
-	COMMAND cd ${CMAKE_BINARY_DIR}/CMakeFiles/build && ${make_util} install
+	COMMAND cd ${CMAKE_BINARY_DIR}/build && ${make_util} install
 	COMMENT ""
 	)  
 add_dependencies(install preinstall)
@@ -162,7 +162,9 @@ include(CPack)
 else(NOT SECOND_RUN)
 
 PROJECT(qtd CXX C)
-load_cache(${CMAKE_BINARY_DIR} INCLUDE_INTERNALS all_packages QTD_VERSION_STR QTD_VERSION)
+if(NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    load_cache(${CMAKE_BINARY_DIR}/.. INCLUDE_INTERNALS all_packages QTD_VERSION_STR QTD_VERSION)
+endif(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(D REQUIRED)
 FIND_PACKAGE(Qt4 REQUIRED)
