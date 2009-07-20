@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 PROJECT(qtd CXX C)
 
 ##########################################################
-## Building generator and settings.
+## Building generator && settings.
 ##########################################################
 if(NOT SECOND_RUN)
 
@@ -60,7 +60,7 @@ if (${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS])
     #add_definitions(-UNO_DEBUG)
 endif(${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS] )
 
-# System specifc settings.
+# System specific settings.
 if(CMAKE_HOST_WIN32)
     set(implib implib)
     find_program(IMPLIB ${implib})
@@ -102,7 +102,7 @@ set(cd_path ${CMAKE_BINARY_DIR}/build)
 make_native_path(cd_path)
 add_custom_command(TARGET main POST_BUILD	
 	COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/build
-	COMMAND cd  ARGS ${cd_path} && ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DSECOND_RUN=1 ${CMAKE_SOURCE_DIR} && ${make_util} allpackages
+	COMMAND cd  ARGS ${cd_path} && ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DSECOND_RUN=1 ${CMAKE_SOURCE_DIR} && ${make_util}
 	COMMENT ""	
 	)  
 
@@ -182,7 +182,7 @@ set(QTD_LIBRARIES_PATH ${CMAKE_BINARY_DIR}/lib CACHE INTERNAL "")
 ##--------------------------------------------
 
 macro(load_generated_classes )
-    include(cpp/qt_${package}/qt_${package}.txt)
+    include(${CMAKE_BINARY_DIR}/cpp/qt_${package}/qt_${package}.txt)
 endmacro(load_generated_classes )
 
 macro(qtd_add_resource output)
@@ -303,7 +303,8 @@ macro(build_example name)
     #if(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX) ##
     #	add_custom_command(TARGET example_${name} POST_BUILD COMMAND "${STRIP}" ARGS "${output}")
     #endif(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX)
-    add_dependencies(${name} allpackages)
+    add_dependencies(examples ${name})
+    add_dependencies(${name} allpackages tools)
 endmacro(build_example sources)
 
 ##--------------------------------------------
@@ -529,19 +530,21 @@ if(GENERATE_DI_FILES)
     add_custom_target(generate_headers ALL DEPENDS ${interfaces_list})
 endif(GENERATE_DI_FILES)
 
-
 set(CPACK_COMPONENTS_ALL qtd qtd_tools)
 
 ##--------------------------------------------
 ## Build other parts of the QtD.
 ##--------------------------------------------
-add_custom_target(tools ALL)
+
 if(BUILD_TOOLS)
+    add_custom_target(tools ALL)
     add_subdirectory(tools)
     add_dependencies(tools drcc duic)
 endif(BUILD_TOOLS)
 
 if(BUILD_EXAMPLES)
+    add_custom_target(examples ALL)
+    add_dependencies(examples allpackages tools)
     add_subdirectory(demos)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLES)

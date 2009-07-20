@@ -207,93 +207,16 @@ target_link_libraries(generator ${libs})
 #    add_precompiled_header(generator ${CMAKE_CURRENT_SOURCE_DIR}/generator_pch.h)
 #ENDIF(NOT USEPCH)
 
-macro(add_dgen_target package)
-    string(TOLOWER ${package} package)
-    set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/built_${package}.txt)
-    set(dgen_build_conf_req ${CMAKE_BINARY_DIR}/CMakeFiles/built_${package}_with_req.txt)
+if(NOT "${packages_in_build_txt}" STREQUAL "${packages}")
+    set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt)
     file(REMOVE ${dgen_build_conf})
-    file(REMOVE ${dgen_build_conf_req})
     file(APPEND ${dgen_build_conf} "<typesystem>\n")
-    file(APPEND ${dgen_build_conf_req} "<typesystem>\n")
-    foreach(req ${ARGN})
-	string(TOLOWER ${req} req_lower)
-	file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${req_lower}.xml\" generate=\"no\" />\n")
-	file(APPEND ${dgen_build_conf_req} "	<load-typesystem name=\"typesystem_${req_lower}.xml\" generate=\"yes\" />\n")
-    endforeach(req ${ARGN})
-
-    if(${package} STREQUAL "all")
-	foreach(pack ${ARGN})   
-	    set(dgen_impl ${CMAKE_BINARY_DIR}/cpp/qt_${pack}/metainfo.cpp)  ## Temporary     
-	    break(pack ${ARGN})  
-	endforeach(pack ${ARGN})  	
-    else(${package} STREQUAL "all")
-	set(dgen_impl ${CMAKE_BINARY_DIR}/cpp/qt_${package}/qt_${package}.pri)  
-	set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml
-		${CMAKE_SOURCE_DIR}/generator/typesystem_${package}-java.java)
+    foreach(package ${packages})
 	file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
-	file(APPEND ${dgen_build_conf_req} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
-    endif(${package} STREQUAL "all")
-
+    endforeach(package ${packages})
     file(APPEND ${dgen_build_conf} "</typesystem>\n")
-    file(APPEND ${dgen_build_conf_req} "</typesystem>\n")
-
-    foreach(pack ${ARGN})   
-	string(TOLOWER ${pack} pack_lower)
-	set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${pack_lower}.xml
-		${CMAKE_SOURCE_DIR}/generator/typesystem_${pack_lower}-java.java)
-    endforeach(pack ${ARGN})
-
-    add_custom_command(OUTPUT ${dgen_impl}
-		    COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
-		    COMMAND "generator"
-		    ARGS ${GEN_OPT}  --no-repreprocess --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=./ 
-			--source-directory=${CMAKE_SOURCE_DIR}/generator
-			qtjambi_masterinclude.h 
-			${dgen_build_conf}
-		    COMMENT "Generating binding..."
-		    DEPENDS  generator ${gen_sources} 
-		)
-    add_custom_target(dgen_${package} DEPENDS ${dgen_impl} COMMENT "")
-endmacro(add_dgen_target target package required)
-
-foreach(pack ${packages})   
-    set(gen_typesystem ${gen_typesystem} ${CMAKE_SOURCE_DIR}/generator/typesystem_${pack}.xml)
-    set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${pack}-java.java)
-endforeach(pack ${packages})
-
-set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt)
-file(REMOVE ${dgen_build_conf})
-file(APPEND ${dgen_build_conf} "<typesystem>\n")
-foreach(package ${packages})
-    file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
-endforeach(package ${packages})
-file(APPEND ${dgen_build_conf} "</typesystem>\n")
-
-# macro(add_sources_for_generating)	
-#     set(parameters_list_file ${CMAKE_BINARY_DIR}/CMakeFiles/dgen_parameters)
-#     if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)	
-# 	file(REMOVE ${parameters_list_file})
-# 	foreach(arg ${ARGN})
-# 	    file(APPEND ${parameters_list_file} "${arg}\n")
-# 	endforeach(arg)
-# 	set(param @${parameters_list_file})
-#     elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-# 	set(param ${parameters})
-#     endif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
-#     foreach(dgen_impl ${ARGN})
-# 	add_custom_command(OUTPUT ${dgen_impl}
-# 			    COMMAND ${CMAKE_COMMAND} -E remove -f ${param}
-# 			    COMMAND "generator"
-# 			    ARGS ${GEN_OPT}  --qt-include-directory=${QT_INCLUDE_DIR} --output-directory=${CMAKE_BINARY_DIR}
-# 							--source-directory=${CMAKE_SOURCE_DIR}/generator 
-# 							qtjambi_masterinclude.h  
-# 							${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
-# 			    COMMENT "Generating binding..."
-# 			    DEPENDS  generator ${gen_typesystem} ${gen_sources} 
-# 			)
-#     endforeach(dgen_impl ${ARGN})
-#     add_custom_target(dgen DEPENDS ${ARGN})
-# endmacro(add_sources_for_generating)
+    set(packages_in_build_txt ${packages} CACHE INTERNAL "")
+endif(NOT "${packages_in_build_txt}" STREQUAL "${packages}")
 
 set(gen_sources)
 foreach(package ${packages})   

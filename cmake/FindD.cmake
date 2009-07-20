@@ -488,7 +488,7 @@ macro(add_d_shared_lib name)
 endmacro(add_d_shared_lib name)
 
 ## Add library target.
-## Library would shared if it supported.
+## Library will shared if it supported.
 macro(add_d_lib name)
     if(D_IS_MARS)
 	add_d_target(${name} TYPE STATIC ${ARGN})
@@ -498,19 +498,37 @@ macro(add_d_lib name)
 endmacro(add_d_lib name)
 
 ## 
-macro(get_imported_files imported)
+macro(get_imported_files_old imported)
     execute_process(COMMAND ${DC} -c -o- -v ${compile_flags_tmp} ${ARGN}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   OUTPUT_VARIABLE dc_output_tmp
 		  
     )
     string(REGEX MATCHALL "import[^\\(]*([^\\)]*)" dc_output_tmp "${dc_output_tmp}")
+    
+    ## Initial filter.
+    regex_safe_string(tmp ${CMAKE_CURRENT_SOURCE_DIR})
+    regex_safe_string(tmp2 ${CMAKE_CURRENT_BINARY_DIR})
+    set(regex_includes_tmp ${tmp}|${tmp2})
+
     set(${imported})
     foreach(import_tmp ${dc_output_tmp})
+	## Getting a next import.
 	string(REGEX REPLACE "import[^\\(]*\\(([^\\)]*)" "\\1" import_tmp ${import_tmp})
-	set(${imported} ${${imported}} ${import_tmp})
+	## Filtering.
+	file(TO_CMAKE_PATH import_tmp ${import_tmp})	
+	string(REGEX MATCH "(${regex_includes_tmp})[^/]*" found "${import_tmp}")	
+	string(SUBSTRING "${import_tmp}" 0 1 first_sym_tmp)
+	set(full_path_tmp)
+	if(${first_sym_tmp} STREQUAL "/")
+	    set(full_path_tmp 1)
+	endif(${first_sym_tmp} STREQUAL "/")
+	if(NOT found AND full_path_tmp)
+	else(NOT found AND full_path_tmp)
+	    set(${imported} ${${imported}} ${import_tmp})	    
+	endif(NOT found AND full_path_tmp)	
     endforeach(import_tmp ${dc_output_tmp})
-endmacro(get_imported_files imported)
+endmacro(get_imported_files_old imported)
 
 macro(filter_paths result)
     set(${result})
@@ -561,7 +579,7 @@ macro(filter_paths result)
 endmacro(filter_paths )
 
 macro(get_files_depends out)
-    get_imported_files(${out} ${ARGN})
-    filter_paths(${out} ${${out}} INCLUDE_CURRENT_DIR INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+    get_imported_files_old(${out} ${ARGN})
+    #filter_paths(${out} ${${out}} INCLUDE_CURRENT_DIR INCLUDE_PATHS ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
     set(${out} ${ARGN} ${${out}})
 endmacro(get_files_depends out)
