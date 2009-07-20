@@ -229,7 +229,6 @@ endforeach(package ${all_packages})
 mark_as_advanced(d_inc_file_found)
 set(d_inc_file_found 1)
 	
-set(dgen_impl ${CMAKE_BINARY_DIR}/build/cpp/qt_core/ArrayOps_shell.cpp)
 if(CMAKE_HOST_WIN32)
     set(sep ";")
 else(CMAKE_HOST_WIN32)
@@ -238,11 +237,17 @@ endif(CMAKE_HOST_WIN32)
 foreach(path ${QT_INCLUDES})
     set(inc_paths ${path}${sep})
 endforeach(path ${QT_INCLUDES})
+if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    set(out_dir ${CMAKE_SOURCE_DIR})
+else(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    set(out_dir ${CMAKE_BINARY_DIR}/build)
+endif(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+set(dgen_impl ${out_dir}/cpp/qt_core/ArrayOps_shell.cpp)
 add_custom_command(OUTPUT ${dgen_impl}
 	COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}
 	COMMAND "generator"
 	ARGS ${GEN_OPT} --include-paths=${inc_paths}
-	    --output-directory=${CMAKE_BINARY_DIR}/build
+	    --output-directory=${out_dir}
 	    --source-directory=${CMAKE_SOURCE_DIR}/generator 
 	    qtjambi_masterinclude.h  
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt

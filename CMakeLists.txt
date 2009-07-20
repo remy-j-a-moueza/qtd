@@ -6,6 +6,19 @@ PROJECT(qtd CXX C)
 ##########################################################
 if(NOT SECOND_RUN)
 
+option(FORCE_IN_SOURCE_BUILD "Force the in-source building" "OFF")
+if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT FORCE_IN_SOURCE_BUILD)
+  message(FATAL_ERROR "In-source builds are not allowed.
+Please create a directory and run cmake from there, passing the path
+to this source directory as the last argument.
+This process created the file `CMakeCache.txt` and the directory `CMakeFiles'.
+Please delete them.
+Or you can restart cmake with `-DFORCE_IN_SOURCE_BUILD=1`, but it is not
+recomended.
+")
+endif()
+
+
 FIND_PACKAGE(Qt4 REQUIRED)
 set (QT_USE_QTMAIN false)
 set (QT_USE_QTGUI false)
@@ -98,7 +111,12 @@ else(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
     message(FATAL_ERROR "${CMAKE_GENERATOR} isn't supported")
 endif(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
 
-set(cd_path ${CMAKE_BINARY_DIR}/build)
+if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    set(cd_path ${CMAKE_SOURCE_DIR})
+else(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    set(cd_path ${CMAKE_BINARY_DIR}/build)
+endif(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+
 make_native_path(cd_path)
 add_custom_command(TARGET main POST_BUILD	
 	COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/build
@@ -109,7 +127,7 @@ add_custom_command(TARGET main POST_BUILD
 ## Make commands.
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/build)
 add_custom_target(install
-	COMMAND cd ${CMAKE_BINARY_DIR}/build && ${make_util} install
+	COMMAND cd ${CMAKE_BINARY_DIR}/CMakeFiles/build && ${make_util} install
 	COMMENT ""
 	)  
 add_dependencies(install preinstall)
@@ -144,7 +162,7 @@ include(CPack)
 else(NOT SECOND_RUN)
 
 PROJECT(qtd CXX C)
-load_cache(${CMAKE_BINARY_DIR}/.. INCLUDE_INTERNALS all_packages QTD_VERSION_STR QTD_VERSION)
+load_cache(${CMAKE_BINARY_DIR} INCLUDE_INTERNALS all_packages QTD_VERSION_STR QTD_VERSION)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(D REQUIRED)
 FIND_PACKAGE(Qt4 REQUIRED)
@@ -550,5 +568,6 @@ if(BUILD_EXAMPLES)
 endif(BUILD_EXAMPLES)
 
 #execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/CMakeCache.txt)
+set(SECOND_RUN 0 CACHE INTERNAL "")
 
 endif(NOT SECOND_RUN)
