@@ -9,11 +9,12 @@ if(NOT SECOND_RUN)
 option(FORCE_IN_SOURCE_BUILD "Force the in-source building" "OFF")
 if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT FORCE_IN_SOURCE_BUILD)
   message(FATAL_ERROR "In-source builds are not allowed.
-Please create a directory and run cmake from there, passing the path
+  Please create a directory and run cmake from there, passing the path
 to this source directory as the last argument.
-This process created the file `CMakeCache.txt` and the directory `CMakeFiles'.
+  This process created the file `CMakeCache.txt` and the directory `CMakeFiles'.
 Please delete them.
-Or you can restart cmake with `-DFORCE_IN_SOURCE_BUILD=1`, but it is not
+
+  Or you can restart cmake with `-DFORCE_IN_SOURCE_BUILD=1`, but it is not
 recomended.
 ")
 endif()
@@ -42,7 +43,7 @@ FIND_PACKAGE(D REQUIRED)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "")
     set(CMAKE_INSTALL_PREFIX
-	${DC_PATH} CACHE PATH "QtD install prefix" FORCE
+	${DC_PATH} CACHE PATH "QtD install prefix"
     )
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "")
 
@@ -140,12 +141,11 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application 
 QtD is a D binding to the Qt application and UI framework. 
 This package installs binding and static library for qt port on D programming language.
 ")
-#SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt")
+SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/changelog.txt")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
 set(CPACK_PACKAGE_VENDOR "QtD team")
 set(CPACK_PACKAGE_CONTACT "e@mail.ru" )
 SET(CPACK_PACKAGE_VERSION "0.1")
-#set(CPACK_PACKAGE_VERSION_PATCH "${RFS_VERSION_BUILD}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "qtd ${CPACK_PACKAGE_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
@@ -164,7 +164,7 @@ else(NOT SECOND_RUN)
 PROJECT(qtd CXX C)
 if(NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     load_cache(${CMAKE_BINARY_DIR}/.. INCLUDE_INTERNALS all_packages QTD_VERSION_STR QTD_VERSION)
-endif(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+endif(NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(D REQUIRED)
 FIND_PACKAGE(Qt4 REQUIRED)
@@ -173,9 +173,6 @@ set(QTD_VERSION_STR ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
 math(EXPR QTD_VERSION "(${QT_VERSION_MAJOR} << 16) + (${QT_VERSION_MINOR} << 8) + ${QT_VERSION_PATCH}")
 
 include_directories(${QT_INCLUDES} ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
-
-## Strip utility.
-find_program(STRIP strip)
 
 # System specifc settings.
 if(CMAKE_HOST_WIN32)
@@ -208,11 +205,9 @@ endmacro(load_generated_classes )
 macro(qtd_add_resource output)
     set (params NAME OPTIONS)
     qtd_parse_params (RESOURCES  params ${ARGN})
-
     if(NAME_tmp)
 	set(OPTIONS_tmp ${OPTIONS_tmp} -name ${NAME_tmp})
     endif(NAME_tmp)
-
     qtd_command ("${output}" "${DRCC}" "${OPTIONS_tmp}" "qrc_" 
 	"Generate" ${RESOURCES_tmp})
 endmacro(qtd_add_resource output)
@@ -226,7 +221,7 @@ endmacro(qtd_wrap_ui output)
 
 macro(qtd_command output command options prefix comment)
     foreach(file "${ARGN}")
-	## Test input file exists.
+	## Test an exist of the input file.
 	get_filename_component(file_path ${file} PATH)
 	get_filename_component(file_name ${file} NAME_WE)
 	get_filename_component(file_ext ${file} EXT)
@@ -243,7 +238,7 @@ macro(qtd_command output command options prefix comment)
     endforeach(file "${ARGN}")
 endmacro(qtd_command output command options files prefix comment)
 
-## Parse the parameters list.
+## Parsing the parameters list.
 macro(qtd_parse_params default params)
     set(type_tmp ${default})
     set(params_tmp ${default} ${${params}})  
@@ -251,19 +246,19 @@ macro(qtd_parse_params default params)
 	set(${param_tmp}_tmp )
     endforeach(param_tmp ${params_tmp})
     foreach(arg_tmp ${ARGN})
-	set(founded_type_tmp)
-	if(NOT founded_type_tmp)
+	set(found_type_tmp)
+	if(NOT found_type_tmp)
 	    foreach(param_tmp ${params_tmp})
 		if(arg_tmp STREQUAL param_tmp)	
 		    set(type_tmp ${param_tmp})
-		    set(founded_type_tmp 1)
+		    set(found_type_tmp 1)
 		    break(param_tmp ${params_tmp})
 		endif(arg_tmp STREQUAL param_tmp)
 	    endforeach(param_tmp ${params_tmp})	
-	endif(NOT founded_type_tmp)
-	if(NOT founded_type_tmp)
+	endif(NOT found_type_tmp)
+	if(NOT found_type_tmp)
 	    set(${type_tmp}_tmp ${${type_tmp}_tmp} ${arg_tmp})
-	endif(NOT founded_type_tmp)
+	endif(NOT found_type_tmp)
     endforeach(arg_tmp ${ARGN})
 endmacro(qtd_parse_params default)
 
@@ -530,7 +525,7 @@ foreach(package_big ${all_packages})
 			      DEPENDS ${source}
 			      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 			      )		   
-	      else(NOT "${file_name}" STREQUAL "QGlobal") ## DMD frontend crash on this file.
+	      else(NOT "${file_name}" STREQUAL "QGlobal") ## The DMD frontend crashes on this file.
 		  add_custom_command(OUTPUT "${interface_file}"
 			      COMMAND ${CMAKE_COMMAND} -E make_directory ${interface_file_path}
 			      COMMAND ${CMAKE_COMMAND} -E remove -f ${interface_file}
@@ -569,7 +564,6 @@ if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif(BUILD_EXAMPLES)
 
-#execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_BINARY_DIR}/CMakeCache.txt)
 set(SECOND_RUN 0 CACHE INTERNAL "")
 
 endif(NOT SECOND_RUN)
