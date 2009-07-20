@@ -291,7 +291,7 @@ void JumpTableGenerator::generateNativeTable(const QString &packageName,
     FileOut file(tableFile);
 
     QString pkgSubDir = QString(packageName).replace(".", "_");
-    m_prigenerator->addSource(pkgSubDir + "/" + pkgSubDir + ".pri", "nativejumptable.cpp");
+    m_prigenerator->addSource(packageName, "nativejumptable.cpp");
 
     printf("Generating jump table (.cpp): %s\n", qPrintable(tableFile));
 

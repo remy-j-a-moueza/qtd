@@ -51,6 +51,7 @@ struct Pri
 {
     QStringList headers;
     QStringList sources;
+    QStringList classes;
 };
 
 class PriGenerator : public Generator
@@ -60,8 +61,9 @@ class PriGenerator : public Generator
  public:
     virtual void generate();
 
-    void addHeader(const QString &folder, const QString &header);
-    void addSource(const QString &folder, const QString &source);
+    void addHeader(QString package, const QString &header);
+    void addSource(QString package, const QString &source);
+    void addClass(QString package, const QString &class_name);
 
  private:
     QHash<QString, Pri> priHash;

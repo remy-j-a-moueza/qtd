@@ -43,14 +43,19 @@
 #include "reporthandler.h"
 #include "fileout.h"
 
-void PriGenerator::addHeader(const QString &folder, const QString &header)
+void PriGenerator::addHeader(QString package, const QString &header)
 {
-    priHash[folder].headers << header;
+    priHash[package.replace(".", "_")].headers << header;
 }
 
-void PriGenerator::addSource(const QString &folder, const QString &source)
+void PriGenerator::addSource(QString package, const QString &source)
 {
-    priHash[folder].sources << source;
+    priHash[package.replace(".", "_")].sources << source;
+}
+
+void PriGenerator::addClass(QString package, const QString &class_name)
+{
+    priHash[package.replace(".", "_")].classes << class_name;
 }
 
 void PriGenerator::generate()
@@ -59,22 +64,14 @@ void PriGenerator::generate()
     while (pri.hasNext()) {
         pri.next();
 
-        FileOut file(m_out_dir + "/cpp/" + pri.key());
-        file.stream << "HEADERS += \\\n";
-        QStringList list = pri.value().headers;
+        FileOut file(m_out_dir + "/cpp/" + pri.key() + "/" + pri.key() + ".txt");
+        file.stream << "set (classes \n";
+        QStringList list = pri.value().classes;
         qSort(list.begin(), list.end());
         foreach (const QString &entry, list) {
-            file.stream << "           $$PWD/" << entry << " \\\n";
+            file.stream << "    " << entry << "\n";
         }
-
-        file.stream << "\n";
-        file.stream << "SOURCES += \\\n";
-        list = pri.value().sources;
-        qSort(list.begin(), list.end());
-        foreach (const QString &entry, list) {
-            file.stream << "           $$PWD/" << entry << " \\\n";
-        }
-        file.stream << "\n\n";
+        file.stream << ")\n";
 
         if (file.done())
             ++m_num_generated_written;

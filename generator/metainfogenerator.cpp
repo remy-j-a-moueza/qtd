@@ -382,8 +382,7 @@ void MetaInfoGenerator::writeCppFile()
 
             fileHash.insert(cls->package(), f);
 
-            QString pro_file_name = cls->package().replace(".", "_") + "/" + cls->package().replace(".", "_") + ".pri";
-            priGenerator->addSource(pro_file_name, cppFilename());
+            priGenerator->addSource(cls->package(), cppFilename());
         }
 
         if (!(cls->attributes() & AbstractMetaAttributes::Fake)) {
@@ -491,8 +490,7 @@ void MetaInfoGenerator::writeHeaderFile()
 
             fileHash.insert(cls->package(), true);
 
-            QString pro_file_name = cls->package().replace(".", "_") + "/" + cls->package().replace(".", "_") + ".pri";
-            priGenerator->addHeader(pro_file_name, headerFilename());
+            priGenerator->addHeader(cls->package(), headerFilename());
 
             if( file.done() )
                 ++m_num_generated_written;
@@ -615,9 +613,7 @@ void MetaInfoGenerator::writeLibraryInitializers()
             s << ";" << endl
               << "}" << endl << endl;
 
-            QString pro_file_name = QString(package).replace(".", "_");
-
-            priGenerator->addSource(pro_file_name + "/" + pro_file_name + ".pri", "qtjambi_libraryinitializer.cpp");
+            priGenerator->addSource(package, "qtjambi_libraryinitializer.cpp");
 
             if( fileOut.done() )
                 ++m_num_generated_written;
