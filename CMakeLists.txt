@@ -6,19 +6,18 @@ PROJECT(qtd CXX C)
 ##########################################################
 if(NOT SECOND_RUN)
 
-option(FORCE_IN_SOURCE_BUILD "Force the in-source building" "OFF")
-if( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT FORCE_IN_SOURCE_BUILD)
+option(ALLOW_IN_SOURCE_BUILDS "Allow in-source builds" "OFF")
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT ALLOW_IN_SOURCE_BUILDS)
   message(FATAL_ERROR "In-source builds are not allowed.
   Please create a directory and run cmake from there, passing the path
 to this source directory as the last argument.
   This process created the file `CMakeCache.txt` and the directory `CMakeFiles'.
 Please delete them.
 
-  Or you can restart cmake with `-DFORCE_IN_SOURCE_BUILD=1`, but it is not
+  Or you can restart cmake with `-DALLOW_IN_SOURCE_BUILDS=1`, but it is not
 recomended.
 ")
-endif()
-
+endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT ALLOW_IN_SOURCE_BUILDS)
 
 FIND_PACKAGE(Qt4 REQUIRED)
 set (QT_USE_QTMAIN false)
