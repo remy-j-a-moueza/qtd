@@ -497,36 +497,43 @@ macro(add_d_lib name)
     endif(D_IS_MARS)
 endmacro(add_d_lib name)
 
-## 
+##
 macro(get_imported_files_old imported)
     execute_process(COMMAND ${DC} -c -o- -v ${compile_flags_tmp} ${ARGN}
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   OUTPUT_VARIABLE dc_output_tmp
 		  
     )
-    string(REGEX MATCHALL "import[^\\(]*([^\\)]*)" dc_output_tmp "${dc_output_tmp}")
+    string(REGEX MATCHALL "import[^(]*([^)]*)" dc_output_tmp "${dc_output_tmp}")
     
     ## Initial filter.
     regex_safe_string(tmp ${CMAKE_CURRENT_SOURCE_DIR})
     regex_safe_string(tmp2 ${CMAKE_CURRENT_BINARY_DIR})
-    set(regex_includes_tmp ${tmp}|${tmp2})
+    set(regex_includes_tmp "${tmp}|${tmp2}")
 
     set(${imported})
     foreach(import_tmp ${dc_output_tmp})
 	## Getting a next import.
-	string(REGEX REPLACE "import[^\\(]*\\(([^\\)]*)" "\\1" import_tmp ${import_tmp})
+	string(REGEX REPLACE "import[^(]*\\(([^)]*)" "\\1" import_tmp ${import_tmp})
 	## Filtering.
-	file(TO_CMAKE_PATH import_tmp ${import_tmp})	
-	string(REGEX MATCH "(${regex_includes_tmp})[^/]*" found "${import_tmp}")	
-	string(SUBSTRING "${import_tmp}" 0 1 first_sym_tmp)
-	set(full_path_tmp)
-	if(${first_sym_tmp} STREQUAL "/")
-	    set(full_path_tmp 1)
-	endif(${first_sym_tmp} STREQUAL "/")
-	if(NOT found AND full_path_tmp)
-	else(NOT found AND full_path_tmp)
+	string(REPLACE "\\" "/" import_tmp ${import_tmp})
+	string(REGEX MATCH "(${regex_includes_tmp})" found "${import_tmp}")
+	if(CMAKE_HOST_WIN32)	
+	    string(SUBSTRING "${import_tmp}" 1 2 first_sym_tmp)
+	    set(full_path_tmp)
+	    if(${first_sym_tmp} STREQUAL ":/")
+		set(full_path_tmp 1)
+	    endif(${first_sym_tmp} STREQUAL ":/")
+	elseif(CMAKE_HOST_UNIX)
+	    string(SUBSTRING "${import_tmp}" 0 1 first_sym_tmp)
+	    set(full_path_tmp)
+	    if(${first_sym_tmp} STREQUAL "/")
+		set(full_path_tmp 1)
+	    endif(${first_sym_tmp} STREQUAL "/")
+	endif(CMAKE_HOST_WIN32)	
+	if(found OR NOT full_path_tmp)
 	    set(${imported} ${${imported}} ${import_tmp})	    
-	endif(NOT found AND full_path_tmp)	
+	endif(found OR NOT full_path_tmp)	
     endforeach(import_tmp ${dc_output_tmp})
 endmacro(get_imported_files_old imported)
 
