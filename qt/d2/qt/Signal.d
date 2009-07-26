@@ -20,10 +20,6 @@ import
     core.thread,
     core.exception;
 
-
-
-debug import std.stdio;
-
 private: // private by default
 
 alias void delegate(Object) DEvent;
@@ -109,11 +105,6 @@ struct Fn
         static assert (is(typeof(*S.init) == function));
         return cast(S)funcptr;
     }
-
-    debug string toString()
-    {
-        return Stdout.layout.convert("funcptr: {}", funcptr);
-    }
 }
 
 struct Dg
@@ -147,11 +138,6 @@ struct Dg
         r.ptr = context;
         r.funcptr = cast(typeof(r.funcptr))funcptr;
         return r;
-    }
-
-    debug string toString()
-    {
-        return Stdout.layout.convert("context: {}, funcptr: {}", context, funcptr);
     }
 }
 
@@ -191,11 +177,6 @@ struct Slot(R)
     }
     else
         static const isDelegate = false;
-
-    debug string toString()
-    {
-        return Stdout.layout.convert("receiver: {}, invoker {}: ", receiver, invoker);
-    }
 }
 
 enum SlotListId
@@ -348,14 +329,6 @@ struct SlotList(SlotT, bool strong = false)
         static if (!strong)
             cfree(data.ptr);
     }
-
-    debug string toString()
-    {
-        string r;
-        foreach(e; data)
-            r ~= e.toString ~ "\n";
-        return r;
-    }
 }
 
 public alias void delegate(int signalId) SignalEvent;
@@ -446,17 +419,6 @@ struct SignalConnections
     template ReceiverType(int slotListId)
     {
         alias SlotType!(slotListId).Receiver ReceiverType;
-    }
-
-    debug string toString()
-    {
-        string r;
-        foreach(i, e; slotLists.tupleof)
-        {
-            r ~= Stdout.layout.convert("Slot list {}:", i);
-            r ~= slotLists.at!(i).toString;
-        }
-        return r;
     }
 
     static const slotListCount = slotLists.tupleof.length;
@@ -715,14 +677,6 @@ public class SignalHandler
     {
         foreach(ref c; connections)
             c.free;
-    }
-
-    debug string toString()
-    {
-        string r;
-        foreach (i, c; connections)
-            r ~= Stdout.layout.convert("Signal {}:\n{}", i, c.toString);
-        return r;
     }
 }
 
