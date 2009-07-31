@@ -182,12 +182,27 @@ public:
     static const MacVersion MacintoshVersion;
 };
 
-char[] qVersion();
-bool qSharedBuild();
 
+extern(C) stringz qtd_qVersion();
+///
+string qVersion()
+{
+    return fromStringz(qtd_qVersion);
+}
+
+extern(C) bool qtd_qSharedBuild();
+///
+bool qSharedBuild()
+{
+    return qtd_qSharedBuild;
+}
+
+///
 int qMacVersion() { return QSysInfo.MacintoshVersion; }
 
+///
 void qUnused(T)(T x) { cast(void) x; }
+///
 void Q_UNUSED(T)(T x) { qUnused(x); }
 
 /*
@@ -592,10 +607,10 @@ struct Align
     ubyte a;
     void* b;
 }
- 
+
 private
 const PTR_ALIGN = Align.tupleof[1].alignof;
- 
+
 private
 template AlignPad(size_t base, size_t aligned)
 {
@@ -605,7 +620,7 @@ template AlignPad(size_t base, size_t aligned)
         const AlignPad = ((base+PTR_ALIGN-1)/PTR_ALIGN)*PTR_ALIGN
             + aligned;
 }
- 
+
 template InstanceSize(T)
 {
     static if( is( T == Object ) )
@@ -615,12 +630,12 @@ template InstanceSize(T)
             AlignPad!(
                 InstanceSize!(Super!(T)),
                 InterfaceCount!(T)*(void*).sizeof),
- 
+
             AlignPad!(
                 InstanceSizeImpl!(T, 0),
                 + InterfaceCount!(T)*(void*).sizeof));
 }
- 
+
 private
 template Super(T)
 {
@@ -629,19 +644,19 @@ template Super(T)
     else
         static assert(false, "Can't get super of "~T.mangleof);
 }
- 
+
 private
 template First(T)
 {
     alias T First;
 }
- 
+
 private
 template First(T, Ts...)
 {
     alias T First;
 }
- 
+
 private
 template InstanceSizeImpl(T, size_t i)
 {
@@ -654,7 +669,7 @@ template InstanceSizeImpl(T, size_t i)
         // variables.
         const InstanceSizeImpl = 2*(void*).sizeof;
 }
- 
+
 private
 template Max(size_t a, size_t b)
 {
@@ -663,7 +678,7 @@ template Max(size_t a, size_t b)
     else
         const Max = b;
 }
- 
+
 private
 template InterfaceCount(T)
 {
@@ -672,7 +687,7 @@ template InterfaceCount(T)
     else static if( is( T S == super ) )
         const InterfaceCount = InterfaceCountImpl!(S);
 }
- 
+
 private
 template InterfaceCountImpl(TBase, TInterfaces...)
 {

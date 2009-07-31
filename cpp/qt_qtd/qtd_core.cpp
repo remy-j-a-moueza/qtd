@@ -29,6 +29,16 @@ extern "C" DLL_PUBLIC QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex
     return mia;
 }
 
+extern "C" DLL_PUBLIC const char* qtd_qVersion()
+{
+    return qVersion();
+}
+
+extern "C" DLL_PUBLIC bool qtd_qSharedBuild()
+{
+    return qSharedBuild();
+}
+
 #ifdef CPP_SHARED
 QTD_EXPORT_VAR(_d_toUtf8)
 QTD_EXPORT_VAR(__qtd_dummy)

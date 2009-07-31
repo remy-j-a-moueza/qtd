@@ -20,6 +20,9 @@ version(D_Version2) {
     version = druntime;
 }
 
+alias immutable(char)* stringz;
+alias const(char)* cstringz;
+
 public static char** toStringzArray(string[] args)
 {
     if ( args is null )
