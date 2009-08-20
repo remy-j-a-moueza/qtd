@@ -17,7 +17,7 @@ public struct QRectF
         rt.w = rt.h = 0.;
         return rt;
     }
-    
+
     public this(qreal aleft, qreal atop, qreal awidth, qreal aheight)
     {
         xp = aleft;
@@ -67,28 +67,28 @@ public struct QRectF
 
     qreal left() const
     { return xp; }
-    
+
     qreal top() const
     { return yp; }
-    
+
     qreal right() const
     { return xp + w; }
-    
+
     qreal bottom() const
     { return yp + h; }
-    
+
     QPointF topLeft() const
     { return QPointF(xp, yp); }
-    
+
     QPointF bottomRight() const
     { return QPointF(xp+w, yp+h); }
-    
+
     QPointF topRight() const
     { return QPointF(xp+w, yp); }
-    
+
     QPointF bottomLeft() const
     { return QPointF(xp, yp+h); }
-    
+
     void setLeft(qreal pos) { qreal diff = pos - xp; xp += diff; w -= diff; }
 
     void setRight(qreal pos) { w = pos - xp; }
@@ -226,7 +226,7 @@ public struct QRectF
         w = s.width();
         h = s.height();
     }
-    
+
     bool contains(qreal ax, qreal ay) const
     {
         return contains(QPointF(ax, ay));
@@ -286,11 +286,11 @@ public struct QRectF
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QRectF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
+        qtd_QRectF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QRectF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
+        qtd_QRectF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
     }
 
     public final QRectF opOr(ref QRectF r) const {

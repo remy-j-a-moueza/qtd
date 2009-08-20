@@ -37,15 +37,15 @@ extern "C" DLL_PUBLIC void qtd_core_ArrayOps_initCallBacks(pfunc_abstr *callback
     QTD_EXPORT_VAR_SET(qtd_allocate_int_array, callbacks[0]);
     QTD_EXPORT_VAR_SET(qtd_assign_int_array_element, callbacks[1]);
     QTD_EXPORT_VAR_SET(qtd_get_int_from_array, callbacks[2]);
-    
+
     QTD_EXPORT_VAR_SET(qtd_allocate_uint_array, callbacks[3]);
     QTD_EXPORT_VAR_SET(qtd_assign_uint_array_element, callbacks[4]);
     QTD_EXPORT_VAR_SET(qtd_get_uint_from_array, callbacks[5]);
-    
+
     QTD_EXPORT_VAR_SET(qtd_allocate_double_array, callbacks[6]);
     QTD_EXPORT_VAR_SET(qtd_assign_double_array_element, callbacks[7]);
     QTD_EXPORT_VAR_SET(qtd_get_double_from_array, callbacks[8]);
-    
+
     QTD_EXPORT_VAR_SET(qtd_allocate_string_array, callbacks[9]);
     QTD_EXPORT_VAR_SET(qtd_assign_string_array_element, callbacks[10]);
     QTD_EXPORT_VAR_SET(qtd_string_from_array, callbacks[11]);

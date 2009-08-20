@@ -857,7 +857,7 @@ extern "C" DLL_PUBLIC void qtd_QVariant_toString
     QVariant_QtDShell *__qt_this = (QVariant_QtDShell *) __this_nativeId;
     QString  __qt_return_value = __qt_this->toString();
 
-    _d_toUtf8(__qt_return_value.utf16(), __qt_return_value.size(), __java_return_value);
+    qtd_toUtf8(__qt_return_value.utf16(), __qt_return_value.size(), __java_return_value);
 
 }
 

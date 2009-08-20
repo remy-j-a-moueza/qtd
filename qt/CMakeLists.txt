@@ -1,7 +1,7 @@
 project (qt_d D)
 
 set(QT_SRCS_D
-QtDObject.d
+QtdObject.d
 QGlobal.d
 
 core/QChildEvent.d

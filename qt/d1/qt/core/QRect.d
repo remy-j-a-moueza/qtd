@@ -313,11 +313,11 @@ public struct QRect
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QRect_writeTo_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
+        qtd_QRect_writeTo_QDataStream(this, arg__1 is null ? null : arg__1.__nativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QRect_readFrom_QDataStream(this, arg__1 is null ? null : arg__1.nativeId);
+        qtd_QRect_readFrom_QDataStream(this, arg__1 is null ? null : arg__1.__nativeId);
     }
 
     public final QRect opAnd(in QRect r) {
@@ -335,7 +335,7 @@ public struct QRect
     public final bool contains(QRect r, bool proper = false) {
         return qtd_QRect_contains_QRect_bool(this, &r, proper);
     }
-    
+
     public final bool intersects(QRect r) {
         return qtd_QRect_intersects_QRect(this, &r);
     }
@@ -343,7 +343,7 @@ public struct QRect
     public final QRect normalized() {
         return qtd_QRect_normalized(this);
     }
-    
+
 private:
     version(OSX)
     {
