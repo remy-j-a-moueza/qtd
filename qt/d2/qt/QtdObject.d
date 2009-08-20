@@ -33,7 +33,7 @@ public:
         
     this(void* nativeId, QtdObjectFlags flags = QtdObjectFlags.none)
     {
-        __nativeId_ = nativeId;
+        __nativeId = nativeId;
         __flags_ = flags;
     }
 

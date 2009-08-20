@@ -24,17 +24,16 @@ enum QtdObjectFlags : ubyte
 package abstract class QtdObject
 {
 private:
-    void* __nativeId_ = null;
     QtdObjectFlags __flags_;
 
 public:
-    return __nativeId;
+    void* __nativeId;
     
     mixin SignalHandlerOps;
     
     this(void* nativeId, QtdObjectFlags flags = QtdObjectFlags.none)
     {
-        __nativeId_ = nativeId;
+        __nativeId = nativeId;
         __flags_ = flags;
     }
 
