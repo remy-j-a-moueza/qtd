@@ -22,7 +22,7 @@
 * exception, Nokia gives you certain additional rights. These rights
 * are described in the Nokia Qt GPL Exception version 1.2, included in
 * the file GPL_EXCEPTION.txt in this package.
-*
+* 
 * Qt for Windows(R) Licensees
 * As a special exception, Nokia, as the sole copyright holder for Qt
 * Designer, grants users of the Qt/Eclipse Integration plug-in the
@@ -46,8 +46,9 @@ import qt.core.*;
 
 class QObject___ extends QObject {
     
-    /* TODO: test whether the linked list is really a better solution
     public bool __stackAllocated = false;
+    
+    public bool __qobject_is_deleting = false;
     
     new(size_t size, void* p = null)
     {
@@ -71,64 +72,12 @@ class QObject___ extends QObject {
             }
         }
     }
-    */
     
-    private
-    {
-        static QObject __root;
-        QObject __next;
-        QObject __prev;
-    }
+    // list of QObjects references to prevent them from garbage collecting if they are managed by Qt
+    private static QObject[] __gc_ref_list;
     
-    ~this()
-    {
-        if (__prev)
-            __prev.__next = __next;
-        else
-            __root = __next;
-        
-        if (__next)      
-            __next.__prev = __prev;        
-    }
-    
-    /**
-    */
-    T findChild(T : QObject = QObject)(string name = null)
-    {
-        foreach (obj; children)
-        {
-            auto tmp = cast(T)obj;
-            if (tmp && (!name.length || tmp.objectName == name))
-                return tmp;
-            
-            tmp = obj.findChild!(T)(name);
-            if (tmp)
-                return tmp;
-        }
-        
-        return null;
-    }
-    
-    /**
-    */
-    T[] findChildren(T : QObject = QObject)(string name = null)
-    {
-        T[] result;
-        
-        void find(QObject[] objects)
-        {        
-            foreach (obj; objects)
-            {
-                auto tmp = cast(T)obj;
-                if (tmp && (!name.length || tmp.objectName == name))
-                    result ~= tmp;
-                find(obj.children);
-            }
-        }
-        
-        find(children);
-        return result;
-    }
+    // this flag needs to be set false when QObject is deleted from inside Qt so when deleting it from D it won't delete C++ object
+    public bool __no_real_delete = false;
 }// class
 
 abstract class QAbstractItemModel___ extends QAbstractItemModel {
@@ -192,14 +141,14 @@ class QCoreApplication___ extends QCoreApplication {
 	{
 //        if (m_instance != null)
 //            throw new RuntimeException("QCoreApplication can only be initialized once");
-
+            
 		argc = args.length;
 		argv = toStringzArray(args);
 		this(&argc, argv);
 
 //        m_instance.aboutToQuit.connect(m_instance, "disposeOfMyself()");
 	}
-
+	
 	private int argc;
 	private char **argv;
 /*
@@ -540,7 +489,7 @@ class QIODevice___ extends QIODevice {
 
     public final long write(string str) {
 	return write(str.ptr, str.length);
-    }
+    } 
 }// class
 
 class QCryptographicHash___ extends QCryptographicHash {

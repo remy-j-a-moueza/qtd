@@ -60,7 +60,7 @@ inline int &ry()
 
     QPoint opMulAssign(qreal c)
     { xp = qRound(xp*c); yp = qRound(yp*c); return this; }
-
+    
     bool opEquals(ref QPoint p)
     { return xp == p.xp && yp == p.yp; }
 
@@ -69,7 +69,7 @@ inline int &ry()
 
     QPoint opSub(ref QPoint p)
     { return QPoint(this.xp-p.xp, this.yp-p.yp); }
-
+    
     QPoint opMul(qreal c)
     { return QPoint(qRound(this.xp*c), qRound(this.yp*c)); }
 
@@ -86,11 +86,11 @@ inline int &ry()
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QPoint_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPoint_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QPoint_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPoint_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
     }
 
 private:
@@ -115,42 +115,42 @@ public struct QPointF
         pt.xp = pt.yp = 0;
         return pt;
     }
-
+    
     public this(qreal xpos, qreal ypos) {
         xp = xpos;
         yp = ypos;
     }
-
+    
     public this(QPoint p) {
         xp = p.x();
         yp = p.y();
     }
-
+    
     bool isNull() //const
     {
         return qIsNull(xp) && qIsNull(yp);
     }
-
+    
     qreal x() //const
     {
         return xp;
     }
-
+    
     qreal y() //const
     {
         return yp;
     }
-
+    
     void x(qreal xpos)
     {
         xp = xpos;
     }
-
+    
     void y(qreal ypos)
     {
         yp = ypos;
     }
-/*
+/*    
 inline qreal &QPointF::rx()
 {
         return xp;
@@ -161,53 +161,53 @@ inline qreal &QPointF::ry()
     return yp;
 }
 */
-
+    
     QPointF opAddAssign(ref QPointF p)
     { xp+=p.xp; yp+=p.yp; return this; }
-
+    
     QPointF opSubAssign(ref QPointF p)
     { xp-=p.xp; yp-=p.yp; return this; }
-
+    
     QPointF opMulAssign(qreal c)
     { xp*=c; yp*=c; return this; }
-
+    
     bool opEquals(ref QPointF p)
     { return qFuzzyCompare(xp, p.xp) && qFuzzyCompare(yp, p.yp); }
-
+    
     QPointF opAdd(ref QPointF p)
     { return QPointF(this.xp+p.xp, this.yp+p.yp); }
-
+    
     QPointF opSub(ref QPointF p)
     { return QPointF(this.xp-p.xp, this.yp-p.yp); }
-
+    
     QPointF opMul(qreal c)
     { return QPointF(this.xp*c, this.yp*c); }
-
+    
     QPointF opDivAssign(qreal c)
     {
         xp/=c;
         yp/=c;
         return this;
     }
-
+    
     QPointF opDiv(qreal c)
     {
         return QPointF(xp/c, yp/c);
     }
-
+    
     QPoint toPoint() //const
     {
         return QPoint(qRound(xp), qRound(yp));
     }
-
+    
     public final void writeTo(QDataStream arg__1) {
-        qtd_QPointF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPointF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
     }
-
+    
     public final void readFrom(QDataStream arg__1) {
-        qtd_QPointF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPointF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.nativeId);
     }
-
+    
 private:
     qreal xp;
     qreal yp;

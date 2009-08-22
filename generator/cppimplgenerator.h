@@ -212,7 +212,6 @@ public:
     void writeQObjectLink(QTextStream &s, const AbstractMetaClass *java_class);
     void writeSignalHandler(QTextStream &s, const AbstractMetaClass *java_class, AbstractMetaFunction *signal);
     static void writeInitCallbacks(QTextStream &s, const AbstractMetaClass *java_class);
-    static void writeQtdEntityFunction(QTextStream &s, const AbstractMetaClass *java_class);
     void writeRefArguments(QTextStream &s, const AbstractMetaFunction *java_function);
 
 private:

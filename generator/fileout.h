@@ -71,6 +71,7 @@ public:
     static bool dummy;
     static bool diff;
 
+ private:
     bool isDone;
 };
 

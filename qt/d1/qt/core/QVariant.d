@@ -1,7 +1,7 @@
 module qt.core.QVariant;
 
 public import qt.QGlobal;
-private import qt.QtdObject;
+private import qt.QtDObject;
 private import qt.core.QMetaType;
 
 // automatic imports-------------
@@ -33,7 +33,7 @@ version (Tango)
 }
 
 
-public class QVariant : QtdObject
+public class QVariant : QtDObject
 {
     enum Type {
         Invalid = 0,
@@ -93,7 +93,7 @@ public class QVariant : QtdObject
 
         LastType = 0xffffffff // need this so that gcc >= 3.4 allocates 32 bits for Type
     }
-
+    
 // Functions
 
     private template getMetaId()
@@ -103,7 +103,7 @@ public class QVariant : QtdObject
 	    if(i <= 0)
 		i = qRegisterMetaType!(T)(name);";
     }
-
+	
     static public QVariant fromValue(T)(T obj)
     {
 	QVariant var;
@@ -131,7 +131,7 @@ public class QVariant : QtdObject
 	}
 	return var;
     }
-
+    
     static public QVariant opCall(T)(T obj)
     {
 	return fromValue(obj);
@@ -144,7 +144,7 @@ public class QVariant : QtdObject
 
 
     public this(QDataStream s) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QDataStream(s is null ? null : s.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QDataStream(s is null ? null : s.nativeId);
         super(__qt_return_value);
     }
 
@@ -162,25 +162,25 @@ public class QVariant : QtdObject
 
 
     public this(QBitArray bitarray) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QBitArray(bitarray is null ? null : bitarray.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QBitArray(bitarray is null ? null : bitarray.nativeId);
         super(__qt_return_value);
     }
 
 
     public this(QByteArray bytearray) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QByteArray(bytearray is null ? null : bytearray.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QByteArray(bytearray is null ? null : bytearray.nativeId);
         super(__qt_return_value);
     }
 
 
     public this(QDate date) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QDate(date is null ? null : date.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QDate(date is null ? null : date.nativeId);
         super(__qt_return_value);
     }
 
 
     public this(QDateTime datetime) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QDateTime(datetime is null ? null : datetime.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QDateTime(datetime is null ? null : datetime.nativeId);
         super(__qt_return_value);
     }
 
@@ -204,7 +204,7 @@ public class QVariant : QtdObject
 
 
     public this(QLocale locale) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QLocale(locale is null ? null : locale.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QLocale(locale is null ? null : locale.nativeId);
         super(__qt_return_value);
     }
 
@@ -234,7 +234,7 @@ public class QVariant : QtdObject
 
 
     public this(QRegExp regExp) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QRegExp(regExp is null ? null : regExp.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QRegExp(regExp is null ? null : regExp.nativeId);
         super(__qt_return_value);
     }
 
@@ -252,19 +252,19 @@ public class QVariant : QtdObject
 
 
     public this(QTime time) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QTime(time is null ? null : time.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QTime(time is null ? null : time.nativeId);
         super(__qt_return_value);
     }
 
 
     public this(QUrl url) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QUrl(url is null ? null : url.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QUrl(url is null ? null : url.nativeId);
         super(__qt_return_value);
     }
 
 
     public this(QVariant other) {
-        void* __qt_return_value = qtd_QVariant_QVariant_QVariant(other is null ? null : other.__nativeId);
+        void* __qt_return_value = qtd_QVariant_QVariant_QVariant(other is null ? null : other.nativeId);
         super(__qt_return_value);
     }
 
@@ -314,7 +314,7 @@ public class QVariant : QtdObject
     {
 	int i = qtd_MetatypeId(toStringz(name));
 	assert(i > 0);
-	return qtd_QVariant_canConvert(__nativeId, i);
+	return qtd_QVariant_canConvert(nativeId, i);
     }
 
     public final bool canConvert(Type)() {
@@ -359,58 +359,58 @@ public class QVariant : QtdObject
 	else  static if ( is(Type == QTime) )
 	    return canConvertImpl("QTime");
 	else static if ( is(Type == uint) )
-	    return canConvertImpl("unsigned int"); // TODO:
+	    return canConvertImpl("unsigned int"); // TODO: 
 	else static if ( is(Type == ulong) )
-	    return canConvertImpl("unsigned long long"); // TODO:
+	    return canConvertImpl("unsigned long long"); // TODO: 
 	else static if ( is(Type == QUrl) )
 	    return canConvertImpl("QUrl");
 	else
 	{
 	    static if( is( Type == class ) || is( Type == interface ) )
 	    {
-		Object object = cast(Object)qtd_QVariant_data(__nativeId);
+		Object object = cast(Object)qtd_QVariant_data(nativeId);
 		if(object)
 		    return cast(Type)(object) !is null;
 		return false;
 	    }
 	    else static if (isDynamicArrayType!(Type) || isStaticArrayType!(Type) )
 	    {
-		auto array = cast(DArrayToC*)qtd_QVariant_data(__nativeId);
+		auto array = cast(DArrayToC*)qtd_QVariant_data(nativeId);
 		return cast(Type)(array.array) !is null;
 	    }
 	    else
 	    {
 		int i = qtd_MetatypeId(toStringz(typeid(Type).toString));
-		return qtd_QVariant_canConvert(__nativeId, i);
+		return qtd_QVariant_canConvert(nativeId, i);
 	    }
 	}
     }
 
     public final Type value(Type)() {
 	static if ( is(Type == QBitArray) )
-	    return toBitArra;
+	    return toBitArra; 
 	else static if ( is(Type == bool) )
-	    return toBool;
+	    return toBool; 
 	else static if ( is(Type == QByteArray) )
-	    return toByteArray;
+	    return toByteArray; 
 	else static if ( is(Type == QDate) )
-	    return toDate;
+	    return toDate; 
 	else static if ( is(Type == QDateTime) )
-	    return toDateTime;
+	    return toDateTime; 
 	else static if ( is(Type == double) )
-	    return toDouble;
+	    return toDouble; 
 	else static if ( is(Type == int) )
-	    return toInt;
+	    return toInt; 
 	else static if ( is(Type == QLine) )
-	    return toLine;
+	    return toLine; 
 	else static if ( is(Type == QLineF) )
-	    return toLineF;
+	    return toLineF; 
 	else static if ( is(Type == QLocale) )
-	    return toLocale;
+	    return toLocale; 
 	else static if ( is(Type == long) )
-	    return toLongLong;
+	    return toLongLong; 
 	else static if ( is(Type == QPoint) )
-	    return toPoint;
+	    return toPoint; 
 	else static if ( is(Type == QPointF) )
 	    return toPointF;
 	else static if ( is(Type == QRect) )
@@ -435,188 +435,194 @@ public class QVariant : QtdObject
 	    return toUrl;
 	else static if( is( Type == class ) || is( Type == interface ) )
 	{
-	    Object object = cast(Object)qtd_QVariant_data(__nativeId);
+	    Object object = cast(Object)qtd_QVariant_data(nativeId);
 	    if(object)
 		return cast(Type)(object);
 	    return null;
 	}
 	else static if (isDynamicArrayType!(Type) || isStaticArrayType!(Type) )
 	{
-	    auto array = cast(DArrayToC*)qtd_QVariant_data(__nativeId);
+	    auto array = cast(DArrayToC*)qtd_QVariant_data(nativeId);
 	    return cast(Type)(array.array);
 	}
 	else
 	{
-	    return *cast(Type*)qtd_QVariant_data(__nativeId);
+	    return *cast(Type*)qtd_QVariant_data(nativeId);
 	}
     }
 
     public final void clear() {
-        qtd_QVariant_clear(__nativeId);
+        qtd_QVariant_clear(nativeId);
     }
 
     protected final bool cmp(QVariant other) {
-        return qtd_QVariant_cmp_QVariant(__nativeId, other is null ? null : other.__nativeId);
+        return qtd_QVariant_cmp_QVariant(nativeId, other is null ? null : other.nativeId);
     }
 
     protected final void create(int type, void* copy) {
-        qtd_QVariant_create_int_nativepointervoid(__nativeId, type, copy);
+        qtd_QVariant_create_int_nativepointervoid(nativeId, type, copy);
     }
 
     public final bool isNull() {
-        return qtd_QVariant_isNull(__nativeId);
+        return qtd_QVariant_isNull(nativeId);
     }
 
     public final bool isValid() {
-        return qtd_QVariant_isValid(__nativeId);
+        return qtd_QVariant_isValid(nativeId);
     }
 
     public final void load(QDataStream ds) {
-        qtd_QVariant_load_QDataStream(__nativeId, ds is null ? null : ds.__nativeId);
+        qtd_QVariant_load_QDataStream(nativeId, ds is null ? null : ds.nativeId);
     }
 
     public final void writeTo(QDataStream s) {
-        qtd_QVariant_writeTo_QDataStream(__nativeId, s is null ? null : s.__nativeId);
+        qtd_QVariant_writeTo_QDataStream(nativeId, s is null ? null : s.nativeId);
     }
 
     public final QVariant operator_assign(QVariant other) {
-        void* __qt_return_value = qtd_QVariant_operator_assign_QVariant(__nativeId, other is null ? null : other.__nativeId);
-        return new QVariant(__qt_return_value, QtdObjectFlags.nativeOwnership);
+        void* __qt_return_value = qtd_QVariant_operator_assign_QVariant(nativeId, other is null ? null : other.nativeId);
+        return new QVariant(__qt_return_value, true);
     }
 
     private final bool operator_equal(QVariant v) {
-        return qtd_QVariant_operator_equal_QVariant(__nativeId, v is null ? null : v.__nativeId);
+        return qtd_QVariant_operator_equal_QVariant(nativeId, v is null ? null : v.nativeId);
     }
 
     public final void readFrom(QDataStream s) {
-        qtd_QVariant_readFrom_QDataStream(__nativeId, s is null ? null : s.__nativeId);
+        qtd_QVariant_readFrom_QDataStream(nativeId, s is null ? null : s.nativeId);
     }
 
     public final void save(QDataStream ds) {
-        qtd_QVariant_save_QDataStream(__nativeId, ds is null ? null : ds.__nativeId);
+        qtd_QVariant_save_QDataStream(nativeId, ds is null ? null : ds.nativeId);
     }
 
     public final QBitArray toBitArray() {
-        void* __qt_return_value = qtd_QVariant_toBitArray(__nativeId);
-        return new QBitArray(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toBitArray(nativeId);
+        return new QBitArray(__qt_return_value, false);
     }
 
     public final bool toBool() {
-        return qtd_QVariant_toBool(__nativeId);
+        return qtd_QVariant_toBool(nativeId);
     }
 
     public final QByteArray toByteArray() {
-        void* __qt_return_value = qtd_QVariant_toByteArray(__nativeId);
-        return new QByteArray(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toByteArray(nativeId);
+        return new QByteArray(__qt_return_value, false);
     }
 
     public final QDate toDate() {
-        void* __qt_return_value = qtd_QVariant_toDate(__nativeId);
-        return new QDate(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toDate(nativeId);
+        return new QDate(__qt_return_value, false);
     }
 
     public final QDateTime toDateTime() {
-        void* __qt_return_value = qtd_QVariant_toDateTime(__nativeId);
-        return new QDateTime(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toDateTime(nativeId);
+        return new QDateTime(__qt_return_value, false);
     }
 
     public final double toDouble(bool* ok = null) {
-        return qtd_QVariant_toDouble_nativepointerbool(__nativeId, ok);
+        return qtd_QVariant_toDouble_nativepointerbool(nativeId, ok);
     }
 
     public final int toInt(bool* ok = null) {
-        return qtd_QVariant_toInt_nativepointerbool(__nativeId, ok);
+        return qtd_QVariant_toInt_nativepointerbool(nativeId, ok);
     }
 
     public final QLine toLine() {
-        return qtd_QVariant_toLine(__nativeId);
+        return qtd_QVariant_toLine(nativeId);
     }
 
     public final QLineF toLineF() {
-        return qtd_QVariant_toLineF(__nativeId);
+        return qtd_QVariant_toLineF(nativeId);
     }
 
     public final QLocale toLocale() {
-        void* __qt_return_value = qtd_QVariant_toLocale(__nativeId);
-        return new QLocale(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toLocale(nativeId);
+        return new QLocale(__qt_return_value, false);
     }
 
     public final long toLongLong(bool* ok = null) {
-        return qtd_QVariant_toLongLong_nativepointerbool(__nativeId, ok);
+        return qtd_QVariant_toLongLong_nativepointerbool(nativeId, ok);
     }
 
     public final QPoint toPoint() {
-        return qtd_QVariant_toPoint(__nativeId);
+        return qtd_QVariant_toPoint(nativeId);
     }
 
     public final QPointF toPointF() {
-        return qtd_QVariant_toPointF(__nativeId);
+        return qtd_QVariant_toPointF(nativeId);
     }
 
     public final QRect toRect() {
-        return qtd_QVariant_toRect(__nativeId);
+        return qtd_QVariant_toRect(nativeId);
     }
 
     public final QRectF toRectF() {
-        return qtd_QVariant_toRectF(__nativeId);
+        return qtd_QVariant_toRectF(nativeId);
     }
 
     public final QRegExp toRegExp() {
-        void* __qt_return_value = qtd_QVariant_toRegExp(__nativeId);
-        return new QRegExp(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toRegExp(nativeId);
+        return new QRegExp(__qt_return_value, false);
     }
 
     public final QSize toSize() {
-        return qtd_QVariant_toSize(__nativeId);
+        return qtd_QVariant_toSize(nativeId);
     }
 
     public final QSizeF toSizeF() {
-        return qtd_QVariant_toSizeF(__nativeId);
+        return qtd_QVariant_toSizeF(nativeId);
     }
 
     public final string toString() {
         string res;
-        qtd_QVariant_toString(__nativeId, &res);
+        qtd_QVariant_toString(nativeId, &res);
         return res;
     }
 
     public final QTime toTime() {
-        void* __qt_return_value = qtd_QVariant_toTime(__nativeId);
-        return new QTime(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toTime(nativeId);
+        return new QTime(__qt_return_value, false);
     }
 
     public final uint toUInt(bool* ok = null) {
-        return qtd_QVariant_toUInt_nativepointerbool(__nativeId, ok);
+        return qtd_QVariant_toUInt_nativepointerbool(nativeId, ok);
     }
 
     public final ulong toULongLong(bool* ok = null) {
-        return qtd_QVariant_toULongLong_nativepointerbool(__nativeId, ok);
+        return qtd_QVariant_toULongLong_nativepointerbool(nativeId, ok);
     }
 
     public final QUrl toUrl() {
-        void* __qt_return_value = qtd_QVariant_toUrl(__nativeId);
-        return new QUrl(__qt_return_value);
+        void* __qt_return_value = qtd_QVariant_toUrl(nativeId);
+        return new QUrl(__qt_return_value, false);
     }
 
     public final char* typeName() {
-        return qtd_QVariant_typeName(__nativeId);
+        return qtd_QVariant_typeName(nativeId);
     }
-
+    
     public final Type type() {
-        return cast(Type)qtd_QVariant_type(__nativeId);
+        return cast(Type)qtd_QVariant_type(nativeId);
     }
 
     public final int userType() {
-        return qtd_QVariant_userType(__nativeId);
+        return qtd_QVariant_userType(nativeId);
     }
 // Field accessors
 
-    public this(void* native_id, QtdObjectFlags flags = QtdObjectFlags.none) {
-        super(native_id, flags);
+    public this(void* native_id, bool no_real_delete = false) {
+        super(native_id, no_real_delete);
     }
 
-    protected override void __deleteNative() {
-        qtd_QVariant_destructor(__nativeId);
+
+    ~this() {
+        if(!__no_real_delete)
+            __free_native_resources();
+    }
+
+    protected void __free_native_resources() {
+        qtd_QVariant_destructor(nativeId());
     }
 
 // Injected code in class

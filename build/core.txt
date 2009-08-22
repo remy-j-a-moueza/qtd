@@ -7,19 +7,13 @@ set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
     qt_core/QLine_shell qt_core/QLineF_shell
     qt_core/QRect_shell qt_core/QRectF_shell
     qt_core/QString_shell qt_core/QVariant_shell
-    qt_core/QModelIndex_shell qt_core/QMetaType_shell
-    qt_core/QMetaObject_shell)
+    qt_core/QModelIndex_shell qt_core/QMetaType_shell)
 ## Module specific d files.
-set (d_files
-    QGlobal
-    qtd/Array  
+set (d_files QGlobal qtd/Array  
     qtd/ArrayOpsPrimitive   
-    qtd/Traits
-    core/QString
-    core/QMetaType
-    core/QMetaObject)
+    core/QString core/QMetaType)
 set (d_version_files 
-    QtdObject
+    QtDObject
     Signal qtd/Str
     core/QLine core/QLineF
     core/QModelIndex

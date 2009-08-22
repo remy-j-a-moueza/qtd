@@ -170,20 +170,20 @@ class QPolygon___ extends QPolygon {
 
     @QtBlockedSlot
     public final QPolygon add(int x, int y) {
-        add_private(__nativeId(), x, y);
+        add_private(nativeId(), x, y);
         return this;
     }
 
     @QtBlockedSlot
     public final QPolygon add(QPoint pt) {
-        add_private(__nativeId(), pt.x(), pt.y());
+        add_private(nativeId(), pt.x(), pt.y());
         return this;
     }
 
     @QtBlockedSlot
     public final QPolygon add(QPolygon p) {
         int size = p.size();
-        long nid = __nativeId();
+        long nid = nativeId();
         for (int i = 0; i < size; ++i) {
             QPoint pt = p.at(i);
             add_private(nid, pt.x(), pt.y());
@@ -199,20 +199,20 @@ class QPolygonF___ extends QPolygonF {
 
     @QtBlockedSlot
     public final QPolygonF add(double x, double y) {
-        add_private(__nativeId(), x, y);
+        add_private(nativeId(), x, y);
         return this;
     }
 
     @QtBlockedSlot
     public final QPolygonF add(QPointF pt) {
-        add_private(__nativeId(), pt.x(), pt.y());
+        add_private(nativeId(), pt.x(), pt.y());
         return this;
     }
 
     @QtBlockedSlot
     public final QPolygonF add(QPolygonF p) {
         int size = p.size();
-        long nid = __nativeId();
+        long nid = nativeId();
         for (int i = 0; i < size; ++i) {
             QPointF pt = p.at(i);
             add_private(nid, pt.x(), pt.y());
@@ -859,14 +859,14 @@ class QFileDialog___ extends QFileDialog {
     public static string getOpenFileName(QWidget _parent, string caption = null, string dir = null, string filter = null) {
         string res;
         string _selectedFilter = "";
-        qtd_QFileDialog_getOpenFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.__nativeId, caption, dir, filter, _selectedFilter, 0);
+        qtd_QFileDialog_getOpenFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.nativeId, caption, dir, filter, _selectedFilter, 0);
         return res;
     }
     
     public static string getSaveFileName(QWidget _parent, string caption = null, string dir = null, string filter = null) {
         string res;
         string _selectedFilter = "";
-        qtd_QFileDialog_getSaveFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.__nativeId, caption, dir, filter, _selectedFilter, 0);
+        qtd_QFileDialog_getSaveFileName_QWidget_string_string_string_nativepointerstring_Options(&res, _parent is null ? null : _parent.nativeId, caption, dir, filter, _selectedFilter, 0);
         return res;
     }
     
@@ -1013,51 +1013,51 @@ class QPainter___ extends QPainter {
     }
     
     public final void drawConvexPolygon(in QPoint[] points) {
-        qtd_QPainter_drawConvexPolygon_nativepointerQPoint_int(__nativeId, points.ptr, points.length);
+        qtd_QPainter_drawConvexPolygon_nativepointerQPoint_int(nativeId, points.ptr, points.length);
     }
     
     public final void drawConvexPolygon(in QPointF[] points) {
-        qtd_QPainter_drawConvexPolygon_nativepointerQPointF_int(__nativeId, points.ptr, points.length);
+        qtd_QPainter_drawConvexPolygon_nativepointerQPointF_int(nativeId, points.ptr, points.length);
     }
     
     public final void drawLines(in QLine[] lines) {
-        qtd_QPainter_drawLines_nativepointerQLine_int(__nativeId, lines.ptr, lines.length);
+        qtd_QPainter_drawLines_nativepointerQLine_int(nativeId, lines.ptr, lines.length);
     }
 
     public final void drawLines(in QLineF[] lines) {
-        qtd_QPainter_drawLines_nativepointerQLineF_int(__nativeId, lines.ptr, lines.length);
+        qtd_QPainter_drawLines_nativepointerQLineF_int(nativeId, lines.ptr, lines.length);
     }
     
     public final void drawPolygon(in QPoint[] points, Qt_FillRule fillRule = Qt_FillRule.OddEvenFill) {
-        qtd_QPainter_drawPolygon_nativepointerQPoint_int_FillRule(__nativeId, points.ptr, points.length, fillRule);
+        qtd_QPainter_drawPolygon_nativepointerQPoint_int_FillRule(nativeId, points.ptr, points.length, fillRule);
     }
 
     public final void drawPolygon(in QPointF[] points, Qt_FillRule fillRule = Qt_FillRule.OddEvenFill) {
-        qtd_QPainter_drawPolygon_nativepointerQPointF_int_FillRule(__nativeId, points.ptr, points.length, fillRule);
+        qtd_QPainter_drawPolygon_nativepointerQPointF_int_FillRule(nativeId, points.ptr, points.length, fillRule);
     }
 
     public final void drawPolyline(in QPoint[] points) {
-        qtd_QPainter_drawPolyline_nativepointerQPoint_int(__nativeId, points.ptr, points.length);
+        qtd_QPainter_drawPolyline_nativepointerQPoint_int(nativeId, points.ptr, points.length);
     }
 
     public final void drawPolyline(in QPointF[] points) {
-        qtd_QPainter_drawPolyline_nativepointerQPointF_int(__nativeId, points.ptr, points.length);
+        qtd_QPainter_drawPolyline_nativepointerQPointF_int(nativeId, points.ptr, points.length);
     }
     
     public final void drawPoints(in QPoint[] points) {
-        qtd_QPainter_drawPoints_nativepointerQPoint_int(__nativeId, points.ptr, points.length);
+        qtd_QPainter_drawPoints_nativepointerQPoint_int(nativeId, points.ptr, points.length);
     }
 
     public final void drawPoints(in QPointF[] points) {
-        qtd_QPainter_drawPoints_nativepointerQPointF_int(__nativeId, points.ptr, points.length);
+        qtd_QPainter_drawPoints_nativepointerQPointF_int(nativeId, points.ptr, points.length);
     }
     
     public final void drawRects(in QRect[] rects) {
-        qtd_QPainter_drawRects_nativepointerQRect_int(__nativeId, rects.ptr, rects.length);
+        qtd_QPainter_drawRects_nativepointerQRect_int(nativeId, rects.ptr, rects.length);
     }
 
     public final void drawRects(in QRectF[] rects) {
-        qtd_QPainter_drawRects_nativepointerQRectF_int(__nativeId, rects.ptr, rects.length);
+        qtd_QPainter_drawRects_nativepointerQRectF_int(nativeId, rects.ptr, rects.length);
     }
 /*
     public static QPaintDeviceInterface redirected(QPaintDeviceInterface device, qt.core.QPoint offset) {
@@ -1689,25 +1689,25 @@ class QGraphicsScene___ extends QGraphicsScene {
 
 class QInputDialog___ extends QInputDialog {
     public static double getDouble(QWidget _parent, string title, string label, double value = 0, double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1, ref bool ok = false, int flags = 0) {
-        return qtd_QInputDialog_getDouble_private_QWidget_string_string_double_double_double_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.__nativeId, title, label, value, minValue, maxValue, decimals, &ok, flags);
+        return qtd_QInputDialog_getDouble_private_QWidget_string_string_double_double_double_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.nativeId, title, label, value, minValue, maxValue, decimals, &ok, flags);
     }
     
     static if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
     {
 	public static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, ref bool ok = false, int flags = 0) {
-            return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.__nativeId, title, label, value, minValue, maxValue, step, &ok, flags);
+	    return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.nativeId, title, label, value, minValue, maxValue, step, &ok, flags);
 	}
     }
 
     public static string getItem(QWidget _parent, string title, string label, string[] items, int current = 0, bool editable = true, ref bool ok = false, int flags = 0) {
         string res;
-        qtd_QInputDialog_getItem_private_QWidget_string_string_List_int_bool_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.__nativeId, title, label, items.ptr, items.length, current, editable, &ok, flags);
+        qtd_QInputDialog_getItem_private_QWidget_string_string_List_int_bool_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.nativeId, title, label, items.ptr, items.length, current, editable, &ok, flags);
         return res;
     }
 
     public static string getText(QWidget _parent, string title, string label, QLineEdit_EchoMode echo = QLineEdit_EchoMode.Normal, string text = null, ref bool ok = false, int flags = 0) {
         string res;
-        qtd_QInputDialog_getText_private_QWidget_string_string_EchoMode_string_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.__nativeId, title, label, echo, text, &ok, flags);
+        qtd_QInputDialog_getText_private_QWidget_string_string_EchoMode_string_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.nativeId, title, label, echo, text, &ok, flags);
         return res;
     }
 }// class
@@ -1716,7 +1716,7 @@ class QFont___ extends QFont {
     version(D_Version2) 
     {
 	void opAssign(in QFont arg__1)  {
-            this.__nativeId = qtd_QFont_QFont_QFont(arg__1 is null ? null : (cast(QFont)arg__1).__nativeId);
+	    this.nativeId = qtd_QFont_QFont_QFont(arg__1 is null ? null : (cast(QFont)arg__1).nativeId);
 	}
     }
 }// class"

@@ -178,15 +178,13 @@ void CppHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *java_cla
 
     s << "class " << shellClassName(java_class)
       << " : public " << java_class->qualifiedCppName();
-    if (java_class->isQObject())
-        s << ", public QtD_QObjectEntity";
-    else if(java_class->hasVirtualFunctions())
-        s << ", public QtD_Entity";
+    if (java_class->hasVirtualFunctions())
+        s << ", public Qtd_QObjectEntity";
     s << endl  << "{" << endl;
 
     if (java_class->isQObject()) {
       s << "public:" << endl
-        << "  Q_OBJECT_CHECK" << endl
+        << "  Q_OBJECT_CHECK" << endl;
 //        << "  mutable const QMetaObject *m_meta_object;" << endl;
 
 /*      if (java_class->hasVirtualSlots()) {
@@ -195,9 +193,9 @@ void CppHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *java_cla
 */
 //      s << "  const QMetaObject *metaObject() const;" << endl
 //        << "  void *qt_metacast(const char *);" << endl
-//        << "  QT_TR_FUNCTIONS" << end
-      << "  virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl
-      << "private:" << endl;
+//        << "  QT_TR_FUNCTIONS" << endl
+//        << "  virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl
+      s << "private:" << endl;
     }
 
 

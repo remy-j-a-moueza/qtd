@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="merge.xsl"?>
 
-<typesystem package="qt.opengl" default-superclass="QtdObject">
+<typesystem package="qt.opengl" default-superclass="QtDObject">
 <depend package="qt.core" />
 <depend package="qt.gui" />
 <inject-code>

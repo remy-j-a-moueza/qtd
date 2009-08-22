@@ -447,7 +447,7 @@ void ContainerGenerator::writeArrayFunctions(QTextStream &s, const ComplexTypeEn
         d_type = cls_name;
         if (centry->designatedInterface())
             d_type = centry->designatedInterface()->name();
-        nativeId = ".__nativeId";
+        nativeId = ".nativeId";
     }
 
     if (centry->designatedInterface()) {
@@ -470,7 +470,7 @@ void ContainerGenerator::writeArrayFunctions(QTextStream &s, const ComplexTypeEn
       << INDENT << "*elem = arr[pos]" << nativeId << ";" << endl
       << "}" << endl << endl
 
-      << "package " << d_type << " qtd_" << cls_name << "_cpp_to_d(" << cpp_type << " ret)" << endl
+      << "package " << d_type << " qtd_" << cls_name << "_cpp_to_d(" << cpp_type << " __qt_return_value)" << endl
       << "{" << endl;
 
     marshallFromCppToD(s, centry);

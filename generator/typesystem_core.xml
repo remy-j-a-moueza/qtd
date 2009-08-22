@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="qt.core" default-superclass="QtdObject">
+<typesystem package="qt.core" default-superclass="QtDObject">
 <inject-code>
     qt.Utilities.loadQtLibrary("QtCore");
     </inject-code>
@@ -787,7 +787,7 @@
     </modify-function>
 
     <modify-function signature="setYMD(int, int, int)" remove="all"/> <!--### Obsolete in 4.3-->
-
+  
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QDate___" quote-before-line="}// class"/>
         </inject-code>
@@ -814,7 +814,7 @@
     <modify-function signature="operator=(QDir)" remove="all"/>
     <modify-function signature="operator=(QString)" remove="all"/>
     <modify-function signature="addResourceSearchPath(QString)" remove="all"/> <!--### Obsolete in 4.3-->
-
+  
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QDir___" quote-before-line="}// class"/>
         </inject-code>
@@ -882,7 +882,7 @@
     <modify-function signature="operator-=(QSize)"> <access modifier="private"/> </modify-function>
     <modify-function signature="rheight()"> <remove/> </modify-function>
     <modify-function signature="rwidth()"> <remove/> </modify-function>
-
+  
         <inject-code>
             <insert-template name="core.multiply-devide-add-subtract">
                 <replace from="%TYPE" to="QSize"/>
@@ -897,7 +897,7 @@
     <modify-function signature="operator-=(QSizeF)"> <access modifier="private"/> </modify-function>
     <modify-function signature="rheight()"> <remove/> </modify-function>
     <modify-function signature="rwidth()"> <remove/> </modify-function>
-
+  
         <inject-code>
             <insert-template name="core.multiply-devide-add-subtract">
                 <replace from="%TYPE" to="QSizeF"/>
@@ -1067,7 +1067,7 @@
     <modify-function signature="operator^=(QBitArray)" access="private"/>
     <modify-function signature="operator|=(QBitArray)" access="private"/>
     <modify-function signature="operator~()const" access="private"/>
-
+  
       <inject-code>
           <import-file name="typesystem_core-java.java" quote-after-line="class QBitArray___" quote-before-line="}// class"/>
       </inject-code>
@@ -1091,7 +1091,7 @@
 
     <modify-function signature="modelAboutToBeReset()" private-signal="yes"/>
     <modify-function signature="modelReset()" private-signal="yes"/>
-
+    
         <modify-function signature="parent()const" remove="java"/>
         <extra-includes>
             <include file-name="QStringList" location="global"/>
@@ -1194,13 +1194,13 @@
   <interface-type name="QFactoryInterface" java-name="QAbstractFactory"/>
 
   <value-type name="QByteArray">
-
+    
     <modify-function signature="at(int)const">
         <modify-argument index="return">
             <replace-type modified-type="ubyte"/>
         </modify-argument>
     </modify-function>
-
+    
     <extra-includes>
         <include file-name="QNoImplicitBoolCast" location="global"/>
     </extra-includes>
@@ -1738,7 +1738,7 @@
     <modify-function signature="readLink(QString)" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="map(long long,long long,QFile::MemoryMapFlags)" remove="all"/> <!-- Can't provide same API and performance -->
     <modify-function signature="unmap(unsigned char*)" remove="all"/> <!-- Can't provide same API and performance -->
-
+  
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QFile___" quote-before-line="}// class"/>
         </inject-code>
@@ -1759,11 +1759,11 @@
             <access modifier="private"/>
             <rename to="getByte"/>
         </modify-function>
-
+	
 	<modify-function signature="write(const char*)">
             <access modifier="private"/>
         </modify-function>
-
+	
 	<modify-function signature="write(const char*,long long)">
             <access modifier="private"/>
         </modify-function>
@@ -2025,7 +2025,7 @@
     <modify-function signature="toUnicode(const char*)const">
         <remove/>
     </modify-function>
-
+  
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QTextCodec___" quote-before-line="}// class"/>
         </inject-code>
@@ -2116,7 +2116,7 @@
     <modify-function signature="translate(const char*,const char*,const char*,int)const">
         <remove/>
     </modify-function>
-
+  
         <extra-includes>
             <include file-name="QTextCodec" location="global"/>
          </extra-includes>
@@ -2200,7 +2200,7 @@
     <modify-function signature="buffer()const">
         <remove/>
     </modify-function>
-
+  
 
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QBuffer___" quote-before-line="}// class"/>
@@ -2269,7 +2269,7 @@
     </extra-includes>
     <modify-function signature="map(long long,long long,QFile::MemoryMapFlags)" remove="all"/>
     <modify-function signature="unmap(unsigned char*)" remove="all"/>
-
+  
     <inject-code>
         <import-file name="typesystem_core-java.java" quote-after-line="class QAbstractFileEngine___" quote-before-line="}// class"/>
     </inject-code>
@@ -2316,7 +2316,7 @@
     <modify-function signature="mapping(QWidget*)const" remove="all"/>
 
     <modify-function signature="setMapping(QObject*,QWidget*)" remove="all"/>
-
+  
         <inject-code>
             <import-file name="typesystem_core-java.java" quote-after-line="class QSignalMapper___" quote-before-line="}// class"/>
         </inject-code>
@@ -2361,59 +2361,6 @@
   </object-type>
 
   <object-type name="QObject">
-	<inject-code class="native">
-
-#ifdef CPP_SHARED
-QTD_EXPORT_VAR(qtd_delete_d_qobject);
-
-extern "C" DLL_PUBLIC void qtd_QObjectEntity_initCallBacks(pfunc_abstr del_d_qobj)
-{
-	QTD_EXPORT_VAR_SET(qtd_delete_d_qobject, del_d_qobj);
-}
-#endif
-
-
-extern "C" DLL_PUBLIC void* qtd_get_d_qobject(void *nativeId)
-{
-    QtD_QObjectEntity *entity = QtD_QObjectEntity::getQObjectEntity((QObject*)nativeId);
-    return entity ? entity-&gt;dId : NULL;
-}
-
-extern "C" DLL_PUBLIC void qtd_delete_qobject(void *nativeId)
-{
-    delete (QObject*)nativeId;
-}
-
-extern "C" DLL_PUBLIC void qtd_create_qobject_entity(void* nativeId, void *dId)
-{
-	new QtD_QObjectEntity((QObject*)nativeId, dId);
-}
-
-extern "C" DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
-{
-    return (void*)((QObject*)nativeId)->metaObject();
-}
-	</inject-code>
-
-	<inject-code class="java-free">
-extern(C) void* qtd_get_d_qobject(void* nativeId);
-extern(C) void qtd_delete_qobject(void* nativeId);
-extern(C) void* qtd_create_qobject_entity(void* nativeId, void* dId);
-extern(C) void* qtd_QObject_metaObject(void* nativeId);
-
-extern(C) void qtd_delete_d_qobject(void* dId)
-{
-    auto obj = cast(QObject)dId;
-	
-	if (!(obj.__flags &amp; QtdObjectFlags.dOwnership))
-	{
-		// Avoid deleting native object twice
-		obj.__setFlags(QtdObjectFlags.nativeOwnership, true);
-		delete obj;
-	}
-}
-	</inject-code>
-
     <modify-function signature="childEvent(QChildEvent*)">
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
@@ -2454,7 +2401,6 @@ extern(C) void qtd_delete_d_qobject(void* dId)
                 __gc_managed = false;
             }
         </inject-code> -->
-
     </modify-function>
 
     <modify-function signature="deleteLater()">
@@ -2478,9 +2424,11 @@ extern(C) void qtd_delete_d_qobject(void* dId)
         <include file-name="QVarLengthArray" location="global"/>
     </extra-includes>
 
-	<inject-code class="java">
-	  <import-file name="typesystem_core-java.java" quote-after-line="class QObject___" quote-before-line="}// class"/>
-	</inject-code>
+
+
+      <inject-code class="java">
+          <import-file name="typesystem_core-java.java" quote-after-line="class QObject___" quote-before-line="}// class"/>
+      </inject-code>
   </object-type>
 
   <object-type name="QCoreApplication">
@@ -2532,7 +2480,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
             <define-ownership class="java" owner="c++"/>
         </modify-argument>
     </modify-function>
-
+  
       <modify-function signature="QCoreApplication(int &amp;, char  **)">
           <inject-code class="shell">
               // qtjambi_register_variant_handler();
@@ -2579,7 +2527,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
   <object-type name="QDataStream">
   <!-- qtd2 -->
   <modify-function signature="device() const" remove="all"/>
-
+  
     <modify-function signature="setDevice(QIODevice*)">
         <modify-argument index="1">
             <reference-count action="set" variable-name="__rcDevice"/>
@@ -2609,7 +2557,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
     <modify-function signature="readBytes(char&amp;*,uint&amp;)"> <remove/> </modify-function>
     <modify-function signature="writeRawData(const char*,int)"> <remove/> </modify-function>
     <modify-function signature="writeBytes(const char*,uint)"> <remove/> </modify-function>
-
+  
       <template name="core.datastream_operator_shift_right">
           <insert-template name="core.stream_operator_shift_right">
               <replace from="%STREAM_TYPE" to="QDataStream"/>
@@ -2794,10 +2742,10 @@ extern(C) void qtd_delete_d_qobject(void* dId)
   </object-type>
 
   <object-type name="QTextStream">
-
+  
       <modify-function signature="setCodec(QTextCodec *)" remove="all"/>
       <modify-function signature="codec() const" remove="all"/>
-
+  
     <modify-function signature="QTextStream(QByteArray *, QFlags&lt;QIODevice::OpenModeFlag&gt;)"> <remove/> </modify-function>
     <modify-function signature="QTextStream(QString*,QFlags&lt;QIODevice::OpenModeFlag&gt;)"> <remove/> </modify-function>
     <modify-function signature="operator&gt;&gt;(QChar&amp;)"> <remove/> </modify-function>
@@ -2884,7 +2832,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
           <rename to="writeString"/>
           <modify-argument index="0" replace-value="this"/>
       </modify-function>
-
+      
       <modify-function signature="operator&gt;&gt;(char&amp;)">
           <access modifier="private"/>
           <modify-argument index="0" replace-value="this"/>
@@ -2959,7 +2907,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
   <value-type name="QFuture" generate="no">
     <modify-function signature="operator T() const" remove="all"/>
     <modify-function signature="operator=(const QFuture &amp;)" remove="all"/>
-
+  
     <modify-function signature="operator==(const QFuture &amp;)const">
         <modify-argument index="1">
             <replace-type modified-type="qt.core.QFuture"/>
@@ -2972,7 +2920,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
   <value-type name="QtJambiVoidFuture" java-name="QFutureVoid">
     <modify-function signature="resultCount()const" remove="all"/>
     <modify-function signature="isResultReadyAt(int)const" remove="all"/>
-
+  
     <modify-function signature="QFuture(const QFuture &amp;)">
         <modify-argument index="1">
             <replace-type modified-type="qt.core.QFutureVoid"/>
@@ -2996,7 +2944,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
   <object-type name="QFutureWatcherBase">
     <modify-function signature="connectNotify(const char *)" remove="all"/>
     <modify-function signature="disconnectNotify(const char *)" remove="all"/>
-
+  
     <inject-code class="shell-declaration">
 
         // private, pure virtual and considered internal
@@ -3029,7 +2977,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
 
   <object-type name="QFutureWatcher" generate="no">
     <modify-function signature="future()const" remove="all"/>
-
+  
     <modify-function signature="setFuture(const QFuture &amp;)">
         <modify-argument index="1">
             <replace-type modified-type="qt.core.QFuture&lt;T&gt;"/>

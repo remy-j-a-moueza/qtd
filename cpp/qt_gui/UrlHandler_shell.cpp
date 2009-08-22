@@ -4,19 +4,19 @@
 
 UrlHandler::UrlHandler(void *d_ptr, QObject*  parent0)
     : QObject(parent0),
-      QtD_QObjectEntity(this, d_ptr)
+      Qtd_QObjectEntity(d_ptr)
 {
 }
 
 #ifdef CPP_SHARED
-extern "C" typedef void (*pfqtd_UrlHandler_handleUrl_QUrl_dispatch)(void *dId, void* arg__1);
+extern "C" typedef void (*pfqtd_UrlHandler_handleUrl_QUrl_dispatch)(void *d_entity, void* arg__1);
 pfqtd_UrlHandler_handleUrl_QUrl_dispatch qtd_UrlHandler_handleUrl_QUrl_dispatch;
 #else
-extern "C" void qtd_UrlHandler_handleUrl_QUrl_dispatch(void *dId, void* name1);
+extern "C" void qtd_UrlHandler_handleUrl_QUrl_dispatch(void *d_entity, void* name1);
 #endif
 void UrlHandler::handleUrl(const QUrl &url)
 {
-    qtd_UrlHandler_handleUrl_QUrl_dispatch(this->dId, &(QUrl& )url);
+    qtd_UrlHandler_handleUrl_QUrl_dispatch(this->d_entity(), &(QUrl& )url);
 }
 
 extern "C" DLL_PUBLIC void qtd_UrlHandler_destructor(void *ptr)

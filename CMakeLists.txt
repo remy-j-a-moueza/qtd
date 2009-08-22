@@ -15,7 +15,7 @@ to this source directory as the last argument.
 Please delete them.
 
   Or you can restart cmake with `-DALLOW_IN_SOURCE_BUILDS=1`, but it is not
-recommended.
+recomended.
 ")
 endif(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT ALLOW_IN_SOURCE_BUILDS)
 
@@ -389,11 +389,7 @@ foreach(package_big ${all_packages})
 	endforeach(d_source ${d_generated_files})
 	set(classes ArrayOps ${classes})
 	foreach(class ${classes})
-	    set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)
-	    set(aux_name ${CMAKE_BINARY_DIR}/qt/${package}/${class}_aux.d )
-            if(EXISTS ${aux_name})
-	        set(d_sources ${d_sources} ${aux_name})
-	    endif(EXISTS ${aux_name})
+	    set(d_sources ${d_sources} ${CMAKE_BINARY_DIR}/qt/${package}/${class}.d)	
 	    set(cpp_sources ${cpp_sources} ${CMAKE_BINARY_DIR}/cpp/qt_${package}/${class}_shell.cpp) 
 	endforeach(class ${classes})
 	set(files_for_gen ${files_for_gen} ${cpp_sources} ${d_sources})
@@ -421,7 +417,7 @@ foreach(package_big ${all_packages})
 	      set(regexp_str_tmp "(${ver_safe_tmp}/|${cbd_safe_tmp}/|${csd_safe_tmp}/|)(.+)")
 	      string(REGEX REPLACE ${regexp_str_tmp} "\\2" ins_path "${path}") 
 	      install(FILES ${d_source} DESTINATION include/d/${ins_path} COMPONENT qtd RENAME ${name}.di)
-	      install(FILES ${path}/${name}_aux.d DESTINATION include/d/${ins_path} COMPONENT qtd RENAME ${name}_aux.di OPTIONAL)
+	      install(FILES ${path}/${name}_enum.d DESTINATION include/d/${ins_path} COMPONENT qtd RENAME ${name}_enum.di OPTIONAL)
 	    endforeach(d_source ${d_sources})
 	endif(NOT GENERATE_DI_FILES)
 

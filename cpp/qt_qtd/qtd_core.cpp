@@ -40,13 +40,13 @@ extern "C" DLL_PUBLIC bool qtd_qSharedBuild()
 }
 
 #ifdef CPP_SHARED
-QTD_EXPORT_VAR(qtd_toUtf8);
-QTD_EXPORT_VAR(qtd_dummy);
+QTD_EXPORT_VAR(_d_toUtf8)
+QTD_EXPORT_VAR(__qtd_dummy)
 
-extern "C" DLL_PUBLIC void qtd_core_initCallBacks(pfunc_abstr d_func, pfunc_abstr dummy) {
-    QTD_EXPORT_VAR_SET(qtd_toUtf8, d_func);
-    QTD_EXPORT_VAR_SET(qtd_dummy, dummy);
-    //std::cout << "qtd_core initialized" << std::endl;
+extern "C" DLL_PUBLIC void __qtd_qtd_core_initCallBacks(pfunc_abstr d_func, pfunc_abstr dummy) {
+    QTD_EXPORT_VAR_SET(_d_toUtf8, d_func);
+    QTD_EXPORT_VAR_SET(__qtd_dummy, dummy);
+//    std::cout << _d_toUtf8 << "\n";
 }
 #endif
 

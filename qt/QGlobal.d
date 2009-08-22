@@ -20,11 +20,6 @@ else
                    core.memory;
 }
 
-T static_cast(T, U)(U obj)
-{
-    return cast(T)cast(void*)obj;
-}
-
 template QT_BEGIN_NAMESPACE() {
 }
 
@@ -40,21 +35,13 @@ template QT_END_HEADER() {
 mixin QT_BEGIN_HEADER;
 mixin QT_BEGIN_NAMESPACE;
 
-//TODO: this sucks
-extern(C) void qtd_dummy() {}
-// Defined in QObject.d
-extern(C) void qtd_delete_d_qobject(void* dPtr);
+extern(C) void __qtd_dummy() {}
 
 version(cpp_shared)
 {
-    extern (C) void qtd_core_initCallBacks(void* toUtf8, void* dummy);
+    extern (C) void __qtd_qtd_core_initCallBacks(void* toUtf8, void* dummy);
     static this() {
-        qtd_core_initCallBacks(&qtd_toUtf8, &qtd_dummy);
-    }
-
-    extern (C) void qtd_QObjectEntity_initCallBacks(void* del_d_obj);
-    static this() {
-        qtd_QObjectEntity_initCallBacks(&qtd_delete_d_qobject);
+        __qtd_qtd_core_initCallBacks(&_d_toUtf8, &__qtd_dummy);
     }
 }
 
@@ -707,7 +694,6 @@ template InterfaceCountImpl(TBase, TInterfaces...)
     const InterfaceCountImpl = TInterfaces.length;
 }
 
-/+
 scope class StackObject(C)
 {
     byte[InstanceSize!(C)] data;
@@ -733,7 +719,6 @@ scope class StackObject(C)
         }
     }
 }
-+/
 
 mixin QT_END_HEADER;
 
