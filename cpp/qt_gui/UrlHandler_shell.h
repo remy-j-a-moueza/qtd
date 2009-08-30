@@ -1,7 +1,7 @@
 #include <QUrl>
 #include <QObjectEntity.h>
 
-class UrlHandler : public QObject, public Qtd_QObjectEntity
+class UrlHandler : public QObject, public QtD_QObjectEntity
 {
     Q_OBJECT
 

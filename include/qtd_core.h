@@ -21,16 +21,16 @@
 #endif
 
 #ifdef CPP_SHARED
-  #define QTD_EXPORT(TYPE, NAME, ARGS)      \
+  #define QTD_EXPORT(TYPE, NAME, ARGS) \
     extern "C" typedef TYPE (*pf_##NAME)ARGS; \
     extern "C" pf_##NAME qtd_get_##NAME();
   #define QTD_EXPORT_VAR(NAME) \
     pf_##NAME m_##NAME;        \
     extern "C" DLL_PUBLIC pf_##NAME qtd_get_##NAME() { return m_##NAME; }
-  #define QTD_EXPORT_VAR_SET(NAME, VALUE) \
+#define QTD_EXPORT_VAR_SET(NAME, VALUE) \
     m_##NAME = (pf_##NAME) VALUE
 #else
-  #define QTD_EXPORT(TYPE, NAME, ARGS)      \
+  #define QTD_EXPORT(TYPE, NAME, ARGS) \
     extern "C" TYPE NAME ARGS;
 #endif
 
@@ -46,7 +46,23 @@ struct DArray {
     void* ptr;
 };
 
-const uint USER_DATA_ID = 0;
+enum QtdObjectFlags
+{
+    qNone,
+    qNativeOwnership            = 0x01,
+    qDOwnership                 = 0x02
+    //gcManaged                 = 0x04
+};
+
+class QtD_Entity
+{
+public:
+    void* dId;
+
+    QtD_Entity(void* id) : dId(id)
+    {
+    }
+};
 
 #define Array DArray
 
@@ -54,15 +70,17 @@ const uint USER_DATA_ID = 0;
 typedef void (*pfunc_abstr)();
 #endif
 
-QTD_EXPORT(void, _d_toUtf8, (const unsigned short* arr, uint size, void* str))
-QTD_EXPORT(void, __qtd_dummy, ())
+QTD_EXPORT(void, qtd_toUtf8, (const unsigned short* arr, uint size, void* str))
+QTD_EXPORT(void, qtd_dummy, ())
 
 #ifdef CPP_SHARED
-#define _d_toUtf8 qtd_get__d_toUtf8()
-#define __qtd_dummy qtd_get___qtd_dummy()
+#define qtd_toUtf8 qtd_get_qtd_toUtf8()
+#define qtd_dummy qtd_get_qtd_dummy()
 #endif
 
 extern "C" QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia);
 extern "C" QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index);
+
+
 
 #endif // QTD_CORE_H

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<typesystem package="qt.opengl" default-superclass="QtDObject">
+<typesystem package="qt.opengl" default-superclass="QtdObject">
   <inject-code>
     qt.Utilities.loadQtLibrary("QtGui");
     qt.Utilities.loadQtLibrary("QtOpenGL");

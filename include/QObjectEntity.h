@@ -1,16 +1,49 @@
 #ifndef QQOBJECTENTITY_H
 #define QQOBJECTENTITY_H
 
-#include <cstdlib>
+#include "qtd_core.h"
+#include <qobject.h>
+#include <iostream>
 
-class Qtd_QObjectEntity
+QTD_EXPORT(void, qtd_delete_d_qobject, (void* dPtr))
+
+#ifdef CPP_SHARED
+#define qtd_delete_d_qobject qtd_get_qtd_delete_d_qobject()
+#endif
+
+//TODO: user data ID must be registered with QObject::registerUserData;
+#define userDataId 0
+
+class QtD_QObjectEntity : public QtD_Entity, public QObjectUserData
 {
 public:
-	Qtd_QObjectEntity(void *d_ptr) { _d_ptr = d_ptr; }
-	void *d_entity() const { return _d_ptr; }
 
-private:
-	void *_d_ptr;
+    QtD_QObjectEntity(QObject *qObject, void *dId) : QtD_Entity(dId)
+    {
+        qObject->setUserData(userDataId, this);
+    }
+
+    virtual ~QtD_QObjectEntity()
+    {        
+        if (dId)
+            destroyEntity();     
+    }
+    
+    inline void destroyEntity(QObject *qObject = NULL)
+    {
+        Q_ASSERT(dId);
+        qtd_delete_d_qobject(dId);
+        if (qObject)
+        {
+            qObject->setUserData(userDataId, NULL);
+            dId = NULL;
+        }
+    }
+
+    inline static QtD_QObjectEntity* getQObjectEntity(const QObject *qObject)
+    {
+        return static_cast<QtD_QObjectEntity*>(qObject->userData(userDataId));
+    }
 };
 
 #endif // QQOBJECTENTITY_H

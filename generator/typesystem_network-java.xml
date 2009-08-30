@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<typesystem package="qt.network" default-superclass="QtDObject">
+<typesystem package="qt.network" default-superclass="QtdObject">
     <inject-code>
         qt.Utilities.loadQtLibrary("QtNetwork");
     </inject-code>

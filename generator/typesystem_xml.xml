@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="merge.xsl"?>
 
-<typesystem package="qt.xml" default-superclass="QtDObject">
+<typesystem package="qt.xml" default-superclass="QtdObject">
 <inject-code>
         com.trolltech.qt.Utilities.loadQtLibrary("QtXml");
     </inject-code>

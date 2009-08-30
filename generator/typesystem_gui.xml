@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<typesystem package="qt.gui" default-superclass="QtDObject">
+<typesystem package="qt.gui" default-superclass="QtdObject">
 <depend package="qt.core" />
 <inject-code>
         qt.Utilities.loadQtLibrary("QtGui");
@@ -7,7 +7,7 @@
 
 <template name="gui.class_from_variant_java">
     public this(QVariant arg__1) {
-        void* __qt_return_value = qtd_%CLASS_NAME_%CLASS_NAME_QVariant(cast(void*) this, arg__1 is null ? null : arg__1.nativeId);
+        void* __qt_return_value = qtd_%CLASS_NAME_%CLASS_NAME_QVariant(cast(void*) this, arg__1 is null ? null : arg__1.__nativeId);
         super(__qt_return_value);
     }
 </template>
@@ -1138,11 +1138,11 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
     
     <inject-code class="java">
     public final void insert(int i, QPoint t) {
-        qtd_QPolygon_insert_int_QPoint(nativeId, i, t);
+        qtd_QPolygon_insert_int_QPoint(__nativeId, i, t);
     }
     
     public final void insert(int i, int n, QPoint t) {
-        qtd_QPolygon_insert_int_int_QPoint(nativeId, i, n, t);
+        qtd_QPolygon_insert_int_int_QPoint(__nativeId, i, n, t);
     }
     </inject-code>
     <inject-code class="java-free">
@@ -1223,11 +1223,11 @@ extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
 		-->
     <inject-code class="java">
     public final void insert(int i, QPointF t) {
-        qtd_QPolygonF_insert_int_QPointF(nativeId, i, t);
+        qtd_QPolygonF_insert_int_QPointF(__nativeId, i, t);
     }
 
     public final void insert(int i, int n, QPointF t) {
-        qtd_QPolygonF_insert_int_int_QPointF(nativeId, i, n, t);
+        qtd_QPolygonF_insert_int_int_QPointF(__nativeId, i, n, t);
     }
     </inject-code>
     <inject-code class="java-free">
@@ -5772,7 +5772,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
                 qt.GeneratorUtilities.threadCheck(this);
                 if (nativeId() == 0)
                     throw new QNoNativeResourcesException("Function call on incomplete object of type: " +getClass().getName());
-                __qt_QMessageBox_setWindowModality(nativeId(), %1.value());
+                __qt_QMessageBox_setWindowModality(__nativeId(), %1.value());
                 return ;
             }
             </inject-code>

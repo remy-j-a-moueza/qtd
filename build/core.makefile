@@ -5,7 +5,7 @@ D_PATH = d2/qt
 endif
 
 ##--------------------------
-QTD_CORE += QGlobal $(D_PATH)/qtd/Str core/Qt qtd/ArrayOpsPrimitive $(D_PATH)/QtDObject $(D_PATH)/Signal \
+QTD_CORE += QGlobal $(D_PATH)/qtd/Str core/Qt qtd/ArrayOpsPrimitive $(D_PATH)/QtdObject $(D_PATH)/Signal \
 $(D_PATH)/core/QPoint \
 $(D_PATH)/core/QPointF \
 $(D_PATH)/core/QRect \

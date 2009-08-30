@@ -11,11 +11,11 @@
 
 module qt.qtd.Str;
 
-import tango.text.convert.Utf : toString;
+    import tango.text.convert.Utf : toString;
 public import tango.stdc.stringz : fromStringz;
 
-alias char[] string;
-alias wchar[] wstring;
+    alias char[] string;
+    alias wchar[] wstring;
 
 alias char* stringz;
 alias char* cstringz;
@@ -36,20 +36,8 @@ public static char** toStringzArray(char[][] args)
 
 	return argv;
 }
-
-version(Windows)
-{
-    export extern(C) void _d_toUtf8(wchar* arr, uint size, string* str)
-    {
-        *str = toString(arr[0..size]);
-    }
-}
-else
-{
-    extern(C) void _d_toUtf8(wchar* arr, uint size, string* str)
-    {
-        *str = toString(arr[0..size]);
-    }
+extern(C) void qtd_toUtf8(wchar* arr, uint size, string* str){
+    *str = toString(arr[0..size]);
 }
 
 

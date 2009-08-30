@@ -36,7 +36,7 @@ public static char** toStringzArray(string[] args)
         argv[argc++] = cast(char*)(p.dup~'\0');
     }
     argv[argc] = null;
-        
+
     return argv;
 }
 
@@ -45,19 +45,11 @@ public string fromStringz(const (char) *s)
     return s ? s[0 .. strlen(s)].idup : cast(string)null;
 }
 
-version(Windows)
+
+extern(C) void qtd_toUtf8(wchar* arr, uint size, string* str)
 {
-    export extern(C) void _d_toUtf8(wchar* arr, uint size, string* str)
-    {
-        *str = toUTF8(arr[0..size]);
-    }
+    *str = toUTF8(arr[0..size]);
 }
-else
-{
-    extern(C) void _d_toUtf8(wchar* arr, uint size, string* str)
-    {
-        *str = toUTF8(arr[0..size]);
-    }
-}
+
 
 

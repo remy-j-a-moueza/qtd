@@ -1,7 +1,7 @@
 module qt.core.QModelIndex;
 
 public import qt.QGlobal;
-private import qt.QtDObject;
+private import qt.core.QObject;
 
 // automatic imports-------------
 private import qt.core.QVariant;
@@ -17,7 +17,7 @@ public struct QModelIndex
          mi.p = mi.m = null;
          return mi;
     }
-    
+
     public final QModelIndex child(int row, int column) {
         return __qtd_QModelIndex_child_int_int(&this, row, column);
     }
@@ -28,7 +28,7 @@ public struct QModelIndex
 
     public final QVariant data(int role = 0) {
         void* __qt_return_value = __qtd_QModelIndex_data_int(&this, role);
-        return new QVariant(__qt_return_value, false);
+        return new QVariant(__qt_return_value);
     }
 
     public final int flags() {
@@ -57,7 +57,7 @@ public struct QModelIndex
         void* __qt_return_value = m;
         if (__qt_return_value is null)
             return null;
-        void* d_obj = __QObject_entity(__qt_return_value);
+        void* d_obj = qtd_get_d_qobject(__qt_return_value);
         return cast(QAbstractItemModel) d_obj;
     }
 
