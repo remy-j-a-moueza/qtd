@@ -139,7 +139,7 @@ public:
 			block ~= "#endif\n";
 		}
 
-		auto headerFile = new QFile(outputDir ~ "/" ~ header);
+        scope headerFile = new QFile(outputDir ~ "/" ~ header);
 		if (!headerFile.open(QFile.WriteOnly | QFile.Text)) {
 			QMessageBox.warning(null, tr("Simple Wizard"),
 					Format(tr("Cannot write file {}:\n{}"),
@@ -193,7 +193,7 @@ public:
 			}
 		}
 
-		auto implementationFile = new QFile(outputDir ~ "/" ~ implementation);
+        scope implementationFile = new QFile(outputDir ~ "/" ~ implementation);
 		if (!implementationFile.open(QFile.WriteOnly | QFile.Text)) {
 			QMessageBox.warning(null, tr("Simple Wizard"),
 					Format(tr("Cannot write file {}:\n{}"),

@@ -170,6 +170,6 @@ inline QString fromCppContainerName(const AbstractMetaClass *cls, const Abstract
 
 bool notWrappedYet(const AbstractMetaFunction *java_function);
 bool isLinearContainer(const ContainerTypeEntry *type);
-AbstractMetaFunctionList signalFunctions(const AbstractMetaClass *cls);
+AbstractMetaFunctionList signalFunctions(const AbstractMetaClass *cls, bool includeBase = true);
 
 #endif // GENERATOR_H

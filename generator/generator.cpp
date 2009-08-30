@@ -193,21 +193,23 @@ bool notWrappedYet(const AbstractMetaFunction *java_function)
     return false;
 }
 
-AbstractMetaFunctionList signalFunctions(const AbstractMetaClass *cls)
+AbstractMetaFunctionList signalFunctions(const AbstractMetaClass *cls, bool includeBase)
 {
     AbstractMetaFunctionList r;
     if (cls->generateShellClass())
     {
-        AbstractMetaClass *base = cls->baseClass();
-        if (base)
-            r += signalFunctions(base);
+        if (includeBase)
+        {
+            AbstractMetaClass *base = cls->baseClass();
+            if (base)
+                r += signalFunctions(base);
+        }
 
         foreach (AbstractMetaFunction *f, cls->functions())
         {
             if (!f->isSignal()
                 || cls != f->implementingClass()
                 || notWrappedYet(f)
-// qtd2                || f->isPrivate() // we want private signals to be accessible as well
                 || f->isModifiedRemoved(TypeSystem::TargetLangCode))
                 continue;
 

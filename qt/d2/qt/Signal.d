@@ -71,6 +71,11 @@ void move(T)(ref T[] a, size_t src, size_t dest, size_t length)
         memmove(a.ptr + dest, a.ptr + src, length * T.sizeof);
 }
 
+enum SignalEventId
+{
+    firstSlotConnected,
+    lastSlotDisconnected
+}
 
 public class SignalException : Exception
 {
@@ -331,7 +336,7 @@ struct SlotList(SlotT, bool strong = false)
     }
 }
 
-public alias void delegate(int signalId) SignalEvent;
+public alias void delegate(int signalId, SignalEventId event) SignalEvent;
 
 struct SignalConnections
 {
@@ -444,12 +449,9 @@ public class SignalHandler
     SignalConnections[] connections;
     Object owner;
     int blocked;
-
-    // Called after a slot has been connected to an empty signal
-    SignalEvent firstSlotConnected;
-    // Called after the last slot has been disconnected from a signal
-    SignalEvent lastSlotDisconnected;
-
+    
+    SignalEvent signalEvent;
+       
     alias SignalConnections.SlotType SlotType;
     alias SignalConnections.ReceiverType ReceiverType;
 
@@ -471,8 +473,8 @@ public class SignalHandler
             connections.length = signalId + 1;
         auto slot = connections[signalId].addSlot!(slotListId)(SlotType!(slotListId)(receiver, invoker));
 
-        if (firstSlotConnected && connections[signalId].slotCount == 1)
-            firstSlotConnected(signalId);
+       if (signalEvent && connections[signalId].slotCount == 1)
+            signalEvent(signalId, SignalEventId.firstSlotConnected);
 
         return slot;
     }
@@ -481,8 +483,8 @@ public class SignalHandler
     {
         connections[signalId].removeSlot!(slotListId)(slotId);
 
-        if (lastSlotDisconnected && !connections[signalId].slotCount)
-            lastSlotDisconnected(signalId);
+        if (signalEvent && !connections[signalId].slotCount)
+            signalEvent(signalId, SignalEventId.lastSlotDisconnected);
     }
 
     private SlotType!(slotListId)* addObjectSlot(int slotListId)(size_t signalId, Object obj, Dg receiver,

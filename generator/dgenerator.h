@@ -151,10 +151,10 @@ private:
     const TypeEntry* fixedTypeEntry(const TypeEntry *type);
 
     void writeDestructor(QTextStream &s, const AbstractMetaClass *d_class);
-    void writeOwnershipMethods(QTextStream &s, const AbstractMetaClass *d_class);
+    void writeFlagsSetter(QTextStream &s, const AbstractMetaClass *d_class);
     void writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_class);
     void writeEnumAlias(QTextStream &s, const AbstractMetaEnum *d_enum);
-    void writeSignalConnectors(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunctionList signal_funcs);
+    void writeSignalSignatures(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunctionList signal_funcs);
     void writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *d_class);
     void writeConversionFunction(QTextStream &s, const AbstractMetaClass *d_class);
 
