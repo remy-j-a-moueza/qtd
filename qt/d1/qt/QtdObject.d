@@ -27,9 +27,9 @@ package abstract class QtdObject
 {
     protected QtdObjectFlags __flags_;
     void* __nativeId;
-    
+
     mixin SignalHandlerOps;
-    
+
     this(void* nativeId, QtdObjectFlags flags = QtdObjectFlags.none)
     {
         //Stdout.formatln("Created D object {} {:x}", nativeId, flags).newline;
@@ -67,25 +67,5 @@ package abstract class QtdObject
             __deleteNative;
         }
         //Stdout.formatln("Deleted native D object {}", __nativeId);
-    }    
-}
-
-class QtdMetaObject
-{
-    private
-    {
-        void* _typeId;
-        QtdMetaObject _base;
-    }
-    
-    QtdMetaObject base()
-    {
-        return _base;
-    }
-    
-    this(void* typeId, QtdMetaObject base)
-    {
-        _typeId = typeId;
-        _base = base;
     }
 }
