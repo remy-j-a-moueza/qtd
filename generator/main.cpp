@@ -153,9 +153,14 @@ int main(int argc, char *argv[])
 
     source_dir = args.value("source-directory");
     fileName = args.value("arg-1");
-    if (!source_dir.isEmpty())
+    if (!source_dir.isEmpty() && !QFileInfo(fileName).exists())
     {
         fileName = source_dir + "/" + fileName;
+        if(!QFileInfo(fileName).exists())
+        {
+            fprintf(stderr, "Master include '%s' is not found", fileName.toAscii().data());
+            return 1;
+        }
     }
 
     typesystemFileName = args.value("arg-2");

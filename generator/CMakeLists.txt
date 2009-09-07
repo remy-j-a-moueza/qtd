@@ -207,25 +207,36 @@ target_link_libraries(generator ${libs})
 #    add_precompiled_header(generator ${CMAKE_CURRENT_SOURCE_DIR}/generator_pch.h)
 #ENDIF(NOT USEPCH)
 
-if(NOT "${packages_in_build_txt}" STREQUAL "${packages}")
-    set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt)
+set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt)
+set(jambi_inc ${CMAKE_BINARY_DIR}/CMakeFiles/qtjambi_masterinclude.h)
+if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}" 
+	OR NOT EXISTS ${dgen_build_conf}
+	OR NOT EXISTS ${jambi_inc})
     file(REMOVE ${dgen_build_conf})
+    file(REMOVE ${jambi_inc})
     file(APPEND ${dgen_build_conf} "<typesystem>\n")
-    foreach(package ${packages})
+    foreach(package_normal ${packages})
+	string(TOLOWER ${package_normal} package) 
+	string(TOUPPER ${package_normal} package_upper) 
 	file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
-    endforeach(package ${packages})
+	message(STATUS "QT_${package_upper}_INCLUDE_DIR ${QT_${package_upper}_INCLUDE_DIR}")
+	file(APPEND ${jambi_inc} "#include <${QT_QT${package_upper}_INCLUDE_DIR}/Qt${package_normal}>\n")
+    endforeach(package_normal ${packages})
     file(APPEND ${dgen_build_conf} "</typesystem>\n")
     set(packages_in_build_txt ${packages} CACHE INTERNAL "")
-endif(NOT "${packages_in_build_txt}" STREQUAL "${packages}")
+endif(	NOT "${packages_in_build_txt}" STREQUAL "${packages}" 
+	OR NOT EXISTS ${dgen_build_conf}
+	OR NOT EXISTS ${jambi_inc})
 
 set(gen_sources)
-foreach(package ${packages})   
+foreach(package_normal ${packages})
+    string(TOLOWER ${package_normal} package) 
     set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml)
     find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_SOURCE_DIR}/generator/) 
     if(d_inc_file_found)
 	set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}-java.java)
     endif(d_inc_file_found)
-endforeach(package ${packages})
+endforeach(package_normal ${packages})
 mark_as_advanced(d_inc_file_found)
 set(d_inc_file_found 1)
 	
@@ -249,7 +260,7 @@ add_custom_command(OUTPUT ${dgen_impl}
 	ARGS ${GEN_OPT} --include-paths=${inc_paths}
 	    --output-directory=${out_dir}
 	    --source-directory=${CMAKE_SOURCE_DIR}/generator 
-	    qtjambi_masterinclude.h  
+	    ${CMAKE_BINARY_DIR}/CMakeFiles/qtjambi_masterinclude.h  
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
 	COMMENT "Generating binding..."
 	DEPENDS generator ${gen_sources} ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
