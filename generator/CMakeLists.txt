@@ -2,7 +2,7 @@ PROJECT(generator CXX C)
 cmake_minimum_required(VERSION 2.6)
 FIND_PACKAGE(Qt4 REQUIRED)
 
-## Force Release settings
+## Hack for msvc: force Release settings
 STRING(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
 set(CMAKE_CXX_FLAGS_${build_type_upper} ${CMAKE_CXX_FLAGS_RELEASE}) 
 get_property(dir_prop DIRECTORY 
@@ -195,8 +195,8 @@ include_directories(${inc_paths})
 add_executable(generator ${all_srcs} )
 target_link_libraries(generator ${libs})
 
-## TODO: Precompilated header work well, but I don`t known license of PCHSupport_26.cmake.
-## downloaded from http://www.vtk.org/Bug/view.php?id=1260. 
+## TODO: Precompilated header works well, but I don't know a license of PCHSupport_26.cmake which  
+## was downloaded from http://www.vtk.org/Bug/view.php?id=1260. 
 #OPTION(USEPCH "Build the project with precompiled-headers" ON)
 #include(../cmake/PCHSupport_26.cmake)
 #	
@@ -223,9 +223,9 @@ foreach(package ${packages})
     set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml)
     find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_SOURCE_DIR}/generator/) 
     if(d_inc_file_found)
-	set(${CMAKE_SOURCE_DIR}/generator/typesystem_${package}-java.java)
+	set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}-java.java)
     endif(d_inc_file_found)
-endforeach(package ${all_packages})
+endforeach(package ${packages})
 mark_as_advanced(d_inc_file_found)
 set(d_inc_file_found 1)
 	
@@ -252,6 +252,6 @@ add_custom_command(OUTPUT ${dgen_impl}
 	    qtjambi_masterinclude.h  
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
 	COMMENT "Generating binding..."
-	DEPENDS ${gen_sources} ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
+	DEPENDS generator ${gen_sources} ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
 )       
 add_custom_target(dgen ALL DEPENDS ${dgen_impl} COMMENT "")     
