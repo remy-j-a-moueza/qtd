@@ -19,7 +19,10 @@
   <enum-type name="QGLFramebufferObject::Attachment"/>
 
   <namespace-type name="QGL">
-     <include file-name="qgl.h" location="global"/>
+    <include file-name="qgl.h" location="global"/>
+    <extra-includes>
+	<include file-name="qt.opengl.gl" location="java"/>
+    </extra-includes>
   </namespace-type>
 
   <value-type name="QGLColormap">
@@ -40,7 +43,9 @@
   </value-type>
 
   <object-type name="QGLContext">
-
+    <extra-includes>
+	<include file-name="qt.opengl.gl" location="java"/>
+    </extra-includes>
     <modify-function signature="chooseContext(const QGLContext*)">
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
@@ -57,16 +62,22 @@
     </modify-function>
     <modify-function signature="generateFontDisplayLists(QFont, int)" remove="all"/>
   </object-type>
-  <object-type name="QGLFramebufferObject"/>
+  <object-type name="QGLFramebufferObject">
+    <extra-includes>
+	<include file-name="qt.opengl.gl" location="java"/>
+    </extra-includes>
+  </object-type>
   <object-type name="QGLPixelBuffer">
     <extra-includes>
         <include file-name="QImage" location="global"/>
+	<include file-name="qt.opengl.gl" location="java"/>
     </extra-includes>
   </object-type>
   <object-type name="QGLWidget">
     <extra-includes>
         <include file-name="QImage" location="global"/>
         <include file-name="QPixmap" location="global"/>
+	<include file-name="qt.opengl.gl" location="java"/>
     </extra-includes>
     <modify-function signature="setContext(QGLContext*,const QGLContext*,bool)">
         <remove/> <!--- Obsolete -->
