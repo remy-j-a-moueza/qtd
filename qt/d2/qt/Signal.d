@@ -430,18 +430,14 @@ struct SignalConnections
 }
 
 
-private ThreadLocal!(Object) signalSender_;
-static this()
-{
-    signalSender_ = new ThreadLocal!(Object);
-}
+private Object signalSender_;
 
 /**
     If called from a slot, returns the object
     that is emitting the signal. Otherwise, returns null.
 */
 public Object signalSender() {
-    return signalSender_.val;
+    return signalSender_;
 }
 
 public class SignalHandler
@@ -602,11 +598,11 @@ public class SignalHandler
             {
                 {
                     cons.isInUse = true;
-                    signalSender_.val = owner;
+                    signalSender_ = owner;
                     scope(exit)
                     {
                         cons.isInUse = false;
-                        signalSender_.val = null;
+                        signalSender_ = null;
                     }
 
                     // Store the lengths to avoid calling new slots
