@@ -1,0 +1,1 @@
+build_example(sdi main.d RESOURCES sdis.qrc)
