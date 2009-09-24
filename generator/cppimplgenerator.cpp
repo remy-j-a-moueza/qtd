@@ -657,7 +657,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     }
 */
     // Signals emitters
-    AbstractMetaFunctionList signal_functions = signalFunctions(java_class);
+    AbstractMetaFunctionList signal_functions = signalFunctions(java_class, false);
     for (int i=0; i<signal_functions.size(); ++i)
     {
         const AbstractMetaFunction *function = signal_functions.at(i);
