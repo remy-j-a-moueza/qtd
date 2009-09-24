@@ -1,6 +1,6 @@
 import qt.core.QCoreApplication;
 
-version(Tango) {} else { import std.stdio; }
+version(Tango) { import tango.io.Stdout; } else { import std.stdio; }
 
 int main(string[] args)
 {
@@ -16,14 +16,15 @@ int main(string[] args)
     child3.setObjectName("child3");
     
     auto cd = parent.children;
-    
-    writeln(app.arguments);
+    Stdout(parent.children.length).newline;
+
+    Stdout(app.arguments).newline;
     foreach(child; cd)
-        writeln(child.objectName);
+        Stdout(child.objectName).newline;
     
     app.setLibraryPaths(["freakin", "bloody", "awesome!"]);
 
-    writeln(app.libraryPaths);
+    Stdout(app.libraryPaths).newline;
     
     return 5;
 //    return app.exec();

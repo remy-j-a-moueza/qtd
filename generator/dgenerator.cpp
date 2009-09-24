@@ -984,6 +984,9 @@ QString DGenerator::functionSignature(const AbstractMetaFunction *d_function,
         option = Option(option | SkipReturnType);
     writeFunctionAttributes(s, d_function, included_attributes, excluded_attributes, option);
 
+    if(d_function->isSignal())
+        functionName += "_emit";
+
     s << functionName << "(";
     writeFunctionArguments(s, d_function, argument_count, option);
     s << ")";
@@ -1746,7 +1749,7 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
 
                 if (type->isContainer()) {
                     s << INDENT << translateType(type, signal->implementingClass(), BoxedPrimitive) << " " << arg_name << ";" << endl
-                      << INDENT << fromCppContainerName(d_class, type) << "(" << arg_ptr << ", &" << arg_name << ");" << endl;
+                      << INDENT << cppContainerConversionName(d_class, type, FromCpp) << "(" << arg_ptr << ", &" << arg_name << ");" << endl;
                 } else if (type->isTargetLangString()) {
                     s << INDENT << "auto " << arg_name << "_ptr = " << arg_ptr << ";" << endl
                       << INDENT << "string " << arg_name << " = QString.toNativeString(" << arg_name << "_ptr);";
@@ -2152,7 +2155,11 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         writeSignalSignatures(s, d_class, signal_funcs);
    
         foreach (AbstractMetaFunction *signal, signal_funcs)
+        {
             writeSignal(s, signal);
+            if(!signal->isPrivate())
+                writeFunction(s, signal);
+        }
     }
 
     // Class has subclasses but also only private constructors
@@ -2503,6 +2510,18 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << "extern (C) void qtd_" << d_class->name() << "_destructor(void *ptr);" << endl << endl;
 
     // qtd
+
+    s << endl << "// C wrappers for signal emitters" << endl;
+
+    if (d_class->isQObject())
+    {
+        AbstractMetaFunctionList signal_funcs = signalFunctions(d_class, false);
+
+        foreach (AbstractMetaFunction *signal, signal_funcs)
+            if(!signal->isPrivate())
+                writePrivateNativeFunction(s, signal);
+    }
+
     s << endl << "// C wrappers" << endl;
     d_funcs = d_class->functionsInTargetLang();
     if (!d_class->isInterface())
@@ -2802,7 +2821,7 @@ void DGenerator::writeSignal(QTextStream &s, const AbstractMetaFunction *d_funct
 
     if (sz > 0) {
         for (int i=0; i<sz; ++i) {
-                s << ", ";
+            s << ", ";
 
             QString modifiedType = d_function->typeReplaced(i+1);
 

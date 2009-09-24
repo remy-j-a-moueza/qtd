@@ -2,4 +2,4 @@
 
 rm -f generator
 make
-./generator  --output-directory=../ qtjambi_masterinclude.h build_gui.txt
+./generator  --output-directory=../ qtjambi_masterinclude.h build_opengl.txt

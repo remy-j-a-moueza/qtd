@@ -275,10 +275,12 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
         s << "}" << endl;
     }*/
 
+    s << "// signal conversion functions" << endl;
+
     foreach(AbstractMetaType* arg_type, signalEntries[cls->package()]) {
         const TypeEntry *te = arg_type->instantiations().first()->typeEntry();
         s << "// " << te->targetLangName() << endl
-          << "extern \"C\" DLL_PUBLIC void " << fromCppContainerName(cls, arg_type) << "(void *cpp_ptr, DArray* __d_container) {" << endl;
+          << "extern \"C\" DLL_PUBLIC void " << cppContainerConversionName(cls, arg_type, FromCpp) << "(void *cpp_ptr, DArray* __d_container) {" << endl;
 
         m_cpp_impl_generator->writeTypeInfo(s, arg_type, NoOption);
         s << "container = (*reinterpret_cast< ";
@@ -407,7 +409,7 @@ void ContainerGenerator::writeDContent2(QTextStream &s, AbstractMetaClass *cls)
         const TypeEntry *te = arg_type->instantiations().first()->typeEntry();
         if(!te->isPrimitive() && !te->isString())
             writeImportString(s, te);
-        s << "extern (C) void " << fromCppContainerName(cls, arg_type) << "(void *cpp_ptr, " << te->targetLangName() << "[]* __d_container);" << endl;
+        s << "extern (C) void " << cppContainerConversionName(cls, arg_type, FromCpp) << "(void *cpp_ptr, " << te->targetLangName() << "[]* __d_container);" << endl;
     }
 }
 

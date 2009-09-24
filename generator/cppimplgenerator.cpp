@@ -387,10 +387,10 @@ QString jni_function_signature(QString package, QString class_name,
     if (options & CppImplGenerator::JNIExport)
         s += "Q_DECL_EXPORT ";
 */
-    if (options & CppImplGenerator::ReturnType) {
-        s += return_type;
-        s += " ";
-    }
+    if (options & CppImplGenerator::ReturnType)
+        s += return_type + " ";
+    else
+        s += "void ";
 /* qtd
     if (options & CppImplGenerator::JNIExport)
         s += "JNICALL QTJAMBI_FUNCTION_PREFIX(";
@@ -655,12 +655,15 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     if (java_class->hasCloneOperator()) {
         writeCloneFunction(s, java_class);
     }
-
-    // Signals
+*/
+    // Signals emitters
     AbstractMetaFunctionList signal_functions = signalFunctions(java_class);
     for (int i=0; i<signal_functions.size(); ++i)
-        writeSignalFunction(s, signal_functions.at(i), java_class, i);
-*/
+    {
+        const AbstractMetaFunction *function = signal_functions.at(i);
+        if(!function->isPrivate())
+            writeFinalFunction(s, signal_functions.at(i), java_class);
+    }
     s << "// ---externC---" << endl;
 
     // Native callbacks (all java functions require native callbacks)
@@ -1291,46 +1294,49 @@ void CppImplGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaC
       << "}" << endl << endl;
 }
 
-void CppImplGenerator::writeSignalHandler(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunction *function)
+void CppImplGenerator::writeSignalEmitter(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunction *function)
 {
-    QString extra_args, extra_call_args, conversion_code;
-    QTextStream s2(&conversion_code);
+    Q_ASSERT(d_class);
 
+    if (function->isModifiedRemoved(TypeSystem::NativeCode))
+        return;
+
+    const AbstractMetaClass *cls = d_class ? d_class : function->ownerClass();
+
+    QString function_signature = cls->name() + "::" + function->signature();
+
+    s << "// " << function_signature << endl;
+
+    const QString qt_object_name = function->isStatic() ? shellClassName(cls) : "__qt_this";
+
+    // we are not wrapping some functions depending on arguments because API is not yet full
+    if (notWrappedYet(function))
+        return;
+
+    // function signature...
+    bool callThrough = function->needsCallThrough();
+ //   uint options = m_native_jump_table ? ReturnType | ExternC : StandardJNISignature;
+    writeFunctionName(s, function, cls, ExternC);
+    s << endl;
+    writeFinalFunctionArguments(s, function);
+    s << endl << "{" << endl;
     Indentation indent(INDENT);
 
-    AbstractMetaArgumentList arguments = function->arguments();
-    foreach (AbstractMetaArgument *argument, arguments) {
-        if(argument->type()->isContainer()) {
-            QString arg_name = argument->indexedName();
-            const AbstractMetaType *arg_type = argument->type();
-            extra_args += ", DArray " + arg_name;
-            extra_call_args += ", " + arg_name + "_arr";
+    writeFinalFunctionSetup(s, function, qt_object_name, cls);
 
-            s2 << INDENT;
-            writeTypeInfo(s2, arg_type, NoOption);
-            s2 << arg_name << " = (*reinterpret_cast< ";
-            writeTypeInfo(s2, arg_type, ExcludeReference);
-            s2 << "(*)>(args[" << argument->argumentIndex() + 1 << "]));" << endl
-               << INDENT << QString("DArray %1_arr;").arg(arg_name) << endl
-               << INDENT << QString("DArray *__d_%1 = &%1_arr;").arg(arg_name);
-
-            writeQtToJava(s2,
-                          arg_type,
-                          arg_name,
-                          "__d_" + arg_name,
-                          function,
-                          argument->argumentIndex() + 1,
-                          Option(VirtualDispatch));
+    s << "void *args[] = {NULL";
+    // create an array of pointers to args
+/*    AbstractMetaArgumentList arguments = java_function->arguments();
+    foreach (const AbstractMetaArgument *argument, arguments) {
+        s << ", ";
+        if (!argument->type()->isPrimitive()
+            || !java_function->conversionRule(TypeSystem::NativeCode, argument->argumentIndex() + 1).isEmpty()) {
+                // s << &qt_arg + n
         }
     }
-    QString sig_name = signalExternName(d_class, function);
-    s << "extern \"C\" DLL_PUBLIC void " << sig_name << "_handle_in_d(void* d_entity, void** args" << extra_args <<");" << endl
-      << "extern \"C\" DLL_PUBLIC void " << sig_name << "_handle(void* d_entity, void** args)" << endl
-      << "{" << endl
-      << conversion_code << endl
-      << INDENT << sig_name << "_handle_in_d(d_entity, args" << extra_call_args << ");" << endl
-      << "}" << endl;
-
+*/
+    s << endl << "}";
+    s << endl << endl;
 }
 
 void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaClass *java_class)
