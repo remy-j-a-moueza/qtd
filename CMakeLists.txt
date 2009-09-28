@@ -33,7 +33,7 @@ option(BUILD_SHARED_LIBRARIES "Build shared library (very experemental and only 
 option(BUILD_TOOLS "Build tools" "ON")
 #option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
 set(GENERATE_DI_FILES OFF) ## Very experemental option. Temporary disabled.
-
+option(VERBOSE_DEBUG "Verbose debug" "OFF")
 
 set(all_packages Core Gui OpenGL Xml Svg Network WebKit CACHE INTERNAL "") 
 
@@ -192,6 +192,10 @@ endif(D_IS_MARS)
 if(UNITTEST)
     add_d_versions(QtdUnittest)
 endif(UNITTEST)
+
+if(VERBOSE_DEBUG)
+    add_d_debugs(QtdVerbose)
+endif(VERBOSE_DEBUG)
 
 ## Bootstrap settings for QtD.
 set(DRCC ${CMAKE_BINARY_DIR}/tools/drcc/drcc CACHE INTERNAL "")
