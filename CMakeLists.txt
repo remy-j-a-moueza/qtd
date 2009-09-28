@@ -34,6 +34,7 @@ option(BUILD_TOOLS "Build tools" "ON")
 #option(GENERATE_DI_FILES "Generate *.di files with DC -H command" "OFF")
 set(GENERATE_DI_FILES OFF) ## Very experemental option. Temporary disabled.
 
+
 set(all_packages Core Gui OpenGL Xml Svg Network WebKit CACHE INTERNAL "") 
 
 ## Init D toolkit.
@@ -187,6 +188,10 @@ if(D_IS_MARS)
     set(D_FLAGS -version=cpp_shared)    
     add_definitions(-DCPP_SHARED)
 endif(D_IS_MARS)
+
+if(UNITTEST)
+    add_d_versions(QtdUnittest)
+endif(UNITTEST)
 
 ## Bootstrap settings for QtD.
 set(DRCC ${CMAKE_BINARY_DIR}/tools/drcc/drcc CACHE INTERNAL "")

@@ -76,14 +76,21 @@ set(D_DEBUG_FLAGS -g )
 if(D_IS_LLVM)
     set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -enable-inlining)
     set(D_DEBUG_FLAGS ${D_DEBUG_FLAGS} -d-debug)
+    set(D_VERSION_FLAG -d-version)
 else(D_IS_LLVM)
     set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -inline)
     set(D_DEBUG_FLAGS ${D_DEBUG_FLAGS} -debug)
+    set(D_VERSION_FLAG -version)
 endif(D_IS_LLVM)
 if(CMAKE_HOST_WIN32)
     set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -L/subsystem:windows)
 endif(CMAKE_HOST_WIN32)   
 
+# Unittest flags.
+option(UNITTEST "Includes unittests" "OFF")
+if(UNITTEST)
+    set(D_FLAGS ${D_FLAGS} -unittest)
+endif(UNITTEST)
 
 ## Settings.
 if(CMAKE_HOST_WIN32)
@@ -104,6 +111,12 @@ endif(CMAKE_HOST_WIN32)
 ##--------------------------------------------
 ## Macros and functions.
 ##--------------------------------------------
+
+macro(add_d_versions)
+    foreach(arg_tmp ${ARGN})
+	set(D_FLAGS ${D_FLAGS} ${D_VERSION_FLAG}=${arg_tmp})
+    endforeach(arg_tmp ${ARGN})
+endmacro(add_d_versions)
 
 ## Make a native path.
 ## Usage:
@@ -209,6 +222,9 @@ macro(compile_d_files target objects_list)
 		    )
 	endforeach (d_source_p_tmp ${SOURCES_tmp})
     else(NOT SINGLE_D_OBJECT)
+	if(is_ldc)
+	    set(FLAGS_tmp ${FLAGS_tmp} -oq )
+	endif(is_ldc)
 	set(count_objects_tmp 0)
 	set(files${count_objects_tmp}_tmp )
 	set(counter_tmp 0)
