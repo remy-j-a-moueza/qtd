@@ -33,18 +33,45 @@ void realloc(T)(ref T[] a, size_t length)
         new OutOfMemoryException(__FILE__, __LINE__);
 }
 
-unittest
+void append(T)(ref T[] a, T element)
 {
-    int[] a;
-    realloc(a, 16);
-    assert(a.length == 16);
-    foreach (i, ref e; a)
-        e = i;
-    realloc(a, 4096);
-    assert(a.length == 4096);
-    foreach (i, e; a[0..16])
-        assert(e == i);
-    cfree(a.ptr);
+    auto newLen = a.length + 1;
+    a = (cast(T*)crealloc(a.ptr, newLen * T.sizeof))[0..newLen];
+    if (!a.ptr)
+        new OutOfMemoryException(__FILE__, __LINE__);
+    a[newLen - 1] = element;
+}
+
+void move(T)(ref T[] a, size_t src, size_t dest, size_t length)
+{
+    if (a.length > 1)
+        memmove(a.ptr + dest, a.ptr + src, length * T.sizeof);
+}
+
+// COMPILER BUG: Though this is private cannot name it 'remove' because of conflicts
+// with Array.remove
+void erase(T)(ref T[] a, size_t i) 
+{
+    auto newLen = a.length - 1;
+    move(a, i + 1, i, newLen);
+    realloc(a, newLen);
+}
+
+version (QtdUnittest)
+{
+    unittest
+    {
+        int[] a;
+        realloc(a, 16);
+        assert(a.length == 16);
+        foreach (i, ref e; a)
+            e = i;
+        realloc(a, 4096);
+        assert(a.length == 4096);
+        foreach (i, e; a[0..16])
+            assert(e == i);
+        cfree(a.ptr);
+    }
 }
 
 // TODO: This one should be replaced with an appropriate library function
@@ -92,12 +119,6 @@ struct STuple(A...)
 
     mixin (genSTuple);
     template at(size_t i) { mixin("alias _" ~ ToString!(i) ~ " at;"); };
-}
-
-void move(T)(ref T[] a, size_t src, size_t dest, size_t length)
-{
-    if (a.length > 1)
-        memmove(a.ptr + dest, a.ptr + src, length * T.sizeof);
 }
 
 enum SignalEventId
@@ -181,44 +202,31 @@ struct Slot(R)
 
     Receiver receiver;
     Dg invoker;
+    ConnectionFlags flags;
 
     static if (is(Receiver == Dg))
     {
         static const isDelegate = true;
-
-        void onReceiverDisposed(Object o)
-        {
-            assert (lock !is null);
-            synchronized(lock)
-            {
-                receiver.context = null;
-                receiver.funcptr = null;
-            }
-        }
-
-        // null if receiver doesn't point to a disposable object
-        Object lock;
-
+                
         bool isDisposed()
         {
             return !receiver.funcptr;
         }
+        
+        void dispose()
+        {
+            receiver.funcptr = null;
+            receiver.context = null;
+        }
 
         Object getObject()
-        {
-            return lock ? _d_toObject(receiver.context) : null;
+        {           
+            return flags & ConnectionFlags.NoObject || !receiver.context
+                ? null : _d_toObject(receiver.context);
         }
     }
     else
         static const isDelegate = false;
-
-    static typeof(*this) opCall(Receiver r, Dg c)
-    {
-        typeof(*this) ret;
-        ret.receiver = r;
-        ret.invoker = c;
-        return ret;
-    }
 }
 
 enum SlotListId
@@ -295,7 +303,7 @@ void main()
 }
 ----
 */
-public enum ConnectionFlags
+public enum ConnectionFlags : ubyte
 {
     ///
     None,
@@ -324,7 +332,7 @@ struct SlotList(SlotT, bool strong = false)
 {
     alias SlotT SlotType;
     SlotType[] data;
-
+    
     void length(size_t length)
     {
         static if (strong)
@@ -360,20 +368,79 @@ struct SlotList(SlotT, bool strong = false)
 
     void free()
     {
-        static if (SlotType.isDelegate)
-        {
-            foreach (ref slot; data)
-            {
-                if (auto obj = slot.getObject)
-                    rt_detachDisposeEvent(obj, &slot.onReceiverDisposed);
-            }
-        }
         static if (!strong)
             cfree(data.ptr);
     }
 }
 
 public alias void delegate(int signalId, SignalEventId event) SignalEvent;
+
+struct Receivers
+{
+    struct Data
+    {
+        Object object;
+        int refs;
+    }
+    
+    Data[] data;
+    void add(Object receiver, DEvent disposeEvent)
+    {        
+        foreach (ref d; data)
+        {
+            if (d.object is receiver)
+            {               
+                d.refs++;              
+                return;
+            }
+        }
+        
+        append(data, Data(receiver, 1));
+        rt_attachDisposeEvent(receiver, disposeEvent);
+    }
+    
+    void remove(Object receiver, DEvent disposeEvent)
+    {
+        foreach (i, ref d; data)
+        {
+            if (d.object is receiver)
+            {
+                assert (d.refs);
+                d.refs--;
+                if (!d.refs)
+                {
+                    .erase(data, i);                    
+                    rt_detachDisposeEvent(receiver, disposeEvent);
+                }
+                return;
+            }
+        }
+        
+        assert (false);
+    }
+    
+    // remove all refarences for receiver, receiver has been disposed
+    void removeAll(Object receiver)
+    {
+        foreach (i, ref d; data)
+        {
+            if (d.object is receiver) 
+            {
+                .erase(data, i);
+                return;
+            }
+        }
+    }
+    
+    // remove all references for all receivers, detaching dispose events
+    void free(DEvent disposeEvent)
+    {
+        foreach (i, ref d; data)
+            rt_detachDisposeEvent(d.object, disposeEvent);
+        cfree(data.ptr);
+        data = null;
+    }
+}
 
 struct SignalConnections
 {
@@ -430,7 +497,7 @@ struct SignalConnections
     }
 
     SlotType!(slotListId)* addSlot(int slotListId)(SlotType!(slotListId) slot)
-    {
+    {        
         return getSlotList!(slotListId).add(slot);
     }
 
@@ -438,13 +505,28 @@ struct SignalConnections
     {
         slotLists.at!(slotListId).remove(slotId);
     }
-
+    
     void free()
-    {
+    {        
         foreach(i, e; slotLists.tupleof)
         {
             static if (is(typeof(slotLists.at!(i).free)))
                 slotLists.at!(i).free;
+        }
+    }
+    
+    void onReceiverDisposed(Object receiver)
+    {
+        foreach (i, e; slotLists.tupleof)
+        {
+            static if (slotLists.at!(i).SlotType.isDelegate)
+            {
+                foreach (ref slot; slotLists.at!(i).data)
+                {
+                    if (slot.getObject is receiver)
+                        slot.dispose;
+                }
+            }
         }
     }
 
@@ -481,9 +563,10 @@ public Object signalSender() {
     return signalSender_.val;
 }
 
-public class SignalHandler
+public final class SignalHandler
 {
     SignalConnections[] connections;
+    Receivers receivers;
     Object owner;
     int blocked;
     
@@ -493,7 +576,7 @@ public class SignalHandler
     alias SignalConnections.ReceiverType ReceiverType;
 
     public this(Object owner_) {
-        owner = owner_;
+        owner = owner_;        
     }
 
     private SignalConnections* getConnections(int signalId)
@@ -504,35 +587,50 @@ public class SignalHandler
     }
 
     private SlotType!(slotListId)* addSlot(int slotListId)(int signalId, ReceiverType!(slotListId) receiver,
-        Dg invoker)
+        Dg invoker, ConnectionFlags flags)
     {
         if (signalId >= connections.length)
             connections.length = signalId + 1;
-        auto slot = connections[signalId].addSlot!(slotListId)(SlotType!(slotListId)(receiver, invoker));
+        auto slot = connections[signalId].addSlot!(slotListId)(SlotType!(slotListId)(receiver, invoker, flags));
+        
+        static if (slot.isDelegate)
+        {
+            if (!(flags & ConnectionFlags.NoObject))
+                receivers.add(_d_toObject(receiver.context), &onReceiverDisposed);
+        }
 
         if (signalEvent && connections[signalId].slotCount == 1)
             signalEvent(signalId, SignalEventId.firstSlotConnected);
-
+       
         return slot;
     }
-
+    
+    void onReceiverDisposed(Object receiver)
+    {
+        synchronized(this)
+        {
+            foreach(ref c; connections)
+                c.onReceiverDisposed(receiver);
+            receivers.removeAll(receiver);
+        }
+    }
+    
     private void removeSlot(int slotListId)(int signalId, int slotId)
     {
+        auto slot = connections[signalId].getSlotList!(slotListId).get(slotId);
+        static if (slot.isDelegate)
+        {
+            if (auto obj = slot.getObject)
+                receivers.remove(obj, &onReceiverDisposed);
+        }
+        
         connections[signalId].removeSlot!(slotListId)(slotId);
 
         if (signalEvent && !connections[signalId].slotCount)
             signalEvent(signalId, SignalEventId.lastSlotDisconnected);
     }
-
-    private SlotType!(slotListId)* addObjectSlot(int slotListId)(size_t signalId, Object obj, Dg receiver,
-        Dg invoker)
-    {
-        auto slot = addSlot!(slotListId)(signalId, receiver, invoker);
-        slot.lock = this;
-        rt_attachDisposeEvent(obj, &slot.onReceiverDisposed);
-        return slot;
-    }
-
+    
+   
     size_t slotCount(int signalId)
     {
         synchronized(this)
@@ -544,7 +642,7 @@ public class SignalHandler
         }
     }
 
-    void connect(Receiver)(size_t signalId, Receiver receiver,
+    void connect(Receiver)(int signalId, Receiver receiver,
         Dg invoker, ConnectionFlags flags)
     {
         synchronized(this)
@@ -552,25 +650,28 @@ public class SignalHandler
             static if (is(typeof(receiver.context)))
             {
                 Object obj;
-                if ((flags & ConnectionFlags.NoObject) || (obj = _d_toObject(receiver.context)) is null)
+                if ((flags & ConnectionFlags.NoObject))
                 {
                     // strong by default
                     if (flags & ConnectionFlags.Weak)
-                        addSlot!(SlotListId.Weak)(signalId, receiver, invoker);
+                        addSlot!(SlotListId.Weak)(signalId, receiver, invoker, flags);
                     else
-                        addSlot!(SlotListId.Strong)(signalId, receiver, invoker);
+                        addSlot!(SlotListId.Strong)(signalId, receiver, invoker, flags);
                 }
                 else
                 {
                     // weak by default
                     if (flags & ConnectionFlags.Strong)
-                        addObjectSlot!(SlotListId.Strong)(signalId, obj, receiver, invoker);
+                        addSlot!(SlotListId.Strong)(signalId, receiver, invoker, flags);
                     else
-                        addObjectSlot!(SlotListId.Weak)(signalId, obj, receiver, invoker);
+                        addSlot!(SlotListId.Weak)(signalId, receiver, invoker, flags);
                 }
             }
             else
-                addSlot!(SlotListId.Func)(signalId, receiver, invoker);
+            {
+                flags |= ConnectionFlags.NoObject;
+                addSlot!(SlotListId.Func)(signalId, receiver, invoker, flags);
+            }
         }
     }
 
@@ -611,11 +712,6 @@ public class SignalHandler
 
                         if (slot.receiver == receiver)
                         {
-                            static if (slot.isDelegate)
-                            {
-                                if (auto obj = slot.getObject)
-                                    rt_detachDisposeEvent(obj, &slot.onReceiverDisposed);
-                            }
                             removeSlot!(slotListId)(signalId, slotId);
                             break TOP;
                         }
@@ -714,6 +810,7 @@ public class SignalHandler
 
     ~this()
     {
+        receivers.free(&onReceiverDisposed);
         foreach(ref c; connections)
             c.free;
     }
