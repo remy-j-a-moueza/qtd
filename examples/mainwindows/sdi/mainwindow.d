@@ -249,7 +249,7 @@ class MainWindow : public QMainWindow
     // QtD bug????
     // only one of the following statements can be included
     // otherwise the app crashes when a MainWindow is closeda
-//     textEdit.copyAvailable.connect(&cutAct.setEnabled);
+    textEdit.copyAvailable.connect(&cutAct.setEnabled);
     textEdit.copyAvailable.connect(&copyAct.setEnabled);
   }
 

@@ -12,7 +12,9 @@
 module qt.Signal;
 
 public import qt.QGlobal;
-public import std.metastrings;
+public import
+    std.metastrings,
+    std.typetuple;
 import core.stdc.stdlib : crealloc = realloc, cfree = free;
 import core.stdc.string : memmove;
 import
@@ -834,11 +836,7 @@ template CheckSlotImpl(Slot, int i, A...)
     {
         static assert (is(SlotArgs[i] : A[i]), "Argument " ~ ToString!(i) ~
             ":" ~ A[i].stringof ~ " of signal " ~ A.stringof ~ " is not implicitly convertible to parameter "
-
-
-
-
-                       ~ SlotArgs[i].stringof ~ " of slot " ~ SlotArgs.stringof);
+            ~ SlotArgs[i].stringof ~ " of slot " ~ SlotArgs.stringof);
         alias CheckSlotImpl!(Slot, i + 1, A) next;
     }
 }
@@ -875,7 +873,115 @@ public:
     {
         signalHandler.unblockSignals();
     }
+
+    void connect(string signalName, this T, R, B...)(R function(B) dg, ConnectionFlags flags = ConnectionFlags.None)
+    {
+        alias findSymbol!(SignalQualifier, T, signalName) sig;
+        alias CheckSlot!(typeof(fn), sig[2].at) check;
+        auto sh = signalHandler();
+        auto invoker = Dg(&sh.invokeSlot!(typeof(fn), Fn, sig[2].at));
+        sh.connect(sig[1], Fn(fn), invoker, flags);
+    }
+
+    void connect(string signalName, this T, R, B...)(R delegate(B) dg, ConnectionFlags flags = ConnectionFlags.None)
+    {
+        alias findSymbol!(SignalQualifier, T, signalName) sig;
+        alias CheckSlot!(typeof(dg), sig[2].at) check;
+        auto sh = signalHandler();
+        auto invoker = Dg(&sh.invokeSlot!(typeof(dg), Dg, sig[2].at));
+        sh.connect(sig[1], Dg(dg), invoker, flags);
+    }
+
+    void disconnect(string signalName, this T, R, B...)(R function(B) fn)
+    {
+        alias findSymbol!(SignalQualifier, T, signalName) sig;
+        auto sh = signalHandler();
+        sh.disconnect(sig[1], Fn(fn));
+    }
+
+    void disconnect(string signalName, this T, R, B...)(R delegate(B) dg)
+    {
+        alias findSymbol!(SignalQualifier, T, signalName) sig;
+        auto sh = signalHandler();
+        sh.disconnect(sig[1], Dg(dg));
+    }
+
+    debug size_t slotCount(string signalName, this T)()
+    {
+        alias findSymbol!(SignalQualifier, T, signalName) sig;
+        auto sh = signalHandler();
+        return sh.slotCount(sig[1]);
+    }
 }
+
+/**
+    New implementation.
+*/
+
+public bool startsWith(T)(T[] source, T[] pattern)
+{
+    return source.length >= pattern.length && source[0 .. pattern.length] == pattern[];
+}
+
+template TupleWrapper(A...) { alias A at; }
+
+string joinArgs(A...)()
+{
+    string res = "";
+    static if(A.length)
+    {
+        res = A[0].stringof;
+        foreach(k; A[1..$])
+            res ~= "," ~ k.stringof;
+    }
+    return res;
+}
+
+struct SignalQualifier
+{
+    const string staticSymbolPrefix = "__signal";
+    const string name = "signal";
+    
+    static bool matches(alias source, string sigName)()
+    {
+        return startsWith(source.at[0], sigName);
+    }
+}
+
+template staticSymbolName(Qualifier, int id)
+{
+    const string staticSymbolName = Qualifier.staticSymbolPrefix ~ ToString!(id);
+}
+
+template signatureString(string name, A...)
+{
+    const string signatureString = name ~ "(" ~ joinArgs!(A) ~ ")";
+}
+
+template findSymbolImpl(Qualifier, C, int id, string key)
+{
+    static if ( is(typeof(mixin("C." ~ staticSymbolName!(Qualifier, id)))) )
+    {
+        mixin ("alias C." ~ staticSymbolName!(Qualifier, id) ~ " current;");
+        static if ( Qualifier.matches!(TupleWrapper!(current), key)() ) {
+            alias current result;
+        }
+        else
+            alias findSymbolImpl!(Qualifier, C, id + 1, key).result result;
+    }
+    else
+    {
+        static assert(0, Qualifier.name ~ " " ~ key ~ " not found.");
+    }
+}
+
+template findSymbol(Qualifier, C, string key)
+{
+    alias findSymbolImpl!(Qualifier, C, 0, key).result findSymbol;
+}
+
+/** ---------------- */
+
 
 /**
     Examples:
@@ -925,7 +1031,8 @@ template SignalImpl(int index, string name, A...)
         {
             mixin SignalHandlerOps;
         }
-        mixin("private static const int __sig" ~ ToString!(index) ~ " = " ~ ToString!(index) ~ ";");
+        /* deprecated */ mixin("private static const int __sig" ~ ToString!(index) ~ " = " ~ ToString!(index) ~ ";");
+        mixin("public alias TypeTuple!(\"" ~ signatureString!(name, A) ~ "\", index, TupleWrapper!(A)) __signal" ~ ToString!(index) ~ ";");
         mixin("SignalOps!(" ~ ToString!(index) ~ ", A) " ~ name ~ "(){ return SignalOps!("
             ~ ToString!(index) ~ ", A)(signalHandler); }");
     }

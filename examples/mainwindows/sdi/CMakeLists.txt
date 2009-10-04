@@ -1,1 +1,1 @@
-build_example(sdi main.d RESOURCES sdis.qrc)
+build_example(sdi main.d RESOURCES sdi.qrc)

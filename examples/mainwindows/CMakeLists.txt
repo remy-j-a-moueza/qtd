@@ -1,1 +1,2 @@
 add_subdirectory(dockwidgets)
+add_subdirectory(sdi)
