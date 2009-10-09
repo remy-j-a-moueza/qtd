@@ -2565,7 +2565,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     // write static constructor
     if (staticInit) {
         QString initArgs;
-        if (cpp_shared)
+        if (cpp_shared && d_class->generateShellClass())
         {
             initArgs = "void* virtuals";
             if (d_class->isQObject())
@@ -2582,7 +2582,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             << INDENT << "    " << d_class->name() << ".createStaticMetaObject;" << endl << endl;
         }
 
-        if (cpp_shared) {
+        if (cpp_shared && d_class->generateShellClass()) {
              // virtual functions
             s << INDENT << "void*[" << virtualFunctions.size() << "] virt_arr;" << endl;
             for (int pos = 0; pos<virtualFunctions.size(); ++pos) {

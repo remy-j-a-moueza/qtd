@@ -1032,7 +1032,7 @@ template SignalImpl(int index, string name, A...)
             mixin SignalHandlerOps;
         }
         /* deprecated */ mixin("private static const int __sig" ~ ToString!(index) ~ " = " ~ ToString!(index) ~ ";");
-        mixin("public alias TypeTuple!(\"" ~ signatureString!(name, A) ~ "\", index, TupleWrapper!(A)) __signal" ~ ToString!(index) ~ ";");
+ //       mixin("public alias TypeTuple!(\"" ~ signatureString!(name, A) ~ "\", index, TupleWrapper!(A)) __signal" ~ ToString!(index) ~ ";");
         mixin("SignalOps!(" ~ ToString!(index) ~ ", A) " ~ name ~ "(){ return SignalOps!("
             ~ ToString!(index) ~ ", A)(signalHandler); }");
     }
