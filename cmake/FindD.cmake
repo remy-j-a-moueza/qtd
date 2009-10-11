@@ -58,15 +58,19 @@ set(ONE_BUILD_COMMAND OFF) ## TODO: test it and uncomment the previous line.
 
 if (NOT ONE_BUILD_COMMAND)
     if(D_IS_MARS)
-	set(opt_tmp "ON")
+        set(opt_tmp "ON")
     else(D_IS_MARS)
-	set(opt_tmp "OFF")
+        set(opt_tmp "OFF")
     endif(D_IS_MARS)   
     option(SINGLE_D_OBJECT "Build all d sources to one object file" ${opt_tmp})
     if(D_IS_LLVM)
-	set(D_FLAGS ${D_FLAGS} -singleobj)
+        set(D_FLAGS ${D_FLAGS} -singleobj)
     endif(D_IS_LLVM)
-    set(D_MODULES_PER_OBJECT 10000 CACHE STRING "Max number of modules per object file")
+    if(CMAKE_HOST_WIN32 AND D_IS_MARS)
+        set(D_MODULES_PER_OBJECT 200 CACHE STRING "Max number of modules per object file")
+    else(CMAKE_HOST_WIN32 AND D_IS_MARS)
+        set(D_MODULES_PER_OBJECT 10000 CACHE STRING "Max number of modules per object file")
+    endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
 endif(NOT ONE_BUILD_COMMAND)
 
 ## Specific flags for build configurations.
