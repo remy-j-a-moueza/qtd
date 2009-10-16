@@ -63,7 +63,7 @@ public:
 		setText(tr("<drop content>"));
 		setBackgroundRole(QPalette.Dark);
 
-		changed.emit(null);
+		changed(null);
 	}
 
 	mixin Signal!("changed", QMimeData);
@@ -76,7 +76,7 @@ protected:
 		setBackgroundRole(QPalette.Highlight);
 
 		event.acceptProposedAction();
-		changed.emit(event.mimeData);
+		changed(event.mimeData);
 	}
 	
 	void dragMoveEvent(QDragMoveEvent event)

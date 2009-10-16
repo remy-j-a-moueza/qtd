@@ -817,47 +817,6 @@ public final class SignalHandler
     }
 }
 
-//TODO: this could be avoided if named mixins didn't suck.
-public struct SignalOps(int sigId, A...)
-{
-    private SignalHandler sh;
-    enum { signalId = sigId }
-
-    void connect(R, B...)(R function(B) fn, ConnectionFlags flags = ConnectionFlags.None)
-    {
-        alias CheckSlot!(typeof(fn), A) check;
-        auto invoker = Dg(&sh.invokeSlot!(typeof(fn), Fn, A));
-        sh.connect(signalId, Fn(fn), invoker, flags);
-    }
-
-    void connect(R, B...)(R delegate(B) dg, ConnectionFlags flags = ConnectionFlags.None)
-    {
-        alias CheckSlot!(typeof(dg), A) check;
-        auto invoker = Dg(&sh.invokeSlot!(typeof(dg), Dg, A));
-        sh.connect(signalId, Dg(dg), invoker, flags);
-    }
-
-    void disconnect(R, B...)(R function(B) fn)
-    {
-        sh.disconnect(signalId, Fn(fn));
-    }
-
-    void disconnect(R, B...)(R delegate(B) dg)
-    {
-        sh.disconnect(signalId, Dg(dg));
-    }
-
-    void emit(A args)
-    {
-        sh.emit(signalId, args);
-    }
-
-    debug size_t slotCount()
-    {
-        return sh.slotCount(signalId);
-    }
-}
-
 public template SignalHandlerOps()
 {
     static assert (is(typeof(this.signalHandler)),
@@ -1096,6 +1055,30 @@ template findSignal(C, string name, Receiver, SigArgs...)
 }
 
 
+public string SignalEmitter(A...)(SignalType signalType, string name, int index)
+{
+    string fullArgs, args;
+    static if (A.length)
+    {
+        fullArgs = A[0].stringof ~ " a0";
+        args = ", a0";
+        foreach(i, _; A[1..$])
+        {
+            fullArgs ~= ", " ~ A[i+1].stringof ~ " a" ~ __toString(i+1);
+            args ~= ", a" ~ __toString(i+1);
+        }
+    }
+    string attribute;
+    string sigName = name;
+    if (signalType == SignalType.BindQtSignal)
+        name ~= "_emit";
+    else
+        attribute = "protected ";
+    string str = attribute ~ "void " ~ name ~ "(" ~ fullArgs ~ ")" ~
+                 "{ this.signalHandler.emit(" ~ __toString(index) ~ args ~ "); }";
+    return str;
+}
+
 /**
     Examples:
 ----
@@ -1128,25 +1111,35 @@ class C
 }
 ----
 */
-template Signal(string name, A...)
+
+enum SignalType
 {
-    mixin SignalImpl!(0, name, A);
+    BindQtSignal,
+    NewSignal
 }
 
-template SignalImpl(int index, string name, A...)
+template BindQtSignal(string name, A...)
+{
+    mixin SignalImpl!(0, name, SignalType.BindQtSignal, A);
+}
+
+template Signal(string name, A...)
+{
+    mixin SignalImpl!(0, name, SignalType.NewSignal, A);
+}
+
+template SignalImpl(int index, string name, SignalType signalType, A...)
 {
     static if (is(typeof(mixin(typeof(this).stringof ~ ".__signal" ~ ToString!(index)))))
-        mixin SignalImpl!(index + 1, name, A);
+        mixin SignalImpl!(index + 1, name, signalType, A);
     else
     {
         // mixed-in once
         static if (!is(typeof(this.signalHandler)))
-        {
             mixin SignalHandlerOps;
-        }
+
+        mixin (SignalEmitter!(A)(signalType, name, index));
         mixin("public alias Tuple!(\"" ~ name ~ "\", index, A) __signal" ~ ToString!(index) ~ ";");
-        mixin("SignalOps!(" ~ ToString!(index) ~ ", A) " ~ name ~ "(){ return SignalOps!("
-            ~ ToString!(index) ~ ", A)(signalHandler); }");
     }
 }
 

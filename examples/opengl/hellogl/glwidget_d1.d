@@ -86,7 +86,7 @@ class GLWidget : QGLWidget
             normalizeAngle(&angle);
             if (angle != xRot) {
                 xRot = angle;
-                xRotationChanged.emit(angle);
+                xRotationChanged(angle);
                 updateGL();
             }
         }
@@ -96,7 +96,7 @@ class GLWidget : QGLWidget
             normalizeAngle(&angle);
             if (angle != yRot) {
                 yRot = angle;
-                yRotationChanged.emit(angle);
+                yRotationChanged(angle);
                 updateGL();
             }
         }
@@ -106,7 +106,7 @@ class GLWidget : QGLWidget
             normalizeAngle(&angle);
             if (angle != zRot) {
                 zRot = angle;
-                zRotationChanged.emit(angle);
+                zRotationChanged(angle);
                 updateGL();
             }
         }

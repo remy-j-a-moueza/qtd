@@ -983,10 +983,10 @@ QString DGenerator::functionSignature(const AbstractMetaFunction *d_function,
     if (!(d_function->isEmptyFunction() || d_function->isNormal() || d_function->isSignal()))
         option = Option(option | SkipReturnType);
     writeFunctionAttributes(s, d_function, included_attributes, excluded_attributes, option);
-
+/*
     if(d_function->isSignal())
         functionName += "_emit";
-
+*/
     s << functionName << "(";
     writeFunctionArguments(s, d_function, argument_count, option);
     s << ")";
@@ -1771,7 +1771,7 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
                 s << endl;
             }
 //            s << INDENT << "Stdout(\"" << d_class->name() << "\", \"" << signal->name() << "\").newline;" << endl;
-            s << INDENT << "d_object." << signal->name() << ".emit(";
+            s << INDENT << "d_object." << signal->name() << "_emit(";
             for (int j = 0; j<sz; ++j) {
                 AbstractMetaArgument *argument = arguments.at(j);
                 QString arg_name = argument->indexedName();
@@ -2817,7 +2817,7 @@ void DGenerator::writeSignal(QTextStream &s, const AbstractMetaFunction *d_funct
     AbstractMetaArgumentList arguments = d_function->arguments();
     int sz = arguments.count();
 
-    s << INDENT << "mixin Signal!(\"" << d_function->name() << "\"";
+    s << INDENT << "mixin BindQtSignal!(\"" << d_function->name() << "\"";
 
     if (sz > 0) {
         for (int i=0; i<sz; ++i) {
