@@ -1,9 +1,9 @@
 PROJECT(generator CXX C)
 cmake_minimum_required(VERSION 2.6)
-FIND_PACKAGE(Qt4 REQUIRED)
+find_package(Qt4 REQUIRED)
 
 ## Hack for msvc: force Release settings
-STRING(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
 set(CMAKE_CXX_FLAGS_${build_type_upper} ${CMAKE_CXX_FLAGS_RELEASE}) 
 get_property(dir_prop DIRECTORY 
 	    PROPERTY COMPILE_DEFINITIONS_RELEASE)
@@ -219,7 +219,6 @@ if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}"
 	string(TOLOWER ${package_normal} package) 
 	string(TOUPPER ${package_normal} package_upper) 
 	file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
-	message(STATUS "QT_${package_upper}_INCLUDE_DIR ${QT_${package_upper}_INCLUDE_DIR}")
 	file(APPEND ${jambi_inc} "#include <${QT_QT${package_upper}_INCLUDE_DIR}/Qt${package_normal}>\n")
     endforeach(package_normal ${packages})
     file(APPEND ${dgen_build_conf} "</typesystem>\n")
@@ -231,9 +230,9 @@ endif(	NOT "${packages_in_build_txt}" STREQUAL "${packages}"
 set(gen_sources)
 foreach(package_normal ${packages})
     string(TOLOWER ${package_normal} package)   
-    set(gen_sources ${gen_sources} ${CMAKE_SOURCE_DIR}/generator/typesystem_${package}.xml)
+    set(gen_sources ${gen_sources} ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_${package}.xml)
     set(d_inc_file_found d_inc_file_found-NOTFOUND) 
-    find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_SOURCE_DIR}/generator/) 
+    find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_CURRENT_SOURCE_DIR}/) 
     if(d_inc_file_found)
 	set(gen_sources ${gen_sources} ${d_inc_file_found})
     endif(d_inc_file_found)
@@ -260,7 +259,7 @@ add_custom_command(OUTPUT ${dgen_impl}
 	COMMAND "generator"
 	ARGS ${GEN_OPT} --include-paths=${inc_paths}
 	    --output-directory=${out_dir}
-	    --source-directory=${CMAKE_SOURCE_DIR}/generator 
+	    --source-directory=${CMAKE_CURRENT_SOURCE_DIR} 
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/qtjambi_masterinclude.h  
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
 	COMMENT "Generating binding..."
