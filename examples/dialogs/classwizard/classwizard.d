@@ -263,7 +263,7 @@ public:
 		copyCtorCheckBox = new QCheckBox(tr("&Generate copy constructor and operator="));
 
 		defaultCtorRadioButton.setChecked(true);
-		defaultCtorRadioButton.toggled.connect(&copyCtorCheckBox.setEnabled);
+		connect!("toggled")(defaultCtorRadioButton, &copyCtorCheckBox.setEnabled);
 
 		registerField("className*", classNameLineEdit);
 		registerField("baseClass", baseClassLineEdit);
@@ -331,10 +331,10 @@ public:
 		baseIncludeLineEdit = new QLineEdit;
 		baseIncludeLabel.setBuddy(baseIncludeLineEdit);
 
-		protectCheckBox.toggled.connect(&macroNameLabel.setEnabled);
-		protectCheckBox.toggled.connect(&macroNameLabel.setEnabled);
-		includeBaseCheckBox.toggled.connect(&macroNameLabel.setEnabled);
-		includeBaseCheckBox.toggled.connect(&macroNameLabel.setEnabled);
+		connect!("toggled")(protectCheckBox, &macroNameLabel.setEnabled);
+// ?	connect!("toggled")(protectCheckBox, &macroNameLabel.setEnabled);
+		connect!("toggled")(includeBaseCheckBox, &macroNameLabel.setEnabled);
+// ?	connect!("toggled")(includeBaseCheckBox, &macroNameLabel.setEnabled);
 
 		registerField("comment", commentCheckBox);
 		registerField("protect", protectCheckBox);

@@ -60,8 +60,8 @@ public:
         slider.setRange(0, 99);
         slider.setValue(0);
 
-        quit.clicked.connect(&QApplication.quit);
-        slider.valueChanged.connect(cast(void delegate(int)) &lcd.display);
+        connect!("clicked")(quit, &QApplication.quit);
+        connect!("valueChanged")(slider, cast(void delegate(int)) &lcd.display);
 
         auto layout = new QVBoxLayout;
         layout.addWidget(quit);

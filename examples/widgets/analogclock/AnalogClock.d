@@ -55,7 +55,7 @@ public:
     {
         super(parent);
         auto timer = new QTimer(this);
-        timer.timeout.connect(&this.update);
+        connect!("timeout")(timer, &this.update);
         timer.start(1000);
         setWindowTitle("Analog Clock");
         resize(200, 200);

@@ -135,21 +135,21 @@ public:
 		errorLabel.setFrameStyle(frameStyle);
 		QPushButton errorButton = new QPushButton(tr("QErrorMessage.show&M&essage()"));
 
-		integerButton.clicked.connect(&this.setInteger);
-		doubleButton.clicked.connect(&this.setDouble);
-		itemButton.clicked.connect(&this.setItem);
-		textButton.clicked.connect(&this.setText);
-		colorButton.clicked.connect(&this.setColor);
-		fontButton.clicked.connect(&this.setFont);
-		directoryButton.clicked.connect(&this.setExistingDirectory);
-		openFileNameButton.clicked.connect(&this.setOpenFileName);
-		openFileNamesButton.clicked.connect(&this.setOpenFileNames);
-		saveFileNameButton.clicked.connect(&this.setSaveFileName);
-		criticalButton.clicked.connect(&this.criticalMessage);
-		informationButton.clicked.connect(&this.informationMessage);
-		questionButton.clicked.connect(&this.questionMessage);
-		warningButton.clicked.connect(&this.warningMessage);
-		errorButton.clicked.connect(&this.errorMessage);
+        connect!("clicked")(integerButton, &this.setInteger);
+        connect!("clicked")(doubleButton, &this.setDouble);
+        connect!("clicked")(itemButton, &this.setItem);
+        connect!("clicked")(textButton, &this.setText);
+        connect!("clicked")(colorButton, &this.setColor);
+        connect!("clicked")(fontButton, &this.setFont);
+        connect!("clicked")(directoryButton, &this.setExistingDirectory);
+        connect!("clicked")(openFileNameButton, &this.setOpenFileName);
+        connect!("clicked")(openFileNamesButton, &this.setOpenFileNames);
+        connect!("clicked")(saveFileNameButton, &this.setSaveFileName);
+        connect!("clicked")(criticalButton, &this.criticalMessage);
+        connect!("clicked")(informationButton, &this.informationMessage);
+        connect!("clicked")(questionButton, &this.questionMessage);
+        connect!("clicked")(warningButton, &this.warningMessage);
+        connect!("clicked")(errorButton, &this.errorMessage);
 
 		native = new QCheckBox(this);
 		native.setText("Use native file dialog.");

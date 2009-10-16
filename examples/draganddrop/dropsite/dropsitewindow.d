@@ -67,7 +67,7 @@ public:
 		abstractLabel.adjustSize();
 
 		dropArea = new DropArea;
-		dropArea.changed.connect(&updateFormatsTable);
+		connect!("changed")(dropArea, &updateFormatsTable);
 
 		string[] labels;
 		labels ~= tr("Format");
@@ -86,8 +86,8 @@ public:
 		buttonBox.addButton(clearButton, QDialogButtonBox.ActionRole);
 		buttonBox.addButton(quitButton, QDialogButtonBox.RejectRole);
 
-		quitButton.pressed.connect(&close);
-		clearButton.pressed.connect(&dropArea.clearArea);
+		connect!("pressed")(quitButton, &close);
+		connect!("pressed")(clearButton, &dropArea.clearArea);
 
 		QVBoxLayout mainLayout = new QVBoxLayout;
 		mainLayout.addWidget(abstractLabel);

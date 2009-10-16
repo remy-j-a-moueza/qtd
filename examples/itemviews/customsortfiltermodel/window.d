@@ -102,11 +102,11 @@ public:
 		toLabel = new QLabel(tr("&To:"));
 		toLabel.setBuddy(toDateEdit);
 
-		filterPatternLineEdit.textChanged.connect(&this.textFilterChanged);
-		filterSyntaxComboBox.currentIndexChanged.connect(&this.textFilterChanged);
-		filterCaseSensitivityCheckBox.toggled.connect(&this.textFilterChanged);
-		fromDateEdit.dateChanged.connect(&this.dateFilterChanged);
-		toDateEdit.dateChanged.connect(&this.dateFilterChanged);
+		connect!("textChanged")(filterPatternLineEdit, &this.textFilterChanged);
+		connect!("currentIndexChanged")(filterSyntaxComboBox, &this.textFilterChanged);
+		connect!("toggled")(filterCaseSensitivityCheckBox, &this.textFilterChanged);
+		connect!("dateChanged")(fromDateEdit, &this.dateFilterChanged);
+		connect!("dateChanged")(toDateEdit, &this.dateFilterChanged);
 
 		proxyView = new QTreeView;
 		proxyView.setRootIsDecorated(false);

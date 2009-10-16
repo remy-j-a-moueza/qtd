@@ -58,7 +58,7 @@ public:
 		auto slider = new QSlider(Qt.Horizontal);
 		slider.setRange(0, 99);
 		slider.setValue(0);
-        slider.valueChanged.connect(cast(void delegate(int)) &lcd.display);
+        connect!("valueChanged")(slider, cast(void delegate(int)) &lcd.display);
 
 		auto layout = new QVBoxLayout;
 		layout.addWidget(lcd);
@@ -76,7 +76,7 @@ class MyWidget : QWidget
 		
 		auto quit = new QPushButton("Quit");
 		quit.setFont(new QFont("Times", 18, QFont.Bold));
-        quit.clicked.connect(&QApplication.quit);
+        connect!("clicked")(quit, &QApplication.quit);
 
 		auto grid = new QGridLayout;
 		for (int row = 0; row < 3; ++row) {

@@ -145,10 +145,10 @@ private:
 		rotableWidgets ~= a2;
 		rotableWidgets ~= a3;
 
-		a0.valueChanged.connect(&a1.setValue);
-		a1.valueChanged.connect(&a2.setValue);
-		a2.valueChanged.connect(&a3.setValue);
-		a3.valueChanged.connect(&a0.setValue);
+		connect!("valueChanged")(a0, &a1.setValue);
+		connect!("valueChanged")(a1, &a2.setValue);
+		connect!("valueChanged")(a2, &a3.setValue);
+		connect!("valueChanged")(a3, &a0.setValue);
 
 		/*
 		int n = rotableWidgets.length;
@@ -172,7 +172,7 @@ private:
 		buttonsOrientationComboBox.addItem(tr("Horizontal"), new QVariant(cast(ulong) Qt.Horizontal));
 		buttonsOrientationComboBox.addItem(tr("Vertical"), new QVariant(cast(ulong) Qt.Vertical));
 
-		buttonsOrientationComboBox.currentIndexChanged.connect(&this.buttonsOrientationChanged);
+		connect!("currentIndexChanged")(buttonsOrientationComboBox, &this.buttonsOrientationChanged);
 
 		optionsLayout = new QGridLayout;
 		optionsLayout.addWidget(buttonsOrientationLabel, 0, 0);
@@ -189,9 +189,9 @@ private:
 		helpButton = buttonBox.addButton(QDialogButtonBox.Help);
 		rotateWidgetsButton = buttonBox.addButton(tr("Rotate &Widgets"), QDialogButtonBox.ActionRole);
 
-		rotateWidgetsButton.clicked.connect(&this.rotateWidgets);
-		closeButton.clicked.connect(&this.close);
-		helpButton.clicked.connect(&this.help);
+		connect!("clicked")(rotateWidgetsButton, &this.rotateWidgets);
+		connect!("clicked")(closeButton, &this.close);
+		connect!("clicked")(helpButton, &this.help);
 	}
 
 	QGroupBox rotableGroupBox;

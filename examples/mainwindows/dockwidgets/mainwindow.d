@@ -214,7 +214,7 @@ class MainWindow : public QMainWindow
             newLetterAct = new QAction(new QIcon(":images/new.png"), tr("&New Letter"), this);
             newLetterAct.setShortcut(tr("Ctrl+N"));
             newLetterAct.setStatusTip(tr("Create a new form letter"));
-            newLetterAct.triggered.connect(&this.newLetter);
+            connect!("triggered")(newLetterAct, &this.newLetter);
 
             saveAct = new QAction(new QIcon(":images/save.png"), tr("&Save..."), this);
             saveAct.setShortcut(tr("Ctrl+S"));
@@ -229,16 +229,16 @@ class MainWindow : public QMainWindow
             undoAct = new QAction(new QIcon(":images/undo.png"), tr("&Undo"), this);
             undoAct.setShortcut(tr("Ctrl+Z"));
             undoAct.setStatusTip(tr("Undo the last editing action"));
-            undoAct.triggered.connect(&undo);
+            connect!("triggered")(undoAct, &undo);
 
             quitAct = new QAction(tr("&Quit"), this);
             quitAct.setShortcut(tr("Ctrl+Q"));
             quitAct.setStatusTip(tr("Quit the application"));
-            quitAct.triggered.connect(&this.close);
+            connect!("triggered")(quitAct, &this.close);
 
             aboutAct = new QAction(tr("&About"), this);
             aboutAct.setStatusTip(tr("Show the application's About box"));
-            aboutAct.triggered.connect(&about);
+            connect!("triggered")(aboutAct, &about);
 
             aboutQtAct = new QAction(tr("About &Qt"), this);
             aboutQtAct.setStatusTip(tr("Show the Qt library's About box"));
@@ -327,8 +327,8 @@ class MainWindow : public QMainWindow
             addDockWidget(Qt.RightDockWidgetArea, dock);
             viewMenu.addAction(dock.toggleViewAction());
 
-            customerList.currentTextChanged.connect(&this.insertCustomer);
-            paragraphsList.currentTextChanged.connect(&this.addParagraph);
+            connect!("currentTextChanged")(customerList, &this.insertCustomer);
+            connect!("currentTextChanged")(paragraphsList, &this.addParagraph);
         }
 
         QTextEdit textEdit;

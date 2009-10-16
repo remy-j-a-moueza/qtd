@@ -153,7 +153,7 @@ private:
 		delaySpinBox = new QSpinBox;
 		delaySpinBox.setSuffix(tr(" s"));
 		delaySpinBox.setMaximum(60);
-		delaySpinBox.valueChanged.connect(&this.updateCheckBox);
+		connect!("valueChanged")(delaySpinBox, &this.updateCheckBox);
 		
 		delaySpinBoxLabel = new QLabel(tr("Screenshot Delay:"));
 
@@ -184,7 +184,7 @@ private:
 	QPushButton createButton(string text, void delegate() slot)
 	{
 		QPushButton button = new QPushButton(text);
-		button.clicked.connect(slot);
+		connect!("clicked")(button, slot);
 		return button;
 	}
 

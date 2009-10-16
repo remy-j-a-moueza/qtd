@@ -57,12 +57,12 @@ class Window : public QWidget
 			ySlider = createSlider();
 			zSlider = createSlider();
 			
-            xSlider.valueChanged.connect(&glWidget.setXRotation);
-            glWidget.xRotationChanged.connect(&xSlider.setValue);
-            ySlider.valueChanged.connect(&glWidget.setYRotation);
-            glWidget.yRotationChanged.connect(&ySlider.setValue);
-            zSlider.valueChanged.connect(&glWidget.setZRotation);
-            glWidget.zRotationChanged.connect(&zSlider.setValue);
+            connect!("valueChanged")(xSlider, &glWidget.setXRotation);
+            connect!("xRotationChanged")(glWidget, &xSlider.setValue);
+            connect!("valueChanged")(ySlider, &glWidget.setYRotation);
+            connect!("yRotationChanged")(glWidget, &ySlider.setValue);
+            connect!("valueChanged")(zSlider,&glWidget.setZRotation);
+            connect!("zRotationChanged")(glWidget, &zSlider.setValue);
 			
 			QHBoxLayout mainLayout = new QHBoxLayout;
 			mainLayout.addWidget(glWidget);

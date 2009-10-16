@@ -180,7 +180,7 @@ class MainWindow : public QMainWindow
 
     readSettings();
 
-    textEdit.document().contentsChanged.connect(&this.documentWasModified);
+    connect!("contentsChanged")(textEdit.document(), &this.documentWasModified);
 
     setUnifiedTitleAndToolBarOnMac(true);
   }
@@ -190,67 +190,64 @@ class MainWindow : public QMainWindow
     newAct = new QAction(new QIcon(":/images/new.png"), tr("&New"), this);
     newAct.setShortcuts(QKeySequence.New);
     newAct.setStatusTip(tr("Create a new file"));
-    newAct.triggered.connect(&this.newFile);
+    connect!("triggered")(newAct, &this.newFile);
 
     openAct = new QAction(new QIcon(":/images/open.png"), tr("&Open..."), this);
     openAct.setShortcuts(QKeySequence.Open);
     openAct.setStatusTip(tr("Open an existing file"));
-    openAct.triggered.connect(&this.open);
+    connect!("triggered")(openAct, &this.open);
 
     saveAct = new QAction(new QIcon(":/images/save.png"), tr("&Save"), this);
     saveAct.setShortcuts(QKeySequence.Save);
     saveAct.setStatusTip(tr("Save the document to disk"));
-    saveAct.triggered.connect(&this.save);
+    connect!("triggered")(saveAct, &this.save);
 
     saveAsAct = new QAction(tr("Save &As..."), this);
     saveAsAct.setShortcuts(QKeySequence.SaveAs);
     saveAsAct.setStatusTip(tr("Save the document under a new name"));
-    saveAsAct.triggered.connect(&this.saveAs);
+    connect!("triggered")(saveAsAct, &this.saveAs);
 
     closeAct = new QAction(tr("&Close"), this);
     closeAct.setShortcut(tr("Ctrl+W"));
     closeAct.setStatusTip(tr("Close this window"));
-    closeAct.triggered.connect(&this.close);
+    connect!("triggered")(closeAct, &this.close);
 
     exitAct = new QAction(tr("E&xit"), this);
     exitAct.setShortcut(tr("Ctrl+Q"));
     exitAct.setStatusTip(tr("Exit the application"));
-    exitAct.triggered.connect(&QApplication.closeAllWindows);
+    connect!("triggered")(exitAct, &QApplication.closeAllWindows);
 
     cutAct = new QAction(new QIcon(":/images/cut.png"), tr("Cu&t"), this);
     cutAct.setShortcuts(QKeySequence.Cut);
     cutAct.setStatusTip(tr("Cut the current selection's contents to the " ~
                            "clipboard"));
-    cutAct.triggered.connect(&textEdit.cut);
+    connect!("triggered")(cutAct, &textEdit.cut);
 
     copyAct = new QAction(new QIcon(":/images/copy.png"), tr("&Copy"), this);
     copyAct.setShortcuts(QKeySequence.Copy);
     copyAct.setStatusTip(tr("Copy the current selection's contents to the " ~
                             "clipboard"));
-    copyAct.triggered.connect(&textEdit.copy);
+    connect!("triggered")(copyAct, &textEdit.copy);
 
     pasteAct = new QAction(new QIcon(":/images/paste.png"), tr("&Paste"), this);
     pasteAct.setShortcuts(QKeySequence.Paste);
     pasteAct.setStatusTip(tr("Paste the clipboard's contents into the current " ~
                              "selection"));
-    pasteAct.triggered.connect(&textEdit.paste);
+    connect!("triggered")(pasteAct, &textEdit.paste);
 
     aboutAct = new QAction(tr("&About"), this);
     aboutAct.setStatusTip(tr("Show the application's About box"));
-    aboutAct.triggered.connect(&this.about);
+    connect!("triggered")(aboutAct, &this.about);
 
     aboutQtAct = new QAction(tr("About &Qt"), this);
     aboutQtAct.setStatusTip(tr("Show the Qt library's About box"));
-    aboutQtAct.triggered.connect(&QApplication.aboutQt);
+    connect!("triggered")(aboutQtAct, &QApplication.aboutQt);
 
     cutAct.setEnabled(false);
     copyAct.setEnabled(false);
 
-    // QtD bug????
-    // only one of the following statements can be included
-    // otherwise the app crashes when a MainWindow is closeda
-    textEdit.copyAvailable.connect(&cutAct.setEnabled);
-    textEdit.copyAvailable.connect(&copyAct.setEnabled);
+    connect!("copyAvailable")(textEdit, &cutAct.setEnabled);
+    connect!("copyAvailable")(textEdit, &copyAct.setEnabled);
   }
 
   void createMenus()

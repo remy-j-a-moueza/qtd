@@ -49,9 +49,9 @@ endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" S
 
 # Check D compiler version
 if(D_VERSION EQUAL "1")
-    if (D_FRONTEND LESS "041")
-	message(STATUS "Minimum required version of D compiler is 1.041 (or compiler based on this version)")
-    endif(D_FRONTEND LESS "041")
+    if (D_FRONTEND LESS "050")
+	message(STATUS "Minimum required version of D compiler is 1.050 (or compiler based on this version)")
+    endif(D_FRONTEND LESS "050")
     set(D_TARGET d1-tango CACHE INTERNAL "")   
 elseif(D_VERSION EQUAL "2")
     set(D_TARGET d2-phobos CACHE INTERNAL "")

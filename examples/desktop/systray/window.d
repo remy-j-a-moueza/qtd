@@ -72,11 +72,11 @@ public:
 		createActions();
 		createTrayIcon();
 
-		showMessageButton.clicked.connect(&this.showMessage);
-		showIconCheckBox.toggled.connect(&trayIcon.setVisible);
-		iconComboBox.currentIndexChanged.connect(&this.setIcon);
-		trayIcon.messageClicked.connect(&this.messageClicked);
-		trayIcon.activated.connect(&this.iconActivated);
+		connect!("clicked")(showMessageButton, &this.showMessage);
+		connect!("toggled")(showIconCheckBox, &trayIcon.setVisible);
+		connect!("currentIndexChanged")(iconComboBox, &this.setIcon);
+		connect!("messageClicked")(trayIcon, &this.messageClicked);
+		connect!("activated")(trayIcon, &this.iconActivated);
 
 		QVBoxLayout mainLayout = new QVBoxLayout;
 		mainLayout.addWidget(iconGroupBox);
@@ -233,16 +233,16 @@ private:
 	void createActions()
 	{
 		minimizeAction = new QAction(tr("Mi&nimize"), this);
-		minimizeAction.triggered.connect(&this.hide);
+		connect!("triggered")(minimizeAction, &this.hide);
 
 		maximizeAction = new QAction(tr("Ma&ximize"), this);
-		maximizeAction.triggered.connect(&this.showMaximized);
+		connect!("triggered")(maximizeAction, &this.showMaximized);
 
 		restoreAction = new QAction(tr("&Restore"), this);
-		restoreAction.triggered.connect(&this.showNormal);
+		connect!("triggered")(restoreAction, &this.showNormal);
 
 		quitAction = new QAction(tr("&Quit"), this);
-		quitAction.triggered.connect(&QApplication.quit);
+		connect!("triggered")(quitAction, &QApplication.quit);
 	}
 
 	void createTrayIcon()

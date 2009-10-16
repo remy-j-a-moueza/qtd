@@ -51,7 +51,7 @@ int main(string[] args)
     quit.setFont(new QFont("Times", 18, QFont.Light));
     quit.setGeometry(10, 40, 180, 40);
 
-    quit.clicked.connect(&QApplication.quit);
+    QObject.connect!("clicked")(quit, &QApplication.quit);
 
     window.show();
     return app.exec();

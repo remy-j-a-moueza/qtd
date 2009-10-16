@@ -787,30 +787,6 @@ public struct SignalOps(int sigId, A...)
     private SignalHandler sh;
     enum { signalId = sigId }
 
-    void connect(R, B...)(R function(B) fn, ConnectionFlags flags = ConnectionFlags.None)
-    {
-        alias CheckSlot!(typeof(fn), A) check;
-        auto invoker = Dg(&sh.invokeSlot!(typeof(fn), Fn, A));
-        sh.connect(signalId, Fn(fn), invoker, flags);
-    }
-
-    void connect(R, B...)(R delegate(B) dg, ConnectionFlags flags = ConnectionFlags.None)
-    {
-        alias CheckSlot!(typeof(dg), A) check;
-        auto invoker = Dg(&sh.invokeSlot!(typeof(dg), Dg, A));
-        sh.connect(signalId, Dg(dg), invoker, flags);
-    }
-
-    void disconnect(R, B...)(R function(B) fn)
-    {
-        sh.disconnect(signalId, Fn(fn));
-    }
-
-    void disconnect(R, B...)(R delegate(B) dg)
-    {
-        sh.disconnect(signalId, Dg(dg));
-    }
-
     void emit(A args)
     {
         sh.emit(signalId, args);
@@ -819,25 +795,6 @@ public struct SignalOps(int sigId, A...)
     debug size_t slotCount()
     {
         return sh.slotCount(signalId);
-    }
-}
-
-template CheckSlot(Slot, A...)
-{
-    static assert(ParameterTypeTuple!(Slot).length <= A.length, "Slot " ~ ParameterTypeTuple!(Slot).stringof ~
-        " has more prameters than signal " ~ A.stringof);
-    alias CheckSlotImpl!(Slot, 0, A) check;
-}
-
-template CheckSlotImpl(Slot, int i, A...)
-{
-    alias ParameterTypeTuple!(Slot) SlotArgs;
-    static if (i < SlotArgs.length)
-    {
-        static assert (is(SlotArgs[i] : A[i]), "Argument " ~ ToString!(i) ~
-            ":" ~ A[i].stringof ~ " of signal " ~ A.stringof ~ " is not implicitly convertible to parameter "
-            ~ SlotArgs[i].stringof ~ " of slot " ~ SlotArgs.stringof);
-        alias CheckSlotImpl!(Slot, i + 1, A) next;
     }
 }
 
@@ -874,56 +831,71 @@ public:
         signalHandler.unblockSignals();
     }
 
-    void connect(string signalName, this T, R, B...)(R function(B) dg, ConnectionFlags flags = ConnectionFlags.None)
+    template connect(string signalName, A...)
     {
-        alias findSymbol!(SignalQualifier, T, signalName) sig;
-        alias CheckSlot!(typeof(fn), sig[2].at) check;
-        auto sh = signalHandler();
-        auto invoker = Dg(&sh.invokeSlot!(typeof(fn), Fn, sig[2].at));
-        sh.connect(sig[1], Fn(fn), invoker, flags);
+        static void connect(T, Func)(T sender, Func func, ConnectionFlags flags = ConnectionFlags.None)
+            if (isFnOrDg!(Func))
+        {
+            alias findSignal!(T, signalName, Func, A).result sig;
+            auto sh = sender.signalHandler();
+            static if (isFn!(Func))
+                alias Fn Callable;
+            else
+                alias Dg Callable;
+            auto invoker = Dg(&sh.invokeSlot!(typeof(func), Callable, sig[2..$]));
+            sh.connect(sig[1], Callable(func), invoker, flags);
+        }
     }
 
-    void connect(string signalName, this T, R, B...)(R delegate(B) dg, ConnectionFlags flags = ConnectionFlags.None)
+    template disconnect(string signalName, A...)
     {
-        alias findSymbol!(SignalQualifier, T, signalName) sig;
-        alias CheckSlot!(typeof(dg), sig[2].at) check;
-        auto sh = signalHandler();
-        auto invoker = Dg(&sh.invokeSlot!(typeof(dg), Dg, sig[2].at));
-        sh.connect(sig[1], Dg(dg), invoker, flags);
+        static void connect(T, Func)(T sender, Func func, ConnectionFlags flags = ConnectionFlags.None)
+            if (isFnOrDg!(Func))
+        {
+            alias findSignal!(T, signalName, Func, A).result sig;
+            auto sh = sender.signalHandler();
+            static if (isFn!(Func))
+                alias Fn Callable;
+            else
+                alias Dg Callable;
+            sh.disconnect(sig[1], Callable(func));
+        }
     }
-
-    void disconnect(string signalName, this T, R, B...)(R function(B) fn)
+/*
+    template slotCount(string signalName, A...)
     {
-        alias findSymbol!(SignalQualifier, T, signalName) sig;
-        auto sh = signalHandler();
-        sh.disconnect(sig[1], Fn(fn));
+        debug static void slotCount(T)(T sender)
+        {
+            alias findSignal!(T, signalName, Func, A).result sig;
+            auto sh = sender.signalHandler();
+            return sh.slotCount(sig[1]);
+        }
     }
-
-    void disconnect(string signalName, this T, R, B...)(R delegate(B) dg)
-    {
-        alias findSymbol!(SignalQualifier, T, signalName) sig;
-        auto sh = signalHandler();
-        sh.disconnect(sig[1], Dg(dg));
-    }
-
-    debug size_t slotCount(string signalName, this T)()
-    {
-        alias findSymbol!(SignalQualifier, T, signalName) sig;
-        auto sh = signalHandler();
-        return sh.slotCount(sig[1]);
-    }
+    */
 }
 
 /**
     New implementation.
 */
 
-public bool startsWith(T)(T[] source, T[] pattern)
-{
-    return source.length >= pattern.length && source[0 .. pattern.length] == pattern[];
-}
+const string signalPrefix = "__signal";
 
 template TupleWrapper(A...) { alias A at; }
+
+template isDg(Dg)
+{
+    enum isDg = is(Dg == delegate);
+}
+
+template isFn(Fn)
+{
+    enum isFn = is(typeof(*Fn.init) == function);
+}
+
+template isFnOrDg(Dg)
+{
+    enum isFnOrDg = isFn!(Dg) || isDg!(Dg);
+}
 
 string joinArgs(A...)()
 {
@@ -937,20 +909,72 @@ string joinArgs(A...)()
     return res;
 }
 
-struct SignalQualifier
+template SlotPred(T1, T2)
 {
-    const string staticSymbolPrefix = "__signal";
-    const string name = "signal";
-    
-    static bool matches(alias source, string sigName)()
+    enum SlotPred = is(T1 : T2);
+}
+
+template CheckSlot(alias Needle, alias Source)
+{
+    static if(Needle.at.length <= Source.at.length)
+        enum CheckSlot = CheckArgs!(Needle, Source, SlotPred, 0).value;
+    else
+        enum CheckSlot = false;
+}
+
+template SignalPred(T1, T2)
+{
+    enum SignalPred = is(T1 == T2);
+}
+
+template CheckSignal(alias Needle, alias Source)
+{
+    static if(Needle.at.length == Source.at.length)
+        enum CheckSignal = CheckArgs!(Needle, Source, SignalPred, 0).value;
+    else
+        enum CheckSignal = false;
+}
+
+template CheckArgs(alias Needle, alias Source, alias pred, int i)
+{
+    static if (i < Needle.at.length)
     {
-        return startsWith(source.at[0], sigName);
+        static if (pred!(Needle.at[i], Source.at[i]))
+            enum value = CheckArgs!(Needle, Source, pred, i + 1).value;
+        else
+            enum value = false;
+    }
+    else
+    {
+        enum value = true;
     }
 }
 
-template staticSymbolName(Qualifier, int id)
+template SigByNamePred(string name, SlotArgs...)
 {
-    const string staticSymbolName = Qualifier.staticSymbolPrefix ~ ToString!(id);
+    template SigByNamePred(source...)
+    {
+        static if (source[0] == name) // only instantiate CheckSlot if names match
+            enum SigByNamePred = CheckSlot!(TupleWrapper!(SlotArgs), TupleWrapper!(source[2 .. $]));
+        else
+            enum SigByNamePred = false;
+    }
+}
+
+template SigBySignPred(string name, SigArgs...)
+{
+    template SigBySignPred(source...)
+    {
+        static if (source[0] == name) // only instantiate CheckSignal if names match
+            enum SigBySignPred = CheckSignal!(TupleWrapper!(SigArgs), TupleWrapper!(source[2 .. $]));
+        else
+            enum SigBySignPred = false;
+    }
+}
+
+template staticSymbolName(string prefix, int id)
+{
+    const string staticSymbolName = prefix ~ ToString!(id);
 }
 
 template signatureString(string name, A...)
@@ -958,26 +982,45 @@ template signatureString(string name, A...)
     const string signatureString = name ~ "(" ~ joinArgs!(A) ~ ")";
 }
 
-template findSymbolImpl(Qualifier, C, int id, string key)
+template findSymbolImpl(string prefix, C, int id, alias pred)
 {
-    static if ( is(typeof(mixin("C." ~ staticSymbolName!(Qualifier, id)))) )
+    static if ( is(typeof(mixin("C." ~ staticSymbolName!(prefix, id)))) )
     {
-        mixin ("alias C." ~ staticSymbolName!(Qualifier, id) ~ " current;");
-        static if ( Qualifier.matches!(TupleWrapper!(current), key)() ) {
+        mixin ("alias C." ~ staticSymbolName!(prefix, id) ~ " current;");
+        static if (pred!current)
             alias current result;
-        }
         else
-            alias findSymbolImpl!(Qualifier, C, id + 1, key).result result;
+            alias findSymbolImpl!(prefix, C, id + 1, pred).result result;
     }
     else
     {
-        static assert(0, Qualifier.name ~ " " ~ key ~ " not found.");
+        alias void result;
     }
 }
 
-template findSymbol(Qualifier, C, string key)
+template findSymbol(string prefix, C, alias pred)
 {
-    alias findSymbolImpl!(Qualifier, C, 0, key).result findSymbol;
+    alias findSymbolImpl!(prefix, C, 0, pred).result findSymbol;
+}
+
+template findSignal(C, string name, Receiver, SigArgs...)
+{
+    alias TupleWrapper!(ParameterTypeTuple!Receiver) SlotArgsWr;
+    static if (SigArgs.length > 0)
+    {
+        alias findSymbol!(signalPrefix, C, SigBySignPred!(name, SigArgs)) result;
+        static if (is(result == void))
+            static assert(0, "Signal " ~ name ~ "(" ~ joinArgs!SigArgs() ~ ") was not found.");
+        else
+            static if (!CheckSlot!(SlotArgsWr, TupleWrapper!(result[2 .. $])))
+                static assert(0, "Signature of slot is incompatible with signal " ~ name ~ ".");
+    }
+    else
+    {
+        alias findSymbol!(signalPrefix, C, SigByNamePred!(name, SlotArgsWr.at)) result;
+        static if (is(result == void))
+            static assert(0, "Signal " ~ name ~ " was not found.");
+    }
 }
 
 /** ---------------- */
@@ -1022,7 +1065,7 @@ template Signal(string name, A...)
 
 template SignalImpl(int index, string name, A...)
 {
-    static if (is(typeof(mixin(typeof(this).stringof ~ ".__sig" ~ ToString!(index)))))
+    static if (is(typeof(mixin(typeof(this).stringof ~ ".__signal" ~ ToString!(index)))))
         mixin SignalImpl!(index + 1, name, A);
     else
     {
@@ -1031,8 +1074,7 @@ template SignalImpl(int index, string name, A...)
         {
             mixin SignalHandlerOps;
         }
-        /* deprecated */ mixin("private static const int __sig" ~ ToString!(index) ~ " = " ~ ToString!(index) ~ ";");
- //       mixin("public alias TypeTuple!(\"" ~ signatureString!(name, A) ~ "\", index, TupleWrapper!(A)) __signal" ~ ToString!(index) ~ ";");
+        mixin("public alias TypeTuple!(\"" ~ name ~ "\", index, A) __signal" ~ ToString!(index) ~ ";");
         mixin("SignalOps!(" ~ ToString!(index) ~ ", A) " ~ name ~ "(){ return SignalOps!("
             ~ ToString!(index) ~ ", A)(signalHandler); }");
     }

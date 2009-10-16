@@ -75,8 +75,8 @@ class Dialog : public QDialog
 
         buttonBox = new QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel);
 
-        buttonBox.accepted.connect(&this.accept);
-        buttonBox.rejected.connect(&this.reject);
+        connect!("accepted")(buttonBox, &this.accept);
+        connect!("rejected")(buttonBox, &this.reject);
 
         QVBoxLayout mainLayout = new QVBoxLayout;
 
@@ -101,7 +101,7 @@ class Dialog : public QDialog
         exitAction = fileMenu.addAction(tr("E&xit"));
         menuBar.addMenu(fileMenu);
 
-        exitAction.triggered.connect(&this.accept);
+        connect!("triggered")(exitAction, &this.accept);
     }
 
     void createHorizontalGroupBox()

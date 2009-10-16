@@ -47,7 +47,7 @@ int main(string[] args)
 
     quit.resize(75, 30);
     quit.setFont(new QFont("Times", 18, QFont.Bold));
-    quit.clicked.connect(&QApplication.quit);
+    QObject.connect!("clicked")(quit, &QApplication.quit);
 
     quit.show();
     return app.exec();

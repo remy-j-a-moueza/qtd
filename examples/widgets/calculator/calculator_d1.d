@@ -348,7 +348,7 @@ private:
         Button createButton(string text, void delegate() member)
         {
                 Button button = new Button(text);
-                button.clicked.connect(member);
+                connect!("clicked")(button, member);
                 return button;
         }
 
