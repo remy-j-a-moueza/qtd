@@ -3703,13 +3703,13 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="layoutSpacingImplementation(QSizePolicy::ControlType, QSizePolicy::ControlType, Qt::Orientation, const QStyleOption *, const QWidget *) const" virtual-slot="yes"/>
   </object-type>
   <object-type name="QPrintDialog">
-      <modify-function signature="accepted(QPrinter *)">
+<!--      <modify-function signature="accepted(QPrinter *)">
           <rename to="accepted_printer"/>
-      </modify-function>
+      </modify-function> -->
       <modify-function signature="accepted()" remove="all"/>
       <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
 
-  </object-type>
+  </object-type> 
   <object-type name="QPrintEngine"/>
   <object-type name="QProgressBar">
 <!--    <modify-function signature="initStyleOption(QStyleOptionProgressBar*)const">
@@ -5330,12 +5330,12 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
   </object-type>
 
   <object-type name="QCompleter">
-    <modify-function signature="activated(const QModelIndex &amp;)">
+<!--    <modify-function signature="activated(const QModelIndex &amp;)">
         <rename to="activatedIndex"/>
     </modify-function>
     <modify-function signature="highlighted(const QModelIndex &amp;)">
         <rename to="highlightedIndex"/>
-    </modify-function>
+    </modify-function> -->
     <modify-function signature="setModel(QAbstractItemModel *)">
         <modify-argument index="1">
             <reference-count action="set" variable-name="__rcModel"/>
@@ -6815,25 +6815,25 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
   </object-type>
 
   <object-type name="QSpinBox">
-    <modify-function signature="valueChanged(const QString &amp;)">
+<!--    <modify-function signature="valueChanged(const QString &amp;)">
         <rename to="valueStringChanged"/>
-    </modify-function>
+    </modify-function> -->
   </object-type>
 
   <object-type name="QTextBrowser">
-    <modify-function signature="highlighted(const QString &amp;)">
+<!--    <modify-function signature="highlighted(const QString &amp;)">
         <rename to="highlightedString"/>
-    </modify-function>
+    </modify-function> -->
   </object-type>
 
   <object-type name="QDoubleSpinBox">
-    <modify-function signature="valueChanged(const QString &amp;)">
+<!--    <modify-function signature="valueChanged(const QString &amp;)">
         <rename to="valueStringChanged"/>
-    </modify-function>
+    </modify-function> -->
   </object-type>
 
   <object-type name="QButtonGroup">
-    <modify-function signature="buttonClicked(int)">
+<!--    <modify-function signature="buttonClicked(int)">
         <rename to="buttonIdClicked"/>
     </modify-function>
     <modify-function signature="buttonPressed(int)">
@@ -6841,7 +6841,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </modify-function>
     <modify-function signature="buttonReleased(int)">
         <rename to="buttonIdReleased"/>
-    </modify-function>
+    </modify-function> -->
     <modify-function signature="addButton(QAbstractButton *)">
         <modify-argument index="1">
             <reference-count action="add" variable-name="__rcButtons"/>
@@ -7235,7 +7235,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <inject-code>
         <import-file name="typesystem_gui-java.java" quote-after-line="class QComboBox___" quote-before-line="}// class"/>
     </inject-code>
-    <modify-function signature="activated(int)">&gt;
+<!--    <modify-function signature="activated(int)">&gt;
         <rename to="activatedIndex"/>
     </modify-function>
     <modify-function signature="currentIndexChanged(const QString &amp;)">
@@ -7244,7 +7244,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="highlighted(int)">
         <rename to="highlightedIndex"/>
     </modify-function>
-
+-->
       <modify-function signature="autoCompletion()const" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="autoCompletionCaseSensitivity()const" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="setAutoCompletion(bool)" remove="all"/> <!--### Obsolete in 4.3-->

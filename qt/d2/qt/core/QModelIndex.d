@@ -4,8 +4,8 @@ public import qt.QGlobal;
 private import qt.core.QObject;
 
 // automatic imports-------------
-private import qt.core.QVariant;
-private import qt.core.QAbstractItemModel;
+//private import qt.core.QVariant;
+//private import qt.core.QAbstractItemModel;
 public import qt.core.Qt;
 
 
@@ -51,7 +51,7 @@ public struct QModelIndex
     public final bool isValid() const {
         return __qtd_QModelIndex_isValid(cast(void*)&this);
     }
-
+/*
     public final QAbstractItemModel model() {
 //        void* __qt_return_value = __qtd_QModelIndex_model(&this);
         void* __qt_return_value = m;
@@ -60,7 +60,7 @@ public struct QModelIndex
         void* d_obj = qtd_get_d_qobject(__qt_return_value);
         return cast(QAbstractItemModel) d_obj;
     }
-
+*/
     private final bool operator_less(QModelIndex other) {
         return __qtd_QModelIndex_operator_less_QModelIndex(&this, other);
     }

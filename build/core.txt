@@ -17,7 +17,14 @@ set (d_files
     qtd/Traits
     core/QString
     core/QMetaType
-    core/QMetaObject)
+    core/QMetaObject
+    
+    qtd/MetaMarshall
+    qtd/MOC
+    qtd/util/Tuple
+    qtd/ctfe/Integer
+    qtd/ctfe/String
+    qtd/ctfe/Format)
 set (d_version_files 
     QtdObject
     Signal qtd/Str

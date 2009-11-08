@@ -42,6 +42,7 @@
 #include "abstractmetalang.h"
 #include "reporthandler.h"
 #include "jumptable.h"
+#include <iostream>
 
 /*******************************************************************************
  * AbstractMetaType
@@ -668,15 +669,15 @@ QString AbstractMetaFunction::typeReplaced(int key) const
     return QString();
 }
 
-QString AbstractMetaFunction::minimalSignature() const
+QString AbstractMetaFunction::minimalSignature(int reduce) const
 {
-    if (!m_cached_minimal_signature.isEmpty())
+    if (!m_cached_minimal_signature.isEmpty() && !reduce)
         return m_cached_minimal_signature;
 
     QString minimalSignature = originalName() + "(";
     AbstractMetaArgumentList arguments = this->arguments();
-
-    for (int i=0; i<arguments.count(); ++i) {
+    int argsCount = arguments.count() - reduce;
+    for (int i=0; i<argsCount; ++i) {
         AbstractMetaType *t = arguments.at(i)->type();
 
         if (i > 0)
@@ -689,7 +690,8 @@ QString AbstractMetaFunction::minimalSignature() const
         minimalSignature += "const";
 
     minimalSignature = QMetaObject::normalizedSignature(minimalSignature.toLocal8Bit().constData());
-    m_cached_minimal_signature = minimalSignature;
+    if(!reduce)
+        m_cached_minimal_signature = minimalSignature;
 
     return minimalSignature;
 }

@@ -79,7 +79,7 @@ class QObject___ extends QObject {
         QObject __next;
         QObject __prev;
     }
-    
+/*    
     override void onSignalHandlerCreated(ref SignalHandler sh)
     {
         sh.signalEvent = &onSignalEvent;
@@ -104,7 +104,7 @@ class QObject___ extends QObject {
             }
         }
     }
-    
+*/
     ~this()
     {
         if (__prev)
@@ -153,6 +153,13 @@ class QObject___ extends QObject {
         
         find(children);
         return result;
+    }
+    
+    static void connect(QObject sender, string signal, QObject receiver, string method)
+    {
+        int signalIndex = sender.metaObject.lookUpSignal(signal);
+        int methodIndex = receiver.metaObject.lookUpMethod(method);
+        QMetaObject.connect(sender, signalIndex, receiver, methodIndex);
     }
 }// class
 

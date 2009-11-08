@@ -12,856 +12,137 @@
 module qt.Signal;
 
 public import qt.QGlobal;
-public import
-    std.metastrings,
-    std.typetuple;
+import qt.qtd.MetaMarshall;
+
 import core.stdc.stdlib : crealloc = realloc, cfree = free;
 import core.stdc.string : memmove;
 import
-    std.traits,
     core.thread,
-    core.exception;
+    core.exception,
+    std.algorithm;
 
-private: // private by default
+public import
+    std.typetuple,
+    std.traits,
+    std.conv,
+    std.string,
+    std.metastrings;
 
-alias void delegate(Object) DEvent;
-
-extern(C) void rt_attachDisposeEvent(Object o, DEvent e);
-extern(C) void rt_detachDisposeEvent(Object o, DEvent e);
-extern(C) Object _d_toObject(void* p);
-
-void realloc(T)(ref T[] a, size_t length)
+   
+// returns name, arguments or tuple of the function depending on type parameter
+enum {_Name, _Tuple, _Args}
+string getFunc(int type)(string fullName)
 {
-    a = (cast(T*)crealloc(a.ptr, length * T.sizeof))[0..length];
-    if (!a.ptr)
-        new OutOfMemoryError(__FILE__, __LINE__);
+    int pos = 0;
+    foreach(i, c; fullName)
+        if (c == '(')
+            static if (type == _Tuple)
+                return fullName[i..$];
+            else if (type == _Name)
+                return fullName[0..i];
+            else if (type == _Args)
+                for(int j = fullName.length-1;; j--)
+                    if(fullName[j] == ')')
+                        return fullName[i+1 .. j];
+    return null;
 }
 
-
-void append(T)(ref T[] a, T element)
+/** The beast that takes string representation of function arguments
+  * and returns an array of default values it doesn't check if arguments
+  * without default values follow the arguments with default values for
+  * simplicity. It is done by mixing in an delegate alias.
+  */
+string[] defaultValues(string signature)
 {
-    auto newLen = a.length + 1;
-    a = (cast(T*)crealloc(a.ptr, newLen * T.sizeof))[0..newLen];
-    if (!a.ptr)
-        new OutOfMemoryError(__FILE__, __LINE__);
-    a[newLen - 1] = element;
-}
-
-void move(T)(ref T[] a, size_t src, size_t dest, size_t length)
-{
-    if (a.length > 1)
-        memmove(a.ptr + dest, a.ptr + src, length * T.sizeof);
-}
-
-// COMPILER BUG: Though this is private cannot name it 'remove' because of conflicts
-// with Array.remove
-void erase(T)(ref T[] a, size_t i) 
-{
-    auto newLen = a.length - 1;
-    move(a, i + 1, i, newLen);
-    realloc(a, newLen);
-}
-
-version (QtdUnittest)
-{
-    unittest
-    {
-        int[] a;
-        realloc(a, 16);
-        assert(a.length == 16);
-        foreach (i, ref e; a)
-            e = i;
-        realloc(a, 4096);
-        assert(a.length == 4096);
-        foreach (i, e; a[0..16])
-            assert(e == i);
-        cfree(a.ptr);
-    }
-}
-
-//TODO: should be in the standard library
-struct STuple(A...)
-{
-    static string genSTuple()
-    {
-        string r = "";
-        foreach (i, e; A)
-            r ~= A[i].stringof ~ " _" ~ ToString!(i) ~ ";";
-        return r;
-    }
-
-    mixin (genSTuple);
-    template at(size_t i) { mixin("alias _" ~ ToString!(i) ~ " at;"); };
-}
-
-enum SignalEventId
-{
-    firstSlotConnected,
-    lastSlotDisconnected
-}
-
-public class SignalException : Exception
-{
-    this(string msg)
-    {
-        super(msg);
-    }
-}
-
-struct Fn
-{
-    void* funcptr;
-
-    static typeof(this) opCall(R, A...)(R function(A) fn)
-    {
-        typeof(this) r;
-        r.funcptr = fn;
-        return r;
-    }
-
-    template call(R)
-    {
-        R call(A...)(A args)
-        {
-            alias R function(A) Fn;
-            return (cast(Fn)funcptr)(args);
-        }
-    }
-
-    S get(S)()
-    {
-        static assert (is(typeof(*S.init) == function));
-        return cast(S)funcptr;
-    }
-}
-
-struct Dg
-{
-    void* context;
-    void* funcptr;
-
-    static typeof(this) opCall(R, A...)(R delegate(A) dg)
-    {
-        typeof(this) r;
-        r.context = dg.ptr;
-        r.funcptr = dg.funcptr;
-        return r;
-    }
-
-    template call(R)
-    {
-        R call(A...)(A args)
-        {
-            R delegate(A) dg; // BUG: parameter storage classes are ignored
-            dg.ptr = context;
-            dg.funcptr = cast(typeof(dg.funcptr))funcptr;
-            return dg(args);
-        }
-    }
-
-    S get(S)()
-    {
-        static assert (is(S == delegate));
-        S r;
-        r.ptr = context;
-        r.funcptr = cast(typeof(r.funcptr))funcptr;
-        return r;
-    }
-}
-
-struct Slot(R)
-{
-    alias R Receiver;
-
-    Receiver receiver;
-    Dg invoker;
-    ConnectionFlags flags;
+    int braces = 0;
+    bool inDefaultValue = false;
+    bool inStringLiteral = false;
+    string[] res;
+    int startValue = 0;
     
-    static if (is(Receiver == Dg))
+    if(strip(signature).length == 0)
+        return res;
+
+    foreach (i,c; signature)
     {
-        static const isDelegate = true;
-                
-        bool isDisposed()
+        if(!inStringLiteral)
         {
-            return !receiver.funcptr;
-        }
-        
-        void dispose()
-        {
-            receiver.funcptr = null;
-            receiver.context = null;
+            if(c == '{' || c =='(')
+                braces++;
+            else if(c == '}' || c ==')')
+                braces--;
         }
 
-        Object getObject()
-        {           
-            return flags & ConnectionFlags.NoObject || !receiver.context
-                ? null : _d_toObject(receiver.context);
-        }
-    }
-    else
-        static const isDelegate = false;
-}
-
-enum SlotListId
-{
-    Func, // function pointers
-    Weak, // object delegates stored in C heap
-    Strong // delegates stored in GC heap
-}
-
-/**
-    Used to specify the type of a signal-to-slot connection.
-
-    Examples:
-----
-class Sender
-{
-    mixin Signal!("changed");
-    void change()
-    {
-        changed.emit;
-    }
-}
-
-
-class Receiver
-{
-    void alarm() {}
-}
-
-void main()
-{
-    auto s = new Sender;
-    auto r = new Receiver;
-    s.changed.connect(&r.alarm); // now s weakly references r
-
-    r = null;
-    // collect garbage (assume there is no more reachable pointers
-    // to the receiver and it gets finalized)
-    ...
-
-    s.change;
-    // weak reference to the receiving object
-    // has been removed from the sender's connection lists.
-
-    r = new Receiver;
-    s.changed.connect(&r.alarm, ConnectionFlags.Strong);
-
-    r = null;
-    // collect garbage
-    ...
-    // the receiving object has not been finalized because s strongly references it.
-
-    s.change; // the receiver is called.
-    delete r;
-    s.change; // the receiver is disconnected from the sender.
-
-    static void foo()
-    {
-    }
-
-    s.changed.connect(&foo);
-    s.changed.emit; // foo is called.
-    s.changed.disconnect(&foo); // must be explicitly disconnected.
-
-    void bar()
-    {
-    }
-
-    // ConnectionFlags.NoObject must be specified for delegates
-    // to non-static local functions or struct member functions.
-    s.changed.connect(&bar, ConnectionFlags.NoObject);
-    s.changed.emit; // bar is called.
-    s.changed.disconnect(&bar); // must be explicitly disconnected.
-}
-----
-*/
-public enum ConnectionFlags : ubyte
-{
-    ///
-    None,
-    /**
-        The receiver will be stored as weak reference (implied if ConnectionFlags.NoObject is not specified).
-        If the signal receiver is not a function pointer or a delegate referencing a D class instance.
-        the sender will not be notified when the receiving object is deleted and emitting the signal
-        connected to that receiving object will result in undefined behavior.
-    */
-    Weak                = 0x0001,
-    /**
-        The receiver is stored as strong reference (implied if ConnectionFlags.NoObject is specified).
-    */
-    Strong              = 0x0002,
-    /**
-        Must be specified if the receiver is not a function pointer or a delegate referencing a D class instance.
-    */
-    NoObject            = 0x0004
-
-    // Queued           = 0x0004,
-    // BlockingQueued   = 0x0008
-}
-
-
-struct SlotList(SlotT, bool strong = false)
-{
-    alias SlotT SlotType;
-    SlotType[] data;
-
-    void length(size_t length)
-    {
-        static if (strong)
-            data.length = length;
-        else
-            realloc(data, length);
-    }
-
-    SlotType* add(SlotType slot)
-    {
-        auto oldLen = data.length;
-        length = oldLen + 1;
-        auto p = &data[oldLen];
-        *p = slot;
-        return p;
-    }
-
-    SlotType* get(int slotId)
-    {
-        return &data[slotId];
-    }
-
-    void remove(int slotId)
-    {
-        move(data, slotId, slotId + 1, data.length - slotId - 1);
-        data = data[0..$ - 1];
-    }
-
-    size_t length()
-    {
-        return data.length;
-    }
-
-    void free()
-    {
-        static if (!strong)
-            cfree(data.ptr);
-    }
-}
-
-public alias void delegate(int signalId, SignalEventId event) SignalEvent;
-
-struct Receivers
-{
-    struct Data
-    {
-        Object object;
-        int refs;
-    }
-    
-    Data[] data;
-    void add(Object receiver, DEvent disposeEvent)
-    {        
-        foreach (ref d; data)
+        if(c == '\"' || c == '\'')
         {
-            if (d.object is receiver)
-            {               
-                d.refs++;              
-                return;
-            }
-        }
-        
-        append(data, Data(receiver, 1));
-        rt_attachDisposeEvent(receiver, disposeEvent);
-    }
-    
-    void remove(Object receiver, DEvent disposeEvent)
-    {
-        foreach (i, ref d; data)
-        {
-            if (d.object is receiver)
+            if (inStringLiteral)
             {
-                assert (d.refs);
-                d.refs--;
-                if (!d.refs)
-                {
-                    .erase(data, i);                    
-                    rt_detachDisposeEvent(receiver, disposeEvent);
-                }
-                return;
-            }
-        }
-        
-        assert (false);
-    }
-    
-    // remove all refarences for receiver, receiver has been disposed
-    void removeAll(Object receiver)
-    {
-        foreach (i, ref d; data)
-        {
-            if (d.object is receiver) 
-            {
-                .erase(data, i);
-                return;
-            }
-        }
-    }
-    
-    // remove all references for all receivers, detaching dispose events
-    void free(DEvent disposeEvent)
-    {
-        foreach (i, ref d; data)
-            rt_detachDisposeEvent(d.object, disposeEvent);
-        cfree(data.ptr);
-        data = null;
-    }
-}
-
-struct SignalConnections
-{
-    bool isInUse;
-
-    STuple!(
-        SlotList!(Slot!(Fn)),
-        SlotList!(Slot!(Dg)),
-        SlotList!(Slot!(Dg), true)
-    ) slotLists;
-
-    STuple!(
-        Fn[],
-        Dg[]
-    ) delayedDisconnects;
-
-    void addDelayedDisconnect(Fn r)
-    {
-        delayedDisconnects.at!(0) ~= r;
-    }
-
-    void addDelayedDisconnect(Dg r)
-    {
-        delayedDisconnects.at!(1) ~= r;
-    }
-
-    SlotListType!(slotListId)* getSlotList(int slotListId)()
-    {
-        return &slotLists.tupleof[slotListId];
-    }
-
-    bool hasSlots()
-    {
-        foreach(i, e; slotLists.tupleof)
-        {
-            if (slotLists.tupleof[i].length)
-                return true;
-        }
-        return false;
-    }
-
-    int slotCount()
-    {
-        int count;
-        foreach(i, e; slotLists.tupleof)
-            count += slotLists.at!(i).length;
-        return count;
-    }
-
-    void slotListLengths(int[] lengths)
-    {
-        foreach(i, e; slotLists.tupleof)
-             lengths[i] = slotLists.at!(i).length;
-    }
-
-    SlotType!(slotListId)* addSlot(int slotListId)(SlotType!(slotListId) slot)
-    {
-        return getSlotList!(slotListId).add(slot);
-    }
-
-    void removeSlot(int slotListId)(int slotId)
-    {
-        slotLists.at!(slotListId).remove(slotId);
-    }
-
-    void free()
-    {
-        foreach(i, e; slotLists.tupleof)
-        {
-            static if (is(typeof(slotLists.at!(i).free)))
-                slotLists.at!(i).free;
-        }
-    }
-    
-    void onReceiverDisposed(Object receiver)
-    {
-        foreach (i, e; slotLists.tupleof)
-        {
-            static if (slotLists.at!(i).SlotType.isDelegate)
-            {
-                foreach (ref slot; slotLists.at!(i).data)
-                {
-                    if (slot.getObject is receiver)
-                        slot.dispose;
-                }
-            }
-        }
-    }
-
-    template SlotListType(int slotListId)
-    {
-        alias typeof(slotLists.tupleof)[slotListId] SlotListType;
-    }
-
-    template SlotType(int slotListId)
-    {
-        alias SlotListType!(slotListId).SlotType SlotType;
-    }
-
-    template ReceiverType(int slotListId)
-    {
-        alias SlotType!(slotListId).Receiver ReceiverType;
-    }
-
-    static const slotListCount = slotLists.tupleof.length;
-}
-
-
-private Object signalSender_;
-
-/**
-    If called from a slot, returns the object
-    that is emitting the signal. Otherwise, returns null.
-*/
-public Object signalSender() {
-    return signalSender_;
-}
-
-public final class SignalHandler
-{
-    SignalConnections[] connections;
-    Receivers receivers;
-    Object owner;
-    int blocked;
-    
-    SignalEvent signalEvent;
-       
-    alias SignalConnections.SlotType SlotType;
-    alias SignalConnections.ReceiverType ReceiverType;
-
-    public this(Object owner_) {
-        owner = owner_;
-    }
-
-    private SignalConnections* getConnections(int signalId)
-    {
-        if (signalId < connections.length)
-            return &connections[signalId];
-        return null;
-    }
-
-    private SlotType!(slotListId)* addSlot(int slotListId)(int signalId, ReceiverType!(slotListId) receiver,
-        Dg invoker, ConnectionFlags flags)
-    {
-        if (signalId >= connections.length)
-            connections.length = signalId + 1;
-        auto slot = connections[signalId].addSlot!(slotListId)(SlotType!(slotListId)(receiver, invoker));
-        
-        static if (slot.isDelegate)
-        {
-            if (!(flags & ConnectionFlags.NoObject))
-                receivers.add(_d_toObject(receiver.context), &onReceiverDisposed);
-        }
-
-        if (signalEvent && connections[signalId].slotCount == 1)
-            signalEvent(signalId, SignalEventId.firstSlotConnected);
-
-        return slot;
-    }
-    
-    void onReceiverDisposed(Object receiver)
-    {
-        synchronized(this)
-        {
-            foreach(ref c; connections)
-                c.onReceiverDisposed(receiver);
-            receivers.removeAll(receiver);
-        }
-    }
-
-    private void removeSlot(int slotListId)(int signalId, int slotId)
-    {
-        auto slot = connections[signalId].getSlotList!(slotListId).get(slotId);
-        static if (slot.isDelegate)
-        {
-            if (auto obj = slot.getObject)
-                receivers.remove(obj, &onReceiverDisposed);
-        }
-        
-        connections[signalId].removeSlot!(slotListId)(slotId);
-
-        if (signalEvent && !connections[signalId].slotCount)
-            signalEvent(signalId, SignalEventId.lastSlotDisconnected);
-    }
-
-    size_t slotCount(int signalId)
-    {
-        synchronized(this)
-        {
-            auto con = getConnections(signalId);
-            if (con)
-                return con.slotCount;
-            return 0;
-        }
-    }
-
-    void connect(Receiver)(int signalId, Receiver receiver,
-        Dg invoker, ConnectionFlags flags)
-    {
-        synchronized(this)
-        {
-            static if (is(typeof(receiver.context)))
-            {
-                Object obj;
-                if ((flags & ConnectionFlags.NoObject))
-                {
-                    // strong by default
-                    if (flags & ConnectionFlags.Weak)
-                        addSlot!(SlotListId.Weak)(signalId, receiver, invoker, flags);
-                    else
-                        addSlot!(SlotListId.Strong)(signalId, receiver, invoker, flags);
-                }
-                else
-                {
-                    // weak by default
-                    if (flags & ConnectionFlags.Strong)
-                        addSlot!(SlotListId.Strong)(signalId, receiver, invoker, flags);
-                    else
-                        addSlot!(SlotListId.Weak)(signalId, receiver, invoker, flags);
-                }
+                if(signature[i-1] != '\\')
+                    inStringLiteral = false;
             }
             else
-                addSlot!(SlotListId.Func)(signalId, receiver, invoker, flags);
-        }
-    }
-
-    void disconnect(Receiver)(int signalId, Receiver receiver)
-    {
-        synchronized(this)
-        {
-            auto cons = getConnections(signalId);
-            if (!cons)
-                return;
-
-            // if called from a slot being executed by this signal, delay disconnection
-            // until all slots has been called.
-            if (cons.isInUse)
             {
-                cons.addDelayedDisconnect(receiver);
-                return;
+                inStringLiteral = true;
             }
-
-        TOP:
-            foreach (slotListId, e; cons.slotLists.tupleof)
+        }
+        
+        if (!inStringLiteral && braces == 0)
+        {
+            if(c == '=') // found default value
             {
-                /// COMPILER BUG: ReceiverType is evaluated to expression instead of type.
-                static if (is(typeof(cons.ReceiverType!(slotListId)) == Receiver))
+                inDefaultValue = true;
+                startValue = i+1;
+            }
+            else if(c == ',') // next function argument
+            {
+                if (inDefaultValue)
                 {
-                    auto slotList = cons.getSlotList!(slotListId);
-                    for (int slotId; slotId < slotList.length;)
-                    {
-                        auto slot = slotList.get(slotId);
-                        static if (slot.isDelegate)
-                        {
-                            if (slot.isDisposed)
-                            {
-                                removeSlot!(slotListId)(signalId, slotId);
-                                continue;
-                            }
-                        }
-
-                        if (slot.receiver == receiver)
-                        {
-                            removeSlot!(slotListId)(signalId, slotId);
-                            break TOP;
-                        }
-
-                        slotId++;
-                    }
+                    res ~= signature[startValue..i];
+                    inDefaultValue = false;
                 }
             }
         }
     }
+    
+    if (inDefaultValue)
+        res ~= signature[startValue..$];
 
-    void emit(A...)(size_t signalId, A args)
-    {
-        synchronized(this)
-        {
-            if (signalId >= connections.length || blocked)
-                return;
-            auto cons = &connections[signalId];
-
-            if (cons.hasSlots)
-            {
-                {
-                    cons.isInUse = true;
-                    signalSender_ = owner;
-                    scope(exit)
-                    {
-                        cons.isInUse = false;
-                        signalSender_ = null;
-                    }
-
-                    // Store the lengths to avoid calling new slots
-                    // connected in the slots being called.
-                    // dmd bug: int[cons.slotListCount] fails
-                    static const c = cons.slotListCount;
-                    int[c] lengths = void;
-                    cons.slotListLengths(lengths);
-
-                    foreach (slotListId, e; cons.slotLists.tupleof)
-                    {
-                        auto slotList = cons.getSlotList!(slotListId);
-                        for (size_t slotId; slotId < lengths[slotListId];)
-                        {
-                            auto slot = slotList.get(slotId);
-                            static if (slot.isDelegate)
-                            {
-                                if (slot.isDisposed)
-                                {
-                                    removeSlot!(slotListId)(signalId, slotId);
-                                    lengths[slotListId]--;
-                                    continue;
-                                }
-                            }
-
-                            slot.invoker.call!(void)(slot.receiver, args);
-                            ++slotId;
-                        }
-                    }
-                }
-
-
-                // process delayed disconnects if any
-                foreach(i, e; cons.delayedDisconnects.tupleof)
-                {
-                    if (cons.delayedDisconnects.at!(i).length)
-                    {
-                        foreach (d; cons.delayedDisconnects.at!(i))
-                            disconnect(signalId, d);
-                        cons.delayedDisconnects.at!(i).length = 0;
-                    }
-                }
-            }
-        }
-    }
-
-    // Adjusts signal arguments and calls the slot. S - slot signature, A - signal arguments
-    private void invokeSlot(S, Receiver, A...)(Receiver r, A args)
-    {
-        r.get!(S)()(args[0..ParameterTypeTuple!(S).length]);
-    }
-
-    void blockSignals()
-    {
-        synchronized(this)
-            blocked++;
-    }
-
-    void unblockSignals()
-    {
-        synchronized(this)
-        {
-            if(!blocked)
-                throw new SignalException("Signals are not blocked");
-            blocked--;
-        }
-    }
-
-    ~this()
-    {
-        receivers.free(&onReceiverDisposed);
-        foreach(ref c; connections)
-            c.free;
-    }
+    return res;
 }
 
-public template SignalHandlerOps()
+int defaultValuesLength(string[] defVals)
 {
-    static assert (is(typeof(this.signalHandler)),
-        "SignalHandlerOps is already instantiated in " ~ typeof(this).stringof ~ " or one of its base classes");
-
-protected:
-    SignalHandler signalHandler_; // manages signal-to-slot connections
-
-    final SignalHandler signalHandler()
-    {
-        if (!signalHandler_)
-        {
-            signalHandler_ = new SignalHandler(this);
-            onSignalHandlerCreated(signalHandler_);
-        }
-        return signalHandler_;
-    }
-
-    void onSignalHandlerCreated(ref SignalHandler sh)
-    {
-    }
-
-public:
-    final void blockSignals()
-    {
-        signalHandler.blockSignals();
-    }
-
-    final void unblockSignals()
-    {
-        signalHandler.unblockSignals();
-    }
-
-    template connect(string signalName, A...)
-    {
-        static void connect(T, Func)(T sender, Func func, ConnectionFlags flags = ConnectionFlags.None)
-            if (isFnOrDg!(Func))
-        {
-            alias findSignal!(T, signalName, Func, A).result sig;
-            auto sh = sender.signalHandler();
-            static if (isFn!(Func))
-                alias Fn Callable;
-            else
-                alias Dg Callable;
-            auto invoker = Dg(&sh.invokeSlot!(typeof(func), Callable, sig[2..$]));
-            sh.connect(sig[1], Callable(func), invoker, flags);
-        }
-    }
-
-    template disconnect(string signalName, A...)
-    {
-        static void connect(T, Func)(T sender, Func func, ConnectionFlags flags = ConnectionFlags.None)
-            if (isFnOrDg!(Func))
-        {
-            alias findSignal!(T, signalName, Func, A).result sig;
-            auto sh = sender.signalHandler();
-            static if (isFn!(Func))
-                alias Fn Callable;
-            else
-                alias Dg Callable;
-            sh.disconnect(sig[1], Callable(func));
-        }
-    }
-/*
-    template slotCount(string signalName, A...)
-    {
-        debug static void slotCount(T)(T sender)
-        {
-            alias findSignal!(T, signalName, Func, A).result sig;
-            auto sh = sender.signalHandler();
-            return sh.slotCount(sig[1]);
-        }
-    }
-    */
+    return defVals.length;
 }
 
 /**
     New implementation.
 */
 
-const string signalPrefix = "__signal";
+
+// need this to mark static metamethods-info whether it's generated by presence of default args
+enum DefaultArgs
+{
+    None, Start, Continue
+}
+
+// templates for extracting data from static meta-information of signals, slots or properties
+// public alias TypeTuple!("name", index, OwnerClass, DefaultArgs.Start, ArgTypes) __signal
+template MetaEntryName(source...)
+{
+    enum MetaEntryName = source[0]; // name of the metaentry is the first element
+}
+
+template MetaEntryOwner(source...)
+{
+    alias TupleWrapper!(source[2]).at[0] MetaEntryOwner; // class that owns the property is the third
+    // Compiler #BUG 3092 - evaluates MetaEntryOwner as a Tuple with one element
+}
+
+template MetaEntryArgs(source...)
+{
+    alias source[4 .. $] MetaEntryArgs; // arguments-tuple starts from the fourth position
+}
 
 template TupleWrapper(A...) { alias A at; }
 
@@ -955,6 +236,14 @@ template SigBySignPred(string name, SigArgs...)
     }
 }
 
+template ByOwner(Owner)
+{
+    template ByOwner(source...)
+    {
+        enum ByOwner = is(MetaEntryOwner!source == Owner);
+    }
+}
+
 template staticSymbolName(string prefix, int id)
 {
     const string staticSymbolName = prefix ~ ToString!(id);
@@ -965,6 +254,7 @@ template signatureString(string name, A...)
     const string signatureString = name ~ "(" ~ joinArgs!(A) ~ ")";
 }
 
+// recursive search in the static meta-information
 template findSymbolImpl(string prefix, C, int id, alias pred)
 {
     static if ( is(typeof(mixin("C." ~ staticSymbolName!(prefix, id)))) )
@@ -1006,6 +296,30 @@ template findSignal(C, string name, Receiver, SigArgs...)
     }
 }
 
+// recursive search in the static meta-information
+template findSymbolsImpl(string prefix, C, int id, alias pred)
+{
+    static if ( is(typeof(mixin("C." ~ staticSymbolName!(prefix, id)))) )
+    {
+        mixin ("alias C." ~ staticSymbolName!(prefix, id) ~ " current;");
+        static if (pred!current) {
+            alias TupleWrapper!current subres;
+//                    pragma(msg, toStringNow!id ~ " " ~ subres.stringof);
+        } else
+            alias TypeTuple!() subres;
+        alias TypeTuple!(subres, findSymbolsImpl!(prefix, C, id + 1, pred).result) result;
+    }
+    else
+    {
+        alias TypeTuple!() result;
+    }
+}
+
+template findSymbols(string prefix, C, alias pred)
+{
+    alias findSymbolsImpl!(prefix, C, 0, pred).result findSymbols;
+}
+
 string __toString(long v)
 {
     if (v == 0)
@@ -1032,18 +346,42 @@ string __toString(long v)
     return ret;
 }
 
-public string SignalEmitter(A...)(SignalType signalType, string name, int index)
+string convertSignalArguments(Args...)()
+{
+//        void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+
+    string res = "void*[" ~ __toString(Args.length+1) ~ "] _a = [null";
+    foreach(i, _; Args)
+        res ~= ", " ~ "cast(void*) &" ~ convertSignalArgument!(Args[i])("_t" ~ __toString(i));
+    res ~= "];\n";
+    return res;
+}
+
+public string SignalEmitter(A...)(SignalType signalType, string name, string[] defVals, int localIndex)
 {
     string fullArgs, args;
+    int defValsLength = defVals.length;
+    string argsConversion = "";
+    string argsPtr = "null";
     static if (A.length)
     {
-        fullArgs = A[0].stringof ~ " a0";
-        args = ", a0";
+        while(A.length != defVals.length)
+            defVals = "" ~ defVals;
+        
+        fullArgs = A[0].stringof ~ " _t0";
+        if (defVals[0].length)
+            fullArgs ~= " = " ~ defVals[0];
+        args = "_t0";
         foreach(i, _; A[1..$])
         {
-            fullArgs ~= ", " ~ A[i+1].stringof ~ " a" ~ __toString(i+1);
-            args ~= ", a" ~ __toString(i+1);
+            fullArgs ~= ", " ~ A[i+1].stringof ~ " _t" ~ __toString(i+1);
+            if (defVals[i+1].length)
+                fullArgs ~= " = " ~ defVals[i+1];
+            args ~= ", _t" ~ __toString(i+1);
         }
+        // build up conversion of signal args from D to C++
+        argsPtr = "_a.ptr";
+        argsConversion = convertSignalArguments!(A)();
     }
     string attribute;
     string sigName = name;
@@ -1051,197 +389,147 @@ public string SignalEmitter(A...)(SignalType signalType, string name, int index)
         name ~= "_emit";
     else
         attribute = "protected ";
-    string str = attribute ~ "void " ~ name ~ "(" ~ fullArgs ~ ")" ~
-                 "{ this.signalHandler.emit(" ~ __toString(index) ~ args ~ "); }";
+    
+    string indexArgs = __toString(localIndex);
+    if(defValsLength > 0)
+        indexArgs ~= ", " ~ __toString(localIndex+defValsLength);
+    string str = attribute ~ "final void " ~ name ~ "(" ~ fullArgs ~ ") {\n" ~ argsConversion ~ "\n"
+                           ~ "    QMetaObject.activate(this, typeof(this).staticMetaObject, " ~ indexArgs ~ ", " ~ argsPtr ~ ");\n"
+                           ~ "}\n"; // ~
     return str;
 }
-
 /** ---------------- */
 
 
-/**
-    Examples:
-----
-struct Args
-{
-    bool cancel;
-}
-
-class C
-{
-    private int _x;
-    // reference parameters are not supported yet,
-    // so we pass arguments by pointer.
-    mixin Signal!("xChanging", int, Args*);
-    mixin Signal!("xChanged");
-
-    void x(int v)
-    {
-        if (v != _x)
-        {
-            Args args;
-            xChanging.emit(v, &args);
-            if (!args.cancel)
-            {
-                _x = v;
-                xChanged.emit;
-            }
-        }
-    }
-}
-----
-*/
+const string signalPrefix = "__signal";
+const string slotPrefix = "__slot";
 
 enum SignalType
 {
     BindQtSignal,
-    NewSignal
+    NewSignal,
+    NewSlot
 }
 
-template BindQtSignal(string name, A...)
+template BindQtSignal(string fullName)
 {
-    mixin SignalImpl!(0, name, SignalType.BindQtSignal, A);
+    mixin MetaMethodImpl!(signalPrefix, 0, fullName, SignalType.BindQtSignal);
 }
 
-template Signal(string name, A...)
+template Signal(string fullName)
 {
-    mixin SignalImpl!(0, name, SignalType.NewSignal, A);
+    mixin MetaMethodImpl!(signalPrefix, 0, fullName, SignalType.NewSignal);
 }
 
-template SignalImpl(int index, string name, SignalType signalType, A...)
+template Slot(string fullName)
 {
-    static if (is(typeof(mixin(typeof(this).stringof ~ ".__signal" ~ ToString!(index)))))
-        mixin SignalImpl!(index + 1, name, signalType, A);
+    mixin MetaMethodImpl!(slotPrefix, 0, fullName, SignalType.NewSlot);
+}
+
+template SignalImpl(int index, string fullName, SignalType signalType)
+{
+    static if (is(typeof(mixin(typeof(this).stringof ~ "." ~ signalPrefix ~ ToString!(index)))))
+        mixin SignalImpl!(index + 1, fullName, signalType);
     else
     {
-        // mixed-in once
-        static if (!is(typeof(this.signalHandler)))
-            mixin SignalHandlerOps;
+//        pragma(msg, "alias void delegate" ~ getFunc!_Tuple(fullName) ~ " Dg;");
+        mixin("alias void delegate" ~ getFunc!_Tuple(fullName) ~ " Dg;");
+        alias ParameterTypeTuple!(Dg) ArgTypes;
+        enum args = getFunc!_Args(fullName);
+        enum defVals = defaultValues(args);
+        enum defValsLength = defaultValuesLength(defVals);
 
-        mixin (SignalEmitter!(A)(signalType, name, index));
-        mixin("public alias TypeTuple!(\"" ~ name ~ "\", index, A) __signal" ~ ToString!(index) ~ ";");
+//        pragma (msg, SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, index));
+        mixin InsertMetaSignal!(fullName, index, defValsLength, ArgTypes);
+//        pragma (msg, ctfe_meta_signal!(ArgTypes)(fullName, index, defValsLength));
     }
 }
-
-extern(C) alias void function(void*) SlotConnector;
-
-debug (UnitTest)
+template MetaMethodImpl(string metaPrefix, int index, string fullName, SignalType signalType)
 {
-    class A
+    static if (is(typeof(mixin(typeof(this).stringof ~ "." ~ metaPrefix ~ toStringNow!(index)))))
     {
-        mixin Signal!("scorched", int);
-
-        int signalId1 = -1;
-        int signalId2 = -1;
-
-        void onFirstConnect(int sId)
-        {
-            signalId1 = sId;
-        }
-
-        void onLastDisconnect(int sId)
-        {
-            signalId2 = sId;
-        }
-
-        this()
-        {
-            signalHandler.firstSlotConnected = &onFirstConnect;
-            signalHandler.lastSlotDisconnected = &onLastDisconnect;
-        }
+        mixin MetaMethodImpl!(metaPrefix, index + 1, fullName, signalType);
     }
-
-    class B : A
+    else
     {
-        mixin Signal!("booed", int);
-
-        int bazSum;
-        void baz(int i)
+        mixin("alias void delegate" ~ getFunc!_Tuple(fullName) ~ " Dg;");
+        alias ParameterTypeTuple!(Dg) ArgTypes;
+        enum args = getFunc!_Args(fullName);
+        enum defVals = defaultValues(args);
+        enum defValsLength = defaultValuesLength(defVals);
+        
+        static if (metaPrefix == signalPrefix)
         {
-            bazSum += i;
+            // calculating local index of the signal
+            static if (typeof(this).stringof == "QObject")
+                enum localIndex = index;
+            else
+                mixin ("enum localIndex = index - 1 - lastSignalIndex_" ~ (typeof(super)).stringof ~ ";");
+            
+            static if (signalType == SignalType.NewSignal)
+            {
+                pragma (msg, SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
+                mixin (SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
+            }
         }
-    }
-
-    class C : A
-    {
-        mixin Signal!("cooked");
+        mixin InsertMetaMethod!(fullName, metaPrefix, index, defValsLength, DefaultArgs.Start, ArgTypes);
+//        pragma (msg, ctfe_meta_signal!(ArgTypes)(fullName, index, defValsLength));
     }
 }
-
-unittest
+template InsertMetaMethod(string fullName, string metaPrefix, int index, int defValsCount, DefaultArgs defArgsInitFlag, ArgTypes...)
 {
-    static int fooSum;
-    static int barSum;
-
-    static void foo(int i)
+    // this identifies if metamethod is was generated by the presence of default args or not
+    static if(defValsCount > 0)
     {
-        fooSum += i;
+        static if (defArgsInitFlag == DefaultArgs.Start)
+            enum defValsFlag = DefaultArgs.Start;
+        else
+            enum defValsFlag = DefaultArgs.Continue;
     }
-
-    void bar(long i)
+    else
     {
-        barSum += i;
+        static if (defArgsInitFlag == DefaultArgs.Start)
+            enum defValsFlag = DefaultArgs.None;
+        else
+            enum defValsFlag = DefaultArgs.Continue;
     }
+    static if(defValsCount >= 0)
+        mixin("public alias TypeTuple!(\"" ~ getFunc!_Name(fullName) ~ "\", index, typeof(this), defValsFlag, ArgTypes) " ~ metaPrefix ~ toStringNow!(index) ~ ";");
+    static if(defValsCount > 0)
+        mixin InsertMetaMethod!(fullName, metaPrefix, index+1, defValsCount-1, DefaultArgs.Continue, ArgTypes[0..$-1]);
+}
 
-    auto a = new A;
-    auto b = new B;
-    auto c = new C;
-    assert(b.scorched.signalId == 0);
-    assert(b.booed.signalId == 1);
-    assert(c.cooked.signalId == 1);
 
-    auto sh = b.signalHandler;
-
-    b.scorched.connect(&foo);
-    assert(sh.connections.length == 1);
-    assert(b.signalId1 == 0);
-    auto scCons = &sh.connections[0];
-
-    assert(scCons.getSlotList!(SlotListId.Func).length == 1);
-    b.scorched.emit(1);
-    assert(fooSum == 1);
-
-    b.scorched.connect(&bar, ConnectionFlags.NoObject);
-    assert(sh.connections.length == 1);
-    assert(scCons.getSlotList!(SlotListId.Strong).length == 1);
-    b.scorched.emit(1);
-    assert (fooSum == 2 && barSum == 1);
-
-    b.scorched.connect(&b.baz);
-    assert(scCons.getSlotList!(SlotListId.Weak).length == 1);
-    b.scorched.emit(1);
-    assert (fooSum == 3 && barSum == 2 && b.bazSum == 1);
-
-    b.scorched.disconnect(&bar);
-    assert(scCons.slotCount == 2);
-    b.scorched.disconnect(&b.baz);
-    assert(scCons.slotCount == 1);
-    b.scorched.disconnect(&foo);
-    assert(scCons.slotCount == 0);
-    assert(b.signalId2 == 0);
-
-    fooSum = 0;
-    void connectFoo()
+string signature_impl(T...)(string name)
+{
+    string res = name ~ "(";
+    foreach(i, _; T)
     {
-        b.scorched.connect(&foo);
-        b.scorched.disconnect(&connectFoo);
+        if(i > 0)
+            res ~= ",";
+        res ~= T[i].stringof;
     }
+    res ~= ")";
+    return res;
+}
 
-    b.scorched.connect(&connectFoo, ConnectionFlags.NoObject);
-    b.scorched.emit(1);
-    assert(scCons.getSlotList!(SlotListId.Func).length == 1);
-    assert(scCons.getSlotList!(SlotListId.Strong).length == 0);
-    assert(!fooSum);
+template signature(string name, T...)
+{
+    enum signature = signature_impl!(T)(name);
+}
 
-    auto r = new B();
-    b.scorched.connect(&r.baz);
-    assert(scCons.getSlotList!(SlotListId.Weak).length == 1);
-    b.scorched.emit(1);
-    assert(r.bazSum == 1);
-    assert(fooSum == 1);
+template lastSignalIndex(T)
+{
+    static if (T.stringof == "QObject")
+        enum lastSignalIndex = lastSignalIndexImpl!(T, 0);
+    else
+        mixin ("enum lastSignalIndex = lastSignalIndexImpl!(T, " ~ "T.lastSignalIndex_" ~ (BaseClassesTuple!(T)[0]).stringof ~ ");");
+}
 
-    delete(r);
-    assert(scCons.getSlotList!(SlotListId.Weak).length == 1);
-    b.scorched.emit(1);
-    assert(scCons.getSlotList!(SlotListId.Weak).length == 0);
+template lastSignalIndexImpl(T, int index)
+{
+    static if (is(typeof(mixin("T." ~ signalPrefix ~ toStringNow!(index)))))
+        enum lastSignalIndexImpl = lastSignalIndexImpl!(T, index + 1);
+    else
+        enum lastSignalIndexImpl = index - 1;
 }

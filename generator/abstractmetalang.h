@@ -440,7 +440,7 @@ public:
 
     QString modifiedName() const;
 
-    QString minimalSignature() const;
+    QString minimalSignature(int reduce = 0) const;
     QStringList possibleIntrospectionCompatibleSignatures() const;
 
     QString marshalledName(bool classIsOwner = true) const;

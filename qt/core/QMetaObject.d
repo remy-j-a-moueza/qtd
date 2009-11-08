@@ -4,14 +4,96 @@ import qt.QGlobal;
 import qt.core.QObject;
 import qt.QtdObject;
 
+import std.algorithm;
+
+class Meta
+{
+    string name;
+}
+
+class MetaType : Meta
+{
+    this()
+    {
+    }
+}
+
+class MetaVariable : Meta
+{
+    MetaType type;
+}
+
+class MetaCallable : Meta { }
+
+class MetaMethod : Meta { }
+
+class QMetaArgument : MetaVariable { }
+
+class QMetaMethod : MetaMethod
+{
+//    QMetaArgument[] arguments;
+    string signature;
+    int indexOfMethod;
+    
+    this(string signature_, int indexOfMethod_)
+    {
+        signature = signature_;
+        indexOfMethod = indexOfMethod_;
+    }
+}
+
+class QMetaSignal : QMetaMethod
+{
+    this(string signature_, int indexOfMethod_)
+    {
+        super(signature_, indexOfMethod_);
+    }
+}
+
+class QMetaSlot : QMetaMethod
+{
+    this(string signature_, int indexOfMethod_)
+    {
+        super(signature_, indexOfMethod_);
+    }
+}
+
+class MetaObject : MetaType
+{
+    MetaObject _base;
+}
+
+struct QMetaObjectNative
+{
+    QMetaObjectNative *superdata;
+    immutable(char) *stringdata;
+    const(uint) *data;
+    void *extradata;
+}
+
 final class QMetaObject
 {
+    enum Call
+    {
+        InvokeMetaMethod,
+        ReadProperty,
+        WriteProperty,
+        ResetProperty,
+        QueryPropertyDesignable,
+        QueryPropertyScriptable,
+        QueryPropertyStored,
+        QueryPropertyEditable,
+        QueryPropertyUser,
+        CreateInstance
+    }
+    
     private
     {
-        void* _nativeId;
+        QMetaObjectNative* _nativeId;
         QMetaObject _base; // super class
         QMetaObject _firstDerived; // head of the linked list of derived classes
         QMetaObject _next; // next sibling on this derivation level
+        QMetaMethod[] _methods;
         ClassInfo _classInfo;
 
         QObject function(void* nativeId) _createWrapper;
@@ -24,7 +106,7 @@ final class QMetaObject
     }
     
     // NOTE: construction is split between this non-templated constructor and 'construct' function below.
-    this(void* nativeId, QMetaObject base)
+    this(QMetaObjectNative* nativeId, QMetaObject base)
     {
         _nativeId = nativeId;
         if (base)
@@ -57,7 +139,7 @@ final class QMetaObject
     
     /++
     +/
-    void* nativeId()
+    QMetaObjectNative* nativeId()
     {
         return _nativeId;
     }
@@ -67,6 +149,39 @@ final class QMetaObject
     ClassInfo classInfo()
     {
         return _classInfo;
+    }
+    
+    const (QMetaMethod[]) methods()
+    {
+        return _methods;
+    }
+    
+    void addMethod(QMetaMethod method_)
+    {
+        _methods ~= method_;
+    }
+    
+    int lookUpMethod(string slot)
+    {
+        foreach (method; _methods)
+            if (method.signature == slot)
+                return method.indexOfMethod;
+        if (_base)
+            return _base.lookUpMethod(slot);
+        else
+            return -1;
+    }
+    
+    int lookUpSignal(string signal)
+    {
+//        auto signalBegin = signal[0..$-1];
+        foreach (method; _methods)
+            if (method.signature == signal && cast(QMetaSignal)method)
+                return method.indexOfMethod;
+        if (_base)
+            return _base.lookUpSignal(signal);
+        else
+            return -1;
     }
     
     private QMetaObject lookupDerived(void*[] moIds)
@@ -123,12 +238,49 @@ final class QMetaObject
                         moIds[--moCount] = moId = qtd_QMetaObject_superClass(moId);
                                     
                     result = lookupDerived(moIds)._createWrapper(nativeObjId);
-                }                
+                }
             }
         }
 
         return result;
     }
+    
+    static void activate(QObject sender, QMetaObject m, int local_signal_index, void **argv)
+    {
+        qtd_QMetaObject_activate_3(sender.__nativeId, m.nativeId, local_signal_index, argv);
+    }
+    
+    static void activate(QObject sender, QMetaObject m, int from_local_signal_index, int to_local_signal_index, void **argv)
+    {
+        qtd_QMetaObject_activate_4(sender.__nativeId, m.nativeId, from_local_signal_index, to_local_signal_index, argv);
+    }
+
+    static bool connect(const QObject sender, int signal_index,
+                        const QObject receiver, int method_index,
+                        int type = 0, int *types = null)
+    {
+        return qtd_QMetaObject_connect(sender.__nativeId, signal_index, receiver.__nativeId, method_index, type, types);
+    }
+    
+    int indexOfMethod_Cpp(string method)
+    {
+        return qtd_QMetaObject_indexOfMethod(_nativeId, toStringz(method));
+    }
+    
+    int methodCount()
+    {
+        return qtd_QMetaObject_methodCount(_nativeId);
+    }
+
 }
+
+extern(C) void qtd_QMetaObject_activate_3(void* sender, void* m, int local_signal_index, void **argv);
+extern(C) void qtd_QMetaObject_activate_4(void *sender, void* m, int from_local_signal_index, int to_local_signal_index, void **argv);
+extern(C) bool qtd_QMetaObject_connect(const void* sender, int signal_index,
+                                       const void* receiver, int method_index,
+                                       int type, int *types);
+                                       
+extern(C) int qtd_QMetaObject_indexOfMethod(void *nativeId, const(char) *method);
+extern(C) int qtd_QMetaObject_methodCount(void *nativeId);
 
 extern(C) void* qtd_QMetaObject_superClass(void* nativeId);

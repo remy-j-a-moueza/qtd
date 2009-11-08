@@ -27,8 +27,6 @@ package abstract class QtdObject
     protected QtdObjectFlags __flags_;
     void* __nativeId;
 
-    mixin SignalHandlerOps;
-        
     this(void* nativeId, QtdObjectFlags flags = QtdObjectFlags.none)
     {
         __nativeId = nativeId;
