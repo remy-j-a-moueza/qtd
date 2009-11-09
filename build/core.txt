@@ -12,19 +12,20 @@ set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
 ## Module specific d files.
 set (d_files
     QGlobal
-    qtd/Array  
+    qtd/Array
     qtd/ArrayOpsPrimitive   
     qtd/Traits
     core/QString
     core/QMetaType
     core/QMetaObject
-    
+
     qtd/MetaMarshall
     qtd/MOC
     qtd/util/Tuple
     qtd/ctfe/Integer
     qtd/ctfe/String
-    qtd/ctfe/Format)
+    qtd/ctfe/Format
+    )
 set (d_version_files 
     QtdObject
     Signal qtd/Str
@@ -45,35 +46,15 @@ set (classes
     QTimerEvent
     QTranslator
     QByteArray
-    QLocale
     QDataStream
-    QMimeData
-    QIODevice
+    QUrl
+    
+    QTime
+    QRegExp
+    QLocale
     QDateTime
     QDate
-    QTime
     QBitArray
-    QRegExp
-    QUrl
-    QAbstractItemModel
-    QAbstractFileEngine
-    QFile
-    QDir
-    QFileInfo
-    QTextStream
-    QTimer
-    QTextCodec
-    QTextCodec_ConverterState
-    QTextEncoder
-    QTextDecoder
-    QTimeLine
-    QAbstractFactory
-    QAbstractListModel
-    QCryptographicHash
-    QSettings
-    QProcess
-    QBuffer
-    QLibraryInfo
-    QXmlStreamEntityResolver
+    QIODevice
     )
 	
