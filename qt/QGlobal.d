@@ -225,6 +225,11 @@ void Q_UNUSED(T)(T x) { qUnused(x); }
 //class QString;
 //char[] qPrintable(QString string) { string.toLocal8Bit().constData(); }
 //TODO(katrina) These should probably actually call into the c++ functions
+void qFatal(string str)
+{
+    throw new Exception(str);
+}
+
 void qDebug( char[] str ) /* print debug message */
 { writeln(str); }
 
