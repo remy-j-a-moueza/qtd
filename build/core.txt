@@ -18,7 +18,10 @@ set (d_files
     core/QString
     core/QMetaType
     core/QMetaObject
-
+    
+    core/QTypeInfo
+    core/QList
+    qtd/Atomic
     qtd/MetaMarshall
     qtd/MOC
     qtd/util/Tuple
@@ -57,4 +60,4 @@ set (classes
     QBitArray
     QIODevice
     )
-    
+	

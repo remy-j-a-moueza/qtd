@@ -215,6 +215,7 @@ public:
     static void writeInitCallbacks(QTextStream &s, const AbstractMetaClass *java_class);
     static void writeQtdEntityFunction(QTextStream &s, const AbstractMetaClass *java_class);
     void writeRefArguments(QTextStream &s, const AbstractMetaFunction *java_function);
+    void writeValueFunctions(QTextStream &s, const AbstractMetaClass *java_class);
 
 private:
     void writeDefaultConstructedValues_helper(QSet<QString> &values,

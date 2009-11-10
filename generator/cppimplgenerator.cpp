@@ -710,6 +710,9 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
 */
 // qtd    writeJavaLangObjectOverrideFunctions(s, java_class);
 
+    if (java_class->typeEntry()->isValue())
+        writeValueFunctions(s, java_class);
+
     if (java_class->isQObject())
     {
         s << endl << endl
@@ -721,6 +724,15 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     s << endl << endl;
 
     priGenerator->addSource(java_class->package(), fileNameForClass(java_class));
+}
+
+void CppImplGenerator::writeValueFunctions(QTextStream &s, const AbstractMetaClass *java_class)
+{
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isComplex() { return (bool) QTypeInfo<%1>::isComplex; }\n").arg(java_class->name());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isStatic() { return (bool) QTypeInfo<%1>::isStatic; }\n").arg(java_class->name());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isLarge() { return (bool) QTypeInfo<%1>::isLarge; }\n").arg(java_class->name());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isPointer() { return (bool) QTypeInfo<%1>::isPointer; }\n").arg(java_class->name());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isDummy() { return (bool) QTypeInfo<%1>::isDummy; }\n").arg(java_class->name());
 }
 
 void CppImplGenerator::writeVirtualDispatchFunction(QTextStream &s, const AbstractMetaFunction *function, bool d_export)

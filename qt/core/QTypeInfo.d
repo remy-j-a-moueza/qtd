@@ -6,22 +6,27 @@ module qt.core.QTypeInfo;
 /*
   The catch-all template.
 */
+import std.traits;
+
+import qt.qtd.MetaMarshall;
 
 bool qIsDetached(T)(ref T) { return true; }
 
-struct QTypeInfo(T)
+template QTypeInfo(T)
+    if ( !(isQObjectType!T || isObjectType!T) )
 {
 public:
     enum {
-        isPointer = false,
-        isComplex = true,
-        isStatic = true,
-        isLarge = (T.sizeof > sizeof(void*)),
+        isPointer = isPointer!T,
+        isComplex = !isPointer,
+        isStatic = !isPointer,
+        isLarge = (T.sizeof > (void*).sizeof),
         isDummy = false
     }
 }
 
-struct QTypeInfo(T : T*)
+template QTypeInfo(T)
+    if ( isQObjectType!T || isObjectType!T )
 {
 public:
     enum {
@@ -33,27 +38,6 @@ public:
     }
 }
 
-#else
-
-template <typename T> char QTypeInfoHelper(T*(*)());
-void* QTypeInfoHelper(...);
-
-template <typename T> inline bool qIsDetached(T &) { return true; }
-
-template <typename T>
-class QTypeInfo
-{
-public:
-    enum {
-        isPointer = (1 == sizeof(QTypeInfoHelper((T(*)())0))),
-        isComplex = !isPointer,
-        isStatic = !isPointer,
-        isLarge = (sizeof(T)>sizeof(void*)),
-        isDummy = false
-    };
-};
-
-#endif /* QT_NO_PARTIAL_TEMPLATE_SPECIALIZATION */
 
 /*
    Specialize a specific type with:
@@ -63,29 +47,33 @@ public:
    where 'type' is the name of the type to specialize and 'flags' is
    logically-OR'ed combination of the flags below.
 */
-enum { /* TYPEINFO flags */
+
+/* presents in QGlobal
+enum { /* TYPEINFO flags
     Q_COMPLEX_TYPE = 0,
     Q_PRIMITIVE_TYPE = 0x1,
     Q_STATIC_TYPE = 0,
     Q_MOVABLE_TYPE = 0x2,
     Q_DUMMY_TYPE = 0x4
-};
-
-#define Q_DECLARE_TYPEINFO(TYPE, FLAGS) \
-template <> \
-class QTypeInfo<TYPE> \
-{ \
-public: \
-    enum { \
-        isComplex = (((FLAGS) & Q_PRIMITIVE_TYPE) == 0), \
-        isStatic = (((FLAGS) & (Q_MOVABLE_TYPE | Q_PRIMITIVE_TYPE)) == 0), \
-        isLarge = (sizeof(TYPE)>sizeof(void*)), \
-        isPointer = false, \
-        isDummy = (((FLAGS) & Q_DUMMY_TYPE) != 0) \
-    }; \
-    static inline const char *name() { return #TYPE; } \
 }
+*/
 
+/*
+template QTypeInfo(alias FLAGS)
+{
+    template QTypeInfo(TYPE)
+    {
+    public:
+        enum {
+            isComplex = (((FLAGS) & Q_PRIMITIVE_TYPE) == 0),
+            isStatic = (((FLAGS) & (Q_MOVABLE_TYPE | Q_PRIMITIVE_TYPE)) == 0),
+            isLarge = (TYPE.sizeof > (void*).sizeof),
+            isPointer = false,
+            isDummy = (((FLAGS) & Q_DUMMY_TYPE) != 0)
+        }
+    }
+}
+*/
 /*
    Specialize a shared type with:
 
@@ -95,6 +83,7 @@ public: \
    types must declare a 'bool isDetached(void) const;' member for this
    to work.
 */
+/*
 #if defined Q_CC_MSVC && _MSC_VER < 1300
 template <typename T>
 inline void qSwap_helper(T &value1, T &value2, T*)
@@ -122,3 +111,4 @@ template <> inline void qSwap<TYPE>(TYPE &value1, TYPE &value2) \
     value2.data_ptr() = t; \
 }
 #endif
+*/

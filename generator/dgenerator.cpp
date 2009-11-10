@@ -1820,7 +1820,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     auxFile.isDone = true;
     auxFile.stream << "module " << auxModName << ";" << endl << endl;
 
-    bool staticInit = d_class->isQObject() || (cpp_shared && d_class->generateShellClass() && !d_class->isInterface());
+    bool staticInit = d_class->isQObject() || d_class->typeEntry()->isValue() || (cpp_shared && d_class->generateShellClass() && !d_class->isInterface());
     if (staticInit)
     {
         auxFile.isDone = false;
@@ -2261,12 +2261,14 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     if (d_class->baseClassName().isEmpty())
     {
         if (d_class->typeEntry()->isQObject())
-            s << INDENT << "public static enum __isQObjectType = true;" << endl << endl;
+            s << INDENT << "public alias void __isQObjectType;" << endl << endl;
         else if (d_class->typeEntry()->isObject())
-            s << INDENT << "public static enum __isObjectType = true;" << endl << endl;
+            s << INDENT << "public alias void __isObjectType;" << endl << endl;
         else if (d_class->typeEntry()->isValue())
-            s << INDENT << "public static enum __isValueType = true;" << endl << endl;
+            s << INDENT << "public alias void __isValueType;" << endl << endl;
     }
+
+    s << INDENT << "public alias void __isQtType_" << d_class->name() << ";" << endl << endl;
 
     // Add dummy constructor for use when constructing subclasses
     if (!d_class->isNamespace() && !d_class->isInterface() && !fakeClass) {
@@ -2377,6 +2379,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         writeDestructor(s, d_class);
     }
 
+    if (d_class->typeEntry()->isValue())
+        writeValueFunctions(s, d_class);
 /* qtd
     // Add a function that converts an array of the value type to a QNativePointer
     if (d_class->typeEntry()->isValue() && !fakeClass) {
@@ -2412,7 +2416,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         writeCloneFunction(s, d_class);
     }
 */
-    s << "}" << endl;
+    s << "}" << endl; // end of class scope
 
     /* ---------------- injected free code ----------------*/ 
     const ComplexTypeEntry *class_type = d_class->typeEntry(); 
@@ -2602,6 +2606,9 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 
         s << "extern(C) void static_init_" << d_class->name() << "() {" << endl;
 
+        if (d_class->typeEntry()->isValue())
+            s << INDENT << d_class->name() << ".QTypeInfo.init();" << endl;
+
         if (d_class->isQObject()) {
             s << INDENT << "if (!" << d_class->name() << "._staticMetaObject) " << endl
             << INDENT << "    " << d_class->name() << ".createStaticMetaObject;" << endl << endl;
@@ -2659,6 +2666,38 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 
     if (d_class->isQObject())
         writeQObjectFreeFunctions(s, d_class);
+
+    if (d_class->typeEntry()->isValue())
+        writeValueFreeFunctions(s, d_class);
+}
+
+void DGenerator::writeValueFunctions(QTextStream &s, const AbstractMetaClass *d_class)
+{
+    s << INDENT << "struct QTypeInfo {" << endl;
+    s << INDENT << "    static __gshared bool isComplex;" << endl;
+    s << INDENT << "    static __gshared bool isStatic;" << endl;
+    s << INDENT << "    static __gshared bool isLarge;" << endl;
+    s << INDENT << "    static __gshared bool isPointer;" << endl;
+    s << INDENT << "    static __gshared bool isDummy;" << endl << endl;
+
+    s << INDENT << "    static init() {" << endl;
+
+    s <<   QString("        isComplex = qtd_%1_QTypeInfo_isComplex();\n"
+                   "        isStatic = qtd_%1_QTypeInfo_isStatic();\n"
+                   "        isLarge = qtd_%1_QTypeInfo_isLarge();\n"
+                   "        isPointer = qtd_%1_QTypeInfo_isPointer();\n"
+                   "        isDummy = qtd_%1_QTypeInfo_isDummy();\n").arg(d_class->name())
+                << "        }" << endl
+                << "    }" << endl << endl;
+}
+
+void DGenerator::writeValueFreeFunctions(QTextStream &s, const AbstractMetaClass *d_class)
+{
+    s << QString("private extern (C) bool qtd_%1_QTypeInfo_isComplex();\n").arg(d_class->name());
+    s << QString("private extern (C) bool qtd_%1_QTypeInfo_isStatic();\n").arg(d_class->name());
+    s << QString("private extern (C) bool qtd_%1_QTypeInfo_isLarge();\n").arg(d_class->name());
+    s << QString("private extern (C) bool qtd_%1_QTypeInfo_isPointer();\n").arg(d_class->name());
+    s << QString("private extern (C) bool qtd_%1_QTypeInfo_isDummy();\n").arg(d_class->name());
 }
 
 void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass *d_class)

@@ -365,7 +365,7 @@ bool qIsNull(float f)
 /*
   The catch-all template.
 */
-
+/*
 bool qIsDetached(T)(T) { return true; }
 
 class QTypeInfossss(T)
@@ -391,7 +391,7 @@ public:
         isDummy = false
     };
 };
-
+*/
 
 /*
    Specialize a specific type with:

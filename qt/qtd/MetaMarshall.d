@@ -4,12 +4,12 @@ import std.traits;
 
 template isQObjectType(T) // is a QObject type that belongs to the library
 {
-    enum isQObjectType = is(typeof(mixin("T." ~ "__isQObjectType")));
+    enum isQObjectType = is(T.__isQObjectType);
 }
 
 template isObjectType(T) // is a QObject type that belongs to the library
 {
-    enum isQObjectType = is(typeof(mixin("T." ~ "__isObjectType")));
+    enum isObjectType = is(T.__isObjectType);
 }
 
 template isValueType(T) // is a QObject type that belongs to the library

@@ -2,11 +2,35 @@ module qt.core.QList;
 
 import qt.QGlobal;
 import qt.qtd.Atomic;
+//import qt.core.QTypeInfo;
+
+import qt.qtd.MetaMarshall;
 
 import core.stdc.stdlib : qRealloc = realloc, qFree = free, qMalloc = malloc;
 import core.stdc.string : memcpy, memmove;
 
+import std.traits;
+
 enum INT_MAX = int.max;
+
+bool isComplex(T)()
+    if (is(typeof(T.QTypeInfo)))
+{
+    return T.QTypeInfo.isComplex();
+}
+
+bool isStatic(T)()
+    if (is(typeof(T.QTypeInfo)))
+{
+    return T.QTypeInfo.isStatic();
+}
+
+bool isLarge(T)()
+    if (is(typeof(T.QTypeInfo)))
+{
+    return T.QTypeInfo.isLarge();
+}
+
 
 int qAllocMore(int alloc, int extra)
 {
@@ -34,10 +58,10 @@ int qAllocMore(int alloc, int extra)
 private int grow(int size)
 {
     // dear compiler: don't optimize me out.
-    synchronized {
+//    synchronized {
         int x = qAllocMore(size * (void*).sizeof, QListData.DataHeaderSize) / (void*).sizeof;
         return x;
-    }
+//    }
 }
 
 struct QListData {
@@ -271,11 +295,23 @@ struct QList(T)
     struct Node
     {
         void *v;
-    
-        ref T t()
-        { return *cast(T*)(&this); }
-//        { return *cast(T*)(QTypeInfo!T.isLarge || QTypeInfo!T.isStatic
-//                                       ? v : &this); }    }
+        
+        static if (isQObjectType!T)
+        {
+            T t()
+            {
+                return T.__getObject( *cast(void**)(&this) );
+            }
+        }
+        else
+        {    
+            ref T t()
+            {
+                return *cast(T*)(&this);
+            }
+    //        { return *cast(T*)(QTypeInfo!T.isLarge || QTypeInfo!T.isStatic
+    //                                       ? v : &this); }    }
+        }
     }
     
     union {
@@ -329,6 +365,9 @@ public:
         return this;
     }
     
+    int length() const { return p.size(); }
+    int size() const { return length; }
+
     void detach() { if (d.ref_.load() != 1) detach_helper(); }
     
     private void detach_helper()
@@ -347,28 +386,47 @@ public:
         {
             node_construct(cast(Node*)(p.append()), t);
         }
-        else*/
+        else*/ static if (isQObjectType!T)
+        {
+            auto n = cast(Node*)(p.append());
+            *cast(void**)(n) = cast(Node*) t.__nativeId;
+        }
+        else
         {
             const T cpy = t;
             node_construct(cast(Node*)(p.append()), cpy);
         }
     }
-    
-    ref const (T) at(int i) const
-    {
-        assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
-        return (cast(Node*)(p.at(i))).t();
-    }
 
-    void node_construct(Node *n, const ref T t)
+    static if (isQObjectType!T)
     {
-/* TODO       static if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
-            n.v = new T(t);
-        else static if (QTypeInfo!T.isComplex)
-            new (n) T(t);
-        else*/
-            *cast(T*)(n) = t;
+        T at(int i) const
+        {
+            assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
+            return (cast(Node*)(p.at(i))).t();
+        }
     }
+    else
+    {
+        ref const (T) at(int i) const
+        {
+            assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
+            return (cast(Node*)(p.at(i))).t();
+        }
+    }   
+    
+    static if (isQObjectType!T)
+        { }
+    else
+        void node_construct(Node *n, const ref T t)
+        {
+    /* TODO       static if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
+                n.v = new T(t);
+            else static if (QTypeInfo!T.isComplex)
+                new (n) T(t);
+            else*/
+                { *cast(T*)(n) = cast(T)(t); }
+        }
     
     void node_copy(Node *from, Node *to, Node *src)
     {
@@ -383,6 +441,7 @@ public:
 
     void free(QListData.Data* data)
     {
+        writeln("QList data destroyed");
         node_destruct(cast(Node*)(data.array.ptr + data.begin),
                       cast(Node*)(data.array.ptr + data.end));
         if (data.ref_.load() == 0)
@@ -400,3 +459,4 @@ public:
 }
 
 extern(C) void qtd_create_QList(void *nativeId);
+extern(C) void qtd_create_QList_QObject(void *nativeId);

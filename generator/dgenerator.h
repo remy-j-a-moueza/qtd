@@ -160,6 +160,8 @@ private:
     void writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *d_class);
     void writeQObjectFreeFunctions(QTextStream &s, const AbstractMetaClass *d_class);
     void writeConversionFunction(QTextStream &s, const AbstractMetaClass *d_class);
+    void writeValueFreeFunctions(QTextStream &s, const AbstractMetaClass *d_class);
+    void writeValueFunctions(QTextStream &s, const AbstractMetaClass *d_class);
 
 //    void writeMarshallFunction(QTextStream &s, const AbstractMetaClass *d_class);
 

@@ -1,6 +1,9 @@
 #include "qtd_core.h"
 #include <qobjectdefs.h>
 
+
+#include <QList>
+
 extern "C" DLL_PUBLIC void* qtd_QMetaObject_superClass(void *nativeId)
 {
     return (void*)((QMetaObject*)nativeId)->superClass();
@@ -36,4 +39,25 @@ extern "C" DLL_PUBLIC int qtd_QMetaObject_indexOfMethod(void *nativeId, const ch
 extern "C" DLL_PUBLIC int qtd_QMetaObject_methodCount(void *nativeId)
 {
     return ((QMetaObject*)nativeId)->methodCount();
+}
+
+extern "C" DLL_PUBLIC void qtd_create_QList(void *nativeId)
+{
+    QList<int> & list = (*(QList<int> *)nativeId);
+    list.append(54);
+    list.append(45);
+}
+
+extern "C" DLL_PUBLIC void qtd_create_QList_QObject(void *nativeId)
+{
+    QList<QObject*> & list2 = (*(QList<QObject*> *)nativeId);
+    
+    QList<QObject*> list;
+    QObject* a1 = new QObject();
+    a1->setObjectName("a1");
+    list.append(a1);
+    QObject* a2 = new QObject();
+    a2->setObjectName("a2");
+    list.append(a2);
+    list2 = list;
 }
