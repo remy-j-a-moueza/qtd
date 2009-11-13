@@ -463,7 +463,7 @@ template MetaMethodImpl(string metaPrefix, int index, string fullName, SignalTyp
             
             static if (signalType == SignalType.NewSignal)
             {
-                pragma (msg, SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
+//                pragma (msg, SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
                 mixin (SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
             }
         }

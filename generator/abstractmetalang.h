@@ -713,6 +713,7 @@ public:
     bool hasSignal(const AbstractMetaFunction *f) const;
 
     bool hasConstructors() const;
+    AbstractMetaFunction *copyConstructor() const;
 
     void addDefaultConstructor();
 

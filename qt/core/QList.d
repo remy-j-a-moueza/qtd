@@ -1,10 +1,10 @@
 module qt.core.QList;
 
 import qt.QGlobal;
+import qt.QtdObject;
 import qt.qtd.Atomic;
-//import qt.core.QTypeInfo;
-
 import qt.qtd.MetaMarshall;
+//import qt.core.QTypeInfo;
 
 import core.stdc.stdlib : qRealloc = realloc, qFree = free, qMalloc = malloc;
 import core.stdc.string : memcpy, memmove;
@@ -14,23 +14,22 @@ import std.traits;
 enum INT_MAX = int.max;
 
 bool isComplex(T)()
-    if (is(typeof(T.QTypeInfo)))
+    if (is(T.QTypeInfo))
 {
-    return T.QTypeInfo.isComplex();
+    return T.QTypeInfo.isComplex;
 }
 
 bool isStatic(T)()
-    if (is(typeof(T.QTypeInfo)))
+    if (is(T.QTypeInfo))
 {
-    return T.QTypeInfo.isStatic();
+    return T.QTypeInfo.isStatic;
 }
 
 bool isLarge(T)()
-    if (is(typeof(T.QTypeInfo)))
+    if (is(T.QTypeInfo))
 {
-    return T.QTypeInfo.isLarge();
+    return T.QTypeInfo.isLarge;
 }
-
 
 int qAllocMore(int alloc, int extra)
 {
@@ -296,17 +295,30 @@ struct QList(T)
     {
         void *v;
         
-        static if (isQObjectType!T)
+        static if (isQObjectType!T || isObjectType!T || isValueType!T) // binded Qt types
         {
             T t()
             {
-                return T.__getObject( *cast(void**)(&this) );
+                static if (isValueType!T)
+                {
+                    pragma(msg, "value " ~ T.stringof);
+                    void* ptr = cast(void*)(isLarge!T() || isStatic!T() ? v : &this);
+                    return new T(ptr, QtdObjectFlags.nativeOwnership);
+                }
+                else
+                {
+                    pragma(msg, T.stringof);
+
+                    return T.__getObject( *cast(void**)(&this) );
+                }
             }
         }
-        else
+        else // native types
         {    
             ref T t()
             {
+                pragma(msg, "native " ~ T.stringof);
+
                 return *cast(T*)(&this);
             }
     //        { return *cast(T*)(QTypeInfo!T.isLarge || QTypeInfo!T.isStatic
@@ -379,17 +391,13 @@ public:
             free(x);
     }
     
+   
     void append(const T t) // fix to const ref for complex types TODO
     {
         detach();
-/*        static if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
+        static if (isQObjectType!T || isObjectType!T || isValueType!T)
         {
             node_construct(cast(Node*)(p.append()), t);
-        }
-        else*/ static if (isQObjectType!T)
-        {
-            auto n = cast(Node*)(p.append());
-            *cast(void**)(n) = cast(Node*) t.__nativeId;
         }
         else
         {
@@ -398,7 +406,7 @@ public:
         }
     }
 
-    static if (isQObjectType!T)
+    static if (isQObjectType!T || isObjectType!T || isValueType!T)
     {
         T at(int i) const
         {
@@ -415,9 +423,22 @@ public:
         }
     }   
     
-    static if (isQObjectType!T)
-        { }
-    else
+    static if (isQObjectType!T || isObjectType!T || isValueType!T) //binded types
+        void node_construct(Node *n, const T t)
+        {
+            static if (isValueType!T)
+                {
+                    if (isLarge!T() || isStatic!T()) // TODO should be static if
+                        n.v = T.__constructNativeCopy(t.__nativeId);
+                    else if (isComplex!T())
+                        T.__constructPlacedNativeCopy(t.__nativeId, n);
+                    else
+                        T.__constructPlacedNativeCopy(t.__nativeId, n); // TODO should be *cast(T*)(n) = cast(T)(t); as it is a primitive type. not until they are implemented with structs
+                }
+            else // in case of QObject or Object Qt types we place a pointer to a native object in the node
+                n = cast(Node*) t.__nativeId;
+        }
+    else // native types
         void node_construct(Node *n, const ref T t)
         {
     /* TODO       static if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
@@ -425,7 +446,7 @@ public:
             else static if (QTypeInfo!T.isComplex)
                 new (n) T(t);
             else*/
-                { *cast(T*)(n) = cast(T)(t); }
+                *cast(T*)(n) = cast(T)(t);
         }
     
     void node_copy(Node *from, Node *to, Node *src)
@@ -445,16 +466,29 @@ public:
         node_destruct(cast(Node*)(data.array.ptr + data.begin),
                       cast(Node*)(data.array.ptr + data.end));
         if (data.ref_.load() == 0)
-            {} // qFree(data); TODO
+            qFree(data);
     }
     
     void node_destruct(Node *from, Node *to)
-    {/* TODO
-        if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
-            while (from != to) --to, delete cast(T*)(to->v);
-        else if (QTypeInfo!T.isComplex)
-            while (from != to) --to, cast(T*)(to).~T();
+    {
+        static if (isQObjectType!T || isObjectType!T) //binded types
+            {} // removing just pointers, do nothing
+        static if (isValueType!T) //binded value types
+        {
+            if (isLarge!T() || isStatic!T()) // TODO should be static if
+                while (from != to)
+                    --to, delete cast(T*)(to->v);
+            else if (QTypeInfo!T.isComplex)
+                while (from != to) --to, cast(T*)(to).~T();
+        }
+        else
+        { /*
+            if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
+                while (from != to) --to, delete cast(T*)(to->v);
+            else if (QTypeInfo!T.isComplex)
+                while (from != to) --to, cast(T*)(to).~T();
             */
+        }
     }
 }
 

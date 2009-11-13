@@ -721,6 +721,22 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
           << "}" << endl;
     }
 
+    if (java_class->typeEntry()->isValue() && java_class->hasCloneOperator())
+    {
+        AbstractMetaFunction *ctor = java_class->copyConstructor();
+        if(ctor)
+        {
+            QString argName = ctor->arguments().at(0)->indexedName();
+            s << endl << endl
+              << "extern \"C\" DLL_PUBLIC void* qtd_" << java_class->name() << "_placed_copy(void* "
+              << argName << ", " << "void* place) {" << endl
+              << QString("    const %1&  __qt_%2 = (const %1& ) *(%1 *)%2;").arg(java_class->name()).arg(argName) << endl;
+
+            writeFinalConstructor(s, ctor, "result", "original", "(place)");
+            s << "}";
+        }
+    }
+    
     s << endl << endl;
 
     priGenerator->addSource(java_class->package(), fileNameForClass(java_class));
@@ -2340,7 +2356,8 @@ void CppImplGenerator::writeFinalDestructor(QTextStream &s, const AbstractMetaCl
 void CppImplGenerator::writeFinalConstructor(QTextStream &s,
                                          const AbstractMetaFunction *java_function,
                                          const QString &qt_object_name,
-                                         const QString &java_object_name)
+                                         const QString &java_object_name,
+                                         const QString &place)
 {
     const AbstractMetaClass *cls = java_function->ownerClass();
     AbstractMetaArgumentList arguments = java_function->arguments();
@@ -2349,7 +2366,7 @@ void CppImplGenerator::writeFinalConstructor(QTextStream &s,
     bool hasShellClass = cls->generateShellClass();
 
     s << INDENT << shellClassName(cls) << " *" << qt_object_name
-      << " = new " << shellClassName(cls)
+      << " = new " << place << shellClassName(cls)
       << "(";
     writeFunctionCallArguments(s, java_function, "__qt_");
     s << ");" << endl;

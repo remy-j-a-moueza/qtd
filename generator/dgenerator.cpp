@@ -1716,8 +1716,6 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
     foreach(AbstractMetaFunction *signal, signal_funcs) {
         QString sigExternName = signalExternName(d_class, signal);
 
-        s << "private " << attr << "extern(C) void " << sigExternName << "_connect(void* native_id);" << endl;
-        s << "private " << attr << "extern(C) void " << sigExternName << "_disconnect(void* native_id);" << endl;
 /*
         QString extra_args;
 
@@ -1732,7 +1730,7 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
 */
         AbstractMetaArgumentList arguments = signal->arguments();
 
-        s << "private extern(C) void " << sigExternName << "_handle(void* d_entity, void** args) {" << endl;
+        s << "/*private extern(C) void " << sigExternName << "_handle(void* d_entity, void** args) {" << endl;
         {
             Indentation indent(INDENT);
             s << INDENT << "auto d_object = cast(" << d_class->name() << ") d_entity;" << endl;
@@ -1781,7 +1779,7 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
 
             s << ");" << endl;
         }
-        s << "}" << endl;
+        s << "}*/" << endl;
     }
 }
 
@@ -2167,7 +2165,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     }
 */
 
-    // Enums aliaases
+    // Enums aliases
     foreach (AbstractMetaEnum *d_enum, d_class->enums())
         writeEnumAlias(s, d_enum);
 
@@ -2224,38 +2222,19 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             writeFieldAccessors(s, field);
     }
 
-/* qtd
-
-    // the static fromNativePointer function...
-    if (!d_class->isNamespace() && !d_class->isInterface() && !fakeClass) {
-        s << endl
-          << INDENT << "public static native " << d_class->name() << " fromNativePointer("
-          << "QNativePointer nativePointer);" << endl;
-    }
-
-    if (d_class->isQObject()) {
-        s << endl;
-        if (TypeDatabase::instance()->includeEclipseWarnings())
-            s << INDENT << "@SuppressWarnings(\"unused\")" << endl;
-
-        s << INDENT << "private static native long originalMetaObject();" << endl;
-    }
-
-    // The __qt_signalInitialization() function
-    if (signal_funcs.size() > 0) {
-        s << endl
-          << INDENT << "@Override" << endl
-          << INDENT << "@QtBlockedSlot protected boolean __qt_signalInitialization(String name) {" << endl
-          << INDENT << "    return (__qt_signalInitialization(nativeId(), name)" << endl
-          << INDENT << "            || super.__qt_signalInitialization(name));" << endl
-          << INDENT << "}" << endl
-          << endl
-          << INDENT << "@QtBlockedSlot" << endl
-          << INDENT << "private native boolean __qt_signalInitialization(long ptr, String name);" << endl;
-    }
-*/
     if (d_class->isQObject())
         writeQObjectFunctions(s, d_class);
+
+    if (ctype->isObject() && !ctype->isQObject()) // conversion function wrapper to be consistent with QObject
+    { // some code duplication, remove when there is a better mechanism for Object type conversions
+        QString class_name = ctype->name();
+        QString return_type_name = class_name;
+        if(ctype->designatedInterface())
+            return_type_name = ctype->designatedInterface()->name();
+        s << "    static " << return_type_name << " __getObject(void* nativeId) {" << endl
+          << "        return qtd_" << class_name << "_from_ptr(nativeId);" << endl
+          << "    }" << endl << endl;
+    }
 
     // flag to mark the type of class (to use in templates to convert arguments)
     if (d_class->baseClassName().isEmpty())
@@ -2269,6 +2248,20 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     }
 
     s << INDENT << "public alias void __isQtType_" << d_class->name() << ";" << endl << endl;
+
+    // construction of a native copy of a Value
+    if (d_class->typeEntry()->isValue() && d_class->hasCloneOperator())
+    {
+        AbstractMetaFunction *copyCtor = d_class->copyConstructor();
+        if(copyCtor)
+            s << INDENT << "static void* __constructNativeCopy(const void* orig) {" << endl
+              << INDENT << "    return " << copyCtor->marshalledName() << "(cast(void*)orig);" << endl
+              << INDENT << "}" << endl << endl
+
+              << INDENT << "static void* __constructPlacedNativeCopy(const void* orig, void* place) {" << endl
+              << INDENT << "    return qtd_" << d_class->name() << "_placed_copy(orig, place);" << endl
+              << INDENT << "}" << endl << endl;
+    }
 
     // Add dummy constructor for use when constructing subclasses
     if (!d_class->isNamespace() && !d_class->isInterface() && !fakeClass) {
@@ -2531,6 +2524,12 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << endl << "extern (C) void *__" << d_class->name() << "_entity(void *q_ptr);" << endl << endl;
     }
 
+    if (d_class->typeEntry()->isValue() && d_class->hasCloneOperator())
+    {
+        AbstractMetaFunction *copyCtor = d_class->copyConstructor();
+        if(copyCtor)
+            s << "private extern(C) void* qtd_" << d_class->name() << "_placed_copy(const void* orig, void* place);" << endl << endl;
+    }
 
 //    if (d_class->needsConversionFunc)
         writeConversionFunction(s, d_class);

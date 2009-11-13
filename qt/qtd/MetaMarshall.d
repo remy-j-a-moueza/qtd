@@ -7,14 +7,14 @@ template isQObjectType(T) // is a QObject type that belongs to the library
     enum isQObjectType = is(T.__isQObjectType);
 }
 
-template isObjectType(T) // is a QObject type that belongs to the library
+template isObjectType(T) // is a Qt Object type that belongs to the library
 {
     enum isObjectType = is(T.__isObjectType);
 }
 
-template isValueType(T) // is a QObject type that belongs to the library
+template isValueType(T) // is a Qt Value type that belongs to the library
 {
-    enum isQObjectType = is(typeof(mixin("T." ~ "__isValueType")));
+    enum isValueType = is(T.__isValueType);
 }
 
 template isNativeType(T) // type that doesn't require conversion i.e. is the same in C++ and D

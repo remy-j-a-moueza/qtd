@@ -1194,7 +1194,19 @@ QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) cons
     return 0;
 }
 
+AbstractMetaFunction* AbstractMetaClass::copyConstructor() const
+{
+    AbstractMetaFunctionList ctors = queryFunctions(Constructors);
+    for(int i = 0; i < ctors.size(); i++)
+    {
+        AbstractMetaFunction *ctor = ctors.at(i);
+        if (ctor->arguments().size() > 0)
+            if(ctor->arguments().at(0)->type()->typeEntry() == typeEntry())
+                return ctor;
+    }
 
+    return NULL;
+}
 
 static bool functions_contains(const AbstractMetaFunctionList &l, const AbstractMetaFunction *func)
 {
