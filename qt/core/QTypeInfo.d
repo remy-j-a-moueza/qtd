@@ -13,7 +13,6 @@ import qt.qtd.MetaMarshall;
 bool qIsDetached(T)(ref T) { return true; }
 
 template QTypeInfo(T)
-    if ( !(isQObjectType!T || isObjectType!T) )
 {
 public:
     enum {

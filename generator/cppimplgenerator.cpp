@@ -2344,12 +2344,14 @@ void CppImplGenerator::writeFinalDestructor(QTextStream &s, const AbstractMetaCl
 {
     if (cls->hasConstructors()) {
         s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_destructor(void *ptr)" << endl
-          << INDENT << "{" << endl;
-        {
-            s << INDENT << "delete (" << shellClassName(cls) << " *)ptr;" << endl;
-        }
+          << INDENT << "{" << endl
+          << INDENT << "    delete (" << shellClassName(cls) << " *)ptr;" << endl
+          << INDENT << "}" << endl << endl;
 
-        s << INDENT << "}" << endl << endl;
+        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_call_destructor(" << shellClassName(cls) << " *ptr)" << endl
+          << INDENT << "{" << endl
+          << INDENT << QString ("    ptr->~%1();").arg(shellClassName(cls)) << endl
+          << INDENT << "}" << endl << endl;
     }
 }
 

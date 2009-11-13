@@ -429,11 +429,11 @@ public:
             static if (isValueType!T)
                 {
                     if (isLarge!T() || isStatic!T()) // TODO should be static if
-                        n.v = T.__constructNativeCopy(t.__nativeId);
+                        n.v = T.__constructNativeCopy(t.__nativeId); // n.v = new T(t);
                     else if (isComplex!T())
-                        T.__constructPlacedNativeCopy(t.__nativeId, n);
+                        T.__constructPlacedNativeCopy(t.__nativeId, n); //  new (n) T(t);
                     else
-                        T.__constructPlacedNativeCopy(t.__nativeId, n); // TODO should be *cast(T*)(n) = cast(T)(t); as it is a primitive type. not until they are implemented with structs
+                        T.__constructPlacedNativeCopy(t.__nativeId, n); // TODO should be *cast(T*)(n) = cast(T)(t); as it is a primitive type. fix when they are implemented with structs
                 }
             else // in case of QObject or Object Qt types we place a pointer to a native object in the node
                 n = cast(Node*) t.__nativeId;
@@ -451,6 +451,7 @@ public:
     
     void node_copy(Node *from, Node *to, Node *src)
     {
+        writeln("QList node_copy");
 /* TODO       if (QTypeInfo<T>::isLarge || QTypeInfo<T>::isStatic)
             while(from != to)
                 (from++)->v = new T(*reinterpret_cast<T*>((src++)->v));
@@ -477,9 +478,10 @@ public:
         {
             if (isLarge!T() || isStatic!T()) // TODO should be static if
                 while (from != to)
-                    --to, delete cast(T*)(to->v);
-            else if (QTypeInfo!T.isComplex)
-                while (from != to) --to, cast(T*)(to).~T();
+                    --to, T.__deleteNativeObject(to.v);
+            else if (isComplex!T())
+                while (from != to)
+                    --to, T.__callNativeDestructor(to);
         }
         else
         { /*

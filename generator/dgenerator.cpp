@@ -1694,6 +1694,20 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
         }
         s << INDENT << "}" << endl << endl;
     }
+
+    if (d_class->typeEntry()->isValue())
+    {
+        s << INDENT << "public static void __deleteNativeObject(void* ptr) {" << endl
+          << INDENT << "    qtd_" << d_class->name() << "_destructor(ptr);" << endl
+          << INDENT << "}" << endl << endl;
+    }
+
+    if (d_class->typeEntry()->isValue())
+    {
+        s << INDENT << "public static void __callNativeDestructor(void* ptr) {" << endl
+          << INDENT << "    qtd_" << d_class->name() << "_call_destructor(ptr);" << endl
+          << INDENT << "}" << endl << endl;
+    }
 }
 
 void DGenerator::writeFlagsSetter(QTextStream &s, const AbstractMetaClass *d_class)
@@ -2535,7 +2549,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         writeConversionFunction(s, d_class);
 
     if (d_class->hasConstructors() && !d_class->isQObject())
-        s << "extern (C) void qtd_" << d_class->name() << "_destructor(void *ptr);" << endl << endl;
+        s << "extern (C) void qtd_" << d_class->name() << "_destructor(void *ptr);" << endl
+          << "extern (C) void qtd_" << d_class->name() << "_call_destructor(void *ptr);" << endl << endl;
 
     // qtd
 
