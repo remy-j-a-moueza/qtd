@@ -527,7 +527,7 @@ public:
             while(from != to)
                 q_new_at(from++, *cast(T*)(src++));
     }
-
+    
     void free(QListData.Data* data)
     {
         writeln("QList data destroyed");

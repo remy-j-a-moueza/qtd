@@ -1677,19 +1677,17 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
 
 QString ContainerTypeEntry::javaPackage() const
 {
-    if (m_type == PairContainer)
-        return "qt";
-    return "java.util";
+    return "qt.core";
 }
 
 QString ContainerTypeEntry::targetLangName() const
 {
 
     switch (m_type) {
-    case StringListContainer: return "List";
-    case ListContainer: return "List";
-    case LinkedListContainer: return "LinkedList";
-    case VectorContainer: return "List";
+    case StringListContainer: return "QList";
+    case ListContainer: return "QList";
+    case LinkedListContainer: return "QLinkedList";
+    case VectorContainer: return "QVector";
     case StackContainer: return "Stack";
     case QueueContainer: return "Queue";
     case SetContainer: return "Set";

@@ -70,7 +70,7 @@ DGenerator::DGenerator()
                   << "QLatin1String" << "unsigned long long" << "signed int"
                   << "signed short" << "Array" << "GLuint" << "GLenum" << "GLint"
                   << "unsigned long" << "ulong" << "long" << "QByteRef"
-                  << "QStringList" << "QList" << "QVector" << "QPair"
+                  << "QStringList" << "QVector" << "QPair"
                   << "QSet" << "QStringRef" << "quintptr";
 }
 
@@ -177,8 +177,12 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
             if ((option & SkipTemplateParameters) == 0) {
                 QList<AbstractMetaType *> args = d_type->instantiations();
 
-                if (args.size() == 1) // QVector or QList
-                    s = translateType(args.at(0), context, BoxedPrimitive) + "[]";
+                if (args.size() == 1) { // QVector or QList
+                    if(d_type->typeEntry()->name() == "QList")
+                        s = "QList!(" + translateType(args.at(0), context, BoxedPrimitive) + ")";
+                    else
+                        s = translateType(args.at(0), context, BoxedPrimitive) + "[]";
+                }
                 else if(args.size() == 2) { // all sorts of maps
                     s = translateType(args.at(1), context, BoxedPrimitive); // value
                     bool isMultiMap = static_cast<const ContainerTypeEntry *>(d_type->typeEntry())->type() == ContainerTypeEntry::MultiMapContainer;
@@ -679,7 +683,12 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
             s << INDENT << return_type->name() << " res;" << endl;
 
         if(return_type->isContainer())
-            s << INDENT << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << " res;" << endl;
+        {
+            if(d_function->type()->typeEntry()->name() == "QList")
+                s << INDENT << "auto res = " << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << ".opCall();" << endl;
+            else
+                s << INDENT << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << " res;" << endl;
+        }
     }
 
     // returning string or a struct

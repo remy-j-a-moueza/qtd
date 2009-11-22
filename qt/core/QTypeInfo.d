@@ -20,6 +20,12 @@ template isBasicType(T)
 
 template QTypeInfo(T)
 {
+    static if(T.stringof == "QModelIndex")
+    {
+        pragma(msg, T.stringof ~ " has QTypeInfo");
+        pragma(msg, T.QTypeInfo.stringof);
+    }
+    
     static if(is(T == string))
     {
         alias QString.QTypeInfo QTypeInfo;
@@ -35,8 +41,9 @@ template QTypeInfo(T)
             isDummy = false
         }
     }
-    else static if(__traits(compiles, mixin("T.TypeInfo")))
+    else static if(is(T.QTypeInfo))
     {
+        pragma(msg, T.stringof ~ " has struct");
         alias T.QTypeInfo QTypeInfo; // alias member QTypeInfo
     }
     else static if ( isQObjectType!T || isObjectType!T )
