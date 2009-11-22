@@ -9,6 +9,7 @@ module qt.core.QTypeInfo;
 import std.traits;
 
 import qt.qtd.MetaMarshall;
+import qt.core.QString;
 
 bool qIsDetached(T)(ref T) { return true; }
 
@@ -19,7 +20,11 @@ template isBasicType(T)
 
 template QTypeInfo(T)
 {
-    static if(isBasicType!T)
+    static if(is(T == string))
+    {
+        alias QString.QTypeInfo QTypeInfo;
+    }
+    else static if(isBasicType!T)
     {
         public enum
         {

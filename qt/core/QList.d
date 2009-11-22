@@ -5,6 +5,7 @@ import qt.QtdObject;
 import qt.qtd.Atomic;
 import qt.qtd.MetaMarshall;
 import qt.core.QTypeInfo;
+import qt.core.QString;
 
 import core.stdc.stdlib : qRealloc = realloc, qFree = free, qMalloc = malloc;
 import core.stdc.string : memcpy, memmove;
@@ -29,6 +30,11 @@ bool isLarge(T)()
     if (is(T.QTypeInfo))
 {
     return T.QTypeInfo.isLarge;
+}
+
+template isQtReference(T)
+{
+    enum isQtReference = isQObjectType!T || isObjectType!T || isValueType!T || is(T == string);
 }
 
 int qAllocMore(int alloc, int extra)
@@ -323,11 +329,16 @@ struct QList(T, alias Default = Dummy)
     {
         void *v;
         
-        static if (isQObjectType!T || isObjectType!T || isValueType!T) // binded Qt types
+        static if (isQObjectType!T || isObjectType!T || isValueType!T || is(T == string)) // binded Qt types
         {
             T t()
             {
-                static if (isValueType!T)
+                static if(is(T == string))
+                {
+                    void* ptr = cast(void*)(TI.isLarge || TI.isStatic ? v : &this);
+                    return QString.toNativeString(ptr);
+                }
+                else static if (isValueType!T)
                 {
                     void* ptr = cast(void*)(isLarge!T() || isStatic!T() ? v : &this);
                     return new T(ptr, QtdObjectFlags.nativeOwnership);
@@ -430,9 +441,14 @@ public:
         }
     }
 
-    static if (isQObjectType!T || isObjectType!T || isValueType!T)
+    static if (isQObjectType!T || isObjectType!T || isValueType!T || is(T == string))
     {
         T at(int i) const
+        {
+            assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
+            return (cast(Node*)(p.at(i))).t();
+        }
+        T opIndex(int i)
         {
             assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
             return (cast(Node*)(p.at(i))).t();
@@ -441,6 +457,11 @@ public:
     else
     {
         ref const (T) at(int i) const
+        {
+            assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
+            return (cast(Node*)(p.at(i))).t();
+        }
+        ref T opIndex(int i)
         {
             assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
             return (cast(Node*)(p.at(i))).t();
@@ -462,16 +483,22 @@ public:
             else // in case of QObject or Object Qt types we place a pointer to a native object in the node
                 n = cast(Node*) t.__nativeId;
         }
+    else static if (is(T == string))
+    {
+        void node_construct(Node *n, T t)
+        {
+            QString.__constructPlacedQString(n, t);
+        }
+    }
     else // native types
         void node_construct(Node *n, const ref T t)
         {
-            static if (TI.isLarge || TI.isStatic) { pragma(msg, "node construct, large " ~ T.stringof);
+            static if (TI.isLarge || TI.isStatic)
                 n.v = q_new!T(t); // n.v = new T(t);
-}            else static if (TI.isComplex) {pragma(msg, "node construct, complex " ~ T.stringof);
+            else static if (TI.isComplex)
                 q_new_at(n, t); // new (n) T(t);
-}            else {pragma(msg, "node construct, other " ~ T.stringof);
+            else
                 *cast(T*)(n) = cast(T)(t);
-}
         }
     
     void node_copy(Node *from, Node *to, Node *src)
@@ -479,6 +506,11 @@ public:
         writeln("QList node_copy");
         static if (isQObjectType!T || isObjectType!T)
             {} // ensure to do nothing. copying only a pointer
+        else static if(is(T == string))
+        {
+            while(from != to) // TODO when porting to Qt 5 ensure that QTypeInfo<QString>.isLarge and .isStatic == false
+                QString.__constructPlacedNativeCopy(src++, from++); // new (from++) T(*reinterpret_cast<T*>(src++));
+        }
         else static if (isValueType!T)
         {
             if (TI.isLarge || TI.isStatic) // TODO should be static if
@@ -509,7 +541,12 @@ public:
     {
         static if (isQObjectType!T || isObjectType!T) //binded types
             {} // removing just pointers, do nothing
-        static if (isValueType!T) //binded value types
+        else static if (is(T == string))
+        {
+            while (from != to)
+                --to, QString.__callNativeDestructor(to);
+        }
+        else static if (isValueType!T) //binded value types
         {
             if (isLarge!T() || isStatic!T()) // TODO should be static if
                 while (from != to)
@@ -525,6 +562,27 @@ public:
             else static if (TI.isComplex)
                 while (from != to) --to, cast(T*)(to).__dtor();
         }
+    }
+    
+    //iteration support
+    int opApply(int delegate(ref T) dg)
+    {
+        int result = 0;
+        int sz = this.length;
+        for (int i = 0; i < sz; i++)
+        {
+            static if (isQtReference!T)
+            {
+                T t = this[i]; // hack to avoid "is not an lvalue" error, since dg accepts ref T
+                result = dg(t);
+            }
+            else
+                result = dg(this[i]);
+
+            if (result)
+                break;
+        }
+        return result;
     }
 }
 
