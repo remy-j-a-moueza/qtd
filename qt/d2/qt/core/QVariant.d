@@ -612,11 +612,34 @@ public class QVariant : QtdObject
     protected override void __deleteNative() {
         qtd_QVariant_destructor(__nativeId);
     }
+    
+    public alias void __isValueType;
 
+    public alias void __isQtType_QVariant;
+    
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
+    
+    static void* __constructNativeCopy(const void* orig) {
+        return qtd_QVariant_QVariant_QVariant(cast(void*)orig);
+    }
+
+    static void* __constructPlacedNativeCopy(const void* orig, void* place) {
+        return qtd_QVariant_placed_copy(orig, place);
+    }
 // Injected code in class
 }
 extern (C) void qtd_QVariant_destructor(void *ptr);
 
+private extern(C) void* qtd_QVariant_placed_copy(const void* orig, void* place);
+
+extern (C) void qtd_QVariant_call_destructor(void *ptr);
 
 // C wrappers
 private extern(C) void* qtd_QVariant_QVariant();

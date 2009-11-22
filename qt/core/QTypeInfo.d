@@ -12,28 +12,49 @@ import qt.qtd.MetaMarshall;
 
 bool qIsDetached(T)(ref T) { return true; }
 
-template QTypeInfo(T)
+template isBasicType(T)
 {
-public:
-    enum {
-        isPointer = isPointer!T,
-        isComplex = !isPointer,
-        isStatic = !isPointer,
-        isLarge = (T.sizeof > (void*).sizeof),
-        isDummy = false
-    }
+    enum isBasicType = isNumeric!T || is(T == bool);
 }
 
 template QTypeInfo(T)
-    if ( isQObjectType!T || isObjectType!T )
 {
-public:
-    enum {
-        isPointer = true,
-        isComplex = false,
-        isStatic = false,
-        isLarge = false,
-        isDummy = false
+    static if(isBasicType!T)
+    {
+        public enum
+        {
+            isPointer = false,
+            isComplex = false,
+            isStatic = false,
+            isLarge = (T.sizeof > (void*).sizeof),
+            isDummy = false
+        }
+    }
+    else static if(__traits(compiles, mixin("T.TypeInfo")))
+    {
+        alias T.QTypeInfo QTypeInfo; // alias member QTypeInfo
+    }
+    else static if ( isQObjectType!T || isObjectType!T )
+    {
+        public enum // are pointers
+        {
+            isPointer = true,
+            isComplex = false,
+            isStatic = false,
+            isLarge = false,
+            isDummy = false
+        }
+    }
+    else // default parameters
+    {
+        public enum
+        {
+            isPointer = isPointer!T,
+            isComplex = !isPointer,
+            isStatic = !isPointer,
+            isLarge = (T.sizeof > (void*).sizeof),
+            isDummy = false
+        }
     }
 }
 

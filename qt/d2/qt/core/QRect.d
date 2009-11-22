@@ -337,6 +337,19 @@ public struct QRect
         return qtd_QRect_normalized(&this);
     }
 
+    // service stuff
+    public alias void __isNativeValueType;
+
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
+
+
 private:
     version(OSX)
     {

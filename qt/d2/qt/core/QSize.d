@@ -113,7 +113,18 @@ public struct QSize
     	assert(!qFuzzyCompare(c + 1, 1.));
     	return QSize(qRound(this.wd/c), qRound(this.ht/c));
 	}
+    
+    // service stuff
+    public alias void __isNativeValueType;
 
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
 private:
     int wd;
     int ht;
@@ -238,7 +249,18 @@ public struct QSizeF
 	    assert(!qFuzzyCompare(c + 1, 1.));
 	    return QSizeF(this.wd/c, this.ht/c);
 	}
+    
+    // service stuff
+    public alias void __isNativeValueType;
 
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
 private:
     qreal wd;
     qreal ht;

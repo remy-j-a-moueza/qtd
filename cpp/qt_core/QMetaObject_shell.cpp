@@ -48,6 +48,13 @@ extern "C" DLL_PUBLIC void qtd_create_QList(void *nativeId)
     list.append(45);
 }
 
+extern "C" DLL_PUBLIC void qtd_create_QList_double(void *nativeId)
+{
+    QList<double> & list = (*(QList<double> *)nativeId);
+    list.append(54.44);
+    list.append(45.55);
+}
+
 extern "C" DLL_PUBLIC void qtd_create_QList_QObject(void *nativeId)
 {
     QList<QObject*> & list2 = (*(QList<QObject*> *)nativeId);

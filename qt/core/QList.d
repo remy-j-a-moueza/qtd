@@ -4,7 +4,7 @@ import qt.QGlobal;
 import qt.QtdObject;
 import qt.qtd.Atomic;
 import qt.qtd.MetaMarshall;
-//import qt.core.QTypeInfo;
+import qt.core.QTypeInfo;
 
 import core.stdc.stdlib : qRealloc = realloc, qFree = free, qMalloc = malloc;
 import core.stdc.string : memcpy, memmove;
@@ -52,6 +52,27 @@ int qAllocMore(int alloc, int extra)
         }
     }
     return nalloc - extra;
+}
+
+void q_new_at(T)(T* ptr, const ref T t)
+{
+    memcpy(ptr, &t, T.sizeof);
+/*    static if (__traits(compiles, ptr.__postblit())) DMD bug #3539
+        ptr.__postblit();*/
+}
+
+T* q_new(T)(const ref T t)
+{
+    T* ptr = cast(T*) qMalloc(T.sizeof);
+    q_new_at!T(ptr, t);
+    return ptr;
+}
+
+void q_delete(T)(T* t)
+{
+    static if (__traits(compiles, t.__dtor()))
+        t.__dtor();
+    qFree(t);
 }
 
 private int grow(int size)
@@ -289,8 +310,15 @@ struct QListData {
 
 import std.stdio;
 
-struct QList(T)
+alias void Dummy; // DMD bug #3538 
+
+struct QList(T, alias Default = Dummy)
 {
+    static if (is(Default == Dummy))
+        alias QTypeInfo!T TI;
+    else
+        alias Default TI; 
+  
     struct Node
     {
         void *v;
@@ -301,14 +329,11 @@ struct QList(T)
             {
                 static if (isValueType!T)
                 {
-                    pragma(msg, "value " ~ T.stringof);
                     void* ptr = cast(void*)(isLarge!T() || isStatic!T() ? v : &this);
                     return new T(ptr, QtdObjectFlags.nativeOwnership);
                 }
                 else
                 {
-                    pragma(msg, T.stringof);
-
                     return T.__getObject( *cast(void**)(&this) );
                 }
             }
@@ -317,12 +342,11 @@ struct QList(T)
         {    
             ref T t()
             {
-                pragma(msg, "native " ~ T.stringof);
-
-                return *cast(T*)(&this);
+                static if(TI.isLarge || TI.isStatic)
+                    return *cast(T*)(v);
+                else
+                    return *cast(T*)(&this);
             }
-    //        { return *cast(T*)(QTypeInfo!T.isLarge || QTypeInfo!T.isStatic
-    //                                       ? v : &this); }    }
         }
     }
     
@@ -441,24 +465,35 @@ public:
     else // native types
         void node_construct(Node *n, const ref T t)
         {
-    /* TODO       static if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
-                n.v = new T(t);
-            else static if (QTypeInfo!T.isComplex)
-                new (n) T(t);
-            else*/
+            static if (TI.isLarge || TI.isStatic) { pragma(msg, "node construct, large " ~ T.stringof);
+                n.v = q_new!T(t); // n.v = new T(t);
+}            else static if (TI.isComplex) {pragma(msg, "node construct, complex " ~ T.stringof);
+                q_new_at(n, t); // new (n) T(t);
+}            else {pragma(msg, "node construct, other " ~ T.stringof);
                 *cast(T*)(n) = cast(T)(t);
+}
         }
     
     void node_copy(Node *from, Node *to, Node *src)
     {
         writeln("QList node_copy");
-/* TODO       if (QTypeInfo<T>::isLarge || QTypeInfo<T>::isStatic)
+        static if (isQObjectType!T || isObjectType!T)
+            {} // ensure to do nothing. copying only a pointer
+        else static if (isValueType!T)
+        {
+            if (TI.isLarge || TI.isStatic) // TODO should be static if
+                while(from != to)
+                    (from++).v = T.__constructNativeCopy((src++).v); // (from++)->v = new T(*reinterpret_cast<T*>((src++)->v));
+            else if (TI.isComplex)
+                while(from != to)
+                    T.__constructPlacedNativeCopy(src++, from++); // new (from++) T(*reinterpret_cast<T*>(src++));
+        }
+        else static if (TI.isLarge || TI.isStatic)
+            while(from != to) 
+                (from++).v = q_new!T(*cast(T*)((src++).v));
+        else static if (TI.isComplex)
             while(from != to)
-                (from++)->v = new T(*reinterpret_cast<T*>((src++)->v));
-        else if (QTypeInfo<T>::isComplex)
-            while(from != to)
-                new (from++) T(*reinterpret_cast<T*>(src++));
-            */
+                q_new_at(from++, *cast(T*)(src++));
     }
 
     void free(QListData.Data* data)
@@ -484,15 +519,16 @@ public:
                     --to, T.__callNativeDestructor(to);
         }
         else
-        { /*
-            if (QTypeInfo!T.isLarge || QTypeInfo!T.isStatic)
-                while (from != to) --to, delete cast(T*)(to->v);
-            else if (QTypeInfo!T.isComplex)
-                while (from != to) --to, cast(T*)(to).~T();
-            */
+        {
+            static if (TI.isLarge || TI.isStatic)
+                while (from != to) --to, q_delete(cast(T*)(to.v));
+            else static if (TI.isComplex)
+                while (from != to) --to, cast(T*)(to).__dtor();
         }
     }
 }
 
 extern(C) void qtd_create_QList(void *nativeId);
+extern(C) void qtd_create_QList_double(void *nativeId);
+
 extern(C) void qtd_create_QList_QObject(void *nativeId);

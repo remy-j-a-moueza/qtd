@@ -92,6 +92,19 @@ inline int &ry()
     public final void readFrom(QDataStream arg__1) {
         qtd_QPoint_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
     }
+    
+    // service stuff
+    public alias void __isNativeValueType;
+
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
+
 
 private:
     // ### Qt 5;  remove the ifdef and just have the same order on all platforms.
@@ -206,6 +219,18 @@ inline qreal &QPointF::ry()
 
     public final void readFrom(QDataStream arg__1) {
         qtd_QPointF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+    }
+
+    // service stuff
+    public alias void __isNativeValueType;
+
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
     }
 
 private:

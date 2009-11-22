@@ -135,7 +135,18 @@ public struct QLine
     public final void readFrom(QDataStream arg__1) {
         qtd_QLine_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
     }
+    
+    // service stuff
+    public alias void __isNativeValueType;
 
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
 private:
     QPoint pt1, pt2;
 }
@@ -353,6 +364,18 @@ public struct QLineF
 
     public static QLineF fromPolar(double length, double angle) {
         return qtd_QLineF_fromPolar_double_double(length, angle);
+    }
+
+    // service stuff
+    public alias void __isNativeValueType;
+
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
     }
 
     private:

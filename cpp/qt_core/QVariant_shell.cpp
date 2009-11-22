@@ -22,6 +22,11 @@ extern "C" DLL_PUBLIC void qtd_QVariant_destructor(void *ptr)
     delete (QVariant *)ptr;
 }
 
+extern "C" DLL_PUBLIC void qtd_QVariant_call_destructor(QVariant *ptr)
+{
+    ptr->~QVariant();
+}
+
 QVariant_QtDShell::QVariant_QtDShell()
     : QVariant()
 {
@@ -961,3 +966,8 @@ extern "C" DLL_PUBLIC void *qtd_QVariant_data(void* __this_nativeId)
 
 
 
+extern "C" DLL_PUBLIC void* qtd_QVariant_placed_copy(void* variant0, void* place) {
+    const QVariant&  __qt_variant0 = (const QVariant& ) *(QVariant *)variant0;
+    QVariant *result = new (place)QVariant((const QVariant& )__qt_variant0);
+    return (void *) result;
+}

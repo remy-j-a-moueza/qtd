@@ -5,7 +5,7 @@ private import qt.core.QObject;
 
 // automatic imports-------------
 //private import qt.core.QVariant;
-//private import qt.core.QAbstractItemModel;
+private import qt.core.QAbstractItemModel;
 public import qt.core.Qt;
 
 
@@ -51,7 +51,7 @@ public struct QModelIndex
     public final bool isValid() const {
         return __qtd_QModelIndex_isValid(cast(void*)&this);
     }
-/*
+    
     public final QAbstractItemModel model() {
 //        void* __qt_return_value = __qtd_QModelIndex_model(&this);
         void* __qt_return_value = m;
@@ -60,7 +60,7 @@ public struct QModelIndex
         void* d_obj = qtd_get_d_qobject(__qt_return_value);
         return cast(QAbstractItemModel) d_obj;
     }
-*/
+
     private final bool operator_less(QModelIndex other) {
         return __qtd_QModelIndex_operator_less_QModelIndex(&this, other);
     }
@@ -79,6 +79,17 @@ public struct QModelIndex
 
     public final QModelIndex sibling(int row, int column) {
         return __qtd_QModelIndex_sibling_int_int(&this, row, column);
+    }
+    
+    public alias void __isNativeValueType;
+
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
     }
 
 private:
@@ -114,8 +125,4 @@ private extern(C) int  __qtd_QModelIndex_row(void* __this_nativeId);
 private extern(C) QModelIndex  __qtd_QModelIndex_sibling_int_int(void* __this_nativeId,
  int row0,
  int column1);
-// Just the private functions for abstract functions implemeneted in superclasses
-
-
-
-// Virtual Dispatch functions
+ 
