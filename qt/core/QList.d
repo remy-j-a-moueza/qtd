@@ -427,7 +427,6 @@ public:
             free(x);
     }
     
-   
     void append(const T t) // fix to const ref for complex types TODO
     {
         detach();
@@ -457,7 +456,7 @@ public:
     }
     else
     {
-        const (T) at(int i) const
+        const (T) at(int i) const // DMD BUG
         {
             assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
             return (cast(Node*)(p.at(i))).t();
@@ -599,6 +598,21 @@ public:
         }
         return result;
     }
+}
+
+alias QList!string QStringList;
+
+QList!T toQList(T)(T[] src)
+{
+    auto res = QList!T.opCall();
+    foreach(elem; src)
+        res.append(elem);
+    return res;
+}
+
+QList!T qList(T)()
+{
+    return QList!T.opCall();
 }
 
 extern(C) void qtd_create_QList(void *nativeId);
