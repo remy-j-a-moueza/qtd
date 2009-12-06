@@ -59,7 +59,7 @@ class Node
     Node[] children;
 }
 
-size_t find(Node[] arr, Node elem)
+size_t find(const Node[] arr, const Node elem)
 {
     size_t res = arr.length;
     for(size_t i = 0; i < arr.length; i++)
@@ -89,18 +89,18 @@ class Model : QAbstractItemModel
     }
 
 
-    override QModelIndex index(int row, int column, const QModelIndex parent)
+    override QModelIndex index(int row, int column, const QModelIndex parent) const
     {
         if (row < rc && row >= 0 && column < cc && column >= 0) {
-            Node p = cast(Node) parent.internalPointer();
-            Node n = getNode(row, p);
+            auto p = cast(Node) parent.internalPointer();
+            auto n = getNode(row, p);
             if (n !is null)
                 return createIndex(row, column, cast(void*)n);
         }
         return QModelIndex();
     }
 
-    override QModelIndex parent(const QModelIndex child)
+    override QModelIndex parent(const QModelIndex child) const
     {
         if (child.isValid()) {
             Node n = cast(Node) child.internalPointer();
@@ -111,17 +111,17 @@ class Model : QAbstractItemModel
         return QModelIndex();
     }
 
-    override int rowCount(const QModelIndex parent)
+    override int rowCount(const QModelIndex parent) const
     {
         return (parent.isValid() && parent.column() != 0) ? 0 : rc;
     }
 
-    override int columnCount(const QModelIndex parent)
+    override int columnCount(const QModelIndex parent) const
     {
         return cc;
     }
     
-    override QVariant data(const QModelIndex index, int role)
+    override QVariant data(const QModelIndex index, int role) const
     {
         if (!index.isValid)
             return new QVariant;
@@ -136,7 +136,7 @@ class Model : QAbstractItemModel
         return new QVariant;
     }
     
-    override QVariant headerData(int section, Qt.Orientation orientation, int role)
+    override QVariant headerData(int section, Qt.Orientation orientation, int role) const
     {
         if (role == Qt.DisplayRole)
             return new QVariant(to!string(section));
@@ -145,39 +145,39 @@ class Model : QAbstractItemModel
         return QAbstractItemModel.headerData(section, orientation, role);
     }
 
-    override bool hasChildren(const QModelIndex parent)
+    override bool hasChildren(const QModelIndex parent) const
     {
         if (parent.isValid && parent.column != 0)
             return false;
         return rc > 0 && cc > 0;
     }
     
-    override int flags(const QModelIndex index)
+    override int flags(const QModelIndex index) const
     {
         if (!index.isValid)
             return 0;
         return (Qt.ItemIsDragEnabled | Qt.ItemIsSelectable | Qt.ItemIsEnabled);
     }
 
-    Node getNode(int row, Node parent)
+    const (Node) getNode(int row, Node parent) const
     {
         if(parent !is null && parent.children.length == 0) {
             for(int i = 0; i < rc; i++)
                 parent.children ~= new Node(parent);
         }
 
-        Node[] v = parent !is null ? parent.children : tree;
+        auto v = parent !is null ? parent.children : tree;
         return v[row];
     }
 
-    Node parent(Node child)
+    Node parent(Node child) const
     {
         return child !is null ? child.parent : null;
     }
     
-    int row(Node node)
+    int row(Node node) const
     {
-        Node[] v = node.parent !is null ? node.parent.children : tree;
+        auto v = node.parent !is null ? node.parent.children : tree;
         return find(v, node);
     }
 
