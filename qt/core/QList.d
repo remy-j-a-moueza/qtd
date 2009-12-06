@@ -315,6 +315,7 @@ struct QListData {
 }
 
 import std.stdio;
+import std.conv;
 
 alias void Dummy; // DMD bug #3538 
 
@@ -323,8 +324,8 @@ struct QList(T, alias Default = Dummy)
     static if (is(Default == Dummy))
         alias QTypeInfo!T TI;
     else
-        alias Default TI; 
-  
+        alias Default TI;
+
     struct Node
     {
         void *v;
@@ -456,7 +457,7 @@ public:
     }
     else
     {
-        ref const (T) at(int i) const
+        const (T) at(int i) const
         {
             assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
             return (cast(Node*)(p.at(i))).t();
@@ -526,6 +527,20 @@ public:
         else static if (TI.isComplex)
             while(from != to)
                 q_new_at(from++, *cast(T*)(src++));
+    }
+    
+    T[] toArray()
+    {
+        T[] res;
+        res.length = this.length;
+        for(int i = 0; i < res.length; ++i)
+        {
+            static if (isValueType!T)
+                res[i] = new T(T.__constructNativeCopy(this.at(i).__nativeId)); // Node should probably provide a ptr method to directly extract pointer to the native value stored in the list to avoid creating a dummy D object in t()
+            else
+                res[i] = this.opIndex(i);
+        }
+        return res;
     }
     
     void free(QListData.Data* data)

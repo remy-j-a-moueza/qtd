@@ -81,6 +81,9 @@ QTD_EXPORT(void, qtd_dummy, ())
 extern "C" QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia);
 extern "C" QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index);
 
-
-
+template <class T>
+void call_destructor(T *a)
+{
+    a->~T();
+}
 #endif // QTD_CORE_H

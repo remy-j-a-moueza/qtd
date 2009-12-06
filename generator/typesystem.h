@@ -950,6 +950,8 @@ public:
     QString javaPackage() const;
     QString qualifiedCppName() const;
 
+    bool isQList() const { return type() == ListContainer || type() == StringListContainer; }
+
 private:
     Type m_type;
 };

@@ -98,7 +98,7 @@ public:
                                     const QString &arg_name);
     void writePrivateNativeFunction(QTextStream &s, const AbstractMetaFunction *d_function);
     void writeJavaLangObjectOverrideFunctions(QTextStream &s, const AbstractMetaClass *cls);
-    void writeReferenceCount(QTextStream &s, const ReferenceCount &refCount, const QString &argumentName);
+    void writeReferenceCount(QTextStream &s, const ReferenceCount &refCount, const QString &argumentName, AbstractMetaType *argumentType = 0);
     void retrieveModifications(const AbstractMetaFunction *f, const AbstractMetaClass *d_class,
          uint *exclude_attributes, uint *include_attributes) const;
     QString functionSignature(const AbstractMetaFunction *d_function,

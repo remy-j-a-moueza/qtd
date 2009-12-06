@@ -633,13 +633,22 @@ public class QVariant : QtdObject
     static void* __constructPlacedNativeCopy(const void* orig, void* place) {
         return qtd_QVariant_placed_copy(orig, place);
     }
+    
+    public static void __deleteNativeObject(void* ptr) {
+        qtd_QVariant_destructor(ptr);
+    }
+    
+    public static void __callNativeDestructor(void* ptr) {
+        qtd_QVariant_call_destructor(ptr);
+    }
 // Injected code in class
 }
+
 extern (C) void qtd_QVariant_destructor(void *ptr);
+extern (C) void qtd_QVariant_call_destructor(void *ptr);
 
 private extern(C) void* qtd_QVariant_placed_copy(const void* orig, void* place);
 
-extern (C) void qtd_QVariant_call_destructor(void *ptr);
 
 // C wrappers
 private extern(C) void* qtd_QVariant_QVariant();

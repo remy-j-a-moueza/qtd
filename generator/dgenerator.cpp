@@ -176,9 +176,10 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
 
             if ((option & SkipTemplateParameters) == 0) {
                 QList<AbstractMetaType *> args = d_type->instantiations();
-
+                const ContainerTypeEntry *cte =
+                        static_cast<const ContainerTypeEntry *>(d_type->typeEntry());
                 if (args.size() == 1) { // QVector or QList
-                    if(d_type->typeEntry()->name() == "QList")
+                    if(cte->isQList())
                         s = "QList!(" + translateType(args.at(0), context, BoxedPrimitive) + ")";
                     else
                         s = translateType(args.at(0), context, BoxedPrimitive) + "[]";
@@ -593,7 +594,10 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         if (!d_function->argumentRemoved(i+1)) {
             TypeSystem::Ownership owner = d_function->ownership(d_function->implementingClass(), TypeSystem::TargetLangCode, i+1);
             if (owner != TypeSystem::InvalidOwnership) {
-                s << INDENT << "if (" << arg->argumentName() << " !is null) {" << endl;
+                QString empty_condition = " !is null";
+                if (arg->type()->isContainer())
+                    empty_condition = ".length != 0";
+                s << INDENT << "if (" << arg->argumentName() << empty_condition << ") {" << endl;
                 {
                     Indentation indent(INDENT);
                     if (arg->type()->isContainer())
@@ -649,7 +653,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                                                          i == 0 ? -1 : i);
 
         foreach (ReferenceCount refCount, referenceCounts)
-            writeReferenceCount(s, refCount, i == 0 ? "this" : arguments.at(i-1)->argumentName());
+            writeReferenceCount(s, refCount, i == 0 ? "this" : arguments.at(i-1)->argumentName(), arguments.at(i-1)->type());
     }
 
     referenceCounts = d_function->referenceCounts(d_function->implementingClass(), 0);
@@ -684,7 +688,9 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
 
         if(return_type->isContainer())
         {
-            if(d_function->type()->typeEntry()->name() == "QList")
+            const ContainerTypeEntry *type =
+                    static_cast<const ContainerTypeEntry *>(return_type->typeEntry());
+            if(type->isQList()) // QList is a native type now
                 s << INDENT << "auto res = " << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << ".opCall();" << endl;
             else
                 s << INDENT << this->translateType(d_function->type(), d_function->ownerClass(), NoOption) << " res;" << endl;
@@ -821,7 +827,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                 const ContainerTypeEntry *cte =
                         static_cast<const ContainerTypeEntry *>(te);
                 if(isLinearContainer(cte))
-                    s << QString("%1.ptr, %1.length").arg(arg_name);
+                    s << QString("&%1").arg(arg_name);
             } else if (type->typeEntry()->qualifiedCppName() == "QChar") {
                 s << arg_name;
             } else if (type->isTargetLangString() || (te && te->qualifiedCppName() == "QString")) {
@@ -925,7 +931,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         }
 
         foreach (ReferenceCount referenceCount, referenceCounts) {
-            writeReferenceCount(s, referenceCount, "__d_return_value");
+            writeReferenceCount(s, referenceCount, "__d_return_value", return_type);
         }
 
         if (!returnImmediately)
@@ -1015,7 +1021,7 @@ void DGenerator::setupForFunction(const AbstractMetaFunction *d_function,
 }
 
 void DGenerator::writeReferenceCount(QTextStream &s, const ReferenceCount &refCount,
-                                        const QString &argumentName)
+                                        const QString &argumentName, AbstractMetaType *argumentType)
 {
     if (refCount.action == ReferenceCount::Ignore)
         return;
@@ -1025,9 +1031,13 @@ void DGenerator::writeReferenceCount(QTextStream &s, const ReferenceCount &refCo
         s << INDENT << "auto __rcTmp = " << refCountVariableName << ";" << endl;
         refCountVariableName = "__rcTmp";
     }
+    QString empty_condition = " !is null";
+    if (argumentType && argumentType->isContainer())
+//        if (((const ContainerTypeEntry *)argumentType->typeEntry())->isQList())
+            empty_condition = ".length != 0";
 
     if (refCount.action != ReferenceCount::Set) {
-        s << INDENT << "if (" << argumentName << " !is null";
+        s << INDENT << "if (" << argumentName << empty_condition;
 
         if (!refCount.conditional.isEmpty())
             s << " && " << refCount.conditional;
@@ -1041,12 +1051,15 @@ void DGenerator::writeReferenceCount(QTextStream &s, const ReferenceCount &refCo
 
     {
         Indentation indent(INDENT);
+        QString summand = argumentName;
         switch (refCount.action) {
         case ReferenceCount::Add:
             s << INDENT << refCountVariableName << " ~= cast(Object) " << argumentName << ";" << endl;
             break;
         case ReferenceCount::AddAll:
-            s << INDENT << refCountVariableName << " ~= " << argumentName << ";" << endl;
+            if(isNativeContainer(argumentType))
+                summand = argumentName + ".toArray()";
+            s << INDENT << refCountVariableName << " ~= " << summand << ";" << endl;
             break;
         case ReferenceCount::Remove:
             s << INDENT << "remove(" << refCountVariableName
@@ -1947,7 +1960,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
           << "public import qt.core.Qt;" << endl
           << "private import qt.QtdObject;" << endl
           << "private import qt.core.QString;" << endl
-          << "private import qt.qtd.Array;" << endl;
+          << "private import qt.qtd.Array;" << endl
+          << "private import qt.core.QList;" << endl;
         if (d_class->isQObject()) {
             s << "public import qt.Signal;" << endl
               << "public import qt.qtd.MOC;" << endl
@@ -2271,16 +2285,14 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     s << INDENT << "public alias void __isQtType_" << d_class->name() << ";" << endl << endl;
 
     // construction of a native copy of a Value
-    if (d_class->typeEntry()->isValue() && d_class->hasCloneOperator())
+    if (d_class->typeEntry()->isValue())
     {
-        AbstractMetaFunction *copyCtor = d_class->copyConstructor();
-        if(copyCtor)
             s << INDENT << "static void* __constructNativeCopy(const void* orig) {" << endl
-              << INDENT << "    return " << copyCtor->marshalledName() << "(cast(void*)orig);" << endl
+              << INDENT << "    return qtd_" << d_class->name() << "_native_copy(orig);" << endl
               << INDENT << "}" << endl << endl
 
-              << INDENT << "static void* __constructPlacedNativeCopy(const void* orig, void* place) {" << endl
-              << INDENT << "    return qtd_" << d_class->name() << "_placed_copy(orig, place);" << endl
+              << INDENT << "static void __constructPlacedNativeCopy(const void* orig, void* place) {" << endl
+              << INDENT << "    qtd_" << d_class->name() << "_placed_copy(orig, place);" << endl
               << INDENT << "}" << endl << endl;
     }
 
@@ -2456,11 +2468,12 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << endl << "extern (C) void *__" << d_class->name() << "_entity(void *q_ptr);" << endl << endl;
     }
 
-    if (d_class->typeEntry()->isValue() && d_class->hasCloneOperator())
+    if (d_class->typeEntry()->isValue())
     {
-        AbstractMetaFunction *copyCtor = d_class->copyConstructor();
-        if(copyCtor)
-            s << "private extern(C) void* qtd_" << d_class->name() << "_placed_copy(const void* orig, void* place);" << endl << endl;
+        {
+            s << "private extern(C) void qtd_" << d_class->name() << "_placed_copy(const void* orig, void* place);" << endl
+              << "private extern(C) void* qtd_" << d_class->name() << "_native_copy(const void* orig);" << endl;
+        }
     }
 
 //    if (d_class->needsConversionFunc)
@@ -2966,7 +2979,13 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
             AbstractMetaType *type = argument->type();
             // if has QString argument we have to pass char* and str.length to QString constructor
             {
-                if(type->isEnum())
+                if (type->isContainer())
+                {
+                    if ( ((const ContainerTypeEntry *)type->typeEntry())->isQList() ) {
+                        s << INDENT;
+                        s << "auto " << arg_name << "_d_ref = cast(" << translateType(type, implementor) << "*)" << arg_name << ";" << endl;
+                    }
+                } else if(type->isEnum())
                     s << INDENT << "auto " << arg_name << "_enum = cast("
                                 << type->typeEntry()->qualifiedTargetLangName() << ") " << arg_name << ";";
                 else if (type->typeEntry()->qualifiedCppName() == "QChar")
@@ -3044,11 +3063,14 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
 
             if (modified_type == "string" /* && type->fullName() == "char" */)
                 s << "fromStringz(" << arg_name << ")";
-            else {
+            else
+            {
                 if(type->isContainer()
                    || (type->isReference() && type->typeEntry()->isStructInD()))
                     s << "*";
                 s << arg_name;
+                if (type->isContainer() && ((const ContainerTypeEntry *)type->typeEntry())->isQList() )
+                    s << "_d_ref";
             }
             if (type->typeEntry()->isStructInD()) ;
             else if (type->isQObject() || type->isObject()
@@ -3084,10 +3106,13 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                 s << INDENT << "return ret_value is null? null : ret_value." << native_id << ";" << endl;
             } else if (f_type->isTargetLangString())
                 s << INDENT << "*ret_str = _d_str;" << endl;
-            else if (f_type->isContainer())
-                s << INDENT << "*__d_arr_ptr = return_value.ptr;" << endl
-                  << INDENT << "*__d_arr_size = return_value.length;" << endl;
-            else if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
+            else if (f_type->isContainer()) {
+                if (isNativeContainer(f_type))
+                    s << INDENT << "*__d_arr = return_value;" << endl;
+                else
+                    s << INDENT << "*__d_arr_ptr = return_value.ptr;" << endl
+                      << INDENT << "*__d_arr_size = return_value.length;" << endl;
+            } else if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
                 ;
             else
                 s << INDENT << "return return_value;" << endl;

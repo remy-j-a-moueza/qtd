@@ -740,5 +740,7 @@ scope class StackObject(C)
 }
 +/
 
+alias void DArray;
+
 mixin QT_END_HEADER;
 

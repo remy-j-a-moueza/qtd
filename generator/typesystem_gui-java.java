@@ -1694,15 +1694,13 @@ class QInputDialog___ extends QInputDialog {
     
     static if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
     {
-	public static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, ref bool ok = false, int flags = 0) {
+        public static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, ref bool ok = false, int flags = 0) {
             return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.__nativeId, title, label, value, minValue, maxValue, step, &ok, flags);
-	}
+    }
     }
 
-    public static string getItem(QWidget _parent, string title, string label, string[] items, int current = 0, bool editable = true, ref bool ok = false, int flags = 0) {
-        string res;
-        qtd_QInputDialog_getItem_private_QWidget_string_string_List_int_bool_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.__nativeId, title, label, items.ptr, items.length, current, editable, &ok, flags);
-        return res;
+    public static string getItem(QWidget _parent, string title, string label, QList!(string) items, int current = 0, bool editable = true, ref bool ok = false, int flags = 0) {
+        return getItem_private(_parent, title, label, items, current, editable, &ok, flags);
     }
 
     public static string getText(QWidget _parent, string title, string label, QLineEdit_EchoMode echo = QLineEdit_EchoMode.Normal, string text = null, ref bool ok = false, int flags = 0) {

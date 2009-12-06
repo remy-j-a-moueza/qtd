@@ -970,4 +970,12 @@ inline AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
                           | NotRemovedFromTargetLang);
 }
 
+inline bool isNativeContainer(AbstractMetaType *argumentType)
+{
+    if (argumentType && argumentType->isContainer())
+        if (((const ContainerTypeEntry *)argumentType->typeEntry())->isQList())
+            return true;
+    return false;
+}
+
 #endif // ABSTRACTMETALANG_H

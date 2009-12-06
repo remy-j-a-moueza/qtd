@@ -1298,7 +1298,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </modify-function>
     <modify-function signature="operator QVariant()const" access="private"/>
     <inject-code class="java">
-        public final QVariant toVariant() {
+        public final QVariant toVariant() const {
             return operator_cast_QVariant();
         }
     </inject-code>

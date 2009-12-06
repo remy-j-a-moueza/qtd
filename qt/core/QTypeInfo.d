@@ -15,17 +15,11 @@ bool qIsDetached(T)(ref T) { return true; }
 
 template isBasicType(T)
 {
-    enum isBasicType = isNumeric!T || is(T == bool);
+    enum isBasicType = isNumeric!T || is(T == bool) || is(T == enum);
 }
 
 template QTypeInfo(T)
 {
-    static if(T.stringof == "QModelIndex")
-    {
-        pragma(msg, T.stringof ~ " has QTypeInfo");
-        pragma(msg, T.QTypeInfo.stringof);
-    }
-    
     static if(is(T == string))
     {
         alias QString.QTypeInfo QTypeInfo;
@@ -43,7 +37,6 @@ template QTypeInfo(T)
     }
     else static if(is(T.QTypeInfo))
     {
-        pragma(msg, T.stringof ~ " has struct");
         alias T.QTypeInfo QTypeInfo; // alias member QTypeInfo
     }
     else static if ( isQObjectType!T || isObjectType!T )
