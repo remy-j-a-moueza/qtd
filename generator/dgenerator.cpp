@@ -2573,18 +2573,10 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                 initArgs = "virt_arr.ptr";
 
             if (d_class->isQObject()) {
-
-                // signals
-                AbstractMetaFunctionList signal_funcs = signalFunctions(d_class);
-                s << endl << INDENT << "void*[" << signal_funcs.size() << "] sign_arr;" << endl;
-                for(int i = 0; i < signal_funcs.size(); i++) {
-                    AbstractMetaFunction *signal = signal_funcs.at(i);
-                    s << INDENT << "sign_arr[" << i << "] = &" << signalExternName(d_class, signal) << "_handle;" << endl;
-                }
-                if(signal_funcs.size() == 0)
-                    initArgs += ", null";
-                else
-                    initArgs += ", sign_arr.ptr";
+                // qt_metacalls
+                s << endl << INDENT << "void*[1] sign_arr;" << endl;
+                s << INDENT << "sign_arr[0] = &qtd_" << d_class->name() << "_qt_metacall_dispatch;" << endl;
+                initArgs += ", sign_arr.ptr";
             }
 
             s << INDENT << "qtd_" << d_class->name() << QString("_initCallBacks(%1);").arg(initArgs) << endl;

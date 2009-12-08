@@ -505,13 +505,9 @@ void CppImplGenerator::writeInitCallbacks(QTextStream &s, const AbstractMetaClas
                  "(pf" << function->marshalledName() << "_dispatch) virts[" << pos << "];" << endl;
         }
     }
-
     // D-side signal callbacks
-    AbstractMetaFunctionList signal_funcs = signalFunctions(java_class);
-    for(int i = 0; i < signal_funcs.size(); i++)
-        s << "    emit_callbacks_" << java_class->name() << "[" << i << "] = (EmitCallback)"
-             "sigs[" << i << "];" << endl;
-
+    if (java_class->isQObject())
+        s << "    qtd_" << java_class->name() << "_qt_metacall_dispatch = (QtMetacallCallback)sigs[0];" << endl;
     s << "}" << endl;
 }
 
@@ -1353,9 +1349,12 @@ void CppImplGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaC
       << "}" << endl << endl;
       */
 
-    s << "extern \"C\" int qtd_" << java_class->name() << "_qt_metacall_dispatch(void *d_entity, QMetaObject::Call _c, int _id, void **_a);" << endl << endl
+    if(cpp_shared)
+        s << "QtMetacallCallback qtd_" << java_class->name() << "_qt_metacall_dispatch;" << endl;
+    else
+        s << "extern \"C\" int qtd_" << java_class->name() << "_qt_metacall_dispatch(void *d_entity, QMetaObject::Call _c, int _id, void **_a);" << endl << endl;
 
-      << "int " << shellClassName(java_class) << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
+    s << "int " << shellClassName(java_class) << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
       << "{" << endl
       << "    return qtd_" << java_class->name() << "_qt_metacall_dispatch(this->dId, _c, _id, _a);" << endl
       << "}" << endl << endl
