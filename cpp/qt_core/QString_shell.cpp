@@ -55,3 +55,13 @@ extern "C" DLL_PUBLIC void* qtd_QString_placed_copy(void* string0, void* place) 
     QString *result = new (place)QString((const QString& )__qt_string0);
     return (void *) result;
 }
+
+extern "C" DLL_PUBLIC void qtd_QString_placed_ctor(void* place) {
+    new (place) QString();
+}
+
+extern "C" DLL_PUBLIC void qtd_QString_assign_fromUtf8
+(QString *__qt_this, DArray text)
+{
+    *__qt_this = QString::fromUtf8((const char *)text.ptr, text.length);
+}

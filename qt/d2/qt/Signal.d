@@ -315,37 +315,13 @@ template findSymbols(string prefix, C, alias pred)
     alias findSymbolsImpl!(prefix, C, 0, pred).result findSymbols;
 }
 
-string __toString(long v)
-{
-    if (v == 0)
-        return "0";
-
-    string ret;
-
-    bool neg;
-    if (v < 0)
-    {
-        neg = true;
-        v = -v;
-    }
-
-    while (v != 0)
-    {
-        ret = cast(char)(v % 10 + '0') ~ ret;
-        v = cast(long)(v / 10);
-    }
-
-    if (neg)
-        ret = "-" ~ ret;
-
-    return ret;
-}
-
 string convertSignalArguments(Args...)()
 {
 //        void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-
-    string res = "void*[" ~ __toString(Args.length+1) ~ "] _a = [null";
+    // at least for string argument need to construct a QString value
+    string res = prepareSignalArguments!(Args);
+    
+    res ~= "void*[" ~ __toString(Args.length+1) ~ "] _a = [null";
     foreach(i, _; Args)
         res ~= ", " ~ "cast(void*) &" ~ convertSignalArgument!(Args[i])("_t" ~ __toString(i));
     res ~= "];\n";
@@ -463,7 +439,7 @@ template MetaMethodImpl(string metaPrefix, int index, string fullName, SignalTyp
             
             static if (signalType == SignalType.NewSignal)
             {
-//                pragma (msg, SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
+                pragma (msg, SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
                 mixin (SignalEmitter!(ArgTypes)(SignalType.NewSignal, getFunc!_Name(fullName), defVals, localIndex));
             }
         }
@@ -487,7 +463,10 @@ string signature_impl(T...)(string name)
     {
         if(i > 0)
             res ~= ",";
-        res ~= T[i].stringof;
+        static if (isNativeType!(T[i]))
+            res ~= Unqual!(T[i]).stringof;
+        else
+            res ~= T[i].stringof;
     }
     res ~= ")";
     return res;

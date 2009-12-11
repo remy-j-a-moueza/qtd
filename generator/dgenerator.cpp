@@ -1783,7 +1783,7 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
                       << INDENT << cppContainerConversionName(d_class, type, FromCpp) << "(" << arg_ptr << ", &" << arg_name << ");" << endl;
                 } else if (type->isTargetLangString()) {
                     s << INDENT << "auto " << arg_name << "_ptr = " << arg_ptr << ";" << endl
-                      << INDENT << "string " << arg_name << " = QString.toNativeString(" << arg_name << "_ptr);";
+                      << INDENT << "string " << arg_name << " = QStringUtil.toNativeString(" << arg_name << "_ptr);";
                 } else if(type->isPrimitive() || type->isEnum() || type->isFlags() || type->typeEntry()->isStructInD()) {
                     QString type_name = argument->type()->typeEntry()->qualifiedTargetLangName();
                     if (type->isFlags())
@@ -2987,7 +2987,7 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
                     s << INDENT << "string " << arg_name << "_d_ref = toUTF8("
                                 << arg_name << "[0.." << arg_name << "_size]);";
                 else if (type->typeEntry()->isValue() && type->isNativePointer() && type->typeEntry()->name() == "QString") {
-                    s << INDENT << "auto " << arg_name << "_d_qstr = QString(" << arg_name << ", true);" << endl
+                    s << INDENT << "auto " << arg_name << "_d_qstr = QStringUtil(" << arg_name << ", true);" << endl
                       << INDENT << "string " << arg_name << "_d_ref = " << arg_name << "_d_qstr.toNativeString();";
                 } else if(type->isVariant())
                     s << INDENT << "scope " << arg_name << "_d_ref = new QVariant(" << arg_name << ", QtdObjectFlags.nativeOwnership);";

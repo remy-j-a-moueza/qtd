@@ -79,5 +79,6 @@ set (classes
     QBuffer
     QLibraryInfo
     QXmlStreamEntityResolver
+    QFileSystemWatcher
     )
 	

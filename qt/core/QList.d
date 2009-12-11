@@ -337,7 +337,7 @@ struct QList(T, alias Default = Dummy)
                 static if(is(T == string))
                 {
                     void* ptr = cast(void*)(TI.isLarge || TI.isStatic ? v : &this);
-                    return QString.toNativeString(ptr);
+                    return QStringUtil.toNativeString(ptr);
                 }
                 else static if (isValueType!T)
                 {

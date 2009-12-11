@@ -79,4 +79,5 @@ core_classes =  \
     QBuffer \
     QMetaType \
     QLibraryInfo \
+    QFileSystemWatcher \
     QXmlStreamEntityResolver

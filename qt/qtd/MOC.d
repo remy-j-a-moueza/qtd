@@ -6,6 +6,7 @@ import std.typetuple;
 
 import qt.Signal;
 import qt.qtd.MetaMarshall;
+public import qt.core.QString;
 
 public import std.traits;
 /**
@@ -529,6 +530,6 @@ template Q_OBJECT()
     
     alias TupleWrapper!(findSymbols!(slotPrefix,   typeof(this), ByOwner!(typeof(this)))) Slots;
     alias TupleWrapper!(findSymbols!(signalPrefix, typeof(this), ByOwner!(typeof(this)))) Signals;
-//    pragma(msg, generateMetaInfo!((typeof(this)).stringof, Signals, Slots)());
+    pragma(msg, generateMetaInfo!((typeof(this)).stringof, Signals, Slots)());
     mixin(generateMetaInfo!((typeof(this)).stringof, Signals, Slots)());
 }
