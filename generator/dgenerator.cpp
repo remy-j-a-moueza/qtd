@@ -2573,9 +2573,10 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                 initArgs = "virt_arr.ptr";
 
             if (d_class->isQObject()) {
-                // qt_metacalls
-                s << endl << INDENT << "void*[1] sign_arr;" << endl;
+                // qt_metacall, metaObject
+                s << endl << INDENT << "void*[2] sign_arr;" << endl;
                 s << INDENT << "sign_arr[0] = &qtd_" << d_class->name() << "_qt_metacall_dispatch;" << endl;
+                s << INDENT << "sign_arr[1] = &qtd_" << d_class->name() << "_metaObject_dispatch;" << endl;
                 initArgs += ", sign_arr.ptr";
             }
 
@@ -2682,8 +2683,13 @@ void DGenerator::writeQObjectFreeFunctions(QTextStream &s, const AbstractMetaCla
       << "private extern(C) int qtd_" << d_class->name() << "_qt_metacall_dispatch(void *d_entity, QMetaObject.Call _c, int _id, void **_a) {"
       << "    auto d_object = cast(" << d_class->name() << ") d_entity;"
       << "    return d_object.qt_metacall(_c, _id, _a);"
+      << "}" << endl << endl
+
+      << "private extern(C) void* qtd_" << d_class->name() << "_metaObject_dispatch(void *d_entity) {"
+      << "    auto d_object = cast(" << d_class->name() << ") d_entity;"
+      << "    return d_object.metaObject().nativeId();"
       << "}" << endl << endl;
-}
+  }
 
 void writeMetaMethodSignatures(QTextStream &s, const QString &var_name, AbstractMetaFunctionList meta_funcs)
 {

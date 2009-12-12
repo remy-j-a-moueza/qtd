@@ -83,6 +83,7 @@ extern "C" QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index);
 
 extern "C" typedef void (*EmitCallback)(void*, void**);
 extern "C" typedef int (*QtMetacallCallback)(void *d_entity, QMetaObject::Call _c, int _id, void **_a);
+extern "C" typedef const QMetaObject* (*MetaObjectCallback)(void *d_entity);
 
 template <class T>
 void call_destructor(T *a)

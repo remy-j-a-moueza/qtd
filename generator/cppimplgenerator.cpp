@@ -506,8 +506,10 @@ void CppImplGenerator::writeInitCallbacks(QTextStream &s, const AbstractMetaClas
         }
     }
     // D-side signal callbacks
-    if (java_class->isQObject())
-        s << "    qtd_" << java_class->name() << "_qt_metacall_dispatch = (QtMetacallCallback)sigs[0];" << endl;
+    if (java_class->isQObject()) {
+        s << "    qtd_" << java_class->name() << "_qt_metacall_dispatch = (QtMetacallCallback)sigs[0];" << endl
+          << "    qtd_" << java_class->name() << "_metaObject_dispatch = (MetaObjectCallback)sigs[1];" << endl;
+    }
     s << "}" << endl;
 }
 
@@ -1350,11 +1352,18 @@ void CppImplGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaC
       */
 
     if(cpp_shared)
-        s << "QtMetacallCallback qtd_" << java_class->name() << "_qt_metacall_dispatch;" << endl;
+        s << "MetaObjectCallback qtd_" << java_class->name() << "_metaObject_dispatch;" << endl
+          << "QtMetacallCallback qtd_" << java_class->name() << "_qt_metacall_dispatch;" << endl;
     else
-        s << "extern \"C\" int qtd_" << java_class->name() << "_qt_metacall_dispatch(void *d_entity, QMetaObject::Call _c, int _id, void **_a);" << endl << endl;
+        s << "extern \"C\" const QMetaObject* qtd_" << java_class->name() << "_metaObject_dispatch(void *d_entity);" << endl
+          << "extern \"C\" int qtd_" << java_class->name() << "_qt_metacall_dispatch(void *d_entity, QMetaObject::Call _c, int _id, void **_a);" << endl;
 
-    s << "int " << shellClassName(java_class) << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
+    s << endl
+      << "const QMetaObject * " << shellClassName(java_class) << "::metaObject() const" << endl
+      << "{" << endl
+      << "    return qtd_" << java_class->name() << "_metaObject_dispatch(this->dId);" << endl
+      << "}" << endl << endl
+      << "int " << shellClassName(java_class) << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
       << "{" << endl
       << "    return qtd_" << java_class->name() << "_qt_metacall_dispatch(this->dId, _c, _id, _a);" << endl
       << "}" << endl << endl

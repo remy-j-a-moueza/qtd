@@ -198,6 +198,7 @@ void CppHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *java_cla
 //        << "  QT_TR_FUNCTIONS" << end
       << "  virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl
       << "  int __override_qt_metacall(QMetaObject::Call _c, int _id, void **_a);" << endl
+      << "  virtual const QMetaObject *metaObject() const;" << endl
 
       << "private:" << endl;
     }

@@ -58,7 +58,7 @@ template isStringType(T) // string type
 // converts an argumnent from C++ to D in qt_metacall
 string metaCallArgument(T)(string ptr)
 {
-    static if (isQObjectType!T)
+    static if (isQObjectType!T || isObjectType!T)
         return T.stringof ~ ".__getObject(*cast(void**)(" ~ ptr ~ "))";
     else static if (isNativeType!T)
         return "*(cast(" ~ T.stringof ~ "*)" ~ ptr ~ ")";
@@ -72,7 +72,7 @@ string metaCallArgument(T)(string ptr)
 // converts a D argument type to C++ for registering in Qt meta system
 string qtDeclArg(T)()
 {
-    static if (isQObjectType!T)
+    static if (isQObjectType!T || isObjectType!T)
         return T.stringof ~ "*";
     else static if (isStringType!T)
         return "QString";
@@ -85,7 +85,7 @@ string qtDeclArg(T)()
 // converts an argument from D to C++ in a signal emitter
 string convertSignalArgument(T)(string arg)
 {
-    static if (isQObjectType!T)
+    static if (isQObjectType!T || isObjectType!T)
         return arg ~ ".__nativeId";
     else static if (isStringType!T)
         return "_qt" ~ arg;
