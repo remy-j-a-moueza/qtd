@@ -846,6 +846,7 @@ public:
     bool isTypeAlias() const { return m_is_type_alias; }
 
     const QStringList &depends() { return m_type_entry->depends(); }
+    AbstractMetaFunctionList allFunctions() const { return m_functions; }
 
     bool needsConversionFunc;
 private:

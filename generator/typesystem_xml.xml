@@ -346,6 +346,7 @@
     </value-type>
 
     <value-type name="QXmlNamespaceSupport">
+    <private-copy-constructor/>
 <!--        <custom-constructor>
             QXmlNamespaceSupport *clone = new QXmlNamespaceSupport;
             clone-&gt;setPrefix("", copy-&gt;uri(""));
@@ -359,7 +360,6 @@
         <custom-destructor>
             delete (QXmlNamespaceSupport *)copy;
         </custom-destructor>
-
 
     
         <inject-code>

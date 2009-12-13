@@ -2287,6 +2287,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     // construction of a native copy of a Value
     if (d_class->typeEntry()->isValue())
     {
+        AbstractMetaFunction *copy_ctor = d_class->copyConstructor();
+        if (!d_class->typeEntry()->hasPrivateCopyConstructor()) // can do a copy if we have a public ctor or don't have any
             s << INDENT << "static void* __constructNativeCopy(const void* orig) {" << endl
               << INDENT << "    return qtd_" << d_class->name() << "_native_copy(orig);" << endl
               << INDENT << "}" << endl << endl
@@ -2470,6 +2472,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 
     if (d_class->typeEntry()->isValue())
     {
+        AbstractMetaFunction *copy_ctor = d_class->copyConstructor();
+        if (!d_class->typeEntry()->hasPrivateCopyConstructor())  // can do a copy if we have a public ctor or don't have any
         {
             s << "private extern(C) void qtd_" << d_class->name() << "_placed_copy(const void* orig, void* place);" << endl
               << "private extern(C) void* qtd_" << d_class->name() << "_native_copy(const void* orig);" << endl;

@@ -721,6 +721,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
 
     if (java_class->typeEntry()->isValue())
     {
+        if (!java_class->typeEntry()->hasPrivateCopyConstructor())  // can do a copy if we have a public ctor or don't have any
         {
             QString argName = "orig";
             s << endl << endl
