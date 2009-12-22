@@ -2,7 +2,13 @@ module qt.qtd.MetaMarshall;
 
 import std.traits;
 
+// utilities
 // shouldn't be here
+
+public bool startsWith(T)(T[] source, T[] pattern)
+{
+    return source.length >= pattern.length && source[0 .. pattern.length] == pattern[];
+}
 
 string __toString(long v)
 {
@@ -30,6 +36,16 @@ string __toString(long v)
     return ret;
 }
 
+template templateParam(U : V!(U), alias V)
+{
+    alias U templateParam;
+}
+
+
+/*
+ * actual stuff
+ */
+
 template isQObjectType(T) // is a QObject type that belongs to the library
 {
     enum isQObjectType = is(T.__isQObjectType);
@@ -55,6 +71,11 @@ template isStringType(T) // string type
     enum isStringType = is(T == string);
 }
 
+template isQList(T)
+{
+    enum isQList = startsWith(Unqual!(T).stringof, "QList!");
+}
+
 // converts an argumnent from C++ to D in qt_metacall
 string metaCallArgument(T)(string ptr)
 {
@@ -76,6 +97,8 @@ string qtDeclArg(T)()
         return T.stringof ~ "*";
     else static if (isStringType!T)
         return "QString";
+    else static if (isQList!T)
+        return "QList<" ~ qtDeclArg!(templateParam!T)() ~ ">";
     else static if (isNativeType!T)
         return Unqual!T.stringof;
     else
