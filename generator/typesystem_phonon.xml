@@ -75,7 +75,7 @@
 
     <interface-type name="Phonon::MediaObjectInterface" java-name="AbstractMediaObject"/>
     <interface-type name="Phonon::PlatformPlugin" java-name="PlatformPlugin">
-        <modify-function signature="notification(const char *, const QString &amp;, const QStringList&lt;QString&gt; &amp;, QObject *, const char *)const">
+        <modify-function signature="notification(const char *, const QString &amp;, const QStringList &amp;, QObject *, const char *)const">
             <modify-argument index="3">
                 <replace-default-expression with="null"/>
             </modify-argument>
