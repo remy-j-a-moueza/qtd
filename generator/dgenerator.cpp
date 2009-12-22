@@ -2708,7 +2708,7 @@ void writeMetaMethodSignatures(QTextStream &s, const QString &var_name, Abstract
             bool hasDefault = false;
             do // need this to look for default arguments and generate extra signatures
             {
-                if (j)
+                if (i || j)
                     s << ", ";
                 s << endl << INDENT << "    \"" << meta_funcs.at(i)->minimalSignature(j) << "\"";
                 AbstractMetaArgumentList args = meta_funcs.at(i)->arguments();

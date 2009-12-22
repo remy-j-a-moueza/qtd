@@ -1905,13 +1905,10 @@ QString AbstractMetaType::minimalSignature() const
     if (isConstant())
         minimalSignature += "const ";
     minimalSignature += typeEntry()->qualifiedCppName();
-    if (hasInstantiations() &&
-        (static_cast<const ContainerTypeEntry *>(typeEntry()))->type() != ContainerTypeEntry::StringListContainer)
-    {
+    if (hasInstantiations()) {
         QList<AbstractMetaType *> instantiations = this->instantiations();
         minimalSignature += "<";
-        for (int i=0;i<instantiations.size();++i)
-        {
+        for (int i=0;i<instantiations.size();++i) {
             if (i > 0)
                 minimalSignature += ",";
             minimalSignature += instantiations.at(i)->minimalSignature();

@@ -123,14 +123,14 @@ endif(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
 make_native_path(cd_path)
 add_custom_command(TARGET main POST_BUILD	
 	COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${CMAKE_BINARY_DIR}/build
-	COMMAND cd  ARGS ${cd_path} && ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DSECOND_RUN=1 ${CMAKE_SOURCE_DIR} && ${make_util}
+	COMMAND cd ARGS ${cd_path} && ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DSECOND_RUN=1 ${CMAKE_SOURCE_DIR} && ${make_util}
 	COMMENT ""	
 	)  
 
 ## "Make install" command.
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_BINARY_DIR}/build)
 add_custom_target(install
-	COMMAND cd ${CMAKE_BINARY_DIR}/build && ${make_util} install
+	COMMAND cd ARGS ${cd_path} && ${make_util} install
 	COMMENT ""
 	)  
 add_dependencies(install preinstall)

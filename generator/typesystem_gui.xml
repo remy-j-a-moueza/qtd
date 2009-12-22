@@ -4868,7 +4868,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <access modifier="private" />
     </modify-function>
 
-    <modify-function signature="getItem(QWidget *, const QString &amp;, const QString &amp;, const QStringList &amp;, int, bool, bool *, QFlags&lt;Qt::WindowType&gt;)">
+    <modify-function signature="getItem(QWidget *, const QString &amp;, const QString &amp;, const QStringList&lt;QString&gt; &amp;, int, bool, bool *, QFlags&lt;Qt::WindowType&gt;)">
         <rename to="getItem_private"/>
         <access modifier="private"/>
     </modify-function>
@@ -5375,7 +5375,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <define-ownership class="java" owner="c++"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="QTreeWidgetItem(QTreeWidget *,const QStringList &amp;,int)">
+    <modify-function signature="QTreeWidgetItem(QTreeWidget *,const QStringList&lt;QString&gt; &amp;,int)">
         <modify-argument index="this">
             <define-ownership class="java" owner="c++"/>
         </modify-argument>
@@ -5390,7 +5390,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <define-ownership class="java" owner="c++"/>
         </modify-argument>
     </modify-function>
-    <modify-function signature="QTreeWidgetItem(QTreeWidgetItem *,const QStringList &amp;,int)">
+    <modify-function signature="QTreeWidgetItem(QTreeWidgetItem *,const QStringList&lt;QString&gt; &amp;,int)">
         <modify-argument index="this">
             <define-ownership class="java" owner="c++"/>
         </modify-argument>
@@ -5509,9 +5509,9 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
   
 <!--        <modify-function signature="addItem(const QString &amp;)" remove="all"/>-->
-        <modify-function signature="addItems(const QStringList &amp;)" remove="all"/>
+        <modify-function signature="addItems(const QStringList&lt;QString&gt; &amp;)" remove="all"/>
         <modify-function signature="insertItem(int, const QString &amp;)" remove="all"/>
-        <modify-function signature="insertItems(int, const QStringList &amp;)" remove="all"/>
+        <modify-function signature="insertItems(int, const QStringList&lt;QString&gt; &amp;)" remove="all"/>
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QListWidget___" quote-before-line="}// class"/>
         </inject-code>
