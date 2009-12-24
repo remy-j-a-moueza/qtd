@@ -81,6 +81,8 @@ string metaCallArgument(T)(string ptr)
 {
     static if (isQObjectType!T || isObjectType!T)
         return T.stringof ~ ".__getObject(*cast(void**)(" ~ ptr ~ "))";
+    else static if (isValueType!T)
+        return "new " ~ T.stringof ~ "(" ~ T.stringof ~ ".__constructNativeCopy(" ~ ptr ~ "))";
     else static if (isNativeType!T)
         return "*(cast(" ~ T.stringof ~ "*)" ~ ptr ~ ")";
     else static if (isStringType!T)
@@ -95,10 +97,18 @@ string qtDeclArg(T)()
 {
     static if (isQObjectType!T || isObjectType!T)
         return T.stringof ~ "*";
+    else static if (isValueType!T)
+        return T.stringof;
     else static if (isStringType!T)
         return "QString";
     else static if (isQList!T)
-        return "QList<" ~ qtDeclArg!(templateParam!T)() ~ ">";
+    {
+        alias templateParam!T ElementType;
+        static if (is(ElementType == string))
+            return "QStringList";
+        else
+            return "QList<" ~ qtDeclArg!(templateParam!T)() ~ ">";
+    }
     else static if (isNativeType!T)
         return Unqual!T.stringof;
     else
@@ -109,13 +119,15 @@ string qtDeclArg(T)()
 string convertSignalArgument(T)(string arg)
 {
     static if (isQObjectType!T || isObjectType!T)
+        return "&" ~ arg ~ ".__nativeId";
+    else static if (isValueType!T)
         return arg ~ ".__nativeId";
     else static if (isStringType!T)
-        return "_qt" ~ arg;
+        return "&_qt" ~ arg;
     else static if (isNativeType!T)
-        return arg;
+        return "&" ~ arg;
     else
-        return arg;
+        return "&" ~ arg;
 }
 
 string prepareSignalArguments(Args...)()

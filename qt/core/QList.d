@@ -440,7 +440,9 @@ public:
             node_construct(cast(Node*)(p.append()), cpy);
         }
     }
-
+    
+    alias append opCatAssign;
+    
     static if (isQObjectType!T || isObjectType!T || isValueType!T || is(T == string))
     {
         T at(int i) const
