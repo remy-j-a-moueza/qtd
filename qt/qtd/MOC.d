@@ -504,7 +504,6 @@ FunctionDef[] genFuncDefs(alias Funcs, alias newFunc)()
 
 template Q_OBJECT_BIND()
 {
-    mixin ("enum lastSignalIndex_" ~ typeof(this).stringof ~ " = " ~ toStringNow!(lastSignalIndex!(typeof(this))) ~ ";");
 }
 /*
 template Q_OBJECT()

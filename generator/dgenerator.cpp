@@ -2951,12 +2951,13 @@ void DGenerator::writeMetaMethodArguments(QTextStream &s, const AbstractMetaFunc
 void DGenerator::writeSignal(QTextStream &s, const AbstractMetaFunction *d_function)
 {
     Q_ASSERT(d_function->isSignal());
-
+/*
     s << INDENT << "mixin BindQtSignal!(\"" << d_function->name() << "(";
 
     writeMetaMethodArguments(s, d_function);
 
     s << ")\");" << endl;
+    */
 }
 
 void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFunction *d_function,

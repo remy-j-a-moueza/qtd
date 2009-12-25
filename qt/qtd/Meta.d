@@ -66,3 +66,18 @@ int requiredArgCount(alias fn)() {
     }
     return 0;
 }
+
+template isDg(Dg)
+{
+    enum isDg = is(Dg == delegate);
+}
+
+template isFn(Fn)
+{
+    enum isFn = is(typeof(*Fn.init) == function);
+}
+
+template isFnOrDg(Dg)
+{
+    enum isFnOrDg = isFn!(Dg) || isDg!(Dg);
+}
