@@ -24,6 +24,7 @@ set (d_files
     qtd/Atomic
     qtd/MetaMarshall
     qtd/MOC
+    qtd/Meta
     qtd/util/Tuple
     qtd/ctfe/Integer
     qtd/ctfe/String

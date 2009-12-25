@@ -6,6 +6,8 @@ import std.typetuple;
 
 import qt.Signal;
 import qt.qtd.MetaMarshall;
+import qt.qtd.Meta;
+
 public import qt.core.QString;
 
 public import std.traits;
@@ -81,12 +83,6 @@ string replicate(int n, char value)
             ret ~= value;
     }
     return cast(string)ret;
-}
-
-template Repeat(T, int I)
-{
-    static if (!I) alias TypeTuple!() Repeat;
-    else alias TypeTuple!(T, Repeat!(T, I - 1)) Repeat;
 }
 
 /**
@@ -409,7 +405,7 @@ protected int qt_metacall(QMetaObject.Call _c, int _id, void **_a)
         res ~= "
         if (_c == QMetaObject.Call.InvokeMetaMethod) {
             switch (_id) {";
-        foreach(i, bogus; Repeat!(void, methodCount)) {
+        foreach(i, _; Repeat!(void, methodCount)) {
             res ~= "
             case " ~ __toString(i) ~ ": " ~ MetaEntryName!(Methods[i].at) ~ "(" ~ metaCallArgs!(MetaEntryArgs!(Methods[i].at))() ~ "); break;";
         }
@@ -506,23 +502,11 @@ FunctionDef[] genFuncDefs(alias Funcs, alias newFunc)()
     return res;
 }
 
-string generateMetaInfo(string className, alias Signals, alias Slots)()
-{
-    string res = "";
-    auto signalList = genFuncDefs!(Signals, newSignal)();
-    auto slotList = genFuncDefs!(Slots, newSlot)();
-    res ~= generateCode(className, signalList, slotList);
-    res ~= generate_qt_metacall!(Signals, Slots);
-    res ~= generateMetaObjectConstruction!(Signals, Slots);
-    res ~= generateQMetaObject(className);
-    return res;
-}
-
 template Q_OBJECT_BIND()
 {
     mixin ("enum lastSignalIndex_" ~ typeof(this).stringof ~ " = " ~ toStringNow!(lastSignalIndex!(typeof(this))) ~ ";");
 }
-
+/*
 template Q_OBJECT()
 {
 //    pragma(msg, toStringNow!(lastSignalIndex!(typeof(this))));
@@ -532,4 +516,55 @@ template Q_OBJECT()
     alias TupleWrapper!(findSymbols!(signalPrefix, typeof(this), ByOwner!(typeof(this)))) Signals;
     pragma(msg, generateMetaInfo!((typeof(this)).stringof, Signals, Slots)());
     mixin(generateMetaInfo!((typeof(this)).stringof, Signals, Slots)());
+}
+*/
+// ------------------------------------------------------------------------------------------
+
+string generateSignalEmitters(alias Funcs)()
+{
+    string res;
+    enum funcsCount = Funcs.at.length;
+    foreach(i, bogus; Repeat!(void, funcsCount))
+    {
+        res ~= SignalEmitter!(MetaEntryArgs!(Funcs.at[i].at))(SignalType.NewSignal, MetaEntryName!(Funcs.at[i].at), [], i);
+    }
+    return res;
+}
+
+string generateSlotAliases(alias Funcs)()
+{
+    string res;
+    enum funcsCount = Funcs.at.length;
+    foreach(i, bogus; Repeat!(void, funcsCount))
+    {
+        string name = MetaEntryName!(Funcs.at[i].at);
+        res ~= format_ctfe("    alias slot_${} ${};\n", name, name);
+    }
+    return res;
+}
+
+
+string generateMetaInfo(T, alias Signals, alias Slots)()
+{
+    string res = "";
+    auto signalList = genFuncDefs!(Signals, newSignal)();
+    auto slotList = genFuncDefs!(Slots, newSlot)();
+    res ~= generateSignalEmitters!(Signals)();
+    res ~= generateSlotAliases!(Slots)();
+    res ~= generateCode(T.stringof, signalList, slotList);
+    res ~= generate_qt_metacall!(Signals, Slots);
+    res ~= generateMetaObjectConstruction!(Signals, Slots);
+    res ~= generateQMetaObject(T.stringof);
+    return res;
+}
+
+template Q_OBJECT()
+{
+    alias findSignals!(typeof(this)) SignalFuncs;
+    alias toMetaEntries!(SignalFuncs) SignalMetaEntries;
+    alias findSlots!(typeof(this)) SlotFuncs;
+    alias toMetaEntries!(SlotFuncs) SlotMetaEntries;
+
+    mixin(generateMetaInfo!(typeof(this), SignalMetaEntries, SlotMetaEntries)());
+    pragma(msg, generateMetaInfo!(typeof(this), SignalMetaEntries, SlotMetaEntries)());
 }

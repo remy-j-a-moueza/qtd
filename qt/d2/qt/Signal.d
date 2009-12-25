@@ -13,6 +13,7 @@ module qt.Signal;
 
 public import qt.QGlobal;
 import qt.qtd.MetaMarshall;
+import qt.qtd.Meta;
 
 import core.stdc.stdlib : crealloc = realloc, cfree = free;
 import core.stdc.string : memmove;
@@ -29,7 +30,12 @@ public import
     std.metastrings;
 
    
-// returns name, arguments or tuple of the function depending on type parameter
+/* returns name, arguments or tuple of the function depending on type parameter
+    foo(int, float)
+    _Name:  "foo"
+    _Tuple: "(int, float)"
+    _Args:  "int, float"
+*/
 enum {_Name, _Tuple, _Args}
 string getFunc(int type)(string fullName)
 {
@@ -38,10 +44,10 @@ string getFunc(int type)(string fullName)
         if (c == '(')
             static if (type == _Tuple)
                 return fullName[i..$];
-            else if (type == _Name)
+            else static if (type == _Name)
                 return fullName[0..i];
-            else if (type == _Args)
-                for(int j = fullName.length-1;; j--)
+            else static if (type == _Args)
+                for(int j = fullName.length-1; ; j--)
                     if(fullName[j] == ')')
                         return fullName[i+1 .. j];
     return null;
@@ -136,7 +142,7 @@ template MetaEntryOwner(source...)
 
 template MetaEntryArgs(source...)
 {
-    alias source[3 .. $] MetaEntryArgs; // arguments-tuple starts from the fourth position
+    alias ParameterTypeTuple!(source[1]) MetaEntryArgs; // arguments-tuple starts from the fourth position
 }
 
 template TupleWrapper(A...) { alias A at; }
@@ -491,4 +497,116 @@ template lastSignalIndexImpl(T, int index)
         enum lastSignalIndexImpl = lastSignalIndexImpl!(T, index + 1);
     else
         enum lastSignalIndexImpl = index - 1;
+}
+
+// ------------------------------------------------------------------
+
+string[] getSymbols(C)(string prefix)
+{
+    string[] result;
+    auto allSymbols = __traits(derivedMembers, C);
+    foreach(s; allSymbols)
+        if(ctfeStartsWith(s, prefix))
+            result ~= s;
+    return result;
+}
+
+string removePrefix(string source)
+{
+    foreach (i, c; source)
+        if (c == '_')
+            return source[i+1..$];
+    return source;
+}
+
+template Alias(T...)
+{
+    alias T Alias;
+}
+
+// recursive search in the static meta-information
+template findSymbolsImpl2(C, alias signals, int id)
+{
+    alias Alias!(__traits(getOverloads, C, signals[id])) current;
+    static if (signals.length - id - 1 > 0)
+        alias TypeTuple!(current, findSymbolsImpl2!(C, signals, id + 1).result) result;
+    else
+        alias current result;
+}
+
+template findSymbols2(C, string prefix)
+{
+    enum signals = getSymbols!(C)(prefix);
+    static if (signals)
+        alias findSymbolsImpl2!(C, signals, 0).result result;
+    else
+        alias TypeTuple!() result;
+}
+
+template findSignals(C)
+{
+    alias findSymbols2!(C, "signal_").result findSignals;
+}
+
+template findSlots(C)
+{
+    alias findSymbols2!(C, "slot_").result findSlots;
+}
+
+
+template metaMethods(alias func, int index, int defValsCount)
+{
+    static if(defValsCount >= 0) {
+        alias TupleWrapper!(func, index) current;
+//        pragma(msg, __traits(identifier, (current.at)[0]) ~ " " ~ typeof(&(current.at)[0]).stringof);
+        alias metaMethods!(func, index+1, defValsCount-1).result next;
+        alias TypeTuple!(current, next) result;
+    }
+    else
+    {
+        alias TypeTuple!() result;
+    }
+}
+
+template toMetaEntriesImpl(int id, Methods...)
+{
+    static if (Methods.length > id)
+    {
+        alias typeof(&Methods[id]) Fn;
+//        enum defValsLength = 0; //ParameterTypeTuple!(Fn).length - requiredArgCount!(Methods[id])();
+//        pragma(msg, __traits(identifier, Methods[id]) ~ " " ~ typeof(&Methods[id]).stringof);
+//        alias metaMethods!(Methods[id], 0, defValsLength).result subres;
+        alias TupleWrapper!(removePrefix(__traits(identifier, Methods[id])), typeof(&Methods[id])) subres;
+        alias TypeTuple!(subres, toMetaEntriesImpl!(id+1, Methods).result) result;
+    }
+    else
+    {
+        alias TypeTuple!() result;
+    }
+}
+
+template toMetaEntries(Methods...)
+{
+    alias TupleWrapper!(toMetaEntriesImpl!(0, Methods).result) toMetaEntries;
+}
+
+
+bool printRawFuncs(T...)()
+{
+    pragma(msg, "---Raw---");
+    foreach(i, _; T)
+        pragma(msg, __traits(identifier, T[i]) ~ " " ~ typeof(&T[i]).stringof);
+    return true;
+}
+
+
+bool printFuncs(alias T)()
+{
+    pragma(msg, "---MetaEntries---");
+    alias T.at tuple;
+    enum num = tuple.length;
+    foreach(i, _; Repeat!(void, num))
+        pragma(msg, tuple[i].at[0] ~ " " ~ tuple[i].at[1].stringof);
+//        pragma(msg, typeof(&tuple[i].at[0]).stringof ~ " " ~ __toString(tuple[i].at[1]));
+    return true;
 }
