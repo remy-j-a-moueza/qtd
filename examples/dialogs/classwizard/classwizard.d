@@ -54,7 +54,7 @@ import qt.core.QFile;
 import qt.core.QDir;
 import qt.core.QRegExp;
 
-import std.string; 
+import std.string : format;
 
 
 class ClassWizard : public QWizard
@@ -332,9 +332,7 @@ public:
 		baseIncludeLabel.setBuddy(baseIncludeLineEdit);
 
 		connect!("toggled")(protectCheckBox, &macroNameLabel.setEnabled);
-// ?	connect!("toggled")(protectCheckBox, &macroNameLabel.setEnabled);
 		connect!("toggled")(includeBaseCheckBox, &macroNameLabel.setEnabled);
-// ?	connect!("toggled")(includeBaseCheckBox, &macroNameLabel.setEnabled);
 
 		registerField("comment", commentCheckBox);
 		registerField("protect", protectCheckBox);

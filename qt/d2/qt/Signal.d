@@ -26,9 +26,9 @@ public import
     std.typetuple,
     std.traits,
     std.conv,
-    std.string,
     std.metastrings;
 
+public import std.string : strip, toStringz;
    
 /** The beast that takes string representation of function arguments
   * and returns an array of default values it doesn't check if arguments

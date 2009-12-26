@@ -1993,7 +1993,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         if (dPhobos)
         {
             s << "import std.stdio;" << endl
-              << "import std.string;" << endl
+              << "import std.string : toStringz;" << endl
               << "import std.utf;" << endl
               << "import core.memory;" << endl;
         }
