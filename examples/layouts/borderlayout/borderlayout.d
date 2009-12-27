@@ -75,40 +75,47 @@ public:
         }
     }
 
-    void addItem(IQLayoutItem item)
-    {
-        add(item, Position.West);
-    }
-
     void addWidget(QWidget widget, Position position)
     {
         add(cast(IQLayoutItem) new QWidgetItem(widget), position);
     }
 
-    int expandingDirections()
+    void add(IQLayoutItem item, Position position)
+    {
+        list ~= new ItemWrapper(item, position);
+    }
+
+override
+{
+    void addItem(IQLayoutItem item)
+    {
+        add(item, Position.West);
+    }
+
+    int expandingDirections() const
     {
         return Qt.Horizontal | Qt.Vertical;
     }
 
-    bool hasHeightForWidth()
+    bool hasHeightForWidth() const
     {
         return false;
     }
 
-    int count()
+    int count() const
     {
         return list.length;
     }
 
-    QLayoutItem itemAt(int index)
+    IQLayoutItem itemAt(int index) const
     {
         if(index >= 0 && index < list.length) 
-            return list[index].item;
+            return cast(IQLayoutItem) list[index].item;
         else
             return null;
     }
 
-    QSize minimumSize()
+    QSize minimumSize() const
     {
         return calculateSize(SizeType.MinimumSize);
     }
@@ -182,7 +189,7 @@ public:
                 centerHeight));
     }
 
-    QSize sizeHint()
+    QSize sizeHint() const
     {
         return calculateSize(SizeType.SizeHint);
     }
@@ -195,11 +202,7 @@ public:
         }
         return null;
     }
-
-    void add(IQLayoutItem item, Position position)
-    {
-        list ~= new ItemWrapper(item, position);
-    }
+}
 
 private:
 
@@ -217,12 +220,12 @@ private:
 
     enum SizeType { MinimumSize, SizeHint };
 
-    QSize calculateSize(SizeType sizeType)
+    QSize calculateSize(SizeType sizeType) const
     {
         QSize totalSize;
 
         for (int i = 0; i < list.length; ++i) {
-            ItemWrapper wrapper = list[i];
+            const ItemWrapper wrapper = list[i];
             Position position = wrapper.position;
             QSize itemSize;
 

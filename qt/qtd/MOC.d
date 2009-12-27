@@ -423,7 +423,11 @@ string dDeclArgs(Args...)()
 {
     string ret;
     foreach(i, _; Args)
-        ret ~= ", " ~ Args[i].stringof;
+    {
+        if (i > 0)
+            ret ~= ", ";
+        ret ~= Args[i].stringof;
+    }
     return ret;
 }
 string genMetaMethodsConstr(alias Funcs)(string className)
@@ -433,7 +437,7 @@ string genMetaMethodsConstr(alias Funcs)(string className)
     foreach(i, bogus; Repeat!(void, funcsCount))
     {
         res ~= "        index++;\n" ~
-               "        _staticMetaObject.addMethod(new " ~ className ~ "(signature!(\"" ~ MetaEntryName!(Funcs.at[i].at) ~ "\"" ~ dDeclArgs!(MetaEntryArgs!(Funcs.at[i].at))()~ "), index));\n\n";
+               "        _staticMetaObject.addMethod(new " ~ className ~ "(signature!(" ~ dDeclArgs!(MetaEntryArgs!(Funcs.at[i].at))()~ ")(\"" ~ MetaEntryName!(Funcs.at[i].at) ~ "\"), index));\n\n";
     }
     return res;
 }
@@ -505,18 +509,7 @@ FunctionDef[] genFuncDefs(alias Funcs, alias newFunc)()
 template Q_OBJECT_BIND()
 {
 }
-/*
-template Q_OBJECT()
-{
-//    pragma(msg, toStringNow!(lastSignalIndex!(typeof(this))));
-    mixin ("enum lastSignalIndex_" ~ typeof(this).stringof ~ " = " ~ toStringNow!(lastSignalIndex!(typeof(this))) ~ ";");
-    
-    alias TupleWrapper!(findSymbols!(slotPrefix,   typeof(this), ByOwner!(typeof(this)))) Slots;
-    alias TupleWrapper!(findSymbols!(signalPrefix, typeof(this), ByOwner!(typeof(this)))) Signals;
-    pragma(msg, generateMetaInfo!((typeof(this)).stringof, Signals, Slots)());
-    mixin(generateMetaInfo!((typeof(this)).stringof, Signals, Slots)());
-}
-*/
+
 // ------------------------------------------------------------------------------------------
 
 string generateSignalEmitters(alias Funcs)()

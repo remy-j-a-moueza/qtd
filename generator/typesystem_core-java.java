@@ -155,11 +155,9 @@ class QObject___ extends QObject {
         return result;
     }
     
-    static void connect(QObject sender, string signal, QObject receiver, string method)
+    static bool connect(QObject sender, string signal, QObject receiver, string method)
     {
-        int signalIndex = sender.metaObject.lookUpSignal(signal);
-        int methodIndex = receiver.metaObject.lookUpMethod(method);
-        QMetaObject.connect(sender, signalIndex, receiver, methodIndex);
+        return QMetaObject.connectImpl(sender, signal, receiver, method);
     }
 }// class
 

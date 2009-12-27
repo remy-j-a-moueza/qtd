@@ -5,6 +5,8 @@ import qt.core.QObject;
 import qt.QtdObject;
 
 import std.algorithm;
+import std.string;
+import std.stdio;
 
 class Meta
 {
@@ -39,6 +41,15 @@ class QMetaMethod : MetaMethod
     {
         signature = signature_;
         indexOfMethod = indexOfMethod_;
+    }
+    
+    string args() const
+    {
+        int openBracket = indexOf(signature, '(');
+        if(signature.length - openBracket - 2 > 0)
+            return signature[openBracket + 1 .. $-1];
+        else
+            return "";
     }
 }
 
@@ -161,27 +172,48 @@ final class QMetaObject
         _methods ~= method_;
     }
     
-    int lookUpMethod(string slot)
+    QMetaMethod lookUpMethod(string slot)
     {
         foreach (method; _methods)
             if (method.signature == slot)
-                return method.indexOfMethod;
+                return method;
         if (_base)
             return _base.lookUpMethod(slot);
         else
-            return -1;
+            return null;
     }
     
-    int lookUpSignal(string signal)
+    QMetaSignal lookUpSignal(string signal)
     {
-//        auto signalBegin = signal[0..$-1];
         foreach (method; _methods)
             if (method.signature == signal && cast(QMetaSignal)method)
-                return method.indexOfMethod;
+                return cast(QMetaSignal)method;
         if (_base)
             return _base.lookUpSignal(signal);
         else
-            return -1;
+            return null;
+    }
+
+    QMetaMethod[] lookUpMethodOverloads(string methodName)
+    {
+        typeof(return) result;
+        foreach (method; _methods)
+            if (startsWith(method.signature, methodName))
+                result ~= method;
+        if (_base)
+            result ~= _base.lookUpMethodOverloads(methodName);
+        return result;
+    }
+
+    QMetaSignal[] lookUpSignalOverloads(string signalName)
+    {
+        typeof(return) result;
+        foreach (method; _methods)
+            if (startsWith(method.signature, signalName) && cast(QMetaSignal)method)
+                result ~= cast(QMetaSignal)method;
+        if (_base)
+            result ~= _base.lookUpSignalOverloads(signalName);
+        return result;
     }
     
     private QMetaObject lookupDerived(void*[] moIds)
@@ -271,7 +303,65 @@ final class QMetaObject
     {
         return qtd_QMetaObject_methodCount(_nativeId);
     }
+    
+    static bool connectImpl(QObject sender, string signalString, QObject receiver, string methodString)
+    {
+        QMetaSignal[] signals;
+        QMetaMethod[] methods;
+        QMetaSignal signal;
+        QMetaMethod method;
 
+        
+        if(indexOf(signalString, '(') > 0)
+            signal = sender.metaObject.lookUpSignal(signalString);
+        else
+            signals = sender.metaObject.lookUpSignalOverloads(signalString); // parameters not specified. Looking for a match
+
+        if(indexOf(methodString, '(') > 0) 
+            method = receiver.metaObject.lookUpMethod(methodString);
+        else
+            methods = receiver.metaObject.lookUpMethodOverloads(methodString); // parameters not specified. Looking for a match
+
+        if(!signal && !method)
+        {
+            foreach(sig; signals)
+                foreach(meth; methods)
+                    if(startsWith(sig.args, meth.args))
+                    {
+                        signal = sig;
+                        method = meth;
+                        goto doConnect;
+                    }
+        }
+        else if (!signal)
+        {
+            foreach(sig; signals)
+                if(startsWith(sig.args, method.args))
+                {
+                    signal = sig;
+                    break;
+                }
+        }
+        else if (!method)
+        {
+            foreach(meth; methods)
+                if(startsWith(signal.args, meth.args))
+                {
+                    method = meth;
+                    break;
+                }
+        } 
+        
+doConnect:
+        if(!signal && !method)
+        {
+            writeln(stderr, "QMetaObject: Signal and slots cannot be found");
+            return false;
+        }
+        int signalIndex = signal.indexOfMethod;
+        int methodIndex = method.indexOfMethod;
+        return QMetaObject.connect(sender, signalIndex, receiver, methodIndex);
+    }
 }
 
 extern(C) void qtd_QMetaObject_activate_3(void* sender, void* m, int local_signal_index, void **argv);

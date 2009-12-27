@@ -2791,11 +2791,9 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
       {
           AbstractMetaFunction *fn = signal_funcs.at(i);
   s << "        index = _staticMetaObject.indexOfMethod_Cpp(__signalSignatures[" << staticId << "]);" << endl
-    << "        _staticMetaObject.addMethod(new QMetaSignal(signature!(\"" << fn->name() << "\"";
-          if(fn->arguments().size()-j > 0)
-              s << ", ";
+    << "        _staticMetaObject.addMethod(new QMetaSignal(signature!(";
           writeMetaMethodArguments(s, fn, j);
-  s << "), index));" << endl << endl;
+  s << ")(\"" << fn->name() << "\"), index));" << endl << endl;
           AbstractMetaArgumentList args = fn->arguments();
           if(args.size() && j<args.size())
               hasDefault = !args.at(args.size() - 1 - j)->defaultValueExpression().isEmpty();
@@ -2815,11 +2813,9 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
       {
           AbstractMetaFunction *fn = slot_funcs.at(i);
   s << "        index = _staticMetaObject.indexOfMethod_Cpp(__slotSignatures[" << staticId << "]);" << endl
-    << "        _staticMetaObject.addMethod(new QMetaSlot(signature!(\"" << fn->name() << "\"";
-          if(fn->arguments().size()-j > 0)
-              s << ", ";
+    << "        _staticMetaObject.addMethod(new QMetaSlot(signature!(";
           writeMetaMethodArguments(s, fn, j);
-  s << "), index));" << endl << endl;
+  s << ")(\"" << fn->name() << "\"), index));" << endl << endl;
           AbstractMetaArgumentList args = fn->arguments();
           if(args.size() && j<args.size())
               hasDefault = !args.at(args.size() - 1 - j)->defaultValueExpression().isEmpty();

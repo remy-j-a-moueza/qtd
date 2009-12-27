@@ -186,7 +186,7 @@ enum SignalType
     NewSlot
 }
 
-string signature_impl(T...)(string name)
+string signature(T...)(string name)
 {
     string res = name ~ "(";
     foreach(i, _; T)
@@ -200,27 +200,6 @@ string signature_impl(T...)(string name)
     }
     res ~= ")";
     return res;
-}
-
-template signature(string name, T...)
-{
-    enum signature = signature_impl!(T)(name);
-}
-
-template lastSignalIndex(T)
-{
-    static if (T.stringof == "QObject")
-        enum lastSignalIndex = lastSignalIndexImpl!(T, 0);
-    else
-        mixin ("enum lastSignalIndex = lastSignalIndexImpl!(T, " ~ "T.lastSignalIndex_" ~ (BaseClassesTuple!(T)[0]).stringof ~ ");");
-}
-
-template lastSignalIndexImpl(T, int index)
-{
-    static if (is(typeof(mixin("T." ~ signalPrefix ~ toStringNow!(index)))))
-        enum lastSignalIndexImpl = lastSignalIndexImpl!(T, index + 1);
-    else
-        enum lastSignalIndexImpl = index - 1;
 }
 
 // ------------------------------------------------------------------
