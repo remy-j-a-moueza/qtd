@@ -102,11 +102,11 @@ public:
 		toLabel = new QLabel(tr("&To:"));
 		toLabel.setBuddy(toDateEdit);
 
-		connect!("textChanged")(filterPatternLineEdit, &this.textFilterChanged);
-		connect!("currentIndexChanged")(filterSyntaxComboBox, &this.textFilterChanged);
-		connect!("toggled")(filterCaseSensitivityCheckBox, &this.textFilterChanged);
-		connect!("dateChanged")(fromDateEdit, &this.dateFilterChanged);
-		connect!("dateChanged")(toDateEdit, &this.dateFilterChanged);
+		connect(filterPatternLineEdit, "textChanged", this, "textFilterChanged");
+		connect(filterSyntaxComboBox, "currentIndexChanged", this, "textFilterChanged");
+		connect(filterCaseSensitivityCheckBox, "toggled", this, "textFilterChanged");
+		connect(fromDateEdit, "dateChanged", this, "dateFilterChanged");
+		connect(toDateEdit, "dateChanged", this, "dateFilterChanged");
 
 		proxyView = new QTreeView;
 		proxyView.setRootIsDecorated(false);
@@ -144,9 +144,9 @@ public:
 		sourceView.setModel(model);
 	}
 
-private:
+private: // slots
 
-	void textFilterChanged()
+	void slot_textFilterChanged()
 	{
 		QRegExp.PatternSyntax syntax = cast(QRegExp.PatternSyntax) filterSyntaxComboBox.itemData(
 			filterSyntaxComboBox.currentIndex()).toInt();
@@ -158,11 +158,13 @@ private:
 		proxyModel.setFilterRegExp(regExp);
 	}
 
-	void dateFilterChanged()
+	void slot_dateFilterChanged()
 	{
 		proxyModel.setFilterMinimumDate(fromDateEdit.date());
 		proxyModel.setFilterMaximumDate(toDateEdit.date());
 	}
+    
+    mixin Q_OBJECT;
 
 private:
 

@@ -69,19 +69,19 @@ class GLWidget : QGLWidget
             glDeleteLists(object, 1);
         }
 
-        QSize minimumSizeHint()
+        QSize minimumSizeHint() const
         {
             return QSize(50, 50);
         }
 
-        QSize sizeHint()
+        QSize sizeHint() const
         {
             return QSize(400, 400);
         }
 
 
     public: // slots:
-        void setXRotation(int angle)
+        void slot_setXRotation(int angle)
         {
             normalizeAngle(&angle);
             if (angle != xRot) {
@@ -91,7 +91,7 @@ class GLWidget : QGLWidget
             }
         }
 
-        void setYRotation(int angle)
+        void slot_setYRotation(int angle)
         {
             normalizeAngle(&angle);
             if (angle != yRot) {
@@ -101,7 +101,7 @@ class GLWidget : QGLWidget
             }
         }
 
-        void setZRotation(int angle)
+        void slot_setZRotation(int angle)
         {
             normalizeAngle(&angle);
             if (angle != zRot) {
@@ -110,11 +110,13 @@ class GLWidget : QGLWidget
                 updateGL();
             }
         }
-
-        mixin Signal!("xRotationChanged", int);
-        mixin Signal!("yRotationChanged", int);
-        mixin Signal!("zRotationChanged", int);
-
+    
+    final // signals
+    {
+        void signal_xRotationChanged(int);
+        void signal_yRotationChanged(int);
+        void signal_zRotationChanged(int);
+    }
 
     protected:
         void initializeGL()
@@ -264,4 +266,6 @@ class GLWidget : QGLWidget
         QPoint lastPos;
         QColor trolltechGreen;
         QColor trolltechPurple;
+        
+        mixin Q_OBJECT;
 }

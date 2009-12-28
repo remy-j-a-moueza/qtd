@@ -75,30 +75,30 @@ public:
                 display.setFont(font);
 
                 for (int i = 0; i < NumDigitButtons; ++i) {
-                        digitButtons[i] = createButton(format("%d", i), &digitClicked);
+                        digitButtons[i] = createButton(format("%d", i), "digitClicked");
                 }
 
-                Button pointButton = createButton(tr("."), &pointClicked);
-                Button changeSignButton = createButton(tr("+/-"), &changeSignClicked);
+                Button pointButton = createButton(tr("."), "pointClicked");
+                Button changeSignButton = createButton(tr("+/-"), "changeSignClicked");
 
-                Button backspaceButton = createButton(tr("Backspace"), &backspaceClicked);
-                Button clearButton = createButton(tr("Clear"), &clear);
-                Button clearAllButton = createButton(tr("Clear All"), &clearAll);
+                Button backspaceButton = createButton(tr("Backspace"), "backspaceClicked");
+                Button clearButton = createButton(tr("Clear"), "clear");
+                Button clearAllButton = createButton(tr("Clear All"), "clearAll");
 
-                Button clearMemoryButton = createButton(tr("MC"), &clearMemory);
-                Button readMemoryButton = createButton(tr("MR"), &readMemory);
-                Button setMemoryButton = createButton(tr("MS"), &setMemory);
-                Button addToMemoryButton = createButton(tr("M+"), &addToMemory);
+                Button clearMemoryButton = createButton(tr("MC"), "clearMemory");
+                Button readMemoryButton = createButton(tr("MR"), "readMemory");
+                Button setMemoryButton = createButton(tr("MS"), "setMemory");
+                Button addToMemoryButton = createButton(tr("M+"), "addToMemory");
 
-                Button divisionButton = createButton(tr("/"), &multiplicativeOperatorClicked);
-                Button timesButton = createButton(tr("*"), &multiplicativeOperatorClicked);
-                Button minusButton = createButton(tr("-"), &additiveOperatorClicked);
-                Button plusButton = createButton(tr("+"), &additiveOperatorClicked);
+                Button divisionButton = createButton(tr("/"), "multiplicativeOperatorClicked");
+                Button timesButton = createButton(tr("*"), "multiplicativeOperatorClicked");
+                Button minusButton = createButton(tr("-"), "additiveOperatorClicked");
+                Button plusButton = createButton(tr("+"), "additiveOperatorClicked");
 
-                Button squareRootButton = createButton(tr("Sqrt"), &unaryOperatorClicked);
-                Button powerButton = createButton(tr("x^2"), &unaryOperatorClicked);
-                Button reciprocalButton = createButton(tr("1/x"), &unaryOperatorClicked);
-                Button equalButton = createButton(tr("="), &equalClicked);
+                Button squareRootButton = createButton(tr("Sqrt"), "unaryOperatorClicked");
+                Button powerButton = createButton(tr("x^2"), "unaryOperatorClicked");
+                Button reciprocalButton = createButton(tr("1/x"), "unaryOperatorClicked");
+                Button equalButton = createButton(tr("="), "equalClicked");
 
                 QGridLayout mainLayout = new QGridLayout();
 
@@ -139,9 +139,9 @@ public:
         }
 
 //private slots:
-        void digitClicked()
+        void slot_digitClicked()
         {
-                Button clickedButton = cast(Button) signalSender();
+                Button clickedButton = cast(Button) sender();
                 int digitValue = to!int(clickedButton.text);
                 if (display.text() == "0" && digitValue == 0.0)
                         return;
@@ -153,9 +153,9 @@ public:
                 display.setText(display.text() ~ format("%g", digitValue));
         }
 
-        void unaryOperatorClicked()
+        void slot_unaryOperatorClicked()
         {
-                Button clickedButton = cast(Button) signalSender();
+                Button clickedButton = cast(Button) sender();
                 string clickedOperator = clickedButton.text();
                 double operand = to!float(display.text);
                 double result = 0.0;
@@ -179,9 +179,9 @@ public:
                 waitingForOperand = true;
         }
 
-        void additiveOperatorClicked()
+        void slot_additiveOperatorClicked()
         {
-                Button clickedButton = cast(Button) signalSender();
+                Button clickedButton = cast(Button) sender();
                 string clickedOperator = clickedButton.text();
                 double operand = to!float(display.text);
 
@@ -210,9 +210,9 @@ public:
                 waitingForOperand = true;
         }
 
-        void multiplicativeOperatorClicked()
+        void slot_multiplicativeOperatorClicked()
         {
-                Button clickedButton = cast(Button) signalSender();
+                Button clickedButton = cast(Button) sender();
                 string clickedOperator = clickedButton.text();
                 double operand = to!float(display.text);
 
@@ -230,7 +230,7 @@ public:
                 waitingForOperand = true;
         }
 
-        void equalClicked()
+        void slot_equalClicked()
         {
                 double operand = to!float(display.text);
 
@@ -258,7 +258,7 @@ public:
                 waitingForOperand = true;
         }
 
-        void pointClicked()
+        void slot_pointClicked()
         {
                 string text = display.text;
 
@@ -271,7 +271,7 @@ public:
                 waitingForOperand = false;
         }
 
-        void changeSignClicked()
+        void slot_changeSignClicked()
         {
                 string text = display.text();
                 double value = to!float(text);
@@ -284,7 +284,7 @@ public:
                 display.setText(text);
         }
 
-        void backspaceClicked()
+        void slot_backspaceClicked()
         {
                 if (waitingForOperand)
                         return;
@@ -299,7 +299,7 @@ public:
         }
 
 
-        void clear()
+        void slot_clear()
         {
                 if (waitingForOperand)
                         return;
@@ -308,7 +308,7 @@ public:
                 waitingForOperand = true;
         }
 
-        void clearAll()
+        void slot_clearAll()
         {
                 sumSoFar = 0.0;
                 factorSoFar = 0.0;
@@ -318,24 +318,24 @@ public:
                 waitingForOperand = true;
         }
 
-        void clearMemory()
+        void slot_clearMemory()
         {
                 sumInMemory = 0.0;
         }
 
-        void readMemory()
+        void slot_readMemory()
         {
                 display.setText(format("%g", sumInMemory));
                 waitingForOperand = true;
         }
 
-        void setMemory()
+        void slot_setMemory()
         {
                 equalClicked();
                 sumInMemory = to!float(display.text);
         }
 
-        void addToMemory()
+        void slot_addToMemory()
         {
                 equalClicked();
                 sumInMemory += to!float(display.text);
@@ -343,10 +343,10 @@ public:
 
 private:
 
-        Button createButton(string text, void delegate() member)
+        Button createButton(string text, string member)
         {
                 Button button = new Button(text);
-                connect!("clicked")(button, member);
+                connect(button, "clicked", this, member);
                 return button;
         }
 
@@ -383,4 +383,6 @@ private:
 
         enum { NumDigitButtons = 10 };
         Button[NumDigitButtons] digitButtons;
+        
+        mixin Q_OBJECT;
 }

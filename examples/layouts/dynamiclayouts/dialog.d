@@ -76,9 +76,9 @@ public:
 		setWindowTitle(tr("Dynamic Layouts"));
 	}
 
-private:
+private: // slots
 
-	void buttonsOrientationChanged(int index)
+	void slot_buttonsOrientationChanged(int index)
 	{
 		mainLayout.setSizeConstraint(QLayout.SetNoConstraint);
 		setMinimumSize(0, 0);
@@ -107,7 +107,7 @@ private:
 		mainLayout.setSizeConstraint(QLayout.SetDefaultConstraint);
 	}
 
-	void rotateWidgets()
+	void slot_rotateWidgets()
 	{
 		assert(rotableWidgets.length % 2 == 0);
 
@@ -123,7 +123,7 @@ private:
 		}
 	}
 
-	void help()
+	void slot_help()
 	{
 		QMessageBox.information(this, tr("Dynamic Layouts Help"),
 			tr("This example shows how to change layouts dynamically."));
@@ -145,17 +145,11 @@ private:
 		rotableWidgets ~= a2;
 		rotableWidgets ~= a3;
 
-		connect!("valueChanged")(a0, &a1.setValue);
-		connect!("valueChanged")(a1, &a2.setValue);
-		connect!("valueChanged")(a2, &a3.setValue);
-		connect!("valueChanged")(a3, &a0.setValue);
-
-		/*
 		int n = rotableWidgets.length;
-		for (int i = 0; i < n; ++i) {
-			rotableWidgets[i].valueChanged.connect(&rotableWidgets[(i + 1) % n].setValue);
-		}*/
+		for (int i = 0; i < n; ++i)
+			connect(rotableWidgets[i], "valueChanged", rotableWidgets[(i + 1) % n], "setValue");
 
+       
 		rotableLayout = new QGridLayout;
 		rotableGroupBox.setLayout(rotableLayout);
 
@@ -172,8 +166,8 @@ private:
 		buttonsOrientationComboBox.addItem(tr("Horizontal"), new QVariant(cast(ulong) Qt.Horizontal));
 		buttonsOrientationComboBox.addItem(tr("Vertical"), new QVariant(cast(ulong) Qt.Vertical));
 
-		connect!("currentIndexChanged")(buttonsOrientationComboBox, &this.buttonsOrientationChanged);
-
+		connect(buttonsOrientationComboBox, "currentIndexChanged", this, "buttonsOrientationChanged");
+      
 		optionsLayout = new QGridLayout;
 		optionsLayout.addWidget(buttonsOrientationLabel, 0, 0);
 		optionsLayout.addWidget(buttonsOrientationComboBox, 0, 1);
@@ -189,9 +183,9 @@ private:
 		helpButton = buttonBox.addButton(QDialogButtonBox.Help);
 		rotateWidgetsButton = buttonBox.addButton(tr("Rotate &Widgets"), QDialogButtonBox.ActionRole);
 
-		connect!("clicked")(rotateWidgetsButton, &this.rotateWidgets);
-		connect!("clicked")(closeButton, &this.close);
-		connect!("clicked")(helpButton, &this.help);
+		connect(rotateWidgetsButton, "clicked", this, "rotateWidgets");
+		connect(closeButton, "clicked", this, "close");
+		connect(helpButton, "clicked", this, "help");
 	}
 
 	QGroupBox rotableGroupBox;
@@ -209,4 +203,6 @@ private:
 	QGridLayout mainLayout;
 	QGridLayout rotableLayout;
 	QGridLayout optionsLayout;
+
+    mixin Q_OBJECT;
 }

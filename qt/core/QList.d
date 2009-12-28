@@ -368,15 +368,17 @@ struct QList(T, alias Default = Dummy)
     }
 
 public:
+    /*
     void output()
     {
         writeln("QList atomic ", d.ref_.load());
     }
+    */
     
     static QList!T opCall()
     {
         QList!T res;
-        writeln("QList opCall");
+//        writeln("QList opCall");
         
         res.d = &QListData.shared_null;
         res.d.ref_.increment();
@@ -386,7 +388,7 @@ public:
 
     this(this)
     {
-        writeln("QList postblit");
+//        writeln("QList postblit");
         d.ref_.increment();
         if (!d.sharable)
             detach_helper();
@@ -394,14 +396,14 @@ public:
 
     ~this()
     {
-        writeln("QList ~this");
+//        writeln("QList ~this");
         if (d && !d.ref_.decrement())
             free(d);
     }
 
     ref QList!T opAssign(const ref QList!T l)
     {
-        writeln("QList opAssign");
+//        writeln("QList opAssign");
         if (d != l.d) {
             l.d.ref_.increment();
             if (!d.ref_.decrement())
@@ -505,7 +507,7 @@ public:
     
     void node_copy(Node *from, Node *to, Node *src)
     {
-        writeln("QList node_copy");
+//        writeln("QList node_copy");
         static if (isQObjectType!T || isObjectType!T)
             {} // ensure to do nothing. copying only a pointer
         else static if(is(T == string))
@@ -546,7 +548,7 @@ public:
     
     void free(QListData.Data* data)
     {
-        writeln("QList data destroyed");
+//        writeln("QList data destroyed");
         node_destruct(cast(Node*)(data.array.ptr + data.begin),
                       cast(Node*)(data.array.ptr + data.end));
         if (data.ref_.load() == 0)

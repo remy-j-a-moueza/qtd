@@ -7586,6 +7586,13 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             return %FUNCTION_NAME(%PRE_CALL_ARGUMENTS %COMMA className == null ? null : className.data());
         }
         </template>
+        
+      <inject-code class="java-free">
+        QApplication qApp()
+        {
+            return cast(QApplication) QCoreApplication.instance();
+        }
+      </inject-code>      
     </object-type>
 
   <object-type name="QCommandLinkButton"/>

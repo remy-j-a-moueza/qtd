@@ -558,7 +558,7 @@
   <rejection class="QObject" function-name="disconnect"/>
   <rejection class="QObject" function-name="disconnectNotify"/>
   <rejection class="QObject" function-name="registerUserData"/>
-  <rejection class="QObject" function-name="sender"/>
+<!--  <rejection class="QObject" function-name="sender"/> -->
   <rejection class="QProcess" function-name="pid"/>
   <rejection class="QRegion" function-name="cleanUp"/>
   <rejection class="QSettings" function-name="registerFormat"/>

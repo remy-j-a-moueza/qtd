@@ -98,14 +98,14 @@ class MainWindow : public QMainWindow
 
  private: // slots
 
-  void newFile()
+  void slot_newFile()
   {
     MainWindow other = new MainWindow;
     other.move(x() + 40, y() + 40);
     other.show();
   }
 
-  void open()
+  void slot_open()
   {
     scope fileName = QFileDialog.getOpenFileName(this);
     if (fileName) {
@@ -131,7 +131,7 @@ class MainWindow : public QMainWindow
     }
   }
 
-  bool save()
+  bool slot_save()
   {
     if (isUntitled) {
       return saveAs();
@@ -140,7 +140,7 @@ class MainWindow : public QMainWindow
     }
   }
 
-  bool saveAs()
+  bool slot_saveAs()
   {
     string fileName = QFileDialog.getSaveFileName(this, tr("Save As"),
                                                   curFile);
@@ -150,14 +150,14 @@ class MainWindow : public QMainWindow
     return saveFile(fileName);
   }
 
-  void about()
+  void slot_about()
   {
     QMessageBox.about(this, tr("About SDI"),
                       tr("The <b>SDI</b> example demonstrates how to write single " ~
                          "document interface applications using Qt."));
   }
 
-  void documentWasModified()
+  void slot_documentWasModified()
   {
     setWindowModified(true);
   }
@@ -180,7 +180,7 @@ class MainWindow : public QMainWindow
 
     readSettings();
 
-    connect!("contentsChanged")(textEdit.document(), &this.documentWasModified);
+    connect(textEdit.document(), "contentsChanged", this, "documentWasModified");
 
     setUnifiedTitleAndToolBarOnMac(true);
   }
@@ -190,64 +190,64 @@ class MainWindow : public QMainWindow
     newAct = new QAction(new QIcon(":/images/new.png"), tr("&New"), this);
     newAct.setShortcuts(QKeySequence.New);
     newAct.setStatusTip(tr("Create a new file"));
-    connect!("triggered")(newAct, &this.newFile);
+    connect(newAct, "triggered", this, "newFile");
 
     openAct = new QAction(new QIcon(":/images/open.png"), tr("&Open..."), this);
     openAct.setShortcuts(QKeySequence.Open);
     openAct.setStatusTip(tr("Open an existing file"));
-    connect!("triggered")(openAct, &this.open);
+    connect(openAct, "triggered", this, "open");
 
     saveAct = new QAction(new QIcon(":/images/save.png"), tr("&Save"), this);
     saveAct.setShortcuts(QKeySequence.Save);
     saveAct.setStatusTip(tr("Save the document to disk"));
-    connect!("triggered")(saveAct, &this.save);
+    connect(saveAct, "triggered", this, "save");
 
     saveAsAct = new QAction(tr("Save &As..."), this);
     saveAsAct.setShortcuts(QKeySequence.SaveAs);
     saveAsAct.setStatusTip(tr("Save the document under a new name"));
-    connect!("triggered")(saveAsAct, &this.saveAs);
+    connect(saveAsAct, "triggered", this, "saveAs");
 
     closeAct = new QAction(tr("&Close"), this);
     closeAct.setShortcut(tr("Ctrl+W"));
     closeAct.setStatusTip(tr("Close this window"));
-    connect!("triggered")(closeAct, &this.close);
+    connect(closeAct, "triggered", this, "close");
 
     exitAct = new QAction(tr("E&xit"), this);
     exitAct.setShortcut(tr("Ctrl+Q"));
     exitAct.setStatusTip(tr("Exit the application"));
-    connect!("triggered")(exitAct, &QApplication.closeAllWindows);
+    connect(exitAct, "triggered", qApp(), "closeAllWindows");
 
     cutAct = new QAction(new QIcon(":/images/cut.png"), tr("Cu&t"), this);
     cutAct.setShortcuts(QKeySequence.Cut);
     cutAct.setStatusTip(tr("Cut the current selection's contents to the " ~
                            "clipboard"));
-    connect!("triggered")(cutAct, &textEdit.cut);
+    connect(cutAct, "triggered", textEdit, "cut");
 
     copyAct = new QAction(new QIcon(":/images/copy.png"), tr("&Copy"), this);
     copyAct.setShortcuts(QKeySequence.Copy);
     copyAct.setStatusTip(tr("Copy the current selection's contents to the " ~
                             "clipboard"));
-    connect!("triggered")(copyAct, &textEdit.copy);
+    connect(copyAct, "triggered", textEdit, "copy");
 
     pasteAct = new QAction(new QIcon(":/images/paste.png"), tr("&Paste"), this);
     pasteAct.setShortcuts(QKeySequence.Paste);
     pasteAct.setStatusTip(tr("Paste the clipboard's contents into the current " ~
                              "selection"));
-    connect!("triggered")(pasteAct, &textEdit.paste);
+    connect(pasteAct, "triggered", textEdit, "paste");
 
     aboutAct = new QAction(tr("&About"), this);
     aboutAct.setStatusTip(tr("Show the application's About box"));
-    connect!("triggered")(aboutAct, &this.about);
+    connect(aboutAct, "triggered", this, "about");
 
     aboutQtAct = new QAction(tr("About &Qt"), this);
     aboutQtAct.setStatusTip(tr("Show the Qt library's About box"));
-    connect!("triggered")(aboutQtAct, &QApplication.aboutQt);
+    connect(aboutQtAct, "triggered", qApp, "aboutQt");
 
     cutAct.setEnabled(false);
     copyAct.setEnabled(false);
 
-    connect!("copyAvailable")(textEdit, &cutAct.setEnabled);
-    connect!("copyAvailable")(textEdit, &copyAct.setEnabled);
+    connect(textEdit, "copyAvailable", cutAct, "setEnabled");
+    connect(textEdit, "copyAvailable", copyAct, "setEnabled");
   }
 
   void createMenus()
@@ -426,4 +426,6 @@ class MainWindow : public QMainWindow
   QAction pasteAct;
   QAction aboutAct;
   QAction aboutQtAct;
+  
+  mixin Q_OBJECT;
 };

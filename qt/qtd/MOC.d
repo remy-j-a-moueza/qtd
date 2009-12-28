@@ -4,6 +4,7 @@ import qt.qtd.ctfe.Format;
 
 import std.typetuple;
 
+import qt.QGlobal;
 import qt.Signal;
 import qt.qtd.MetaMarshall;
 import qt.qtd.Meta;
@@ -14,10 +15,6 @@ public import std.traits;
 /**
    Utils.
   */
-
-T qMin(T)(T a,T b) { if (a < b) return a; return b; }
-T qMax(T)(T a, T b) { if (a < b) return b; return a; }
-T qBound(T)(T min, T val,T max) { return qMax(min, qMin(max, val)); }
 
 bool is_digit_char(const char s)
 {
@@ -461,7 +458,7 @@ string generateQMetaObject(string className)
 {
     string res;
     res ~= "
-    QMetaObject metaObject() { return staticMetaObject; }
+    public QMetaObject metaObject() { return staticMetaObject; }
     private static QMetaObject _staticMetaObject;
     private static QMetaObjectNative _nativeStaticMetaObject;
     public static QMetaObject staticMetaObject() { return _staticMetaObject; }
@@ -558,5 +555,6 @@ template Q_OBJECT()
     alias toMetaEntries!(SlotFuncs) SlotMetaEntries;
 
     mixin(generateMetaInfo!(typeof(this), SignalMetaEntries, SlotMetaEntries)());
-    pragma(msg, generateMetaInfo!(typeof(this), SignalMetaEntries, SlotMetaEntries)());
+    // debug output
+//    pragma(msg, generateMetaInfo!(typeof(this), SignalMetaEntries, SlotMetaEntries)());
 }

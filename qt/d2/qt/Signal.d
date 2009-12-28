@@ -127,7 +127,7 @@ string convertSignalArguments(Args...)()
     
     res ~= "void*[" ~ __toString(Args.length+1) ~ "] _a = [null";
     foreach(i, _; Args)
-        res ~= ", " ~ "cast(void*) " ~ convertSignalArgument!(Args[i])("_t" ~ __toString(i));
+        res ~= ", " ~ "cast(void*) (" ~ convertSignalArgument!(Args[i])("_t" ~ __toString(i)) ~ ")";
     res ~= "];\n";
     return res;
 }

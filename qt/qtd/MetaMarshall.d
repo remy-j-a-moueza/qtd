@@ -77,7 +77,7 @@ string qtDeclArg(T)()
 string convertSignalArgument(T)(string arg)
 {
     static if (isQObjectType!T || isObjectType!T)
-        return "&" ~ arg ~ ".__nativeId";
+        return arg ~ " ? " "&" ~ arg ~ ".__nativeId : cast(void**) &" ~ arg; // since it is a pointer type check arg for null
     else static if (isValueType!T)
         return arg ~ ".__nativeId";
     else static if (isStringType!T)

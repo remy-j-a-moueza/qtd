@@ -51,6 +51,12 @@ class QMetaMethod : MetaMethod
         else
             return "";
     }
+    
+    string name() const
+    {
+        int openBracket = indexOf(signature, '(');
+        return signature[0..openBracket];
+    }
 }
 
 class QMetaSignal : QMetaMethod
@@ -81,6 +87,8 @@ struct QMetaObjectNative
     const(uint) *data;
     void *extradata;
 }
+
+class QMetaException : Exception { this(string msg) { super(msg); } }
 
 final class QMetaObject
 {
@@ -198,7 +206,7 @@ final class QMetaObject
     {
         typeof(return) result;
         foreach (method; _methods)
-            if (startsWith(method.signature, methodName))
+            if (method.name == methodName)
                 result ~= method;
         if (_base)
             result ~= _base.lookUpMethodOverloads(methodName);
@@ -209,7 +217,7 @@ final class QMetaObject
     {
         typeof(return) result;
         foreach (method; _methods)
-            if (startsWith(method.signature, signalName) && cast(QMetaSignal)method)
+            if (method.name == signalName && cast(QMetaSignal)method)
                 result ~= cast(QMetaSignal)method;
         if (_base)
             result ~= _base.lookUpSignalOverloads(signalName);
@@ -304,14 +312,13 @@ final class QMetaObject
         return qtd_QMetaObject_methodCount(_nativeId);
     }
     
-    static bool connectImpl(QObject sender, string signalString, QObject receiver, string methodString)
+    static void connectImpl(QObject sender, string signalString, QObject receiver, string methodString)
     {
         QMetaSignal[] signals;
         QMetaMethod[] methods;
         QMetaSignal signal;
         QMetaMethod method;
 
-        
         if(indexOf(signalString, '(') > 0)
             signal = sender.metaObject.lookUpSignal(signalString);
         else
@@ -324,13 +331,14 @@ final class QMetaObject
 
         if(!signal && !method)
         {
+            Top:
             foreach(sig; signals)
                 foreach(meth; methods)
                     if(startsWith(sig.args, meth.args))
                     {
                         signal = sig;
                         method = meth;
-                        goto doConnect;
+                        break Top;
                     }
         }
         else if (!signal)
@@ -352,15 +360,21 @@ final class QMetaObject
                 }
         } 
         
-doConnect:
+        bool success = false;
+
         if(!signal && !method)
         {
-            writeln(stderr, "QMetaObject: Signal and slots cannot be found");
-            return false;
+            success = false;
         }
-        int signalIndex = signal.indexOfMethod;
-        int methodIndex = method.indexOfMethod;
-        return QMetaObject.connect(sender, signalIndex, receiver, methodIndex);
+        else
+        {
+            int signalIndex = signal.indexOfMethod;
+            int methodIndex = method.indexOfMethod;
+            success = QMetaObject.connect(sender, signalIndex, receiver, methodIndex);
+        }
+        
+        if(!success)
+            throw new QMetaException("QMetaObject: Signal " ~ signalString ~ " and slot " ~ methodString ~ " cannot be found");
     }
 }
 

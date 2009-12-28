@@ -82,7 +82,7 @@ public:
 
 protected:
 
-	override bool filterAcceptsRow(int sourceRow, const QModelIndex sourceParent)
+	override bool filterAcceptsRow(int sourceRow, const QModelIndex sourceParent) const
 	{
 		QModelIndex index0 = sourceModel().index(sourceRow, 0, sourceParent);
 		QModelIndex index1 = sourceModel().index(sourceRow, 1, sourceParent);
@@ -96,10 +96,10 @@ protected:
 		
 		return (contains(sourceModel().data(index0).toString(), filterRegExp())
 			|| contains(sourceModel().data(index1).toString(), filterRegExp()))
-			&& dateInRange(sourceModel().data(index2).toDate());
+			/* && dateInRange(sourceModel().data(index2).toDate())*/;
 	}
 
-	override bool lessThan(const QModelIndex left, const QModelIndex right)
+	override bool lessThan(const QModelIndex left, const QModelIndex right) const
 	{
 		QVariant leftData = sourceModel().data(left);
 		QVariant rightData = sourceModel().data(right);
@@ -122,12 +122,12 @@ protected:
 	}
 
 private:
-
-	bool dateInRange(QDate date)
+/*
+	bool dateInRange(const QDate date) const
 	{
 		return (!minDate.isValid() || date > minDate) && (!maxDate.isValid() || date < maxDate);
 	}
-
+*/
 	QDate minDate;
 	QDate maxDate;
 }

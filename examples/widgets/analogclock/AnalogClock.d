@@ -55,7 +55,7 @@ public:
     {
         super(parent);
         auto timer = new QTimer(this);
-        connect!("timeout")(timer, &this.update);
+        connect(timer, "timeout", this, "update");
         timer.start(1000);
         setWindowTitle("Analog Clock");
         resize(200, 200);
@@ -119,4 +119,6 @@ public:
             painter.rotate(6.0);
         }
     }
+    
+    mixin Q_OBJECT;
 }
