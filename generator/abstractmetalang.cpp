@@ -226,6 +226,10 @@ QString AbstractMetaFunction::marshalledName(bool classIsOwner) const
             returned += arg->type()->name().replace("[]", "_3").replace(".", "_");
         }
     }
+
+    if(this->isConstant())
+        returned += "_const";
+
     return returned;
 }
 

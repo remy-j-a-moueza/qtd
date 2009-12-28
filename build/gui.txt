@@ -352,4 +352,6 @@ set(classes
     QSizeGrip
     QSortFilterProxyModel
     QSound
+	
+	QGraphicsObject
 )

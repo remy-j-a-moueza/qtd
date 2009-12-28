@@ -3816,3 +3816,4 @@ void CppImplGenerator::writeDefaultConstructedValues(QTextStream &s, const Abstr
         s << endl << endl;
     }
 }
+

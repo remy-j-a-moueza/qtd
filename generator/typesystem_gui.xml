@@ -2202,7 +2202,8 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="setMatrix(QMatrix, bool)" remove="all"/>
 
     <modify-function signature="children()const" remove="all"/>
-  <!--
+    <modify-function signature="isBlockedByModalPanel(QGraphicsItem**)const" remove="all"/>
+	<!--
     <modify-function signature="setMatrix(QMatrix, bool)" remove="all"/>
 
     <modify-function signature="paint(QPainter*,const QStyleOptionGraphicsItem*,QWidget*)">
@@ -3687,11 +3688,11 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="find(QString)">
         <remove/>
     </modify-function>
-<!--
     <modify-function signature="find(QString,QPixmap&amp;)">
-        <access modifier="private"/>
+        <remove/>
     </modify-function>
-  
+	
+<!--
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPixmapCache___" quote-before-line="}// class"/>
         </inject-code>
@@ -5297,7 +5298,11 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
       <modify-function signature="setTextColor(QColor)" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="textColor()const" remove="all"/> <!--### Obsolete in 4.3-->
   </object-type>
-
+  
+  <object-type name="QGraphicsObject">
+    <modify-function signature="children()const" remove="all"/>
+  </object-type>
+  
   <object-type name="QGraphicsTextItem"> <!-- a QObject so main-thread delete redundant -->
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
