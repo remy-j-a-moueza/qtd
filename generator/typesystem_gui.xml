@@ -2203,6 +2203,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
     <modify-function signature="children()const" remove="all"/>
     <modify-function signature="isBlockedByModalPanel(QGraphicsItem**)const" remove="all"/>
+<!--    <modify-function signature="toGraphicsObject()const" remove="all"/> -->
 	<!--
     <modify-function signature="setMatrix(QMatrix, bool)" remove="all"/>
 

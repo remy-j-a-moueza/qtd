@@ -406,10 +406,11 @@ public:
         EqualReturnType             = 0x00000010,
         EqualDefaultValueOverload   = 0x00000020,
         EqualModifiedName           = 0x00000040,
+        EqualConstness              = 0x00000080,
 
         NameLessThan                = 0x00001000,
 
-        PrettySimilar               = EqualName | EqualArguments,
+        PrettySimilar               = EqualName | EqualArguments | EqualConstness,
         Equal                       = 0x0000001f,
         NotEqual                    = 0x00001000
     };

@@ -258,6 +258,11 @@ uint AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
         result |= EqualAttributes;
     }
 
+    // Attributes
+    if (isConstant() == other->isConstant()) {
+        result |= EqualConstness;
+    }
+
     // Compare types
     AbstractMetaType *t = type();
     AbstractMetaType *ot = other->type();
