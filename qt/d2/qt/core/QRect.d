@@ -300,7 +300,7 @@ public struct QRect
         return this | r;
     }
 
-    bool opEquals(const QRect r)
+    bool opEquals(ref const QRect r) const
     {
         return x1==r.x1 && x2==r.x2 && y1==r.y1 && y2==r.y2;
     }

@@ -91,7 +91,7 @@ public struct QSize
 	QSize opMulAssign(qreal c)
 	{ wd = qRound(wd*c); ht = qRound(ht*c); return this; }
 
-	bool opEquals(ref QSize s)
+	bool opEquals(ref const QSize s) const
 	{ return wd == s.wd && ht == s.ht; }
 
 	QSize opAdd(ref QSize s)
@@ -225,7 +225,7 @@ public struct QSizeF
 	QSizeF opMulAssign(qreal c)
 	{ wd *= c; ht *= c; return this; }
 
-	bool opEquals(ref QSizeF s)
+	bool opEquals(ref const QSizeF s) const
 	{ return qFuzzyCompare(wd, s.wd) && qFuzzyCompare(ht, s.ht); }
 
 	QSizeF opAdd(ref QSizeF s)

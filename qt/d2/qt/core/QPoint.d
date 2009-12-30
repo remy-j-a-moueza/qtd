@@ -61,7 +61,7 @@ inline int &ry()
     QPoint opMulAssign(qreal c)
     { xp = qRound(xp*c); yp = qRound(yp*c); return this; }
 
-    bool opEquals(ref QPoint p)
+    bool opEquals(ref const QPoint p) const
     { return xp == p.xp && yp == p.yp; }
 
     QPoint opAdd(ref QPoint p)
@@ -184,7 +184,7 @@ inline qreal &QPointF::ry()
     QPointF opMulAssign(qreal c)
     { xp*=c; yp*=c; return this; }
 
-    bool opEquals(ref QPointF p)
+    bool opEquals(ref const QPointF p) const
     { return qFuzzyCompare(xp, p.xp) && qFuzzyCompare(yp, p.yp); }
 
     QPointF opAdd(ref QPointF p)

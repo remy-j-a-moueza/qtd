@@ -123,7 +123,7 @@ public struct QLine
         pt2 = QPoint(aX2, aY2);
     }
 
-    bool opEquals(ref QLine d) // const
+    bool opEquals(ref const QLine d) const
     {
         return pt1 == d.pt1 && pt2 == d.pt2;
     }
@@ -320,7 +320,7 @@ public struct QLineF
         pt2 = QPointF(aX2, aY2);
     }
 
-    bool opEquals(ref QLineF d) // const
+    bool opEquals(ref const QLineF d) const
     {
         return pt1 == d.pt1 && pt2 == d.pt2;
     }

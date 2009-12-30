@@ -116,7 +116,7 @@ version( D_Ddoc )
          * Returns:
          *  The loaded value.
          */
-        T atomicLoad( inout T val )
+        T atomicLoad( ref T val )
         {
             return val;
         }
@@ -146,7 +146,7 @@ version( D_Ddoc )
          *  val     = The destination variable.
          *  newval  = The value to store.
          */
-        void atomicStore( inout T val, T newval )
+        void atomicStore( ref T val, T newval )
         {
 
         }
@@ -180,7 +180,7 @@ version( D_Ddoc )
          * Returns:
          *  true if the store occurred, false if not.
          */
-        bool atomicStoreIf( inout T val, T newval, T equalTo )
+        bool atomicStoreIf( ref T val, T newval, T equalTo )
         {
             return false;
         }
@@ -220,7 +220,7 @@ version( D_Ddoc )
          *  newly stored value.  Thus, competing writes are allowed to occur
          *  between the increment and successive load operation.
          */
-        T atomicIncrement( inout T val )
+        T atomicIncrement( ref T val )
         {
             return val;
         }
@@ -260,7 +260,7 @@ version( D_Ddoc )
          *  newly stored value.  Thus, competing writes are allowed to occur
          *  between the increment and successive load operation.
          */
-        T atomicDecrement( inout T val )
+        T atomicDecrement( ref T val )
         {
             return val;
         }
@@ -523,7 +523,7 @@ else version( D_InlineAsm_X86 )
 
     template atomicLoad( msync ms = msync.seq, T )
     {
-        T atomicLoad( inout T val )
+        T atomicLoad( ref T val )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -670,7 +670,7 @@ else version( D_InlineAsm_X86 )
 
     template atomicStore( msync ms = msync.seq, T )
     {
-        void atomicStore( inout T val, T newval )
+        void atomicStore( ref T val, T newval )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -824,7 +824,7 @@ else version( D_InlineAsm_X86 )
 
     template atomicStoreIf( msync ms = msync.seq, T )
     {
-        bool atomicStoreIf( inout T val, T newval, T equalTo )
+        bool atomicStoreIf( ref T val, T newval, T equalTo )
         in
         {
             // NOTE: 32 bit x86 systems support 8 byte CAS, which only requires
@@ -970,7 +970,7 @@ else version( D_InlineAsm_X86 )
         static assert( isValidNumericType!(T) );
 
 
-        T atomicIncrement( inout T val )
+        T atomicIncrement( ref T val )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -1082,7 +1082,7 @@ else version( D_InlineAsm_X86 )
         static assert( isValidNumericType!(T) );
 
 
-        T atomicDecrement( inout T val )
+        T atomicDecrement( ref T val )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -1228,7 +1228,7 @@ else
 
     template atomicLoad( msync ms = msync.seq, T )
     {
-        T atomicLoad( inout T val )
+        T atomicLoad( ref T val )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -1278,7 +1278,7 @@ else
 
     template atomicStore( msync ms = msync.seq, T )
     {
-        void atomicStore( inout T val, T newval )
+        void atomicStore( ref T val, T newval )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -1328,7 +1328,7 @@ else
 
     template atomicStoreIf( msync ms = msync.seq, T )
     {
-        bool atomicStoreIf( inout T val, T newval, T equalTo )
+        bool atomicStoreIf( ref T val, T newval, T equalTo )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -1379,7 +1379,7 @@ else
         static assert( isValidNumericType!(T) );
 
 
-        T atomicIncrement( inout T val )
+        T atomicIncrement( ref T val )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );
@@ -1425,7 +1425,7 @@ else
         static assert( isValidNumericType!(T) );
 
 
-        T atomicDecrement( inout T val )
+        T atomicDecrement( ref T val )
         in
         {
             assert( atomicValueIsProperlyAligned!(T)( cast(size_t) &val ) );

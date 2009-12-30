@@ -254,7 +254,7 @@ public struct QRectF
         return this | r;
     }
 
-    bool opEquals(ref QRectF r)
+    bool opEquals(ref const QRectF r) const
     {
         return qFuzzyCompare(xp, r.xp) && qFuzzyCompare(yp, r.yp)
             && qFuzzyCompare(w, r.w) && qFuzzyCompare(h, r.h);
