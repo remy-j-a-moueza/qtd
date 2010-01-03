@@ -515,7 +515,7 @@ string generateSignalEmitters(alias Funcs)()
     enum funcsCount = Funcs.at.length;
     foreach(i, bogus; Repeat!(void, funcsCount))
     {
-        res ~= SignalEmitter!(MetaEntryArgs!(Funcs.at[i].at))(SignalType.NewSignal, MetaEntryName!(Funcs.at[i].at), [], i);
+        res ~= SignalEmitter!(MetaEntryArgs!(Funcs.at[i].at))(SignalType.NewSignal, MetaEntryName!(Funcs.at[i].at), cast(string[])[], i);
     }
     return res;
 }

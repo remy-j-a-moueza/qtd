@@ -258,7 +258,7 @@ uint AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
         result |= EqualAttributes;
     }
 
-    // Attributes
+    // Constness
     if (isConstant() == other->isConstant()) {
         result |= EqualConstness;
     }

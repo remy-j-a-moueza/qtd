@@ -16,3 +16,4 @@ changes since 0.1
  * D2 port
  * new CMake module for D
  * support for MSVC
+ * Rewritten signals and slots implementation. Now integrates nicely into Qt metasystem
