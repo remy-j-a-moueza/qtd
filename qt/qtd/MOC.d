@@ -458,7 +458,12 @@ string generateQMetaObject(string className)
 {
     string res;
     res ~= "
-    public QMetaObject metaObject() { return staticMetaObject; }
+    public QMetaObject metaObject()
+    {
+        if(!_staticMetaObject)
+            createStaticMetaObject();
+        return staticMetaObject();
+    }
     private static QMetaObject _staticMetaObject;
     private static QMetaObjectNative _nativeStaticMetaObject;
     public static QMetaObject staticMetaObject() { return _staticMetaObject; }
@@ -474,10 +479,6 @@ string generateQMetaObject(string className)
         _staticMetaObject = new QMetaObject(&_nativeStaticMetaObject, base);
 //        _staticMetaObject.construct!(typeof(this));
         _populateMetaInfo();
-    }
-    static this()
-    {
-        createStaticMetaObject();
     }\n\n";
     return res;
 }
