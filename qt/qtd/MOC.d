@@ -464,8 +464,8 @@ string generateQMetaObject(string className)
             createStaticMetaObject();
         return staticMetaObject();
     }
-    private static QMetaObject _staticMetaObject;
-    private static QMetaObjectNative _nativeStaticMetaObject;
+    private static __gshared QMetaObject _staticMetaObject;
+    private static __gshared QMetaObjectNative _nativeStaticMetaObject;
     public static QMetaObject staticMetaObject() { return _staticMetaObject; }
     protected static void createStaticMetaObject() {
         assert(!_staticMetaObject);

@@ -405,10 +405,11 @@ public:
     {
 //        writeln("QList opAssign");
         if (d != l.d) {
-            l.d.ref_.increment();
+            QListData.Data* nd = cast(QListData.Data*)l.d;
+            nd.ref_.increment();
             if (!d.ref_.decrement())
                 free(d);
-            d = cast(QListData.Data*)l.d;
+            d = nd;
             if (!d.sharable)
                 detach_helper();
         }
