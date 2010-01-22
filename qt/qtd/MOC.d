@@ -458,15 +458,15 @@ string generateQMetaObject(string className)
 {
     string res;
     res ~= "
-    public QMetaObject metaObject()
+    public QMetaObject metaObject() { return staticMetaObject(); }
+    private static __gshared QMetaObject _staticMetaObject;
+    private static __gshared QMetaObjectNative _nativeStaticMetaObject;
+    public static QMetaObject staticMetaObject()
     {
         if(!_staticMetaObject)
             createStaticMetaObject();
-        return staticMetaObject();
+        return _staticMetaObject;
     }
-    private static __gshared QMetaObject _staticMetaObject;
-    private static __gshared QMetaObjectNative _nativeStaticMetaObject;
-    public static QMetaObject staticMetaObject() { return _staticMetaObject; }
     protected static void createStaticMetaObject() {
         assert(!_staticMetaObject);
         alias BaseClassesTuple!(typeof(this))[0] BaseClass;

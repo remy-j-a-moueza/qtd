@@ -1857,7 +1857,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     {
         auxFile.isDone = false;
         auxFile.stream << "extern(C) void static_init_" << d_class->name() << "();" << endl;
-        auxFile.stream << "static this() { static_init_" << d_class->name() << "; }" << endl << endl;
+        auxFile.stream << "shared static this() { static_init_" << d_class->name() << "; }" << endl << endl;
     }
 
     if (m_docs_enabled) {
@@ -2743,7 +2743,7 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
     << "        return qtd_" << d_class->name() << "_qt_metacall(__nativeId, _c, _id, _a);" << endl
     << "    }" << endl << endl;
 
-  s << "    private static QMetaObject _staticMetaObject;" << endl
+  s << "    private static __gshared QMetaObject _staticMetaObject;" << endl
     << "    protected static void createStaticMetaObject() {" << endl
     << "        assert(!_staticMetaObject);" << endl
     << "        QMetaObject base;" << endl;
