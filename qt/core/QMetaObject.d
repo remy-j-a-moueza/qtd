@@ -312,7 +312,7 @@ final class QMetaObject
         return qtd_QMetaObject_methodCount(_nativeId);
     }
     
-    static void connectImpl(QObject sender, string signalString, QObject receiver, string methodString)
+    static void connectImpl(QObject sender, string signalString, QObject receiver, string methodString, int type)
     {
         QMetaSignal[] signals;
         QMetaMethod[] methods;
@@ -370,7 +370,7 @@ final class QMetaObject
         {
             int signalIndex = signal.indexOfMethod;
             int methodIndex = method.indexOfMethod;
-            success = QMetaObject.connect(sender, signalIndex, receiver, methodIndex);
+            success = QMetaObject.connect(sender, signalIndex, receiver, methodIndex, type);
         }
         
         if(!success)
