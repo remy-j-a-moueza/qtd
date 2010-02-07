@@ -436,9 +436,10 @@ public:
         : m_name(name),
           m_type(t),
           m_code_generation(GenerateAll),
-          m_preferred_conversion(true)
+          m_preferred_conversion(true),
+          m_has_copy_constructor(false)
     {
-    };
+    }
 
     virtual ~TypeEntry() { }
 
@@ -508,6 +509,8 @@ public:
 
     // qtd
     virtual bool isStructInD() const { return false; }
+    bool hasPrivateCopyConstructor() const { return m_has_copy_constructor; }
+    void setHasPrivateCopyConstructor(bool has_copy_constructor) { m_has_copy_constructor = has_copy_constructor; }
 
 private:
     QString m_name;
@@ -516,6 +519,7 @@ private:
     CustomFunction m_customConstructor;
     CustomFunction m_customDestructor;
     bool m_preferred_conversion;
+    bool m_has_copy_constructor;
 };
 typedef QHash<QString, QList<TypeEntry *> > TypeEntryHash;
 typedef QHash<QString, TypeEntry *> SingleTypeEntryHash;
@@ -949,6 +953,8 @@ public:
     QString targetLangName() const;
     QString javaPackage() const;
     QString qualifiedCppName() const;
+
+    bool isQList() const { return type() == ListContainer || type() == StringListContainer; }
 
 private:
     Type m_type;

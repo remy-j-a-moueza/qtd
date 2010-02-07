@@ -17,7 +17,19 @@ set (d_files
     qtd/Traits
     core/QString
     core/QMetaType
-    core/QMetaObject)
+    core/QMetaObject
+    
+    core/QTypeInfo
+    core/QList
+    qtd/Atomic
+    qtd/MetaMarshall
+    qtd/MOC
+    qtd/Meta
+    qtd/util/Tuple
+    qtd/ctfe/Integer
+    qtd/ctfe/String
+    qtd/ctfe/Format
+    )
 set (d_version_files 
     QtdObject
     Signal qtd/Str
@@ -68,5 +80,6 @@ set (classes
     QBuffer
     QLibraryInfo
     QXmlStreamEntityResolver
+    QFileSystemWatcher
     )
 	

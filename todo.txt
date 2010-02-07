@@ -1,0 +1,10 @@
+Before 0.3 release
+
+1) Move nested classes into host classes they belong to
+2) connectSlotsByName
+3) docs
+4) remove deprecated methods (as many as possible)
+5) remove mangling of const methods - always reimplement them in D - to reduce binaries size at least a little bit
+6) QList!(IQGraphicsItem)
+7) const correct QMetaObject (QObject.metaObject() should be const?)
+8) fix duic once value types are implemented as structs and add connectSlotsByName call

@@ -39,58 +39,55 @@ import qt.gui.QWidget;
 import qt.gui.QSlider;
 import qt.gui.QHBoxLayout;
 
-version(D_Version2)
-    import glwidget;
-else
-    import glwidget_d1;
+import glwidget;
 
 class Window : public QWidget
 {
-//	Q_OBJECT
-	
-	public:
-		this()
-		{
-			glWidget = new GLWidget;
-			
-			xSlider = createSlider();
-			ySlider = createSlider();
-			zSlider = createSlider();
-			
-            connect!("valueChanged")(xSlider, &glWidget.setXRotation);
-            connect!("xRotationChanged")(glWidget, &xSlider.setValue);
-            connect!("valueChanged")(ySlider, &glWidget.setYRotation);
-            connect!("yRotationChanged")(glWidget, &ySlider.setValue);
-            connect!("valueChanged")(zSlider,&glWidget.setZRotation);
-            connect!("zRotationChanged")(glWidget, &zSlider.setValue);
-			
-			QHBoxLayout mainLayout = new QHBoxLayout;
-			mainLayout.addWidget(glWidget);
-			mainLayout.addWidget(xSlider);
-			mainLayout.addWidget(ySlider);
-			mainLayout.addWidget(zSlider);
-			setLayout(mainLayout);
-			
-			xSlider.setValue(15 * 16);
-			ySlider.setValue(345 * 16);
-			zSlider.setValue(0 * 16);
-			setWindowTitle(tr("Hello GL"));
-		}
-		
-	private:
-		QSlider createSlider()
-		{
-			auto slider = new QSlider(Qt.Vertical);
-			slider.setRange(0, 360 * 16);
-			slider.setSingleStep(16);
-			slider.setPageStep(15 * 16);
-			slider.setTickInterval(15 * 16);
-			slider.setTickPosition(QSlider.TicksRight);
-			return slider;
-		}
-		
-		GLWidget glWidget;
-		QSlider xSlider;
-		QSlider ySlider;
-		QSlider zSlider;
+    public:
+        this()
+        {
+            glWidget = new GLWidget;
+            
+            xSlider = createSlider();
+            ySlider = createSlider();
+            zSlider = createSlider();
+            
+            connect(xSlider, "valueChanged", glWidget, "setXRotation");
+            connect(glWidget, "xRotationChanged", xSlider, "setValue");
+            connect(ySlider, "valueChanged", glWidget, "setYRotation");
+            connect(glWidget, "yRotationChanged", ySlider, "setValue");
+            connect(zSlider, "valueChanged", glWidget, "setZRotation");
+            connect(glWidget, "zRotationChanged", zSlider, "setValue");
+            
+            QHBoxLayout mainLayout = new QHBoxLayout;
+            mainLayout.addWidget(glWidget);
+            mainLayout.addWidget(xSlider);
+            mainLayout.addWidget(ySlider);
+            mainLayout.addWidget(zSlider);
+            setLayout(mainLayout);
+            
+            xSlider.setValue(15 * 16);
+            ySlider.setValue(345 * 16);
+            zSlider.setValue(0 * 16);
+            setWindowTitle(tr("Hello GL"));
+        }
+        
+    private:
+        QSlider createSlider()
+        {
+            auto slider = new QSlider(Qt.Vertical);
+            slider.setRange(0, 360 * 16);
+            slider.setSingleStep(16);
+            slider.setPageStep(15 * 16);
+            slider.setTickInterval(15 * 16);
+            slider.setTickPosition(QSlider.TicksRight);
+            return slider;
+        }
+        
+        GLWidget glWidget;
+        QSlider xSlider;
+        QSlider ySlider;
+        QSlider zSlider;
+        
+        mixin Q_OBJECT;
 }

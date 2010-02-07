@@ -58,7 +58,7 @@ public:
 		clearArea();
 	}
    
-	void clearArea()
+	void slot_clearArea()
 	{
 		setText(tr("<drop content>"));
 		setBackgroundRole(QPalette.Dark);
@@ -66,10 +66,9 @@ public:
 		changed(null);
 	}
 
-	mixin Signal!("changed", QMimeData);
+	final void signal_changed(QMimeData);
 	
 protected:
-
 	void dragEnterEvent(QDragEnterEvent event)
 	{
 		setText(tr("<drop content>"));
@@ -103,7 +102,7 @@ protected:
 			setText(mimeData.text());    
 			setTextFormat(Qt.PlainText);
 		} else if (mimeData.hasUrls()) {
-			QUrl[] urlList = mimeData.urls();
+			auto urlList = mimeData.urls();
 			string text;
 			for (int i = 0; i < urlList.length && i < 32; ++i) {
 				text ~= urlList[i].path() ~ "\n";
@@ -119,5 +118,7 @@ protected:
 
 private:
 	QLabel label;
+    
+    mixin Q_OBJECT;
 }
 

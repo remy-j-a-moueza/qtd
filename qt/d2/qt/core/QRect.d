@@ -300,7 +300,7 @@ public struct QRect
         return this | r;
     }
 
-    bool opEquals(const QRect r)
+    bool opEquals(ref const QRect r) const
     {
         return x1==r.x1 && x2==r.x2 && y1==r.y1 && y2==r.y2;
     }
@@ -336,6 +336,19 @@ public struct QRect
     public final QRect normalized() const {
         return qtd_QRect_normalized(&this);
     }
+
+    // service stuff
+    public alias void __isNativeValueType;
+
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
+
 
 private:
     version(OSX)

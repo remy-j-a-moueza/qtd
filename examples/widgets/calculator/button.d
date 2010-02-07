@@ -57,11 +57,13 @@ public:
                 setText(text);
         }
 
-        QSize sizeHint()
+        QSize sizeHint() const
         {
                 QSize size = super.sizeHint();
                 size.height = size.height + 20;
                 size.width= qMax(size.width(), size.height());
                 return size;
         }
+        
+        mixin Q_OBJECT;
 }

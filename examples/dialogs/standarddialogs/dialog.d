@@ -135,21 +135,21 @@ public:
 		errorLabel.setFrameStyle(frameStyle);
 		QPushButton errorButton = new QPushButton(tr("QErrorMessage.show&M&essage()"));
 
-		connect!("clicked")(integerButton, &this.setInteger);
-		connect!("clicked")(doubleButton, &this.setDouble);
-		connect!("clicked")(itemButton, &this.setItem);
-		connect!("clicked")(textButton, &this.setText);
-		connect!("clicked")(colorButton, &this.setColor);
-		connect!("clicked")(fontButton, &this.setFont);
-		connect!("clicked")(directoryButton, &this.setExistingDirectory);
-		connect!("clicked")(openFileNameButton, &this.setOpenFileName);
-		connect!("clicked")(openFileNamesButton, &this.setOpenFileNames);
-		connect!("clicked")(saveFileNameButton, &this.setSaveFileName);
-		connect!("clicked")(criticalButton, &this.criticalMessage);
-		connect!("clicked")(informationButton, &this.informationMessage);
-		connect!("clicked")(questionButton, &this.questionMessage);
-		connect!("clicked")(warningButton, &this.warningMessage);
-		connect!("clicked")(errorButton, &this.errorMessage);
+		connect(integerButton, "clicked", this, "setInteger");
+		connect(doubleButton, "clicked", this, "setDouble");
+		connect(itemButton, "clicked", this, "setItem");
+		connect(textButton, "clicked", this, "setText");
+		connect(colorButton, "clicked", this, "setColor");
+		connect(fontButton, "clicked", this, "setFont");
+		connect(directoryButton, "clicked", this, "setExistingDirectory");
+		connect(openFileNameButton, "clicked", this, "setOpenFileName");
+		connect(openFileNamesButton, "clicked", this, "setOpenFileNames");
+		connect(saveFileNameButton, "clicked", this, "setSaveFileName");
+		connect(criticalButton, "clicked", this, "criticalMessage");
+		connect(informationButton, "clicked", this, "informationMessage");
+		connect(questionButton, "clicked", this, "questionMessage");
+		connect(warningButton, "clicked", this, "warningMessage");
+		connect(errorButton, "clicked", this, "errorMessage");
 
 		native = new QCheckBox(this);
 		native.setText("Use native file dialog.");
@@ -202,9 +202,9 @@ public:
 		setWindowTitle(tr("Standard Dialogs"));
 	}
 
-private:
+private: // slots
 
-	void setInteger()
+	void slot_setInteger()
 	{
 		bool ok;
 		int i = QInputDialog.getInt(this, tr("QInputgetInteger()"), tr("Percentage:"), 25, 0, 100, 1, ok);
@@ -212,27 +212,27 @@ private:
 			integerLabel.setText(format("%d", i)); 
 	}
 
-	void setDouble()
+	void slot_setDouble()
 	{
 		bool ok;
 		double d = QInputDialog.getDouble(this, tr("QInputgetDouble()"),
 						tr("Amount:"), 37.56, -10000, 10000, 2, ok);
 		if (ok)
-			integerLabel.setText(format("%g", d)); 	
+			doubleLabel.setText(format("%g", d)); 	
 	}
 
-	void setItem()
+	void slot_setItem()
 	{
 		string[] items =  [tr("Spring"), tr("Summer"), tr("Fall"), tr("Winter")];
 
 		bool ok;
 		string item = QInputDialog.getItem(this, tr("QInputgetItem()"),
-						tr("Season:"), items, 0, false, ok);
+						tr("Season:"), items.toQList, 0, false, ok);
 		if (ok && item.length)
 			itemLabel.setText(item);
 	}
 
-	void setText()
+	void slot_setText()
 	{
 		bool ok;
 		string text = QInputDialog.getText(this, tr("QInputgetText()"),
@@ -242,7 +242,7 @@ private:
 			textLabel.setText(text);
 	}
 
-	void setColor()
+	void slot_setColor()
 	{
 		QColor color = QColorDialog.getColor(QColor.Green, this);
 		if (color.isValid()) {
@@ -252,7 +252,7 @@ private:
 		}
 	}
 
-	void setFont()
+	void slot_setFont()
 	{
 		bool ok;
 		QFont font = QFontDialog.getFont(&ok, new QFont(fontLabel.text()), this);
@@ -262,7 +262,7 @@ private:
 		}
 	}
 
-	void setExistingDirectory()
+	void slot_setExistingDirectory()
 	{
 		int options = QFileDialog_Option.DontResolveSymlinks | QFileDialog_Option.ShowDirsOnly;
 		if (!native.isChecked())
@@ -275,7 +275,7 @@ private:
 			directoryLabel.setText(directory);
 	}
 
-	void setOpenFileName()
+	void slot_setOpenFileName()
 	{
 		int options;
 		if (!native.isChecked())
@@ -291,13 +291,13 @@ private:
 			openFileNameLabel.setText(fileName);
 	}
 
-	void setOpenFileNames()
+	void slot_setOpenFileNames()
 	{
 		int options;
 		if (!native.isChecked())
 			options |= QFileDialog_Option.DontUseNativeDialog;
 		string selectedFilter;
-		string[] files = QFileDialog.getOpenFileNames(
+		auto files = QFileDialog.getOpenFileNames(
 						this, tr("QFilegetOpenFileNames()"),
 						openFilesPath,
 						tr("All Files (*);;Text Files (*.txt)"),
@@ -305,11 +305,11 @@ private:
 						options);
 		if (files.length) {
 			openFilesPath = files[0];
-			openFileNamesLabel.setText(join(files, "; "));
+			openFileNamesLabel.setText(join(files.toArray, "; "));
 		}
 	}
 
-	void setSaveFileName()
+	void slot_setSaveFileName()
 	{
 		int options;
 		if (!native.isChecked())
@@ -325,7 +325,7 @@ private:
 			saveFileNameLabel.setText(fileName);
 	}
 
-	void criticalMessage()
+	void slot_criticalMessage()
 	{
 		QMessageBox.StandardButton reply;
 		reply = QMessageBox.critical(this, tr("QMessageBox.critical()"),
@@ -339,7 +339,7 @@ private:
 			criticalLabel.setText(tr("Ignore"));
 	}
 
-	void informationMessage()
+	void slot_informationMessage()
 	{
 		QMessageBox.StandardButton reply;
 		reply = QMessageBox.information(this, tr("QMessageBox.information()"), MESSAGE);
@@ -349,7 +349,7 @@ private:
 			informationLabel.setText(tr("Escape"));
 	}
 
-	void questionMessage()
+	void slot_questionMessage()
 	{
 		QMessageBox.StandardButton reply;
 		reply = QMessageBox.question(this, tr("QMessageBox.question()"),
@@ -363,7 +363,7 @@ private:
 			questionLabel.setText(tr("Cancel"));
 	}
 
-	void warningMessage()
+	void slot_warningMessage()
 	{
 		auto msgBox = new QMessageBox(QMessageBox.Warning, tr("QMessageBox.warning()"), MESSAGE, 0, this);
 		msgBox.addButton(tr("Save &Again"), QMessageBox.AcceptRole);
@@ -374,7 +374,7 @@ private:
 			warningLabel.setText(tr("Continue"));
 	}
 
-	void errorMessage()
+	void slot_errorMessage()
 	{
 		errorMessageDialog.showMessage(
 				tr("This dialog shows and remembers error messages. "
@@ -407,4 +407,6 @@ private:
 	QErrorMessage errorMessageDialog;
 
 	string openFilesPath;
+    
+    mixin Q_OBJECT;
 }

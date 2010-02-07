@@ -406,10 +406,11 @@ public:
         EqualReturnType             = 0x00000010,
         EqualDefaultValueOverload   = 0x00000020,
         EqualModifiedName           = 0x00000040,
+        EqualConstness              = 0x00000080,
 
         NameLessThan                = 0x00001000,
 
-        PrettySimilar               = EqualName | EqualArguments,
+        PrettySimilar               = EqualName | EqualArguments | EqualConstness,
         Equal                       = 0x0000001f,
         NotEqual                    = 0x00001000
     };
@@ -440,7 +441,7 @@ public:
 
     QString modifiedName() const;
 
-    QString minimalSignature() const;
+    QString minimalSignature(int reduce = 0) const;
     QStringList possibleIntrospectionCompatibleSignatures() const;
 
     QString marshalledName(bool classIsOwner = true) const;
@@ -713,6 +714,7 @@ public:
     bool hasSignal(const AbstractMetaFunction *f) const;
 
     bool hasConstructors() const;
+    AbstractMetaFunction *copyConstructor() const;
 
     void addDefaultConstructor();
 
@@ -845,6 +847,7 @@ public:
     bool isTypeAlias() const { return m_is_type_alias; }
 
     const QStringList &depends() { return m_type_entry->depends(); }
+    AbstractMetaFunctionList allFunctions() const { return m_functions; }
 
     bool needsConversionFunc;
 private:
@@ -967,6 +970,14 @@ inline AbstractMetaFunctionList AbstractMetaClass::cppSignalFunctions() const
     return queryFunctions(Signals
                           | Visible
                           | NotRemovedFromTargetLang);
+}
+
+inline bool isNativeContainer(AbstractMetaType *argumentType)
+{
+    if (argumentType && argumentType->isContainer())
+        if (((const ContainerTypeEntry *)argumentType->typeEntry())->isQList())
+            return true;
+    return false;
 }
 
 #endif // ABSTRACTMETALANG_H

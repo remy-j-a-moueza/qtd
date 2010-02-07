@@ -139,21 +139,6 @@ set(res_files
     generator.qrc
 )
 
-#win32-msvc2005:{
-#        QMAKE_CXXFLAGS += -wd4996
-#        QMAKE_CFLAGS += -wd4996
-#}
-
-#if(MSVC)
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zm500 /Zc:wchar_t-")
-#endif(MSVC)
-
-#win32-msvc.net {
-#        QMAKE_CXXFLAGS += /Zm500
-#        QMAKE_CXXFLAGS -= -Zm200
-#        QMAKE_CFLAGS -= -Zm200
-#}
-
 ## Includes path.
 set(inc_paths
     ${CMAKE_CURRENT_SOURCE_DIR}/../common 

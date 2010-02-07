@@ -125,7 +125,7 @@
 
   <object-type name="QXmlQuery">
     <modify-function signature="evaluateTo(QAbstractXmlReceiver *)const" remove="all"/>
-    <modify-function signature="evaluateTo(QStringList&lt;QString&gt;*)const" remove="all"/>
+    <modify-function signature="evaluateTo(QStringList*)const" remove="all"/>
     <modify-function signature="setMessageHandler(QAbstractMessageHandler*)">
       <modify-argument index="1">
     <reference-count action="set" variable-name="__rcMessageHandler"/>

@@ -82,7 +82,7 @@ class MainWindow : public QMainWindow
         }
 
     private : //slots:
-        void newLetter()
+        void slot_newLetter()
         {
             textEdit.clear();
 
@@ -128,7 +128,7 @@ class MainWindow : public QMainWindow
             cursor.insertText("ADDRESS", italicFormat);
         }
 /*
-        void save()
+        void slot_save()
         {
             char[] fileName = QFileDialog.getSaveFileName(this,
                                                           tr("Choose a file name"), ".",
@@ -150,14 +150,14 @@ class MainWindow : public QMainWindow
             statusBar.showMessage(layout("Saved '%1'", fileName), 2000);
         }*/
 
-        void print() { }
+        void slot_print() { }
 
-        void undo() {
+        void slot_undo() {
             auto document = textEdit.document();
             document.undo();
         }
 
-        void insertCustomer(string customer)
+        void slot_insertCustomer(string customer)
         {
             if (customer == "")
                 return;
@@ -182,7 +182,7 @@ class MainWindow : public QMainWindow
             }
         }
 
-        void addParagraph(string paragraph)
+        void slot_addParagraph(string paragraph)
         {
             if (paragraph == "")
                 return;
@@ -199,7 +199,7 @@ class MainWindow : public QMainWindow
 
         }
 
-        void about()
+        void slot_about()
         {
             QMessageBox.about(this, "About Dock Widgets",
                                "The <b>Dock Widgets</b> example demonstrates how to "
@@ -214,7 +214,7 @@ class MainWindow : public QMainWindow
             newLetterAct = new QAction(new QIcon(":images/new.png"), tr("&New Letter"), this);
             newLetterAct.setShortcut(tr("Ctrl+N"));
             newLetterAct.setStatusTip(tr("Create a new form letter"));
-            connect!("triggered")(newLetterAct, &this.newLetter);
+            connect(newLetterAct, "triggered", this, "newLetter");
 
             saveAct = new QAction(new QIcon(":images/save.png"), tr("&Save..."), this);
             saveAct.setShortcut(tr("Ctrl+S"));
@@ -229,20 +229,20 @@ class MainWindow : public QMainWindow
             undoAct = new QAction(new QIcon(":images/undo.png"), tr("&Undo"), this);
             undoAct.setShortcut(tr("Ctrl+Z"));
             undoAct.setStatusTip(tr("Undo the last editing action"));
-            connect!("triggered")(undoAct, &undo);
+            connect(undoAct, "triggered", this, "undo");
 
             quitAct = new QAction(tr("&Quit"), this);
             quitAct.setShortcut(tr("Ctrl+Q"));
             quitAct.setStatusTip(tr("Quit the application"));
-            connect!("triggered")(quitAct, &this.close);
+            connect(quitAct, "triggered", this, "close");
 
             aboutAct = new QAction(tr("&About"), this);
             aboutAct.setStatusTip(tr("Show the application's About box"));
-            connect!("triggered")(aboutAct, &about);
+            connect(aboutAct, "triggered", this, "about");
 
             aboutQtAct = new QAction(tr("About &Qt"), this);
             aboutQtAct.setStatusTip(tr("Show the Qt library's About box"));
-            // aboutQtAct.triggered(&aboutQt);
+            connect(aboutQtAct, "triggered", qApp, "aboutQt");
         }
 
         void createMenus()
@@ -327,8 +327,8 @@ class MainWindow : public QMainWindow
             addDockWidget(Qt.RightDockWidgetArea, dock);
             viewMenu.addAction(dock.toggleViewAction());
 
-            connect!("currentTextChanged")(customerList, &this.insertCustomer);
-            connect!("currentTextChanged")(paragraphsList, &this.addParagraph);
+            connect(customerList, "currentTextChanged", this, "insertCustomer");
+            connect(paragraphsList, "currentTextChanged", this, "addParagraph");
         }
 
         QTextEdit textEdit;
@@ -348,7 +348,6 @@ class MainWindow : public QMainWindow
         QAction aboutAct;
         QAction aboutQtAct;
         QAction quitAct;
+        
+        mixin Q_OBJECT;
 }
-
-
-//! [9]

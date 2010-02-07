@@ -254,7 +254,7 @@ public struct QRectF
         return this | r;
     }
 
-    bool opEquals(ref QRectF r)
+    bool opEquals(ref const QRectF r) const
     {
         return qFuzzyCompare(xp, r.xp) && qFuzzyCompare(yp, r.yp)
             && qFuzzyCompare(w, r.w) && qFuzzyCompare(h, r.h);
@@ -301,7 +301,18 @@ public struct QRectF
     {
         return qtd_QRectF_toAlignedRect(cast(void*)&this);
     }
+    
+    // service stuff
+    public alias void __isNativeValueType;
 
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
 private:
     qreal xp;
     qreal yp;

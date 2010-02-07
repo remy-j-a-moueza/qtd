@@ -505,13 +505,11 @@ void CppImplGenerator::writeInitCallbacks(QTextStream &s, const AbstractMetaClas
                  "(pf" << function->marshalledName() << "_dispatch) virts[" << pos << "];" << endl;
         }
     }
-
     // D-side signal callbacks
-    AbstractMetaFunctionList signal_funcs = signalFunctions(java_class);
-    for(int i = 0; i < signal_funcs.size(); i++)
-        s << "    emit_callbacks_" << java_class->name() << "[" << i << "] = (EmitCallback)"
-             "sigs[" << i << "];" << endl;
-
+    if (java_class->isQObject()) {
+        s << "    qtd_" << java_class->name() << "_qt_metacall_dispatch = (QtMetacallCallback)sigs[0];" << endl
+          << "    qtd_" << java_class->name() << "_metaObject_dispatch = (MetaObjectCallback)sigs[1];" << endl;
+    }
     s << "}" << endl;
 }
 
@@ -592,9 +590,10 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     if (!java_class->isQObject())
         writeFinalDestructor(s, java_class);
 
-    if (java_class->isQObject())
+    if (java_class->isQObject()) {
+        writeQObjectEntity(s, java_class);
         writeSignalsHandling(s, java_class);
-
+    }
     if (shellClass) {
         foreach (AbstractMetaFunction *function, java_class->functions()) {
             if (function->isConstructor() && !function->isPrivate())
@@ -709,6 +708,9 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
 */
 // qtd    writeJavaLangObjectOverrideFunctions(s, java_class);
 
+    if (java_class->typeEntry()->isValue())
+        writeValueFunctions(s, java_class);
+
     if (java_class->isQObject())
     {
         s << endl << endl
@@ -717,9 +719,40 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
           << "}" << endl;
     }
 
+    if (java_class->typeEntry()->isValue())
+    {
+        if (!java_class->typeEntry()->hasPrivateCopyConstructor())  // can do a copy if we have a public ctor or don't have any
+        {
+            QString argName = "orig";
+            s << endl << endl
+              << "extern \"C\" DLL_PUBLIC void qtd_" << java_class->name() << "_placed_copy(void* "
+              << argName << ", void* place) {" << endl
+              << QString("    const %1&  __qt_%2 = (const %1& ) *(%1 *)%2;").arg(shellClassName(java_class)).arg(argName) << endl
+              << QString("    %1 *result = new (place) %1 (__qt_%2);").arg(java_class->qualifiedCppName()).arg(argName) << endl;
+//            writeFinalConstructor(s, ctor, "result", "original", "(place)");
+            s << "}";
+
+            s << endl << endl
+              << "extern \"C\" DLL_PUBLIC void* qtd_" << java_class->name() << "_native_copy(void* " << argName << ") {" << endl
+              << QString("    const %1&  __qt_%2 = (const %1& ) *(%1 *)%2;").arg(shellClassName(java_class)).arg(argName) << endl
+              << QString("    %1 *result = new %1 (__qt_%2);").arg(java_class->qualifiedCppName()).arg(argName) << endl
+              << "    return result;" << endl;
+            s << "}";
+        }
+    }
+    
     s << endl << endl;
 
     priGenerator->addSource(java_class->package(), fileNameForClass(java_class));
+}
+
+void CppImplGenerator::writeValueFunctions(QTextStream &s, const AbstractMetaClass *java_class)
+{
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isComplex() { return (bool) QTypeInfo<%2>::isComplex; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isStatic() { return (bool) QTypeInfo<%2>::isStatic; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isLarge() { return (bool) QTypeInfo<%2>::isLarge; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isPointer() { return (bool) QTypeInfo<%2>::isPointer; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isDummy() { return (bool) QTypeInfo<%2>::isDummy; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
 }
 
 void CppImplGenerator::writeVirtualDispatchFunction(QTextStream &s, const AbstractMetaFunction *function, bool d_export)
@@ -782,27 +815,35 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
                     s << INDENT << f_type->typeEntry()->qualifiedCppName() << " __d_return_value;" << endl;
 
                 if (f_type->isContainer())
-                    s << INDENT << "void* __d_return_value;" << endl
-                      << INDENT << "size_t __d_return_value_size;" << endl;
+                {
+                    if (isNativeContainer(f_type))
+                    {
+                        s << INDENT;
+                        writeTypeInfo(s, f_type, ForceValueType);
+                        s << "__d_return_value;" << endl;
+                    }
+                    else
+                        s << INDENT << "void* __d_return_value;" << endl
+                          << INDENT << "size_t __d_return_value_size;" << endl;
+                }
             }
 
             AbstractMetaArgumentList arguments = function->arguments();
             foreach (AbstractMetaArgument *argument, arguments) {
                 if (!function->argumentRemoved(argument->argumentIndex()+1)) {
-                    if (!argument->type()->isPrimitive()
+                    AbstractMetaType *atype = argument->type();
+                    if (!atype->isPrimitive()
                         || !function->conversionRule(TypeSystem::NativeCode, argument->argumentIndex()+1).isEmpty()) {
-                        if(argument->type()->isContainer()) {
+                        if(atype->isContainer()) {
                             QString arg_name = argument->indexedName();
-                            s << INDENT << QString("DArray %1_arr;").arg(arg_name) << endl
-                              << INDENT << QString("DArray *__d_%1 = &%1_arr;").arg(arg_name);
-
-                            writeQtToJava(s,
-                                        argument->type(),
-                                        arg_name,
-                                        "__d_" + arg_name,
-                                        function,
-                                        argument->argumentIndex() + 1,
-                                        Option(VirtualDispatch));
+                            if(!isNativeContainer(atype))
+                                writeQtToJava(s,
+                                              argument->type(),
+                                              arg_name,
+                                              "__d_" + arg_name,
+                                              function,
+                                              argument->argumentIndex() + 1,
+                                              Option(VirtualDispatch));
                         }
                     }
                 }
@@ -838,9 +879,13 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
                     if (f_type->isTargetLangString())
                         s << ", &ret_str";
                     if (f_type->name() == "QModelIndex" || f_type->typeEntry()->isStructInD())
-                        s << ", &__d_return_value";
-                    if (f_type->isContainer())
-                        s << ", &__d_return_value, &__d_return_value_size";
+                        s << ", &__d_return_value";       // TODO should both be refactored into isNativeType function
+                    if (f_type->isContainer()) {
+                        if ( ((const ContainerTypeEntry *)f_type->typeEntry())->isQList() )
+                            s << ", &__d_return_value";
+                        else
+                            s << ", &__d_return_value, &__d_return_value_size";
+                    }
                 }
 
                 if (function->arguments().size() > 0)
@@ -862,9 +907,14 @@ s << "qtd_dummy();" << endl; // hack!!!
                         s << INDENT << "return __d_return_value;" << endl;
 
                     if (f_type->isContainer()) {
-                        writeJavaToQt(s, f_type, "__qt_return_value", "__d_return_value",
-                                      function, 0, GlobalRefJObject);
-                        s << INDENT << "return __qt_return_value;" << endl;
+                        if (isNativeContainer(f_type))
+                            s << INDENT << "return __d_return_value;" << endl;
+                        else
+                        {
+                            writeJavaToQt(s, f_type, "__qt_return_value", "__d_return_value",
+                                          function, 0, GlobalRefJObject);
+                            s << INDENT << "return __qt_return_value;" << endl;
+                        }
                     }
 
                     if (f_type->isTargetLangString())
@@ -898,8 +948,16 @@ void CppImplGenerator::writeVirtualDispatchArguments(QTextStream &s, const Abstr
         else if(ret_type->typeEntry()->isStructInD())
             s << ", " << ret_type->typeEntry()->qualifiedCppName() << " *__d_return_value";
 
-        if (ret_type->isContainer())
-            s << ", void** __d_arr_ptr, size_t* __d_arr_size";
+        if (ret_type->isContainer()) {
+            if(isNativeContainer(ret_type)) {
+                if(d_export)
+                    s << ", " << DGenerator::translateType(ret_type, d_function->ownerClass(), NoOption) << "* __d_arr";
+                else
+                    s << ", void * __d_arr";
+            }
+            else
+                s << ", void** __d_arr_ptr, size_t* __d_arr_size";
+        }
     }
 
     if (d_function->arguments().size() > 0)
@@ -919,9 +977,11 @@ void CppImplGenerator::writeVirtualDispatchArguments(QTextStream &s, const Abstr
             if (d_type->name() == "QModelIndex")
                 s << "QModelIndexAccessor" << QString(d_type->actualIndirections(), '*') << " " << arg_name;
             else if (d_type->isContainer()) {
-                if (d_export) {
+                if ( isNativeContainer(d_type) )
+                    s << "void* ";
+                else if (d_export)
                     s << DGenerator::translateType(d_type, d_function->ownerClass(), NoOption) << "* ";
-                } else
+                else
                     s << "DArray* ";
                 s << arg_name;
             } else if (d_type->typeEntry()->isStructInD())
@@ -1217,22 +1277,21 @@ void CppImplGenerator::writeQObjectEntity(QTextStream &s, const AbstractMetaClas
       << "{" << endl
       << "public:" << endl
       << "    Q_OBJECT_CHECK" << endl
-      << "    virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl << endl
+      << "//    virtual int qt_metacall(QMetaObject::Call, int, void **);" << endl << endl
 
       << "    " << entityName << "(QObject *qObject, void *dId) : QObject(), QtD_QObjectEntity(qObject, dId) {}" << endl
       << "};" << endl << endl;
 
-    // QObject_Link::qt_metacall()
+/*    // QObject_Link::qt_metacall()
     s << "int " << entityName << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
       << "{" << endl      
       << "    _id = QObject::qt_metacall(_c, _id, _a);" << endl
       << "    if (_id < 0 || _c != QMetaObject::InvokeMetaMethod)" << endl
       << "        return _id;" << endl
-//      << "    Q_ASSERT(_id < 2);" << endl      
       << "    emit_callbacks_" << java_class->name() << "[_id](dId, _a);" << endl      
       << "    return -1;" << endl
       << "}" << endl << endl;
-
+*/
     s << "extern \"C\" DLL_PUBLIC void qtd_" << className << "_createEntity(void *nativeId, void* dId)" << endl
       << "{" << endl
       << "    new " << entityName << "((QObject*)nativeId, dId);" << endl
@@ -1282,15 +1341,43 @@ void CppImplGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaC
       << "  return " << java_class->qualifiedCppName() << "::qt_metacast(_clname);" << endl
       << "}" << endl << endl;
 */
-    
+/*
     s << "int " << shellClassName(java_class) << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
-      << "{" << endl;
-
-    s << "    _id = " << java_class->qualifiedCppName() << "::qt_metacall(_c, _id, _a);" << endl    
+      << "{" << endl
+      << "    _id = " << java_class->qualifiedCppName() << "::qt_metacall(_c, _id, _a);" << endl
       << "    if (_id < 0 || _c != QMetaObject::InvokeMetaMethod)" << endl
       << "        return _id;" << endl      
       << "    emit_callbacks_" << java_class->name() << "[_id](this->dId, _a);" << endl      
       << "    return -1;" << endl
+      << "}" << endl << endl;
+      */
+
+    if(cpp_shared)
+        s << "MetaObjectCallback qtd_" << java_class->name() << "_metaObject_dispatch;" << endl
+          << "QtMetacallCallback qtd_" << java_class->name() << "_qt_metacall_dispatch;" << endl;
+    else
+        s << "extern \"C\" const QMetaObject* qtd_" << java_class->name() << "_metaObject_dispatch(void *d_entity);" << endl
+          << "extern \"C\" int qtd_" << java_class->name() << "_qt_metacall_dispatch(void *d_entity, QMetaObject::Call _c, int _id, void **_a);" << endl;
+
+    s << endl
+      << "const QMetaObject * " << shellClassName(java_class) << "::metaObject() const" << endl
+      << "{" << endl
+      << "    return qtd_" << java_class->name() << "_metaObject_dispatch(this->dId);" << endl
+      << "}" << endl << endl
+      << "int " << shellClassName(java_class) << "::qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
+      << "{" << endl
+      << "    return qtd_" << java_class->name() << "_qt_metacall_dispatch(this->dId, _c, _id, _a);" << endl
+      << "}" << endl << endl
+
+      << "int " << shellClassName(java_class) << "::__override_qt_metacall(QMetaObject::Call _c, int _id, void **_a)" << endl
+      << "{" << endl
+      << "    return " << java_class->qualifiedCppName() << "::qt_metacall(_c, _id, _a);"
+      << "}" << endl << endl
+
+      << "extern \"C\" DLL_PUBLIC int qtd_" << java_class->name() << "_qt_metacall(void* __this_nativeId, QMetaObject::Call _c, int _id, void **_a)"
+      << "{" << endl
+      << "    " << shellClassName(java_class) << " *__qt_this = (" << shellClassName(java_class) << " *) __this_nativeId;" << endl
+      << "    return __qt_this->__override_qt_metacall(_c, _id, _a);" << endl
       << "}" << endl << endl;
 }
 
@@ -1341,6 +1428,8 @@ void CppImplGenerator::writeSignalEmitter(QTextStream &s, const AbstractMetaClas
 
 void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaClass *java_class)
 {
+    return; // #TODO probably don't need this function at all
+
     s << "extern \"C\" typedef void (*EmitCallback)(void*, void**);" << endl;
     AbstractMetaFunctionList signal_funcs = signalFunctions(java_class);
 
@@ -1369,8 +1458,6 @@ void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaCl
         }
         s << endl << "};" << endl << endl;
     }
-
-    writeQObjectEntity(s, java_class);
 }
 
 
@@ -1934,8 +2021,10 @@ void CppImplGenerator::writeFinalFunctionArguments(QTextStream &s, const Abstrac
             } else if (d_type->isContainer()) {
                 const ContainerTypeEntry *cte =
                         static_cast<const ContainerTypeEntry *>(te);
-                if(isLinearContainer(cte))
-                    s << QString("void *%1, size_t %1_size").arg(arg_name);
+                if(cte->isQList())
+                    s << "void* " << arg_name;
+                else if(isLinearContainer(cte))
+                    s << "DArray* " << arg_name;
             } else {
                 if (!d_type->hasNativeId()) {
                     if(d_type->isVariant()) {
@@ -2298,19 +2387,22 @@ void CppImplGenerator::writeFinalDestructor(QTextStream &s, const AbstractMetaCl
 {
     if (cls->hasConstructors()) {
         s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_destructor(void *ptr)" << endl
-          << INDENT << "{" << endl;
-        {
-            s << INDENT << "delete (" << shellClassName(cls) << " *)ptr;" << endl;
-        }
+          << INDENT << "{" << endl
+          << INDENT << "    delete (" << shellClassName(cls) << " *)ptr;" << endl
+          << INDENT << "}" << endl << endl;
 
-        s << INDENT << "}" << endl << endl;
+        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_call_destructor(" << shellClassName(cls) << " *ptr)" << endl
+          << INDENT << "{" << endl
+          << INDENT << "    call_destructor(ptr);" << endl
+          << INDENT << "}" << endl << endl;
     }
 }
 
 void CppImplGenerator::writeFinalConstructor(QTextStream &s,
                                          const AbstractMetaFunction *java_function,
                                          const QString &qt_object_name,
-                                         const QString &java_object_name)
+                                         const QString &java_object_name,
+                                         const QString &place)
 {
     const AbstractMetaClass *cls = java_function->ownerClass();
     AbstractMetaArgumentList arguments = java_function->arguments();
@@ -2319,7 +2411,7 @@ void CppImplGenerator::writeFinalConstructor(QTextStream &s,
     bool hasShellClass = cls->generateShellClass();
 
     s << INDENT << shellClassName(cls) << " *" << qt_object_name
-      << " = new " << shellClassName(cls)
+      << " = new " << place << shellClassName(cls)
       << "(";
     writeFunctionCallArguments(s, java_function, "__qt_");
     s << ");" << endl;
@@ -3139,9 +3231,7 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
     const ContainerTypeEntry *type =
         static_cast<const ContainerTypeEntry *>(java_type->typeEntry());
 
-    if (type->type() == ContainerTypeEntry::ListContainer
-        || type->type() == ContainerTypeEntry::VectorContainer
-        || type->type() == ContainerTypeEntry::StringListContainer
+    if (type->type() == ContainerTypeEntry::VectorContainer
         || type->type() == ContainerTypeEntry::LinkedListContainer
         || type->type() == ContainerTypeEntry::StackContainer
         || type->type() == ContainerTypeEntry::SetContainer
@@ -3154,7 +3244,6 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
         cls_name.remove("_ConcreteWrapper");
 
         s << endl
-//          << INDENT << "{" << endl // qtd2 hack, additional scope for avoiding duplicating of "i"
           << INDENT;
 
         switch (type->type()) {
@@ -3202,7 +3291,14 @@ void CppImplGenerator::writeQtToJavaContainer(QTextStream &s,
             s << INDENT << "++" << index << ";" << endl;
         }
         s << INDENT << "}" << endl;
-//          << INDENT << "}" << endl;
+
+    } else if (type->isQList()) {
+//            QList<QObject*> & list2 = (*(QList<QObject*> *)nativeId);
+        writeTypeInfo(s, java_type, ForceValueType);
+        s << "&" << java_name << "_tmp = (*(";
+        writeTypeInfo(s, java_type, ForceValueType);
+        s << "*)" <<  java_name << ");" << endl
+          << INDENT << java_name << "_tmp = " << qt_name << ";" << endl;
 
     } else if (type->type() == ContainerTypeEntry::PairContainer) {
         QList<AbstractMetaType *> args = java_type->instantiations();
@@ -3329,9 +3425,7 @@ void CppImplGenerator::writeJavaToQtContainer(QTextStream &s,
     const ContainerTypeEntry *type =
         static_cast<const ContainerTypeEntry *>(java_type->typeEntry());
 
-    if (type->type() == ContainerTypeEntry::ListContainer
-        || type->type() == ContainerTypeEntry::VectorContainer
-        || type->type() == ContainerTypeEntry::StringListContainer
+    if (type->type() == ContainerTypeEntry::VectorContainer
         || type->type() == ContainerTypeEntry::LinkedListContainer
         || type->type() == ContainerTypeEntry::StackContainer
         || type->type() == ContainerTypeEntry::SetContainer
@@ -3345,23 +3439,17 @@ void CppImplGenerator::writeJavaToQtContainer(QTextStream &s,
         writeTypeInfo(s, java_type, ForceValueType);
         s << qt_name << ";" << endl;
 
-// qtd       s << INDENT << "if (" << java_name << " != 0) {" << endl;
         {
-/* qtd           Indentation indent(INDENT);
-            s << INDENT << "jobjectArray __qt__array = qtjambi_collection_toArray(__jni_env, "
-              << java_name << ");" << endl
-              << INDENT << "jsize __qt__size = __jni_env->GetArrayLength(__qt__array);" << endl;
-*/
             if (type->type() == ContainerTypeEntry::VectorContainer
                 || type->type() == ContainerTypeEntry::StackContainer)
-                s << INDENT << qt_name << ".reserve(" << java_name << "_size);" << endl;
+                s << INDENT << qt_name << ".reserve(" << java_name << "->length);" << endl;
 
-            s << INDENT << "for (int i=0; i<" << java_name << "_size; ++i) {" << endl;
+            s << INDENT << "for (int i=0; i<" << java_name << "->length; ++i) {" << endl;
             {
                 Indentation indent(INDENT);
                 if(targ->isTargetLangString())
                     s << INDENT << "DArray __d_element;" << endl
-                      << INDENT << "qtd_get_string_from_array(" << java_name << ", i, &__d_element);" << endl;
+                      << INDENT << "qtd_get_string_from_array(" << java_name << "->ptr, i, &__d_element);" << endl;
                 else {
                     s << INDENT;
                     writeTypeInfo(s, targ, Option(VirtualDispatch | ForcePointer | EnumAsInts));
@@ -3372,8 +3460,6 @@ void CppImplGenerator::writeJavaToQtContainer(QTextStream &s,
                     s << "__d_element;" << endl
                       << INDENT << "qtd_get_" << elem_type << "_from_array(" << java_name << ", i, &__d_element);" << endl;
                 }
-/* qtd                   s << INDENT << "jobject __d_element = "
-                      << "__jni_env->GetObjectArrayElement(__qt__array, i);" << endl;*/
                 writeJavaToQt(s, targ, "__qt_element", "__d_element", 0, -1, BoxedPrimitive);
                 QString cont_element = "__qt_element";
                 if(targ->typeEntry()->isStructInD() && targ->name() != "QModelIndex")
@@ -3383,6 +3469,11 @@ void CppImplGenerator::writeJavaToQtContainer(QTextStream &s,
 // qtd            s << INDENT << "}" << endl;
         }
         s << INDENT << "}" << endl;
+    } else if (type->isQList()) {
+        writeTypeInfo(s, java_type, ForceValueType);
+        s << qt_name << " = (*(";
+        writeTypeInfo(s, java_type, ForceValueType);
+        s << "*)" <<  java_name << ");" << endl;
     } else if (type->type() == ContainerTypeEntry::PairContainer) {
         QList<AbstractMetaType *> targs = java_type->instantiations();
         Q_ASSERT(targs.size() == 2);
@@ -3548,7 +3639,10 @@ void CppImplGenerator::writeFunctionCallArguments(QTextStream &s,
 
         if ( (options & VirtualDispatch)
              && a_type->isContainer()) {
-            s << "__d_" << argument->indexedName();
+            if ( ((const ContainerTypeEntry *)a_type->typeEntry())->isQList() )
+                s << "(void*)&" <<  argument->indexedName();
+            else
+                s << "__d_" << argument->indexedName();
             continue;
         }
 
@@ -3722,3 +3816,4 @@ void CppImplGenerator::writeDefaultConstructedValues(QTextStream &s, const Abstr
         s << endl << endl;
     }
 }
+

@@ -81,6 +81,13 @@ QTD_EXPORT(void, qtd_dummy, ())
 extern "C" QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia);
 extern "C" QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index);
 
+extern "C" typedef void (*EmitCallback)(void*, void**);
+extern "C" typedef int (*QtMetacallCallback)(void *d_entity, QMetaObject::Call _c, int _id, void **_a);
+extern "C" typedef const QMetaObject* (*MetaObjectCallback)(void *d_entity);
 
-
+template <class T>
+void call_destructor(T *a)
+{
+    a->~T();
+}
 #endif // QTD_CORE_H

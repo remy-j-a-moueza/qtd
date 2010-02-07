@@ -67,7 +67,7 @@ public:
 		abstractLabel.adjustSize();
 
 		dropArea = new DropArea;
-		connect!("changed")(dropArea, &updateFormatsTable);
+		connect(dropArea, "changed", this, "updateFormatsTable");
 
 		string[] labels;
 		labels ~= tr("Format");
@@ -76,7 +76,7 @@ public:
 		formatsTable = new QTableWidget;
 		formatsTable.setColumnCount(2);
 		formatsTable.setEditTriggers(QAbstractItemView.NoEditTriggers);
-		formatsTable.setHorizontalHeaderLabels(labels);
+		formatsTable.setHorizontalHeaderLabels(labels.toQList());
 		formatsTable.horizontalHeader().setStretchLastSection(true);
 
 		clearButton = new QPushButton(tr("Clear"));
@@ -86,8 +86,8 @@ public:
 		buttonBox.addButton(clearButton, QDialogButtonBox.ActionRole);
 		buttonBox.addButton(quitButton, QDialogButtonBox.RejectRole);
 
-		connect!("pressed")(quitButton, &close);
-		connect!("pressed")(clearButton, &dropArea.clearArea);
+		connect(quitButton, "pressed", this, "close");
+		connect(clearButton, "pressed", dropArea, "clearArea");
 
 		QVBoxLayout mainLayout = new QVBoxLayout;
 		mainLayout.addWidget(abstractLabel);
@@ -100,7 +100,7 @@ public:
 		setMinimumSize(350, 500);
 	}
 
-	void updateFormatsTable(QMimeData mimeData)
+	void slot_updateFormatsTable(QMimeData mimeData)
 	{
 		formatsTable.setRowCount(0);
 		if (!mimeData)
@@ -117,7 +117,7 @@ public:
 			} else if (format == "text/html") {
 				text = strip(mimeData.html());
 			} else if (format == "text/uri-list") {
-				QUrl[] urlList = mimeData.urls();
+				auto urlList = mimeData.urls();
 				for (int i = 0; i < urlList.length && i < 32; ++i) {
 					string url = urlList[i].path();
 					text ~= url ~ " ";
@@ -148,4 +148,6 @@ private:
 	QPushButton clearButton;
 	QPushButton quitButton;
 	QDialogButtonBox buttonBox;
+    
+    mixin Q_OBJECT;
 }

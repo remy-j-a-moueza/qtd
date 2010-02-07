@@ -109,7 +109,8 @@ public:
     void writeFinalConstructor(QTextStream &s,
                                const AbstractMetaFunction *java_function,
                                const QString &qt_object_name,
-                               const QString &java_object_name);
+                               const QString &java_object_name,
+                               const QString &place = "");
     void writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *java_class);
     void writeFunctionCall(QTextStream &s,
                            const QString &variable_name,
@@ -215,6 +216,7 @@ public:
     static void writeInitCallbacks(QTextStream &s, const AbstractMetaClass *java_class);
     static void writeQtdEntityFunction(QTextStream &s, const AbstractMetaClass *java_class);
     void writeRefArguments(QTextStream &s, const AbstractMetaFunction *java_function);
+    void writeValueFunctions(QTextStream &s, const AbstractMetaClass *java_class);
 
 private:
     void writeDefaultConstructedValues_helper(QSet<QString> &values,

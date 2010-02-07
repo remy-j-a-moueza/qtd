@@ -225,6 +225,11 @@ void Q_UNUSED(T)(T x) { qUnused(x); }
 //class QString;
 //char[] qPrintable(QString string) { string.toLocal8Bit().constData(); }
 //TODO(katrina) These should probably actually call into the c++ functions
+void qFatal(string str)
+{
+    throw new Exception(str);
+}
+
 void qDebug( char[] str ) /* print debug message */
 { writeln(str); }
 
@@ -360,7 +365,7 @@ bool qIsNull(float f)
 /*
   The catch-all template.
 */
-
+/*
 bool qIsDetached(T)(T) { return true; }
 
 class QTypeInfossss(T)
@@ -386,7 +391,7 @@ public:
         isDummy = false
     };
 };
-
+*/
 
 /*
    Specialize a specific type with:
@@ -734,6 +739,8 @@ scope class StackObject(C)
     }
 }
 +/
+
+alias void DArray;
 
 mixin QT_END_HEADER;
 

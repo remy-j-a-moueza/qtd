@@ -1,10 +1,4 @@
 set(required Core)
-qt4_generate_moc(cpp/qt_gui/UrlHandler_shell.h
-	  ${CMAKE_BINARY_DIR}/cpp/qt_gui/UrlHandler_shell_moc.cpp 
-	)
-set (cpp_files qt_gui/UrlHandler_shell )
-set (cpp_generated_files qt_gui/UrlHandler_shell_moc)
-#set (d_files gui/UrlHandler)
 set(classes
     QPushButton
     QFileIconProvider
@@ -352,4 +346,6 @@ set(classes
     QSizeGrip
     QSortFilterProxyModel
     QSound
+	
+	QGraphicsObject
 )

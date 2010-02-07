@@ -54,7 +54,7 @@ import qt.core.QFile;
 import qt.core.QDir;
 import qt.core.QRegExp;
 
-import std.string; 
+import std.string : format, tolower, toupper;
 
 
 class ClassWizard : public QWizard
@@ -263,7 +263,7 @@ public:
 		copyCtorCheckBox = new QCheckBox(tr("&Generate copy constructor and operator="));
 
 		defaultCtorRadioButton.setChecked(true);
-		connect!("toggled")(defaultCtorRadioButton, &copyCtorCheckBox.setEnabled);
+		connect(defaultCtorRadioButton, "toggled", copyCtorCheckBox, "setEnabled");
 
 		registerField("className*", classNameLineEdit);
 		registerField("baseClass", baseClassLineEdit);
@@ -331,10 +331,8 @@ public:
 		baseIncludeLineEdit = new QLineEdit;
 		baseIncludeLabel.setBuddy(baseIncludeLineEdit);
 
-		connect!("toggled")(protectCheckBox, &macroNameLabel.setEnabled);
-// ?	connect!("toggled")(protectCheckBox, &macroNameLabel.setEnabled);
-		connect!("toggled")(includeBaseCheckBox, &macroNameLabel.setEnabled);
-// ?	connect!("toggled")(includeBaseCheckBox, &macroNameLabel.setEnabled);
+		connect(protectCheckBox, "toggled", macroNameLabel, "setEnabled");
+		connect(includeBaseCheckBox, "toggled", macroNameLabel, "setEnabled");
 
 		registerField("comment", commentCheckBox);
 		registerField("protect", protectCheckBox);

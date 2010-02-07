@@ -103,7 +103,7 @@
     <primitive-type name="__int64" java-name="long" preferred-conversion="no" jni-name="jlong"/>
     <primitive-type name="unsigned __int64" java-name="long" preferred-conversion="no" jni-name="jlong"/>
     <primitive-type name="unsigned long long" java-name="ulong" preferred-conversion="no" jni-name="jlong"/>
-    <primitive-type name="long long" java-name="long" preferred-conversion="no" jni-name="jlong"/>
+    <primitive-type name="qint64" java-name="long" preferred-conversion="no" jni-name="jlong"/>
     <primitive-type name="quintptr" preferred-conversion="no" java-name="quintptr" jni-name="quintptr" />
 
     <primitive-type name="short" preferred-conversion="no" java-name="short" jni-name="jchar"/>
@@ -558,8 +558,7 @@
   <rejection class="QObject" function-name="disconnect"/>
   <rejection class="QObject" function-name="disconnectNotify"/>
   <rejection class="QObject" function-name="registerUserData"/>
-  <rejection class="QObject" function-name="sender"/>
-  <rejection class="QTimer" function-name="singleShot"/>
+<!--  <rejection class="QObject" function-name="sender"/> -->
   <rejection class="QProcess" function-name="pid"/>
   <rejection class="QRegion" function-name="cleanUp"/>
   <rejection class="QSettings" function-name="registerFormat"/>
@@ -2282,15 +2281,16 @@
         <modify-function signature="error()const">
             <rename to="lastError"/>
         </modify-function>
-        <modify-function signature="finished(int, QProcess::ExitStatus)">
+<!--        <modify-function signature="finished(int, QProcess::ExitStatus)">
             <rename to="finishedWithStatusCode"/>
         </modify-function>
+        -->
         <modify-function signature="setStandardOutputProcess(QProcess*)">
             <modify-argument index="1">
                 <reference-count action="set" variable-name="__rcStandardOutputProcess"/>
             </modify-argument>
         </modify-function>
-<!--        <modify-function signature="startDetached(QString,QStringList&lt;QString&gt;,QString,long long*)">
+<!--        <modify-function signature="startDetached(QString,QStringList,QString,long long*)">
             <access modifier="private"/>
             <modify-argument index="4">
                 <remove-default-expression/>
@@ -2302,7 +2302,7 @@
   </object-type>
 
   <object-type name="QSignalMapper">
-    <modify-function signature="mapped(const QString &amp;)">
+<!--    <modify-function signature="mapped(const QString &amp;)">
         <rename to="mappedString"/>
     </modify-function>
     <modify-function signature="mapped(int)">
@@ -2310,7 +2310,7 @@
     </modify-function>
     <modify-function signature="mapped(QObject *)">
         <rename to="mappedQObject"/>
-    </modify-function>
+    </modify-function> -->
     <modify-function signature="mapped(QWidget *)" remove="all"/>
 
     <modify-function signature="mapping(QWidget*)const" remove="all"/>
@@ -2477,11 +2477,11 @@ extern(C) void qtd_delete_d_qobject(void* dId)
         </inject-code> -->
 
     </modify-function>
-
+<!--
     <modify-function signature="deleteLater()">
         <rename to="disposeLater"/>
     </modify-function>
-
+-->
     <modify-function signature="inherits(const char*)const">
         <remove/>
     </modify-function>
@@ -2655,7 +2655,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
           <rename to="writeInt"/>
           <modify-argument index="0" replace-value="this"/>
       </modify-function>
-      <modify-function signature="operator&lt;&lt;(long long)">
+      <modify-function signature="operator&lt;&lt;(qint64)">
           <rename to="writeLong"/>
           <modify-argument index="0" replace-value="this"/>
       </modify-function>
@@ -2691,7 +2691,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
           <access modifier="private"/>
       </modify-function>
 
-      <modify-function signature="operator&gt;&gt;(long long&amp;)">
+      <modify-function signature="operator&gt;&gt;(qint64&amp;)">
           <rename to="operator_shift_right_long"/>
           <modify-argument index="0" replace-value="this"/>
           <access modifier="private"/>

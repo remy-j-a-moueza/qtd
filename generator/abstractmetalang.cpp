@@ -42,6 +42,7 @@
 #include "abstractmetalang.h"
 #include "reporthandler.h"
 #include "jumptable.h"
+#include <iostream>
 
 /*******************************************************************************
  * AbstractMetaType
@@ -225,6 +226,10 @@ QString AbstractMetaFunction::marshalledName(bool classIsOwner) const
             returned += arg->type()->name().replace("[]", "_3").replace(".", "_");
         }
     }
+
+    if(this->isConstant())
+        returned += "_const";
+
     return returned;
 }
 
@@ -251,6 +256,11 @@ uint AbstractMetaFunction::compareTo(const AbstractMetaFunction *other) const
     // Attributes
     if (attributes() == other->attributes()) {
         result |= EqualAttributes;
+    }
+
+    // Constness
+    if (isConstant() == other->isConstant()) {
+        result |= EqualConstness;
     }
 
     // Compare types
@@ -668,15 +678,15 @@ QString AbstractMetaFunction::typeReplaced(int key) const
     return QString();
 }
 
-QString AbstractMetaFunction::minimalSignature() const
+QString AbstractMetaFunction::minimalSignature(int reduce) const
 {
-    if (!m_cached_minimal_signature.isEmpty())
+    if (!m_cached_minimal_signature.isEmpty() && !reduce)
         return m_cached_minimal_signature;
 
     QString minimalSignature = originalName() + "(";
     AbstractMetaArgumentList arguments = this->arguments();
-
-    for (int i=0; i<arguments.count(); ++i) {
+    int argsCount = arguments.count() - reduce;
+    for (int i=0; i<argsCount; ++i) {
         AbstractMetaType *t = arguments.at(i)->type();
 
         if (i > 0)
@@ -689,7 +699,8 @@ QString AbstractMetaFunction::minimalSignature() const
         minimalSignature += "const";
 
     minimalSignature = QMetaObject::normalizedSignature(minimalSignature.toLocal8Bit().constData());
-    m_cached_minimal_signature = minimalSignature;
+    if(!reduce)
+        m_cached_minimal_signature = minimalSignature;
 
     return minimalSignature;
 }
@@ -1192,7 +1203,19 @@ QPropertySpec *AbstractMetaClass::propertySpecForReset(const QString &name) cons
     return 0;
 }
 
+AbstractMetaFunction* AbstractMetaClass::copyConstructor() const
+{
+    AbstractMetaFunctionList ctors = queryFunctions(Constructors);
+    for(int i = 0; i < ctors.size(); i++)
+    {
+        AbstractMetaFunction *ctor = ctors.at(i);
+        if (ctor->arguments().size() > 0)
+            if(ctor->arguments().at(0)->type()->typeEntry() == typeEntry())
+                return ctor;
+    }
 
+    return NULL;
+}
 
 static bool functions_contains(const AbstractMetaFunctionList &l, const AbstractMetaFunction *func)
 {
@@ -1891,10 +1914,13 @@ QString AbstractMetaType::minimalSignature() const
     if (isConstant())
         minimalSignature += "const ";
     minimalSignature += typeEntry()->qualifiedCppName();
-    if (hasInstantiations()) {
+    if (hasInstantiations() &&
+        (static_cast<const ContainerTypeEntry *>(typeEntry()))->type() != ContainerTypeEntry::StringListContainer)
+    {
         QList<AbstractMetaType *> instantiations = this->instantiations();
         minimalSignature += "<";
-        for (int i=0;i<instantiations.size();++i) {
+        for (int i=0;i<instantiations.size();++i)
+        {
             if (i > 0)
                 minimalSignature += ",";
             minimalSignature += instantiations.at(i)->minimalSignature();

@@ -98,7 +98,7 @@ public:
                                     const QString &arg_name);
     void writePrivateNativeFunction(QTextStream &s, const AbstractMetaFunction *d_function);
     void writeJavaLangObjectOverrideFunctions(QTextStream &s, const AbstractMetaClass *cls);
-    void writeReferenceCount(QTextStream &s, const ReferenceCount &refCount, const QString &argumentName);
+    void writeReferenceCount(QTextStream &s, const ReferenceCount &refCount, const QString &argumentName, AbstractMetaType *argumentType = 0);
     void retrieveModifications(const AbstractMetaFunction *f, const AbstractMetaClass *d_class,
          uint *exclude_attributes, uint *include_attributes) const;
     QString functionSignature(const AbstractMetaFunction *d_function,
@@ -149,14 +149,19 @@ private:
     void addInstantiations(const AbstractMetaType* d_type);
     void writeRequiredImports(QTextStream &s, const AbstractMetaClass *d_class);
     const TypeEntry* fixedTypeEntry(const TypeEntry *type);
+    AbstractMetaFunctionList generatedClassFunctions(const AbstractMetaClass *d_class);
 
     void writeDestructor(QTextStream &s, const AbstractMetaClass *d_class);
     void writeFlagsSetter(QTextStream &s, const AbstractMetaClass *d_class);
     void writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_class);
     void writeEnumAlias(QTextStream &s, const AbstractMetaEnum *d_enum);
     void writeSignalSignatures(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunctionList signal_funcs);
+    void writeMetaMethodArguments(QTextStream &s, const AbstractMetaFunction *d_function, int reduce = -1);
     void writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *d_class);
+    void writeQObjectFreeFunctions(QTextStream &s, const AbstractMetaClass *d_class);
     void writeConversionFunction(QTextStream &s, const AbstractMetaClass *d_class);
+    void writeValueFreeFunctions(QTextStream &s, const AbstractMetaClass *d_class);
+    void writeValueFunctions(QTextStream &s, const AbstractMetaClass *d_class);
 
 //    void writeMarshallFunction(QTextStream &s, const AbstractMetaClass *d_class);
 

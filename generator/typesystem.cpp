@@ -96,6 +96,7 @@ class StackElement
         // qtd stuff
         AddClass                    = 0x1100,
         PackageDepend               = 0x1200,
+        PrivateCopyConstructor      = 0x1300,
 
         // Code snip tags (0x1000, 0x2000, ... , 0xf000)
         InjectCode =           0x1000,
@@ -163,6 +164,7 @@ public:
         tagNames["rename"] = StackElement::Rename;
         tagNames["typesystem"] = StackElement::Root;
         tagNames["custom-constructor"] = StackElement::CustomMetaConstructor;
+        tagNames["private-copy-constructor"] = StackElement::PrivateCopyConstructor;
         tagNames["custom-destructor"] = StackElement::CustomMetaDestructor;
         tagNames["argument-map"] = StackElement::ArgumentMap;
         tagNames["suppress-warning"] = StackElement::SuppressedWarning;
@@ -297,6 +299,11 @@ bool Handler::endElement(const QString &, const QString &localName, const QStrin
         {
             current->entry->setCustomConstructor(*current->value.customFunction);
             delete current->value.customFunction;
+        }
+        break;
+    case StackElement::PrivateCopyConstructor:
+        {
+            current->entry->setHasPrivateCopyConstructor(true);
         }
         break;
     case StackElement::CustomMetaDestructor:
@@ -1677,19 +1684,17 @@ FieldModification ComplexTypeEntry::fieldModification(const QString &name) const
 
 QString ContainerTypeEntry::javaPackage() const
 {
-    if (m_type == PairContainer)
-        return "qt";
-    return "java.util";
+    return "qt.core";
 }
 
 QString ContainerTypeEntry::targetLangName() const
 {
 
     switch (m_type) {
-    case StringListContainer: return "List";
-    case ListContainer: return "List";
-    case LinkedListContainer: return "LinkedList";
-    case VectorContainer: return "List";
+    case StringListContainer: return "QList";
+    case ListContainer: return "QList";
+    case LinkedListContainer: return "QLinkedList";
+    case VectorContainer: return "QVector";
     case StackContainer: return "Stack";
     case QueueContainer: return "Queue";
     case SetContainer: return "Set";

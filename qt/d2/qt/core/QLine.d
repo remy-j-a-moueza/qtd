@@ -123,7 +123,7 @@ public struct QLine
         pt2 = QPoint(aX2, aY2);
     }
 
-    bool opEquals(ref QLine d) // const
+    bool opEquals(ref const QLine d) const
     {
         return pt1 == d.pt1 && pt2 == d.pt2;
     }
@@ -135,7 +135,18 @@ public struct QLine
     public final void readFrom(QDataStream arg__1) {
         qtd_QLine_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
     }
+    
+    // service stuff
+    public alias void __isNativeValueType;
 
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
 private:
     QPoint pt1, pt2;
 }
@@ -309,7 +320,7 @@ public struct QLineF
         pt2 = QPointF(aX2, aY2);
     }
 
-    bool opEquals(ref QLineF d) // const
+    bool opEquals(ref const QLineF d) const
     {
         return pt1 == d.pt1 && pt2 == d.pt2;
     }
@@ -353,6 +364,18 @@ public struct QLineF
 
     public static QLineF fromPolar(double length, double angle) {
         return qtd_QLineF_fromPolar_double_double(length, angle);
+    }
+
+    // service stuff
+    public alias void __isNativeValueType;
+
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
     }
 
     private:

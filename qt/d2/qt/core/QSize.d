@@ -91,7 +91,7 @@ public struct QSize
 	QSize opMulAssign(qreal c)
 	{ wd = qRound(wd*c); ht = qRound(ht*c); return this; }
 
-	bool opEquals(ref QSize s)
+	bool opEquals(ref const QSize s) const
 	{ return wd == s.wd && ht == s.ht; }
 
 	QSize opAdd(ref QSize s)
@@ -113,7 +113,18 @@ public struct QSize
     	assert(!qFuzzyCompare(c + 1, 1.));
     	return QSize(qRound(this.wd/c), qRound(this.ht/c));
 	}
+    
+    // service stuff
+    public alias void __isNativeValueType;
 
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
 private:
     int wd;
     int ht;
@@ -214,7 +225,7 @@ public struct QSizeF
 	QSizeF opMulAssign(qreal c)
 	{ wd *= c; ht *= c; return this; }
 
-	bool opEquals(ref QSizeF s)
+	bool opEquals(ref const QSizeF s) const
 	{ return qFuzzyCompare(wd, s.wd) && qFuzzyCompare(ht, s.ht); }
 
 	QSizeF opAdd(ref QSizeF s)
@@ -238,7 +249,18 @@ public struct QSizeF
 	    assert(!qFuzzyCompare(c + 1, 1.));
 	    return QSizeF(this.wd/c, this.ht/c);
 	}
+    
+    // service stuff
+    public alias void __isNativeValueType;
 
+    struct QTypeInfo
+    {
+        enum bool isComplex = true;
+        enum bool isStatic = false;
+        enum bool isLarge = true;
+        enum bool isPointer = false;
+        enum bool isDummy = false;
+    }
 private:
     qreal wd;
     qreal ht;

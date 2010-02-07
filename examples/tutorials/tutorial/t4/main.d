@@ -51,7 +51,7 @@ public:
 		auto quit = new QPushButton("Quit", this);
 		quit.setGeometry(62, 40, 75, 30);
 		quit.setFont(new QFont("Times", 18, QFont.Bold));
-		connect!("clicked")(quit, &QApplication.quit);
+		connect(quit, "clicked", qApp(), "quit");
 	}
 }
 

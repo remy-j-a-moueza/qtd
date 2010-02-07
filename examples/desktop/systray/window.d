@@ -72,11 +72,11 @@ public:
 		createActions();
 		createTrayIcon();
 
-		connect!("clicked")(showMessageButton, &this.showMessage);
-		connect!("toggled")(showIconCheckBox, &trayIcon.setVisible);
-		connect!("currentIndexChanged")(iconComboBox, &this.setIcon);
-		connect!("messageClicked")(trayIcon, &this.messageClicked);
-		connect!("activated")(trayIcon, &this.iconActivated);
+		connect(showMessageButton, "clicked", this, "showMessage");
+		connect(showIconCheckBox, "toggled", trayIcon, "setVisible");
+		connect(iconComboBox, "currentIndexChanged", this, "setIcon");
+		connect(trayIcon, "messageClicked", this, "messageClicked");
+		connect(trayIcon, "activated", this, "iconActivated");
 
 		QVBoxLayout mainLayout = new QVBoxLayout;
 		mainLayout.addWidget(iconGroupBox);
@@ -111,9 +111,9 @@ public:
 		}
 	}
 
-private:
+private: // slots
 
-	void setIcon(int index)
+	void slot_setIcon(int index)
 	{
 		QIcon icon = iconComboBox.itemIcon(index);
 		trayIcon.setIcon(icon);
@@ -122,7 +122,7 @@ private:
 		trayIcon.setToolTip(iconComboBox.itemText(index));
 	}
 	
-	void iconActivated(QSystemTrayIcon.ActivationReason reason)
+	void slot_iconActivated(QSystemTrayIcon.ActivationReason reason)
 	{
 		switch (reason) {
 			case QSystemTrayIcon.Trigger:
@@ -136,14 +136,14 @@ private:
 		}
 	}
 	
-	void showMessage()
+	void slot_showMessage()
 	{
 		QSystemTrayIcon.MessageIcon icon = cast(QSystemTrayIcon.MessageIcon)
 			typeComboBox.itemData(typeComboBox.currentIndex()).toInt();
 		trayIcon.showMessage(titleEdit.text(), bodyEdit.toPlainText(), icon, durationSpinBox.value() * 1000);
 	}
 	
-	void messageClicked()
+	void slot_messageClicked()
 	{
 		QMessageBox.information(null, tr("Systray"),
 			tr("Sorry, I already gave what help I could.\nMaybe you should try asking a human?"));
@@ -233,16 +233,16 @@ private:
 	void createActions()
 	{
 		minimizeAction = new QAction(tr("Mi&nimize"), this);
-		connect!("triggered")(minimizeAction, &this.hide);
+		connect(minimizeAction, "activated", this, "hide");
 
 		maximizeAction = new QAction(tr("Ma&ximize"), this);
-		connect!("triggered")(maximizeAction, &this.showMaximized);
+		connect(maximizeAction, "activated", this, "showMaximized");
 
 		restoreAction = new QAction(tr("&Restore"), this);
-		connect!("triggered")(restoreAction, &this.showNormal);
+		connect(restoreAction, "activated", this, "showNormal");
 
 		quitAction = new QAction(tr("&Quit"), this);
-		connect!("triggered")(quitAction, &QApplication.quit);
+		connect(quitAction, "triggered", qApp(), "quit");
 	}
 
 	void createTrayIcon()
@@ -282,4 +282,6 @@ private:
 
 	QSystemTrayIcon trayIcon;
 	QMenu trayIconMenu;
+    
+    mixin Q_OBJECT;
 }

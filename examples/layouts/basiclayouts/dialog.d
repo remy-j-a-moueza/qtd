@@ -61,6 +61,8 @@ version(Tango)
 else
     import std.string;
 
+import std.stdio;
+
 class Dialog : public QDialog
 {
     this()
@@ -75,8 +77,8 @@ class Dialog : public QDialog
 
         buttonBox = new QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel);
 
-        connect!("accepted")(buttonBox, &this.accept);
-        connect!("rejected")(buttonBox, &this.reject);
+        connect(buttonBox, "accepted", this, "accept");
+        connect(buttonBox, "rejected", this, "reject");
 
         QVBoxLayout mainLayout = new QVBoxLayout;
 
@@ -101,7 +103,7 @@ class Dialog : public QDialog
         exitAction = fileMenu.addAction(tr("E&xit"));
         menuBar.addMenu(fileMenu);
 
-        connect!("triggered")(exitAction, &this.accept);
+        connect(exitAction, "triggered", this, "accept");
     }
 
     void createHorizontalGroupBox()
@@ -154,6 +156,8 @@ class Dialog : public QDialog
         layout.addRow(new QLabel(tr("Line 3:")), new QSpinBox);
         formGroupBox.setLayout(layout);
     }
+
+    mixin Q_OBJECT;
 
     enum { NumGridRows = 3, NumButtons = 4 };
 
