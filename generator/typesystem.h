@@ -657,8 +657,8 @@ public:
     QString targetLangName() const { return m_java_name; }
     QString javaQualifier() const;
     QString qualifiedTargetLangName() const {
-        return javaQualifier() + '_' + targetLangName();
-//        return targetLangName();
+        return javaQualifier() + '.' + targetLangName();
+        //return targetLangName();
     }
 
     QString jniName() const;

@@ -91,6 +91,7 @@ private int grow(int size)
 }
 
 struct QListData {
+private:
     struct Data {
         Atomic!int ref_;
         int alloc, begin, end;
@@ -355,7 +356,7 @@ struct QList(T, alias Default = Dummy)
             ref T t()
             {
                 static if(TI.isLarge || TI.isStatic)
-                    return *cast(T*)(v);
+                    return *cast(T*)(this.v);
                 else
                     return *cast(T*)(&this);
             }

@@ -155,9 +155,9 @@ class QObject___ extends QObject {
         return result;
     }
     
-    static void connect(QObject sender, string signal, QObject receiver, string method)
+    static void connect(QObject sender, string signal, QObject receiver, string method, int type = 0)
     {
-        QMetaObject.connectImpl(sender, signal, receiver, method);
+        QMetaObject.connectImpl(sender, signal, receiver, method, type);
     }
 }// class
 

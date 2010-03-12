@@ -96,7 +96,7 @@ private: // slots
 		buttonBox.setOrientation(orientation);
 		QSize newSizeHint = buttonBox.sizeHint() + QSize(spacing, spacing);
 
-		if (orientation == Qt_Orientation.Horizontal) {
+		if (orientation == Qt.Orientation.Horizontal) {
 			mainLayout.addWidget(buttonBox, 2, 0);
 			resize(size() + QSize(-1 * oldSizeHint.width(), newSizeHint.height()));
 		} else {

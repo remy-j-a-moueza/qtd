@@ -289,7 +289,7 @@ void DGenerator::writeIntegerEnum(QTextStream &s, const AbstractMetaEnum *d_enum
 void DGenerator::writeEnumAlias(QTextStream &s, const AbstractMetaEnum *d_enum)
 {
     // aliases for enums to be used in easier way like QFont.Bold instead of QFont.Weight.Bold
-    s << QString("    alias %1 %2;").arg(d_enum->typeEntry()->qualifiedTargetLangName()).arg(d_enum->name()) << endl << endl;
+    //s << QString("    alias %1 %2;").arg(d_enum->typeEntry()->qualifiedTargetLangName()).arg(d_enum->name()) << endl << endl;
     const AbstractMetaEnumValueList &values = d_enum->values();
     for (int i=0; i<values.size(); ++i) {
         AbstractMetaEnumValue *enum_value = values.at(i);
@@ -297,7 +297,7 @@ void DGenerator::writeEnumAlias(QTextStream &s, const AbstractMetaEnum *d_enum)
         if (d_enum->typeEntry()->isEnumValueRejected(enum_value->name()))
             continue;
 
-        s << QString("    alias %1.%2 %2;").arg(d_enum->typeEntry()->qualifiedTargetLangName()).arg(enum_value->name()) << endl;
+        s << QString("    alias %1.%2 %2;").arg(d_enum->name()).arg(enum_value->name()) << endl;
     }
     s << endl;
 }
@@ -322,7 +322,7 @@ void DGenerator::writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum)
     }
 */
     // Generates Java 1.5 type enums
-    s << "public enum " << d_enum->enclosingClass()->name() << "_" << d_enum->name() << " {" << endl;
+    s << "public enum " << d_enum->name() << " {" << endl;
     const AbstractMetaEnumValueList &values = d_enum->values();
     EnumTypeEntry *entry = d_enum->typeEntry();
 
@@ -565,7 +565,6 @@ void DGenerator::writeInjectedCode(QTextStream &s, const AbstractMetaFunction *d
         }
     }
 }
-
 
 void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMetaFunction *d_function, uint attributes)
 {
@@ -1941,13 +1940,6 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         }
     }
 
-    // Enums aliases outside of the class - hack
-    if (!d_class->enums().isEmpty()) {
-        auxFile.isDone = false;
-        foreach (AbstractMetaEnum *d_enum, d_class->enums())
-            writeEnum(auxFile.stream, d_enum);
-    }
-
     // Auxiliary file contents should have been written at this point
     if (!auxFile.isDone)
     {
@@ -2113,6 +2105,12 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     s << endl << "{" << endl;
 
     Indentation indent(INDENT);
+
+    // Enums
+    if (!d_class->enums().isEmpty()) {
+        foreach (AbstractMetaEnum *d_enum, d_class->enums())
+            writeEnum(s, d_enum);
+    }
 
     // Define variables for reference count mechanism
     if (!d_class->isInterface() && !d_class->isNamespace()) {

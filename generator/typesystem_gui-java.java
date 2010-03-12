@@ -1028,11 +1028,11 @@ class QPainter___ extends QPainter {
         qtd_QPainter_drawLines_nativepointerQLineF_int(__nativeId, lines.ptr, lines.length);
     }
     
-    public final void drawPolygon(in QPoint[] points, Qt_FillRule fillRule = Qt_FillRule.OddEvenFill) {
+    public final void drawPolygon(in QPoint[] points, Qt.FillRule fillRule = Qt.FillRule.OddEvenFill) {
         qtd_QPainter_drawPolygon_nativepointerQPoint_int_FillRule(__nativeId, points.ptr, points.length, fillRule);
     }
 
-    public final void drawPolygon(in QPointF[] points, Qt_FillRule fillRule = Qt_FillRule.OddEvenFill) {
+    public final void drawPolygon(in QPointF[] points, Qt.FillRule fillRule = Qt.FillRule.OddEvenFill) {
         qtd_QPainter_drawPolygon_nativepointerQPointF_int_FillRule(__nativeId, points.ptr, points.length, fillRule);
     }
 
@@ -1703,7 +1703,7 @@ class QInputDialog___ extends QInputDialog {
         return getItem_private(_parent, title, label, items, current, editable, &ok, flags);
     }
 
-    public static string getText(QWidget _parent, string title, string label, QLineEdit_EchoMode echo = QLineEdit_EchoMode.Normal, string text = null, ref bool ok = false, int flags = 0) {
+    public static string getText(QWidget _parent, string title, string label, QLineEdit.EchoMode echo = QLineEdit.EchoMode.Normal, string text = null, ref bool ok = false, int flags = 0) {
         string res;
         qtd_QInputDialog_getText_private_QWidget_string_string_EchoMode_string_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.__nativeId, title, label, echo, text, &ok, flags);
         return res;
