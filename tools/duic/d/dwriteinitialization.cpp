@@ -1025,7 +1025,7 @@ void WriteInitialization::writeProperties(const QString &varName,
         DomPropertyMap properties = propertyMap(lst);
         if (properties.contains(QLatin1String("control"))) {
             DomProperty *p = properties.value(QLatin1String("control"));
-            m_output << m_option.indent << varName << ".setControl(QString.fromUtf8("
+            m_output << m_option.indent << varName << ".setControl(QStringUtil.fromUtf8("
                    << fixString(toString(p->elementString()), m_option.indent) << "));\n";
         }
     }
@@ -1037,7 +1037,7 @@ void WriteInitialization::writeProperties(const QString &varName,
         indent = QLatin1String("    ");
         m_output << m_option.indent << "if (" << varName << ".objectName().length == 0)\n";
     }
-    m_output << m_option.indent << indent << varName << ".setObjectName(QString.fromUtf8(" << fixString(varName, m_option.indent) << "));\n";
+    m_output << m_option.indent << indent << varName << ".setObjectName(QStringUtil.fromUtf8(" << fixString(varName, m_option.indent) << "));\n";
 
     int leftMargin, topMargin, rightMargin, bottomMargin;
     leftMargin = topMargin = rightMargin = bottomMargin = -1;
@@ -1266,7 +1266,7 @@ void WriteInitialization::writeProperties(const QString &varName,
 
             if (p->elementString()->hasAttributeNotr()
                     && toBool(p->elementString()->attributeNotr())) {
-                propertyValue = QLatin1String("QString.fromUtf8(");
+                propertyValue = QLatin1String("QStringUtil.fromUtf8(");
                 propertyValue += fixString(p->elementString()->text(), m_option.indent);
                 propertyValue += QLatin1Char(')');
             } else {
@@ -1452,7 +1452,7 @@ QString WriteInitialization::writeFontProperties(const DomFont *f)
 
     m_output << m_option.indent << "QFont " << fontName << ";\n";
     if (f->hasElementFamily() && !f->elementFamily().isEmpty()) {
-        m_output << m_option.indent << fontName << ".setFamily(QString.fromUtf8(" << fixString(f->elementFamily(), m_option.indent)
+        m_output << m_option.indent << fontName << ".setFamily(QStringUtil.fromUtf8(" << fixString(f->elementFamily(), m_option.indent)
             << "));\n";
     }
     if (f->hasElementPointSize() && f->elementPointSize() > 0) {
@@ -1936,7 +1936,7 @@ QString WriteInitialization::pixCall(const QString &t, const QString &text) cons
         if (m_option.extractImages) {
             const QString format = image->elementData()->attributeFormat();
             const QString extension = format.left(format.indexOf(QLatin1Char('.'))).toLower();
-            QString rc = QLatin1String("QPixmap(QString.fromUtf8(\":/");
+            QString rc = QLatin1String("QPixmap(QStringUtil.fromUtf8(\":/");
             rc += m_generatedClass;
             rc += QLatin1String("/images/");
             rc += text;
@@ -1954,7 +1954,7 @@ QString WriteInitialization::pixCall(const QString &t, const QString &text) cons
 
     QString pixFunc = m_uic->pixmapFunction();
     if (pixFunc.isEmpty())
-        pixFunc = QLatin1String("QString.fromUtf8");
+        pixFunc = QLatin1String("QStringUtil.fromUtf8");
 
     type += QLatin1Char('(');
     type += pixFunc;
@@ -2488,7 +2488,7 @@ void WriteInitialization::acceptWidgetScripts(const DomScripts &widgetScripts, D
         }
         m_output << ";\n";
     }
-    m_output << m_option.indent << "scriptContext.run(QString.fromUtf8("
+    m_output << m_option.indent << "scriptContext.run(QStringUtil.fromUtf8("
              << fixString(script, m_option.indent) << "), "
              << m_driver->findOrInsertWidget(node) << ", childWidgets);\n";
 }
