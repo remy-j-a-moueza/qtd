@@ -2,6 +2,7 @@ module qt.qtd.Meta;
 
 import std.traits;
 import std.typetuple;
+import std.string;
 
 // Various compile time utilities
 
@@ -80,4 +81,33 @@ template isFn(Fn)
 template isFnOrDg(Dg)
 {
     enum isFnOrDg = isFn!(Dg) || isDg!(Dg);
+}
+
+uint isModule(string str)
+{
+    return startsWith(str, "module ");
+}
+
+template qualifiedCppName(T)
+{
+    static if(!isModule(__traits(parent, T).stringof))
+        enum qualifiedCppName = qualifiedCppName!(__traits(parent, T)) ~ "::" ~ T.stringof;
+    else
+        enum qualifiedCppName = T.stringof;
+}
+
+template qualifiedDName(T)
+{
+    static if (!isModule(__traits(parent, T).stringof))
+        enum qualifiedDName = qualifiedDName!(__traits(parent, T)) ~ "." ~ T.stringof;
+    else
+        enum qualifiedDName = T.stringof;
+}
+
+template fullDName(T)
+{
+    static if (is(T == enum))
+        enum fullDName = qualifiedDName!T;
+    else
+        enum fullDName = T.stringof;
 }

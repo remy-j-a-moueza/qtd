@@ -233,13 +233,13 @@ private:
 	void createActions()
 	{
 		minimizeAction = new QAction(tr("Mi&nimize"), this);
-		connect(minimizeAction, "activated", this, "hide");
+		connect(minimizeAction, "triggered", this, "hide");
 
 		maximizeAction = new QAction(tr("Ma&ximize"), this);
-		connect(maximizeAction, "activated", this, "showMaximized");
+		connect(maximizeAction, "triggered", this, "showMaximized");
 
 		restoreAction = new QAction(tr("&Restore"), this);
-		connect(restoreAction, "activated", this, "showNormal");
+		connect(restoreAction, "triggered", this, "showNormal");
 
 		quitAction = new QAction(tr("&Quit"), this);
 		connect(quitAction, "triggered", qApp(), "quit");

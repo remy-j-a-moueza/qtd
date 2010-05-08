@@ -423,7 +423,7 @@ string dDeclArgs(Args...)()
     {
         if (i > 0)
             ret ~= ", ";
-        ret ~= Args[i].stringof;
+        ret ~= fullDName!(Args[i]);
     }
     return ret;
 }

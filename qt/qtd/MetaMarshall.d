@@ -19,6 +19,16 @@ template isValueType(T) // is a Qt Value type that belongs to the library
     enum isValueType = is(T.__isValueType);
 }
 
+template isQtType(T)
+{
+    mixin ("enum isQtType = is(T.__isQtType_" ~ T.stringof ~ ");");
+}
+/*
+template isQtType(T)
+{
+    enum isQtType = isQObjectType!(T) || isObjectType!(T) || isValueType!(T) || is(T.__isQtType);
+}
+*/
 template isNativeType(T) // type that doesn't require conversion i.e. is the same in C++ and D
 {
     enum isNativeType = isNumeric!T || is(T == bool) || is(T == struct);
@@ -34,6 +44,23 @@ template isQList(T)
     enum isQList = ctfeStartsWith(Unqual!(T).stringof, "QList!");
 }
 
+// returns full name of enum:
+// for Qt enum it is in the form of QPaintDevice::PaintDeviceMetric
+// for pure D enums it is Foo.Bar
+template enumFullName(T)
+{
+    static if(!isModule(__traits(parent, T).stringof))
+    {
+        static if(isQtType!(__traits(parent, T)))
+            enum enumFullName = qualifiedCppName!T;
+        else
+            enum enumFullName = qualifiedDName!T;
+    }
+    else
+        enum enumFullName = qualifiedDName!T;
+            
+}
+
 // converts an argumnent from C++ to D in qt_metacall
 string metaCallArgument(T)(string ptr)
 {
@@ -45,6 +72,8 @@ string metaCallArgument(T)(string ptr)
         return "*(cast(" ~ T.stringof ~ "*)" ~ ptr ~ ")";
     else static if (isStringType!T)
         return "QStringUtil.toNativeString(" ~ ptr ~ ")";
+    else static if (is(T == enum))
+        return "*(cast(" ~ qualifiedDName!T ~ "*)" ~ ptr ~ ")";
     else
         return "*(cast(" ~ T.stringof ~ "*)" ~ ptr ~ ")";
         //res = T.stringof;
@@ -67,6 +96,8 @@ string qtDeclArg(T)()
         else
             return "QList<" ~ qtDeclArg!(templateParam!T)() ~ ">";
     }
+    else static if (is(T == enum))
+        return enumFullName!T;
     else static if (isNativeType!T)
         return Unqual!T.stringof;
     else

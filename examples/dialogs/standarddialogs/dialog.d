@@ -236,7 +236,7 @@ private: // slots
 	{
 		bool ok;
 		string text = QInputDialog.getText(this, tr("QInputgetText()"),
-						tr("User name:"), QLineEdit_EchoMode.Normal,
+						tr("User name:"), QLineEdit.EchoMode.Normal,
 		QDir.home().dirName(), ok);
 		if (ok && text.length)
 			textLabel.setText(text);
@@ -264,9 +264,9 @@ private: // slots
 
 	void slot_setExistingDirectory()
 	{
-		int options = QFileDialog_Option.DontResolveSymlinks | QFileDialog_Option.ShowDirsOnly;
+		int options = QFileDialog.Option.DontResolveSymlinks | QFileDialog.Option.ShowDirsOnly;
 		if (!native.isChecked())
-			options |= QFileDialog_Option.DontUseNativeDialog;
+			options |= QFileDialog.Option.DontUseNativeDialog;
 		string directory = QFileDialog.getExistingDirectory(this,
 						tr("QFilegetExistingDirectory()"),
 						directoryLabel.text(),
@@ -279,7 +279,7 @@ private: // slots
 	{
 		int options;
 		if (!native.isChecked())
-			options |= QFileDialog_Option.DontUseNativeDialog;
+			options |= QFileDialog.Option.DontUseNativeDialog;
 		string selectedFilter;
 		string fileName = QFileDialog.getOpenFileName(this,
 						tr("QFilegetOpenFileName()"),
@@ -295,7 +295,7 @@ private: // slots
 	{
 		int options;
 		if (!native.isChecked())
-			options |= QFileDialog_Option.DontUseNativeDialog;
+			options |= QFileDialog.Option.DontUseNativeDialog;
 		string selectedFilter;
 		auto files = QFileDialog.getOpenFileNames(
 						this, tr("QFilegetOpenFileNames()"),
@@ -313,7 +313,7 @@ private: // slots
 	{
 		int options;
 		if (!native.isChecked())
-			options |= QFileDialog_Option.DontUseNativeDialog;
+			options |= QFileDialog.Option.DontUseNativeDialog;
 		string selectedFilter;
 		string fileName = QFileDialog.getSaveFileName(this,
 						tr("QFilegetSaveFileName()"),
