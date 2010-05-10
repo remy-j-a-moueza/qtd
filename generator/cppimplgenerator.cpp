@@ -2178,7 +2178,7 @@ void CppImplGenerator::writeFinalFunction(QTextStream &s, const AbstractMetaFunc
                 s << INDENT
                   << "bool __do_static_call = __this_nativeId ? ";
                 if (java_class->isQObject())
-                    s << "QtD_QObjectEntity::getQObjectEntity((QObject*)__this_nativeId) : false;" << endl;
+                    s << "dynamic_cast<QtD_QObjectEntity*>((QObject*)__this_nativeId) : false;" << endl;
                 else
                     s << "__" << java_class->name() << "_entity(__this_nativeId) : false;" << endl;
             } else {
