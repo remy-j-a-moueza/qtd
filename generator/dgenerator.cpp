@@ -286,23 +286,23 @@ void DGenerator::writeIntegerEnum(QTextStream &s, const AbstractMetaEnum *d_enum
     s << "    } // end of enum " << d_enum->name() << endl << endl;
 }
 
-void DGenerator::writeEnumAlias(QTextStream &s, const AbstractMetaEnum *d_enum)
+void DGenerator::writeEnumAliases(QTextStream &s, const AbstractMetaEnum *d_enum)
 {
-    // aliases for enums to be used in easier way like QFont.Bold instead of QFont.Weight.Bold
-    //s << QString("    alias %1 %2;").arg(d_enum->typeEntry()->qualifiedTargetLangName()).arg(d_enum->name()) << endl << endl;
+    FlagsTypeEntry *flags = d_enum->typeEntry()->flags();
+    if (flags)
+        s << INDENT << "alias " << d_enum->name() << " " << flags->targetLangName() << ";" << endl << endl;
+
     const AbstractMetaEnumValueList &values = d_enum->values();
     for (int i=0; i<values.size(); ++i) {
         AbstractMetaEnumValue *enum_value = values.at(i);
 
-        if (d_enum->typeEntry()->isEnumValueRejected(enum_value->name()))
-            continue;
-
-        s << QString("    alias %1.%2 %2;").arg(d_enum->name()).arg(enum_value->name()) << endl;
+        if (!d_enum->typeEntry()->isEnumValueRejected(enum_value->name()))
+            s << INDENT << QString("alias %1.%2 %2;").arg(d_enum->name()).arg(enum_value->name()) << endl;
     }
     s << endl;
 }
 
-void DGenerator::writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum)
+void DGenerator::writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum, bool withAliases)
 {
     if (m_doc_parser) {
         s << m_doc_parser->documentation(d_enum);
@@ -322,11 +322,13 @@ void DGenerator::writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum)
     }
 */
     // Generates Java 1.5 type enums
-    s << "public enum " << d_enum->name() << " {" << endl;
+    s << INDENT << "public enum " << d_enum->name() << " {" << endl;
     const AbstractMetaEnumValueList &values = d_enum->values();
     EnumTypeEntry *entry = d_enum->typeEntry();
 
+
     for (int i=0; i<values.size(); ++i) {
+        Indentation indent(INDENT);
         AbstractMetaEnumValue *enum_value = values.at(i);
 
         if (d_enum->typeEntry()->isEnumValueRejected(enum_value->name()))
@@ -335,7 +337,7 @@ void DGenerator::writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum)
         if (m_doc_parser)
             s << m_doc_parser->documentation(enum_value);
 
-        s << "        " << enum_value->name() << " = " << enum_value->value();
+        s << INDENT << enum_value->name() << " = " << enum_value->value();
 
         if (i != values.size() - 1) {
             AbstractMetaEnumValue *next_value = values.at(i+1); // qtd
@@ -418,6 +420,9 @@ void DGenerator::writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum)
         QString flagsName = flags_entry->targetLangName();
         s << INDENT << "alias QFlags!(" << d_enum->name() << ") " << flagsName << ";" << endl << endl;
     }*/
+
+    if (withAliases)
+        writeEnumAliases(s, d_enum);
 }
 
 void DGenerator::writePrivateNativeFunction(QTextStream &s, const AbstractMetaFunction *d_function)
@@ -894,7 +899,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
             s << INDENT << "this." << function_call_for_ownership(owner) << ";" << endl;
     }
 
-    // return value marschalling
+    // return value marshalling
     if(return_type) {
         if (!returnImmediately) {
             s << INDENT;
@@ -1785,8 +1790,6 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
                       << INDENT << "string " << arg_name << " = QStringUtil.toNativeString(" << arg_name << "_ptr);";
                 } else if(type->isPrimitive() || type->isEnum() || type->isFlags() || type->typeEntry()->isStructInD()) {
                     QString type_name = argument->type()->typeEntry()->qualifiedTargetLangName();
-                    if (type->isFlags())
-                        type_name = "int";
                     s << INDENT << "auto " << arg_name << " = *(cast(" << type_name << "*)" << arg_ptr << ");";
                 } else if(type->isObject() || type->isQObject()
                         || (type->typeEntry()->isValue() && type->isNativePointer())
@@ -2107,9 +2110,15 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     Indentation indent(INDENT);
 
     // Enums
-    if (!d_class->enums().isEmpty()) {
+    if (!d_class->typeEntry()->designatedInterface() && !d_class->enums().isEmpty()) {
         foreach (AbstractMetaEnum *d_enum, d_class->enums())
-            writeEnum(s, d_enum);
+            writeEnum(s, d_enum, true);
+    }
+
+    // Enums in designated interfaces
+    if (d_class->isInterface() && d_class->primaryInterfaceImplementor()) {
+        foreach (AbstractMetaEnum *d_enum, d_class->primaryInterfaceImplementor()->enums())
+            writeEnum(s, d_enum, true);
     }
 
     // Define variables for reference count mechanism
@@ -2197,10 +2206,6 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
           << INDENT << "}" << endl;
     }
 */
-
-    // Enums aliases
-    foreach (AbstractMetaEnum *d_enum, d_class->enums())
-        writeEnumAlias(s, d_enum);
 
     // Signals
     if (d_class->isQObject())
@@ -2602,7 +2607,6 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         write(s, cls);
         m_isRecursive = false;
     }
-
 
     if (d_class->isQObject())
         writeQObjectFreeFunctions(s, d_class);

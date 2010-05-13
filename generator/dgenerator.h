@@ -47,6 +47,7 @@
 #include "cppimplgenerator.h"
 
 #include <QTextStream>
+#include <QStack>
 
 class DocParser;
 
@@ -69,7 +70,7 @@ public:
     static QString argumentString(const AbstractMetaFunction *d_function,
                                   const AbstractMetaArgument *d_argument,
                                   uint options = 0);
-    void writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum);
+    void writeEnum(QTextStream &s, const AbstractMetaEnum *d_enum, bool withAliases = false);
     void writeIntegerEnum(QTextStream &s, const AbstractMetaEnum *d_enum);
     void writeSignal(QTextStream &s, const AbstractMetaFunction *d_function);
     void writeFunction(QTextStream &s, const AbstractMetaFunction *d_function,
@@ -154,7 +155,7 @@ private:
     void writeDestructor(QTextStream &s, const AbstractMetaClass *d_class);
     void writeFlagsSetter(QTextStream &s, const AbstractMetaClass *d_class);
     void writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_class);
-    void writeEnumAlias(QTextStream &s, const AbstractMetaEnum *d_enum);
+    void writeEnumAliases(QTextStream &s, const AbstractMetaEnum *d_enum);
     void writeSignalSignatures(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunctionList signal_funcs);
     void writeMetaMethodArguments(QTextStream &s, const AbstractMetaFunction *d_function, int reduce = -1);
     void writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *d_class);
@@ -167,6 +168,7 @@ private:
 
     int m_recursive;
     bool m_isRecursive;
+    QStack<const AbstractMetaClass*> m_recursionStack;
     QSet<const TypeEntry*> typeEntries; // imports
     QSet<const TypeEntry*> typeEntriesEnums; // imports for enums
     QSet<QString> excludedTypes2;
