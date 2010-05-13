@@ -5824,8 +5824,9 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
       <modify-function signature="critical(QWidget*,QString,QString,int,int,int)" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="critical(QWidget*,QString,QString,QString,QString,QString,int,int)" remove="all"/> <!--### Obsolete in 4.3-->
-      <modify-function signature="information(QWidget*,QString,QString,int,int,int)" remove="all"/> <!--### Obsolete in 4.3-->
+      <!-- <modify-function signature="information(QWidget*,QString,QString,int,int,int)" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="information(QWidget*,QString,QString,QString,QString,QString,int,int)" remove="all"/> <!--### Obsolete in 4.3-->
+      <modify-function signature="information(QWidget*,const QString &amp;,const QString &amp;,int,int,int)" remove="all"/>
       <modify-function signature="question(QWidget*, QString, QString, int, int, int)" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="question(QWidget*, QString, QString, QString, QString, QString, int, int)" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="warning(QWidget*, QString, QString, int, int, int)" remove="all"/> <!--### Obsolete in 4.3-->

@@ -288,10 +288,6 @@ void DGenerator::writeIntegerEnum(QTextStream &s, const AbstractMetaEnum *d_enum
 
 void DGenerator::writeEnumAliases(QTextStream &s, const AbstractMetaEnum *d_enum)
 {
-    FlagsTypeEntry *flags = d_enum->typeEntry()->flags();
-    if (flags)
-        s << INDENT << "alias " << d_enum->name() << " " << flags->targetLangName() << ";" << endl << endl;
-
     const AbstractMetaEnumValueList &values = d_enum->values();
     for (int i=0; i<values.size(); ++i) {
         AbstractMetaEnumValue *enum_value = values.at(i);
@@ -487,7 +483,7 @@ void DGenerator::writePrivateNativeFunction(QTextStream &s, const AbstractMetaFu
 }
 
 static QString function_call_for_ownership(TypeSystem::Ownership owner)
-{  
+{
     if (owner == TypeSystem::CppOwnership) {
         return "__setFlags(QtdObjectFlags.nativeOwnership, true)";
     } else /* qtd 2 if (owner == TypeSystem::TargetLangOwnership) */ {
@@ -2212,7 +2208,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     {
         AbstractMetaFunctionList signal_funcs = signalFunctions(d_class, false);
         writeSignalSignatures(s, d_class, signal_funcs);
-   
+
         foreach (AbstractMetaFunction *signal, signal_funcs)
         {
             writeSignal(s, signal);
@@ -2401,17 +2397,17 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 */
     s << "}" << endl; // end of class scope
 
-    /* ---------------- injected free code ----------------*/ 
-    const ComplexTypeEntry *class_type = d_class->typeEntry(); 
-    Q_ASSERT(class_type); 
+    /* ---------------- injected free code ----------------*/
+    const ComplexTypeEntry *class_type = d_class->typeEntry();
+    Q_ASSERT(class_type);
 
-    CodeSnipList code_snips = class_type->codeSnips(); 
-    foreach (const CodeSnip &snip, code_snips) { 
-        if (!d_class->isInterface() && snip.language == TypeSystem::TargetLangFreeCode) { 
-            s << endl; 
-            snip.formattedCode(s, INDENT); 
-        } 
-    } 
+    CodeSnipList code_snips = class_type->codeSnips();
+    foreach (const CodeSnip &snip, code_snips) {
+        if (!d_class->isInterface() && snip.language == TypeSystem::TargetLangFreeCode) {
+            s << endl;
+            snip.formattedCode(s, INDENT);
+        }
+    }
     /* --------------------------------------------------- */
 
     interfaces = d_class->interfaces();
@@ -2434,7 +2430,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             QString hasShellFlag = d_class->generateShellClass() ? " | QtdObjectFlags.hasShell" : "";
             s << INDENT << "public this(void* native_id, QtdObjectFlags flags = QtdObjectFlags.nativeOwnership) {" << endl
               << INDENT << "    super(native_id, flags);" << endl << endl;
-            
+
             s << INDENT << "}" << endl << endl;
 
             uint exclude_attributes = AbstractMetaAttributes::Native | AbstractMetaAttributes::Abstract;
@@ -2902,14 +2898,14 @@ void DGenerator::writeSignalSignatures(QTextStream &s, const AbstractMetaClass *
     s << INDENT << "int signalSignature(int signalId, ref stringz signature) {" << endl;
     {
         Indentation indent(INDENT);
-        
+
         if (d_class->name() != "QObject")
         {
             s << INDENT << "signalId = super.signalSignature(signalId, signature);" << endl
               << INDENT << "if (signature)" << endl
-              << INDENT << "    return signalId;" << endl;            
+              << INDENT << "    return signalId;" << endl;
         }
-        
+
         s << INDENT << "if (signalId < __signalSignatures.length)" << endl
           << INDENT << "    signature = __signalSignatures[signalId].ptr;" << endl
           << INDENT << "else" << endl
