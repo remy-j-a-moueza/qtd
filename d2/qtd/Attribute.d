@@ -9,6 +9,7 @@ import
     lds.meta.compiletime,
     std.traits,
     std.conv,
+    std.variant,
     std.typetuple;
 
 enum standardNamespace = "qtd";
@@ -29,9 +30,9 @@ enum AttributeOptions
     /* internal */ inner         = 0x0000_0002,
 
     /**
-        Attribute data are in key-value form.
+        Specifies that the attribute data are in name-value form.
      */
-    named                        = 0x0000_0004
+    nameValue                    = 0x0000_0004
 }
 
 /**
@@ -57,7 +58,7 @@ mixin template tupleToMembers!(string nameSpace, size_t index, A...)
     When mixed in an aggregate, converts a compile-time tuple of name-value pairs to
     members of that aggregate.
  */
-struct NamedValueTupleToFields(A...)
+struct NameValueTupleToFields(A...)
 {
 
 }
@@ -218,44 +219,127 @@ private mixin template AttributeImpl(alias symbol, string attrClass, AttributeOp
 }
 
 /**
-    Base class for run time attributes
+    Base class for run time attribute implementations
  */
 abstract class MetaAttribute
 {
 }
 
 /**
-    Default implementation of run time attributes
+    A run-time attribute implementation that stores the attribute data in an
+    array of variants.
  */
-final class MetaAttributeVariant : MetaAttribute
+final class MetaVariantAttribute : MetaAttribute
 {
-private:
-    Variant[] values_;
+    Variant[] values;
 
-public:
-    Variant values()
-    {
-        return values_;
-    }
-
-    static MetaAttributeVariant create(string category, AttributeOptions opts, A...)()
+    private this()
     {
     }
-}
 
-class MetaAttributeTypedImpl(A...)
-{
-}
-
-
-abstract class MetaAtributeTyped : MetaAttribute
-{
-    void construct(A...)()
+    static MetaVariantAttribute create(string category, AttributeOptions opts, A...)()
     {
+        auto ret = new MetaVariantAttribute;
+        super.construct!(category, opts, A)();
+        foreach(i, _; A)
+        {
+            static if (__traits(compiles, { ret.values ~= Variant(A[i]); }() ))
+                ret.values ~= Variant(A[i]);
+        }
+        return ret;
     }
 }
 
+/**
+    A run-time attribute implementation that stores the attribute data in an
+    assiciative array of variants.
+ */
+final class MetaVariantDictAttribute : MetaAttribute
+{
+    Variant[string] values;
 
+    private this()
+    {
+    }
+
+    static MetaVariantAttribute create(string category, AttributeOptions opts, A...)()
+    {
+        auto ret = new MetaVariantAttribute;
+        super.construct!(category, opts, A)();
+        foreach(i, _; A)
+        {
+            static if (i % 2 == 0 && __traits(compiles, { ret.values[A[i]] = Variant(A[i + 1]); }() ))
+                ret.values[A[i]] ~= Variant(A[i + 1]);
+        }
+        return ret;
+    }
+}
+
+
+/**
+    A run-time attribute implementation that stores the attribute data in
+    typed fields named fieldN, where N is the index of the original attribute data element.
+ */
+abstract class MetaTypedAttribute : MetaAttribute
+{
+    private this() {}
+
+    static class Impl(A) : typeof(this)
+    {
+        private this() {}
+
+        mixin tupleToMembers!("field", 0, A);
+    }
+
+    static MetaAttribute create(string category, AttributeOptions opts, A...)()
+    {
+        auto ret = new Impl!A;
+        super.construct(category, opts, A);
+        return ret;
+    }
+}
+
+/**
+    A run-time attribute implementation that stores the attribute data in
+    typed fields by interpreting the original attribute data as name-value pairs.
+ */
+abstract class MetaTypedDictAttribute : MetaAttribute
+{
+    private this() {}
+
+    static class Impl(A) : typeof(this)
+    {
+        private this() {}
+
+        mixin nameValueTupleToMembers!("", A);
+    }
+
+    static MetaAttribute create(string category, AttributeOptions opts, A...)()
+    {
+        auto ret = new Impl!A;
+        super.construct(category, opts, A);
+        return ret;
+    }
+}
+
+version (QtdUnittest)
+{
+    unittest
+    {
+        static void foo() {}
+
+        static class C
+        {
+            mixin InnerAttribute!("someAttribute", MetaVariantAttribute, "22", foo, 33);
+        }
+
+        auto attr = cast(MetaVariantAttribute) meta!(C).attributes[0];
+        assert(attr.name == "someAttribute");
+        assert(qttr.length == 2);
+        assert(attr.values[0] == "22");
+        assert(attr.values[1] == 33);
+    }
+}
 
 private string stringOfFunction(alias symbol)()
 {
