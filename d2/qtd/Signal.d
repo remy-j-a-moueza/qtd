@@ -12,7 +12,7 @@
 module qtd.Signal;
 
 public import qt.QGlobal;
-import qtd.MetaMarshall;
+import qtd.Marshal;
 import qtd.Meta;
 
 import core.stdc.stdlib : crealloc = realloc, cfree = free;

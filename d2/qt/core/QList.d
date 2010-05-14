@@ -5,7 +5,7 @@ import qt.core.QTypeInfo;
 import qt.core.QString;
 import qtd.QtdObject;
 import qtd.Atomic;
-import qtd.MetaMarshall;
+import qtd.Marshal;
 
 import core.stdc.stdlib : qRealloc = realloc, qFree = free, qMalloc = malloc;
 import core.stdc.string : memcpy, memmove;

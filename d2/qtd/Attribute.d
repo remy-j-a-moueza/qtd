@@ -26,7 +26,66 @@ enum AttributeOptions
      */
     allowMultiple                = 0x0000_0001,
 
-    /* internal */ inner         = 0x0000_0002
+    /* internal */ inner         = 0x0000_0002,
+
+    /**
+        Attribute data are in key-value form.
+     */
+    named                        = 0x0000_0004
+}
+
+/**
+    When mixed in an aggregate, converts a compile-time tuple to
+    members of that aggregate.
+ */
+mixin template tupleToMembers!(string nameSpace, size_t index, A...)
+{
+    static if (index < A.length)
+    {
+        enum indexStr = to!string(index);
+
+        static if (is(__traits(compiles, { struct { typeof(A[index]) x; } }() })))
+            mixin("typeof(A[" ~ indexStr ~ "]) " ~ nameSpace ~  ~ " = A[" ~ indexStr ~"];\n" ~ next;
+        else
+            mixin("alias A[" ~ indexStr ~ "] " ~ nameSpace ~ indexStr ~ ";\n" ~ next;
+
+        mixin tupleToFields!(nameSpace, index + 1, A);
+    }
+}
+
+/**
+    When mixed in an aggregate, converts a compile-time tuple of name-value pairs to
+    members of that aggregate.
+ */
+struct NamedValueTupleToFields(A...)
+{
+
+}
+
+version (QtdUnittest)
+{
+    unittest
+    {
+        static int foo()
+        {
+            return 42;
+        }
+
+        static struct S
+        {
+            mixin TupleToFields!("field", 0,
+                int,
+                "a",
+                22,
+                foo);
+        }
+
+        static assert(is(S.field0 == int));
+        S s;
+        assert(s.field1 == "a");
+        assert(s.field2 == "22");
+        assert(S.foo() == 42);
+    }
 }
 
 private template attributeId(alias symbol, uint index = 0)
@@ -157,6 +216,46 @@ private mixin template AttributeImpl(alias symbol, string attrClass, AttributeOp
     else
         mixin ("alias TypeTuple!(attrClass, A) " ~ attrId ~ ";");
 }
+
+/**
+    Base class for run time attributes
+ */
+abstract class MetaAttribute
+{
+}
+
+/**
+    Default implementation of run time attributes
+ */
+final class MetaAttributeVariant : MetaAttribute
+{
+private:
+    Variant[] values_;
+
+public:
+    Variant values()
+    {
+        return values_;
+    }
+
+    static MetaAttributeVariant create(string category, AttributeOptions opts, A...)()
+    {
+    }
+}
+
+class MetaAttributeTypedImpl(A...)
+{
+}
+
+
+abstract class MetaAtributeTyped : MetaAttribute
+{
+    void construct(A...)()
+    {
+    }
+}
+
+
 
 private string stringOfFunction(alias symbol)()
 {

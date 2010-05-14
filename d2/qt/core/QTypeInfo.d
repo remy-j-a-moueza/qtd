@@ -8,7 +8,7 @@ module qt.core.QTypeInfo;
 */
 import std.traits;
 
-import qtd.MetaMarshall;
+import qtd.Marshal;
 import qt.core.QString;
 
 bool qIsDetached(T)(ref T) { return true; }

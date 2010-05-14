@@ -4,7 +4,7 @@ import std.typetuple;
 
 import qt.QGlobal;
 import qtd.Signal;
-import qtd.MetaMarshall;
+import qtd.Marshal;
 import qtd.Meta;
 import qtd.ctfe.Format;
 

@@ -29,7 +29,7 @@ set (d_qtd_files
     Signal
     Str
     Atomic
-    MetaMarshall
+    Marshal
     MOC
     Meta
     Array
