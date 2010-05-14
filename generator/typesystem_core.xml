@@ -2510,7 +2510,7 @@ extern(C) void qtd_delete_d_qobject(void* dId)
     </extra-includes>
 
     <extra-includes>
-        <include file-name="qt.qtd.Str" location="java"/>
+        <include file-name="qtd.Str" location="java"/>
     </extra-includes>
 
     <modify-function signature="argv()" remove="all"/> <!-- Obsolete -->

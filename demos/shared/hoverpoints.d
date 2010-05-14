@@ -49,7 +49,7 @@ else
 
 import
     qt.gui.QWidget,
-    qt.qtd.Array,
+    qtd.Array,
     arthurwidgets;
 
 final class HoverPoints : QObject

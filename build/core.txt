@@ -1,4 +1,4 @@
-configure_file(qt/QDefines.d.inc qt/QDefines.d)
+configure_file(d${D_VERSION}/qt/QDefines.d.inc qt/QDefines.d)
 
 ## Module specific cpp files.
 set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
@@ -10,38 +10,38 @@ set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
     qt_core/QModelIndex_shell qt_core/QMetaType_shell
     qt_core/QMetaObject_shell)
 ## Module specific d files.
-set (d_files
+set (d_qt_files
     QGlobal
-    qtd/Array  
-    qtd/ArrayOpsPrimitive   
-    qtd/Traits
     core/QString
     core/QMetaType
     core/QMetaObject
-    
     core/QTypeInfo
     core/QList
-    qtd/Atomic
-    qtd/MetaMarshall
-    qtd/MOC
-    qtd/Meta
-    qtd/util/Tuple
-    qtd/ctfe/Integer
-    qtd/ctfe/String
-    qtd/ctfe/Format
-    )
-set (d_version_files 
-    QtdObject
-    Signal qtd/Str
     core/QLine core/QLineF
     core/QModelIndex
     core/QRect core/QRectF
     core/QSize core/QSizeF
     core/QPoint core/QPointF
-    core/QVariant)
+    core/QVariant
+    )
+set (d_qtd_files
+    QtdObject
+    Signal
+    Str
+    Atomic
+    MetaMarshall
+    MOC
+    Meta
+    Array
+    ArrayOpsPrimitive
+    util/Tuple
+    ctfe/Integer
+    ctfe/String
+    ctfe/Format
+    )
 set (d_generated_files core/Qt QDefines)
 ## Classes.
-set (classes 
+set (classes
     QChildEvent
     QCoreApplication
     QEvent
@@ -81,5 +81,6 @@ set (classes
     QLibraryInfo
     QXmlStreamEntityResolver
     QFileSystemWatcher
+    QDynamicPropertyChangeEvent
     )
-	
+

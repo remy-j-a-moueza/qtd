@@ -9,9 +9,7 @@
 *
 */
 
-module qt.QtdObject;
-
-import qt.Signal;
+module qtd.QtdObject;
 
 enum QtdObjectFlags : ubyte
 {

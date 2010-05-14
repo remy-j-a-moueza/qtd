@@ -1,7 +1,7 @@
 module qt.core.QVariant;
 
 public import qt.QGlobal;
-private import qt.QtdObject;
+private import qtd.QtdObject;
 private import qt.core.QMetaType;
 
 // automatic imports-------------

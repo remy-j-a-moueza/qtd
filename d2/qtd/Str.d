@@ -9,7 +9,7 @@
  *
  */
 
-module qt.qtd.Str;
+module qtd.Str;
 
 import std.utf : toUTF8;
 
