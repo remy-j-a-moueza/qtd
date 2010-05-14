@@ -935,11 +935,11 @@ class QTextDocument___ extends QTextDocument {
 class QSplitter___ extends QSplitter {
 
     public struct Range {
-		public static Range opCall(int min, int max) {
+        public static Range opCall(int min, int max) {
             Range rng;
-			rng.minimum = min;
+            rng.minimum = min;
             rng.maximum = max;
-			return rng;
+            return rng;
         }
 
         public int minimum;
@@ -947,12 +947,9 @@ class QSplitter___ extends QSplitter {
     }
 
     public final Range getRange(int index) {
-        int* min;
-        int* max;
-
-        getRange(index, min, max);
-
-        return Range(*min, *max);
+        Range range;
+        getRange(index, &range.minimum, &range.maximum);
+        return range;
     }
 
 }// class

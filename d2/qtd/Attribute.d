@@ -24,7 +24,9 @@ enum AttributeOptions
     /**
         Allows multiple attributes of the same category to be associated with the symbol.
      */
-    allowMultiple       = 0x0000_0001,
+    allowMultiple                = 0x0000_0001,
+
+    /* internal */ inner         = 0x0000_0002
 }
 
 private template attributeId(alias symbol, uint index = 0)
