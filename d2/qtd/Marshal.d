@@ -1,4 +1,4 @@
-module qtd.MetaMarshall;
+module qtd.Marshal;
 
 import std.traits;
 
@@ -58,7 +58,7 @@ template enumFullName(T)
     }
     else
         enum enumFullName = qualifiedDName!T;
-            
+
 }
 
 // converts an argumnent from C++ to D in qt_metacall
