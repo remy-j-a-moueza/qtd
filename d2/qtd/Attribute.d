@@ -58,7 +58,7 @@ mixin template tupleToMembers!(string nameSpace, size_t index, A...)
     When mixed in an aggregate, converts a compile-time tuple of name-value pairs to
     members of that aggregate.
  */
-struct NameValueTupleToFields(A...)
+mixin template NameValueTupleToFields(A...)
 {
 
 }
@@ -192,10 +192,9 @@ mixin template InnerAttribute(string attrClass, AttributeOptions opts, A...)
     mixin Attribute!(typeof(this), attrClass, opts | AttributeOptions.inner, A);
 }
 
-// ditto
+/// ditto
 mixin template InnerAttribute(string attrClass, A...)
 {
-    // BUG: needs to be generalized to accept any parent
     mixin InnerAttribute!(attrClass, AttributeOptions.none, A);
 }
 
@@ -335,7 +334,7 @@ version (QtdUnittest)
 
         auto attr = cast(MetaVariantAttribute) meta!(C).attributes[0];
         assert(attr.name == "someAttribute");
-        assert(qttr.length == 2);
+        assert(attr.length == 2);
         assert(attr.values[0] == "22");
         assert(attr.values[1] == 33);
     }

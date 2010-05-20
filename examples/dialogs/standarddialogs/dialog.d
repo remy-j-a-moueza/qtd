@@ -40,7 +40,6 @@
 ****************************************************************************/
 module dialog;
 
-
 import qt.gui.QDialog;
 import qt.gui.QCheckBox;
 import qt.gui.QLabel;
@@ -55,8 +54,7 @@ import qt.gui.QFontDialog;
 import qt.gui.QFileDialog;
 import qt.core.QFile;
 
-import std.string;
-
+import std.string : format, join;
 
 string MESSAGE = tr("<p>Message boxes have a caption, a text, "
                "and any number of buttons, each with standard or custom texts."
@@ -154,7 +152,7 @@ public:
 		native = new QCheckBox(this);
 		native.setText("Use native file dialog.");
 		native.setChecked(true);
-		
+
 		version(windows) {} else
 		{
 			version(mac) {} else
@@ -209,7 +207,7 @@ private: // slots
 		bool ok;
 		int i = QInputDialog.getInt(this, tr("QInputgetInteger()"), tr("Percentage:"), 25, 0, 100, 1, ok);
 		if (ok)
-			integerLabel.setText(format("%d", i)); 
+			integerLabel.setText(format("%d", i));
 	}
 
 	void slot_setDouble()
@@ -218,7 +216,7 @@ private: // slots
 		double d = QInputDialog.getDouble(this, tr("QInputgetDouble()"),
 						tr("Amount:"), 37.56, -10000, 10000, 2, ok);
 		if (ok)
-			doubleLabel.setText(format("%g", d)); 	
+			doubleLabel.setText(format("%g", d));
 	}
 
 	void slot_setItem()
@@ -407,6 +405,6 @@ private:
 	QErrorMessage errorMessageDialog;
 
 	string openFilesPath;
-    
+
     mixin Q_OBJECT;
 }

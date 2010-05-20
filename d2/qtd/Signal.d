@@ -11,29 +11,28 @@
  */
 module qtd.Signal;
 
-public import qt.QGlobal;
-import qtd.Marshal;
-import qtd.Meta;
-
 import core.stdc.stdlib : crealloc = realloc, cfree = free;
 import core.stdc.string : memmove;
+
 import
     core.thread,
     core.exception,
-    std.algorithm;
 
-public import
+    std.algorithm,
     std.typetuple,
-    std.traits,
     std.conv,
-    std.metastrings;
+    std.traits,
+    std.string,
 
-public import std.string : strip, toStringz;
-   
+    qt.QGlobal,
+    qtd.Marshal,
+    qtd.meta.Compiletime,
+    qtd.ctfe.Format;
+
 /** The beast that takes string representation of function arguments
   * and returns an array of default values it doesn't check if arguments
   * without default values follow the arguments with default values for
-  * simplicity. It is done by mixing in an delegate alias.
+  * simplicity. It is done by mixing in a delegate alias.
   */
 string[] defaultValues(string signature)
 {
@@ -42,7 +41,7 @@ string[] defaultValues(string signature)
     bool inStringLiteral = false;
     string[] res;
     int startValue = 0;
-    
+
     if(strip(signature).length == 0)
         return res;
 
@@ -68,7 +67,7 @@ string[] defaultValues(string signature)
                 inStringLiteral = true;
             }
         }
-        
+
         if (!inStringLiteral && braces == 0)
         {
             if(c == '=') // found default value
@@ -86,100 +85,97 @@ string[] defaultValues(string signature)
             }
         }
     }
-    
+
     if (inDefaultValue)
         res ~= signature[startValue..$];
 
     return res;
 }
 
-int defaultValuesLength(string[] defVals)
+/**
+    Generates D-to-C++ conversion code for signals.
+ */
+string genConvToCpp(uint argIndex)
 {
-    return defVals.length;
-}
+    string res = format_ctfe(q{
 
+        static if (isStringType!(Args[${0}]))
+        {
+           auto _tmp${0} = QString(_t${0});
+           _a[${0}] = cast(void*)&_tmp${0};
+        }
+        else static if (isQObjectType!(Args[${0}]) || isObjectType!(Args[${0}]))
+           _a[${0}] = _t${0} ? &(_t${0}.__nativeId) : cast(void*)&_t${0};
+        else static if (isValueType!(Args[${0}]))
+           _a[${0}] = _t${0}.__nativeId;
+        else
+           _a[${0}] = cast(void*)&_t${0};
 
-// templates for extracting data from static meta-information of signals, slots or properties
-// public alias TypeTuple!("name", index, OwnerClass, ArgTypes) __signal
-template MetaEntryName(source...)
-{
-    enum MetaEntryName = source[0]; // name of the metaentry is the first element
-}
+    }, argIndex);
 
-template MetaEntryOwner(source...)
-{
-    alias TupleWrapper!(source[2]).at[0] MetaEntryOwner; // class that owns the property is the third
-    // Compiler #BUG 3092 - evaluates MetaEntryOwner as a Tuple with one element
-}
-
-template MetaEntryArgs(source...)
-{
-    alias ParameterTypeTuple!(source[1]) MetaEntryArgs; // arguments-tuple starts from the fourth position
-}
-
-template TupleWrapper(A...) { alias A at; }
-
-string convertSignalArguments(Args...)()
-{
-//        void *_a[] = { 0, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-    // at least for string argument need to construct a QString value
-    string res = prepareSignalArguments!(Args);
-    
-    res ~= "void*[" ~ __toString(Args.length+1) ~ "] _a = [null";
-    foreach(i, _; Args)
-        res ~= ", " ~ "cast(void*) (" ~ convertSignalArgument!(Args[i])("_t" ~ __toString(i)) ~ ")";
-    res ~= "];\n";
     return res;
 }
 
-public string SignalEmitter(A...)(SignalType signalType, string name, string[] defVals, int localIndex)
+string genSignalEmitter(SignalKind signalKind, string name, uint localIndex, uint argCount)
 {
-    string fullArgs, args;
-    int defValsLength = defVals.length;
-    string argsConversion = "";
-    string argsPtr = "null";
-    static if (A.length)
-    {
-        while(A.length != defVals.length)
-            defVals = "" ~ defVals;
-        
-        fullArgs = A[0].stringof ~ " _t0";
-        if (defVals[0].length)
-            fullArgs ~= " = " ~ defVals[0];
-        args = "_t0";
-        foreach(i, _; A[1..$])
-        {
-            fullArgs ~= ", " ~ A[i+1].stringof ~ " _t" ~ __toString(i+1);
-            if (defVals[i+1].length)
-                fullArgs ~= " = " ~ defVals[i+1];
-            args ~= ", _t" ~ __toString(i+1);
-        }
-        // build up conversion of signal args from D to C++
-        argsPtr = "_a.ptr";
-        argsConversion = convertSignalArguments!(A)();
-    }
-    string attribute;
-    string sigName = name;
-    if (signalType == SignalType.BindQtSignal)
-        name ~= "_emit";
-    else
-        attribute = "protected ";
+    string res;
+
+    // signature
+    //
+    if (signalKind != SignalKind.BindQtSignal)
+        res ~= "protected ";
+
+    res ~= "Args[0] " ~ name;
     
-    string indexArgs = __toString(localIndex);
-    if(defValsLength > 0)
-        indexArgs ~= ", " ~ __toString(localIndex+defValsLength);
-    string str = attribute ~ "final void " ~ name ~ "(" ~ fullArgs ~ ") {\n" ~ argsConversion ~ "\n"
-                           ~ "    QMetaObject.activate(this, typeof(this).staticMetaObject, " ~ indexArgs ~ ", " ~ argsPtr ~ ");\n"
-                           ~ "}\n"; // ~
-    return str;
+    if (signalKind == SignalKind.BindQtSignal)
+        res ~= "_emit";
+
+    res ~= "(";
+    
+    foreach (i; 1..argCount)
+    {
+        auto iStr = to!string(i);
+        if (i > 1)
+            res ~= ", ";
+        res ~= "Args[" ~ iStr ~ "] _t" ~ iStr;
+    }
+
+    res ~= ") {\n";
+
+    // body
+    //
+    res ~= "    void*[" ~ to!string(argCount) ~ "] _a;\n";
+    foreach (i; 1..argCount)
+        res ~= genConvToCpp(i);
+
+    res  ~= "    QMetaObject.activate(this, typeof(this).staticMetaObject, "
+        ~ to!string(localIndex) ~ ", _a.ptr);\n";
+
+    return res ~= "}\n";
+}
+
+// BUG: parameter storage classes are not supported yet
+mixin template SignalEmitter(SignalKind signalKind, int localIndex)
+{
+    alias signals[localIndex] signal;
+    alias TypeTuple!(ReturnType!(signal), ParameterTypeTuple!(signal)) Args;
+
+    /+
+    pragma(msg, genSignalEmitter(signalKind,
+        methodName!signal,
+        localIndex,
+        Args.length));
+    +/
+
+    mixin (genSignalEmitter(signalKind,
+        methodName!signal,
+        localIndex,
+        Args.length));
 }
 /** ---------------- */
 
 
-const string signalPrefix = "__signal";
-const string slotPrefix = "__slot";
-
-enum SignalType
+enum SignalKind
 {
     BindQtSignal,
     NewSignal,
@@ -209,32 +205,31 @@ string[] getSymbols(C)(string prefix)
     string[] result;
     auto allSymbols = __traits(derivedMembers, C);
     foreach(s; allSymbols)
-        if(ctfeStartsWith(s, prefix))
+    {
+        if(startsWith(s, prefix))
             result ~= s;
+    }
     return result;
 }
 
 string removePrefix(string source)
 {
     foreach (i, c; source)
+    {
         if (c == '_')
             return source[i+1..$];
+    }
     return source;
-}
-
-template Alias(T...)
-{
-    alias T Alias;
 }
 
 // recursive search in the static meta-information
 template findSymbolsImpl2(C, alias signals, int id)
 {
-    alias Alias!(__traits(getOverloads, C, signals[id])) current;
+    alias qtd.meta.Compiletime.Alias!(__traits(getOverloads, C, signals[id])) current;
     static if (signals.length - id - 1 > 0)
         alias TypeTuple!(current, findSymbolsImpl2!(C, signals, id + 1).result) result;
     else
-        alias current result;
+        alias TypeTuple!(current) result;
 }
 
 template findSymbols2(C, string prefix)
@@ -256,41 +251,7 @@ template findSlots(C)
     alias findSymbols2!(C, "slot_").result findSlots;
 }
 
-/* commented out for future when we will implement default arguments
-template metaMethods(alias func, int index, int defValsCount)
+template methodName(alias method)
 {
-    static if(defValsCount >= 0) {
-        alias TupleWrapper!(func, index) current;
-//        pragma(msg, __traits(identifier, (current.at)[0]) ~ " " ~ typeof(&(current.at)[0]).stringof);
-        alias metaMethods!(func, index+1, defValsCount-1).result next;
-        alias TypeTuple!(current, next) result;
-    }
-    else
-    {
-        alias TypeTuple!() result;
-    }
-}
-*/
-
-template toMetaEntriesImpl(int id, Methods...)
-{
-    static if (Methods.length > id)
-    {
-        alias typeof(&Methods[id]) Fn;
-//    commented out for future when we will implement default arguments
-//        enum defValsLength = 0; //ParameterTypeTuple!(Fn).length - requiredArgCount!(Methods[id])();
-//        pragma(msg, __traits(identifier, Methods[id]) ~ " " ~ typeof(&Methods[id]).stringof);
-//        alias metaMethods!(Methods[id], 0, defValsLength).result subres;
-        alias TupleWrapper!(removePrefix(__traits(identifier, Methods[id])), typeof(&Methods[id])) subres;
-        alias TypeTuple!(subres, toMetaEntriesImpl!(id+1, Methods).result) result;
-    }
-    else
-    {
-        alias TypeTuple!() result;
-    }
-}
-
-template toMetaEntries(Methods...)
-{
-    alias TupleWrapper!(toMetaEntriesImpl!(0, Methods).result) toMetaEntries;
+    enum methodName = removePrefix(__traits(identifier, method));
 }

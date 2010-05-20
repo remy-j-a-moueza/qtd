@@ -41,7 +41,7 @@
 
 module dropsitewindow;
 
-import std.string;
+import std.string : format, strip, toupper;
 
 import qt.gui.QWidget;
 import qt.gui.QLabel;
@@ -56,13 +56,13 @@ import droparea;
 class DropSiteWindow : public QWidget
 {
 public:
-	
+
 	this()
 	{
 		abstractLabel = new QLabel(tr("This example accepts drags from other "
 			"applications and displays the MIME types "
 			"provided by the drag object."));
-		
+
 		abstractLabel.setWordWrap(true);
 		abstractLabel.adjustSize();
 
@@ -125,7 +125,7 @@ public:
 			} else {
 				QByteArray data = mimeData.data(format);
 				for (int i = 0; i < data.size() && i < 32; ++i) {
-					string hex = toupper(std.string.format("%x", data.at(i)));					
+					string hex = toupper(std.string.format("%x", data.at(i)));
 					text ~= hex ~ " ";
 				}
 			}
@@ -148,6 +148,6 @@ private:
 	QPushButton clearButton;
 	QPushButton quitButton;
 	QDialogButtonBox buttonBox;
-    
+
     mixin Q_OBJECT;
 }

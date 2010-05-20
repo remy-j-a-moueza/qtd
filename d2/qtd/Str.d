@@ -11,19 +11,15 @@
 
 module qtd.Str;
 
+import core.stdc.string;
 import std.utf : toUTF8;
-
-version(D_Version2) {
-//    private import core.sys.posix.stdio;
-    private import core.stdc.string;
-
-    version = druntime;
-}
 
 alias immutable(char)* stringz;
 alias const(char)* cstringz;
 
-public static char** toStringzArray(string[] args)
+/**
+ */
+static char** toStringzArray(string[] args)
 {
     if ( args is null )
     {
@@ -40,11 +36,36 @@ public static char** toStringzArray(string[] args)
     return argv;
 }
 
-public string fromStringz(const (char) *s)
+/**
+ */
+bool isDigit(char s)
+{
+    return (s >= '0' && s <= '9');
+}
+
+/**
+ */
+bool isOctalChar(char s)
+{
+    return (s >= '0' && s <= '7');
+}
+
+/**
+ */
+bool isHexChar(char s)
+{
+    return ((s >= 'a' && s <= 'f')
+            || (s >= 'A' && s <= 'F')
+            || (s >= '0' && s <= '9')
+       );
+}
+
+/**
+ */
+string fromStringz(const (char) *s)
 {
     return s ? s[0 .. strlen(s)].idup : cast(string)null;
 }
-
 
 extern(C) void qtd_toUtf8(wchar* arr, uint size, string* str)
 {

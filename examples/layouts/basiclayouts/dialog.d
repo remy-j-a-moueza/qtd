@@ -56,10 +56,7 @@ import qt.gui.QFormLayout;
 import qt.gui.QComboBox;
 import qt.gui.QSpinBox;
 
-version(Tango)
-    import tango.text.convert.Format: format = Format;
-else
-    import std.string;
+import std.string : format;
 
 import std.stdio;
 
@@ -157,8 +154,6 @@ class Dialog : public QDialog
         formGroupBox.setLayout(layout);
     }
 
-    mixin Q_OBJECT;
-
     enum { NumGridRows = 3, NumButtons = 4 };
 
     QMenuBar menuBar;
@@ -174,4 +169,6 @@ class Dialog : public QDialog
 
     QMenu fileMenu;
     QAction exitAction;
+
+    mixin Q_OBJECT;
 }

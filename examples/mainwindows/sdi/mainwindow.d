@@ -57,16 +57,9 @@ import qt.gui.QMessageBox;
 import qt.core.QSettings;
 import qt.core.QTextStream;
 
-version(Tango)
-{
-  import tango.text.Util;
-  import Int = tango.text.convert.Integer;
-}
-else
-{
-  import std.string;
-  import std.conv;
-}
+//import std.string;
+import std.conv;
+
 class MainWindow : public QMainWindow
 {
   //    Q_OBJECT
@@ -371,9 +364,6 @@ class MainWindow : public QMainWindow
 
     isUntitled = fileName == null;
     if (isUntitled) {
-      version(Tango)
-        curFile = tr("document" ~ Int.toString(sequenceNumber++) ~ ".txt");
-      else
         curFile = tr("document" ~ to!(string)(sequenceNumber++) ~ ".txt");
     } else {
       scope qfi = new QFileInfo(fileName);
@@ -426,6 +416,6 @@ class MainWindow : public QMainWindow
   QAction pasteAct;
   QAction aboutAct;
   QAction aboutQtAct;
-  
+
   mixin Q_OBJECT;
 };

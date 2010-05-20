@@ -1,20 +1,24 @@
 module qtd.Marshal;
 
-import std.traits;
+import
+    std.traits,
+    qtd.meta.Compiletime,
+    qtd.ctfe.Format;
 
-import qtd.Meta;
+import std.string : startsWith;
 
-template isQObjectType(T) // is a QObject type that belongs to the library
+
+template isQObjectType(T)
 {
     enum isQObjectType = is(T.__isQObjectType);
 }
 
-template isObjectType(T) // is a Qt Object type that belongs to the library
+template isObjectType(T)
 {
     enum isObjectType = is(T.__isObjectType);
 }
 
-template isValueType(T) // is a Qt Value type that belongs to the library
+template isValueType(T)
 {
     enum isValueType = is(T.__isValueType);
 }
@@ -41,7 +45,7 @@ template isStringType(T) // string type
 
 template isQList(T)
 {
-    enum isQList = ctfeStartsWith(Unqual!(T).stringof, "QList!");
+    enum isQList = startsWith(Unqual!(T).stringof, "QList!");
 }
 
 // returns full name of enum:
@@ -58,26 +62,8 @@ template enumFullName(T)
     }
     else
         enum enumFullName = qualifiedDName!T;
-
 }
 
-// converts an argumnent from C++ to D in qt_metacall
-string metaCallArgument(T)(string ptr)
-{
-    static if (isQObjectType!T || isObjectType!T)
-        return T.stringof ~ ".__getObject(*cast(void**)(" ~ ptr ~ "))";
-    else static if (isValueType!T)
-        return "new " ~ T.stringof ~ "(" ~ T.stringof ~ ".__constructNativeCopy(" ~ ptr ~ "))";
-    else static if (isNativeType!T)
-        return "*(cast(" ~ T.stringof ~ "*)" ~ ptr ~ ")";
-    else static if (isStringType!T)
-        return "QStringUtil.toNativeString(" ~ ptr ~ ")";
-    else static if (is(T == enum))
-        return "*(cast(" ~ qualifiedDName!T ~ "*)" ~ ptr ~ ")";
-    else
-        return "*(cast(" ~ T.stringof ~ "*)" ~ ptr ~ ")";
-        //res = T.stringof;
-}
 
 // converts a D argument type to C++ for registering in Qt meta system
 string qtDeclArg(T)()
@@ -104,26 +90,31 @@ string qtDeclArg(T)()
         return T.stringof;
 }
 
-// converts an argument from D to C++ in a signal emitter
-string convertSignalArgument(T)(string arg)
+/**
+    Generates C++-to-D conversion code for the
+    argument argIndex.
+ */
+string generateConvToD(uint argIndex)
 {
-    static if (isQObjectType!T || isObjectType!T)
-        return arg ~ " ? " "&" ~ arg ~ ".__nativeId : cast(void**) &" ~ arg; // since it is a pointer type check arg for null
-    else static if (isValueType!T)
-        return arg ~ ".__nativeId";
-    else static if (isStringType!T)
-        return "&_qt" ~ arg;
-    else static if (isNativeType!T)
-        return "&" ~ arg;
-    else
-        return "&" ~ arg;
-}
+    string res = format_ctfe(q{
 
-string prepareSignalArguments(Args...)()
-{
-    string res;
-    foreach(i, _; Args)
-        static if (isStringType!(Args[i]))
-            res ~= "auto _qt_t" ~ __toString(i) ~ " = QString(_t" ~ __toString(i) ~ ");\n";
+        static if (isQObjectType!(Args[${0}]) || isObjectType!(Args[${0}]))
+            auto _out${0} = Args[${0}].__getObject(*cast(void**)_a[${0}]);
+        else static if (isValueType!(Args[${0}]))
+        {
+            // COMPILER BUG: 'new' chokes on Args[argIndex], hence the alias
+            alias Args[${0}] Args${0}; 
+            auto _out${0} = new Args${0}(Args[${0}].__constructNativeCopy(_a[${0}]));
+        }
+        else static if (isStringType!(Args[${0}]))
+            auto _out${0} = QStringUtil.toNativeString(_a[${0}]);
+        else
+        {
+            auto _out${0} = *cast(Args[${0}]*)_a[${0}];
+        }
+
+    }, argIndex);
+
     return res;
 }
+

@@ -58,9 +58,11 @@ version(cpp_shared)
     }
 }
 
-string tr(string arg) {
+string _tr(string arg) {
     return arg;
 }
+
+alias _tr tr;
 
 /*
    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 4, 0))

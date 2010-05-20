@@ -62,226 +62,226 @@ class Window : public QDialog
 {
 public:
 
-	this()
-	{
-		createIconGroupBox();
-		createMessageGroupBox();
+    this()
+    {
+        createIconGroupBox();
+        createMessageGroupBox();
 
-		iconLabel.setMinimumWidth(durationLabel.sizeHint().width());
+        iconLabel.setMinimumWidth(durationLabel.sizeHint().width());
 
-		createActions();
-		createTrayIcon();
+        createActions();
+        createTrayIcon();
 
-		connect(showMessageButton, "clicked", this, "showMessage");
-		connect(showIconCheckBox, "toggled", trayIcon, "setVisible");
-		connect(iconComboBox, "currentIndexChanged", this, "setIcon");
-		connect(trayIcon, "messageClicked", this, "messageClicked");
-		connect(trayIcon, "activated", this, "iconActivated");
+        connect(showMessageButton, "clicked", this, "showMessage");
+        connect(showIconCheckBox, "toggled", trayIcon, "setVisible");
+        connect(iconComboBox, "currentIndexChanged", this, "setIcon");
+        connect(trayIcon, "messageClicked", this, "messageClicked");
+        connect(trayIcon, "activated", this, "iconActivated");
 
-		QVBoxLayout mainLayout = new QVBoxLayout;
-		mainLayout.addWidget(iconGroupBox);
-		mainLayout.addWidget(messageGroupBox);
-		setLayout(mainLayout);
+        QVBoxLayout mainLayout = new QVBoxLayout;
+        mainLayout.addWidget(iconGroupBox);
+        mainLayout.addWidget(messageGroupBox);
+        setLayout(mainLayout);
 
-		iconComboBox.setCurrentIndex(1);
-		trayIcon.show();
+        iconComboBox.setCurrentIndex(1);
+        trayIcon.show();
 
-		setWindowTitle(tr("Systray"));
-		resize(400, 300);
-	}
+        setWindowTitle(tr("Systray"));
+        resize(400, 300);
+    }
 
-	void setVisible(bool visible)
-	{
-		minimizeAction.setEnabled(visible);
-		maximizeAction.setEnabled(!isMaximized());
-		restoreAction.setEnabled(isMaximized() || !visible);
-		QDialog.setVisible(visible);
-	}
+    void setVisible(bool visible)
+    {
+        minimizeAction.setEnabled(visible);
+        maximizeAction.setEnabled(!isMaximized());
+        restoreAction.setEnabled(isMaximized() || !visible);
+        QDialog.setVisible(visible);
+    }
 
-	protected:
+    protected:
 
-	void closeEvent(QCloseEvent event)
-	{
-		if (trayIcon.isVisible()) {
-			QMessageBox.information(this, tr("Systray"),
-				tr("The program will keep running in the system tray. To terminate the program, "
-				"choose <b>Quit</b> in the context menu of the system tray entry."));
-			hide();
-			event.ignore();
-		}
-	}
+    void closeEvent(QCloseEvent event)
+    {
+        if (trayIcon.isVisible()) {
+            QMessageBox.information(this, tr("Systray"),
+                tr("The program will keep running in the system tray. To terminate the program, "
+                "choose <b>Quit</b> in the context menu of the system tray entry."));
+            hide();
+            event.ignore();
+        }
+    }
 
 private: // slots
 
-	void slot_setIcon(int index)
-	{
-		QIcon icon = iconComboBox.itemIcon(index);
-		trayIcon.setIcon(icon);
-		setWindowIcon(icon);
+    void slot_setIcon(int index)
+    {
+        QIcon icon = iconComboBox.itemIcon(index);
+        trayIcon.setIcon(icon);
+        setWindowIcon(icon);
 
-		trayIcon.setToolTip(iconComboBox.itemText(index));
-	}
-	
-	void slot_iconActivated(QSystemTrayIcon.ActivationReason reason)
-	{
-		switch (reason) {
-			case QSystemTrayIcon.Trigger:
-			case QSystemTrayIcon.DoubleClick:
-				iconComboBox.setCurrentIndex((iconComboBox.currentIndex() + 1) % iconComboBox.count());
-				break;
-			case QSystemTrayIcon.MiddleClick:
-				showMessage();
-				break;
-			default:
-		}
-	}
-	
-	void slot_showMessage()
-	{
-		QSystemTrayIcon.MessageIcon icon = cast(QSystemTrayIcon.MessageIcon)
-			typeComboBox.itemData(typeComboBox.currentIndex()).toInt();
-		trayIcon.showMessage(titleEdit.text(), bodyEdit.toPlainText(), icon, durationSpinBox.value() * 1000);
-	}
-	
-	void slot_messageClicked()
-	{
-		QMessageBox.information(null, tr("Systray"),
-			tr("Sorry, I already gave what help I could.\nMaybe you should try asking a human?"));
-	}
+        trayIcon.setToolTip(iconComboBox.itemText(index));
+    }
+    
+    void slot_iconActivated(QSystemTrayIcon.ActivationReason reason)
+    {
+        switch (reason) {
+            case QSystemTrayIcon.Trigger:
+            case QSystemTrayIcon.DoubleClick:
+                iconComboBox.setCurrentIndex((iconComboBox.currentIndex() + 1) % iconComboBox.count());
+                break;
+            case QSystemTrayIcon.MiddleClick:
+                showMessage();
+                break;
+            default:
+        }
+    }
+    
+    void slot_showMessage()
+    {
+        QSystemTrayIcon.MessageIcon icon = cast(QSystemTrayIcon.MessageIcon)
+            typeComboBox.itemData(typeComboBox.currentIndex()).toInt();
+        trayIcon.showMessage(titleEdit.text(), bodyEdit.toPlainText(), icon, durationSpinBox.value() * 1000);
+    }
+    
+    void slot_messageClicked()
+    {
+        QMessageBox.information(null, tr("Systray"),
+            tr("Sorry, I already gave what help I could.\nMaybe you should try asking a human?"));
+    }
 
 private:
 
-	void createIconGroupBox()
-	{
-		iconGroupBox = new QGroupBox(tr("Tray Icon"));
+    void createIconGroupBox()
+    {
+        iconGroupBox = new QGroupBox(tr("Tray Icon"));
 
-		iconLabel = new QLabel("Icon:");
+        iconLabel = new QLabel("Icon:");
 
-		iconComboBox = new QComboBox;
-		iconComboBox.addItem(new QIcon(":/images/bad.svg"), tr("Bad"));
-		iconComboBox.addItem(new QIcon(":/images/heart.svg"), tr("Heart"));
-		iconComboBox.addItem(new QIcon(":/images/trash.svg"), tr("Trash"));
+        iconComboBox = new QComboBox;
+        iconComboBox.addItem(new QIcon(":/images/bad.svg"), tr("Bad"));
+        iconComboBox.addItem(new QIcon(":/images/heart.svg"), tr("Heart"));
+        iconComboBox.addItem(new QIcon(":/images/trash.svg"), tr("Trash"));
 
-		showIconCheckBox = new QCheckBox(tr("Show icon"));
-		showIconCheckBox.setChecked(true);
+        showIconCheckBox = new QCheckBox(tr("Show icon"));
+        showIconCheckBox.setChecked(true);
 
-		QHBoxLayout iconLayout = new QHBoxLayout;
-		iconLayout.addWidget(iconLabel);
-		iconLayout.addWidget(iconComboBox);
-		iconLayout.addStretch();
-		iconLayout.addWidget(showIconCheckBox);
-		iconGroupBox.setLayout(iconLayout);
-	}
+        QHBoxLayout iconLayout = new QHBoxLayout;
+        iconLayout.addWidget(iconLabel);
+        iconLayout.addWidget(iconComboBox);
+        iconLayout.addStretch();
+        iconLayout.addWidget(showIconCheckBox);
+        iconGroupBox.setLayout(iconLayout);
+    }
 
-	void createMessageGroupBox()
-	{
-		messageGroupBox = new QGroupBox(tr("Balloon Message"));
+    void createMessageGroupBox()
+    {
+        messageGroupBox = new QGroupBox(tr("Balloon Message"));
 
-		typeLabel = new QLabel(tr("Type:"));
+        typeLabel = new QLabel(tr("Type:"));
 
-		typeComboBox = new QComboBox;
-		typeComboBox.addItem(tr("None"), new QVariant(cast(ulong) QSystemTrayIcon.NoIcon));
-		typeComboBox.addItem(style().standardIcon(
-			QStyle.SP_MessageBoxInformation), tr("Information"),
-			new QVariant(cast(ulong) QSystemTrayIcon.Information));
-		typeComboBox.addItem(style().standardIcon(
-			QStyle.SP_MessageBoxWarning), tr("Warning"),
-			new QVariant(cast(ulong) QSystemTrayIcon.Warning));
-		typeComboBox.addItem(style().standardIcon(
-			QStyle.SP_MessageBoxCritical), tr("Critical"),
-			new QVariant(cast(ulong) QSystemTrayIcon.Critical));
-		typeComboBox.setCurrentIndex(1);
+        typeComboBox = new QComboBox;
+        typeComboBox.addItem(tr("None"), new QVariant(cast(ulong) QSystemTrayIcon.NoIcon));
+        typeComboBox.addItem(style().standardIcon(
+            QStyle.SP_MessageBoxInformation), tr("Information"),
+            new QVariant(cast(ulong) QSystemTrayIcon.Information));
+        typeComboBox.addItem(style().standardIcon(
+            QStyle.SP_MessageBoxWarning), tr("Warning"),
+            new QVariant(cast(ulong) QSystemTrayIcon.Warning));
+        typeComboBox.addItem(style().standardIcon(
+            QStyle.SP_MessageBoxCritical), tr("Critical"),
+            new QVariant(cast(ulong) QSystemTrayIcon.Critical));
+        typeComboBox.setCurrentIndex(1);
 
-		durationLabel = new QLabel(tr("Duration:"));
+        durationLabel = new QLabel(tr("Duration:"));
 
-		durationSpinBox = new QSpinBox;
-		durationSpinBox.setRange(5, 60);
-		durationSpinBox.setSuffix(" s");
-		durationSpinBox.setValue(15);
+        durationSpinBox = new QSpinBox;
+        durationSpinBox.setRange(5, 60);
+        durationSpinBox.setSuffix(" s");
+        durationSpinBox.setValue(15);
 
-		durationWarningLabel = new QLabel(tr("(some systems might ignore this hint)"));
-		durationWarningLabel.setIndent(10);
+        durationWarningLabel = new QLabel(tr("(some systems might ignore this hint)"));
+        durationWarningLabel.setIndent(10);
 
-		titleLabel = new QLabel(tr("Title:"));
+        titleLabel = new QLabel(tr("Title:"));
 
-		titleEdit = new QLineEdit(tr("Cannot connect to network"));
+        titleEdit = new QLineEdit(tr("Cannot connect to network"));
 
-		bodyLabel = new QLabel(tr("Body:"));
+        bodyLabel = new QLabel(tr("Body:"));
 
-		bodyEdit = new QTextEdit;
-		bodyEdit.setPlainText(tr("Don't believe me. Honestly, I don't have a clue.\nClick this balloon for details."));
+        bodyEdit = new QTextEdit;
+        bodyEdit.setPlainText(tr("Don't believe me. Honestly, I don't have a clue.\nClick this balloon for details."));
 
-		showMessageButton = new QPushButton(tr("Show Message"));
-		showMessageButton.setDefault(true);
+        showMessageButton = new QPushButton(tr("Show Message"));
+        showMessageButton.setDefault(true);
 
-		QGridLayout messageLayout = new QGridLayout;
-		messageLayout.addWidget(typeLabel, 0, 0);
-		messageLayout.addWidget(typeComboBox, 0, 1, 1, 2);
-		messageLayout.addWidget(durationLabel, 1, 0);
-		messageLayout.addWidget(durationSpinBox, 1, 1);
-		messageLayout.addWidget(durationWarningLabel, 1, 2, 1, 3);
-		messageLayout.addWidget(titleLabel, 2, 0);
-		messageLayout.addWidget(titleEdit, 2, 1, 1, 4);
-		messageLayout.addWidget(bodyLabel, 3, 0);
-		messageLayout.addWidget(bodyEdit, 3, 1, 2, 4);
-		messageLayout.addWidget(showMessageButton, 5, 4);
-		messageLayout.setColumnStretch(3, 1);
-		messageLayout.setRowStretch(4, 1);
-		messageGroupBox.setLayout(messageLayout);
-	}
+        QGridLayout messageLayout = new QGridLayout;
+        messageLayout.addWidget(typeLabel, 0, 0);
+        messageLayout.addWidget(typeComboBox, 0, 1, 1, 2);
+        messageLayout.addWidget(durationLabel, 1, 0);
+        messageLayout.addWidget(durationSpinBox, 1, 1);
+        messageLayout.addWidget(durationWarningLabel, 1, 2, 1, 3);
+        messageLayout.addWidget(titleLabel, 2, 0);
+        messageLayout.addWidget(titleEdit, 2, 1, 1, 4);
+        messageLayout.addWidget(bodyLabel, 3, 0);
+        messageLayout.addWidget(bodyEdit, 3, 1, 2, 4);
+        messageLayout.addWidget(showMessageButton, 5, 4);
+        messageLayout.setColumnStretch(3, 1);
+        messageLayout.setRowStretch(4, 1);
+        messageGroupBox.setLayout(messageLayout);
+    }
 
-	void createActions()
-	{
-		minimizeAction = new QAction(tr("Mi&nimize"), this);
-		connect(minimizeAction, "triggered", this, "hide");
+    void createActions()
+    {
+        minimizeAction = new QAction(tr("Mi&nimize"), this);
+        connect(minimizeAction, "triggered", this, "hide");
 
-		maximizeAction = new QAction(tr("Ma&ximize"), this);
-		connect(maximizeAction, "triggered", this, "showMaximized");
+        maximizeAction = new QAction(tr("Ma&ximize"), this);
+        connect(maximizeAction, "triggered", this, "showMaximized");
 
-		restoreAction = new QAction(tr("&Restore"), this);
-		connect(restoreAction, "triggered", this, "showNormal");
+        restoreAction = new QAction(tr("&Restore"), this);
+        connect(restoreAction, "triggered", this, "showNormal");
 
-		quitAction = new QAction(tr("&Quit"), this);
-		connect(quitAction, "triggered", qApp(), "quit");
-	}
+        quitAction = new QAction(tr("&Quit"), this);
+        connect(quitAction, "triggered", qApp(), "quit");
+    }
 
-	void createTrayIcon()
-	{
-		trayIconMenu = new QMenu(this);
-		trayIconMenu.addAction(minimizeAction);
-		trayIconMenu.addAction(maximizeAction);
-		trayIconMenu.addAction(restoreAction);
-		trayIconMenu.addSeparator();
-		trayIconMenu.addAction(quitAction);
+    void createTrayIcon()
+    {
+        trayIconMenu = new QMenu(this);
+        trayIconMenu.addAction(minimizeAction);
+        trayIconMenu.addAction(maximizeAction);
+        trayIconMenu.addAction(restoreAction);
+        trayIconMenu.addSeparator();
+        trayIconMenu.addAction(quitAction);
 
-		trayIcon = new QSystemTrayIcon(this);
-		trayIcon.setContextMenu(trayIconMenu);
-	}
+        trayIcon = new QSystemTrayIcon(this);
+        trayIcon.setContextMenu(trayIconMenu);
+    }
 
-	QGroupBox iconGroupBox;
-	QLabel iconLabel;
-	QComboBox iconComboBox;
-	QCheckBox showIconCheckBox;
+    QGroupBox iconGroupBox;
+    QLabel iconLabel;
+    QComboBox iconComboBox;
+    QCheckBox showIconCheckBox;
 
-	QGroupBox messageGroupBox;
-	QLabel typeLabel;
-	QLabel durationLabel;
-	QLabel durationWarningLabel;
-	QLabel titleLabel;
-	QLabel bodyLabel;
-	QComboBox typeComboBox;
-	QSpinBox durationSpinBox;
-	QLineEdit titleEdit;
-	QTextEdit bodyEdit;
-	QPushButton showMessageButton;
+    QGroupBox messageGroupBox;
+    QLabel typeLabel;
+    QLabel durationLabel;
+    QLabel durationWarningLabel;
+    QLabel titleLabel;
+    QLabel bodyLabel;
+    QComboBox typeComboBox;
+    QSpinBox durationSpinBox;
+    QLineEdit titleEdit;
+    QTextEdit bodyEdit;
+    QPushButton showMessageButton;
 
-	QAction minimizeAction;
-	QAction maximizeAction;
-	QAction restoreAction;
-	QAction quitAction;
+    QAction minimizeAction;
+    QAction maximizeAction;
+    QAction restoreAction;
+    QAction quitAction;
 
-	QSystemTrayIcon trayIcon;
-	QMenu trayIconMenu;
-    
+    QSystemTrayIcon trayIcon;
+    QMenu trayIconMenu;
+
     mixin Q_OBJECT;
 }

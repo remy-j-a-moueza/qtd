@@ -56,10 +56,7 @@ import qt.gui.QFont;
 import qt.gui.QIcon;
 import qt.core.QDate;
 
-version(Tango)
-    import tango.text.Util;
-else
-    import std.string;
+import std.string : split;
 
 class MainWindow : public QMainWindow
 {
@@ -161,7 +158,7 @@ class MainWindow : public QMainWindow
         {
             if (customer == "")
                 return;
-            
+
             string[] customerList = customer.split(", ");
             auto document = textEdit.document();
             QTextCursor cursor = document.find("NAME");
@@ -348,6 +345,6 @@ class MainWindow : public QMainWindow
         QAction aboutAct;
         QAction aboutQtAct;
         QAction quitAct;
-        
+
         mixin Q_OBJECT;
 }

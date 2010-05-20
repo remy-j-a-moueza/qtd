@@ -35,3 +35,20 @@ void remove(T)(ref T[] haystack, T needle)
         }
     }
 }
+
+/**
+    Allocates a dynamic array at compile time.
+ */
+T[] newArray(T)(size_t len, T[] from = [])
+{
+    if (len == from.length)
+        return from;
+
+    if (!from.length)
+        from = [T.init];
+
+    if (from.length < len)
+        return newArray!T(len, from ~ from);
+
+    return from[0..len];
+}

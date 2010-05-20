@@ -31,13 +31,14 @@ set (d_qtd_files
     Atomic
     Marshal
     MOC
-    Meta
     Array
     ArrayOpsPrimitive
     util/Tuple
     ctfe/Integer
     ctfe/String
     ctfe/Format
+    meta/Compiletime
+    meta/Runtime
     )
 set (d_generated_files core/Qt QDefines)
 ## Classes.

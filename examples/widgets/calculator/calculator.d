@@ -49,13 +49,12 @@ import qt.gui.QFont;
 
 import std.math; 
 import std.conv;
-import std.string; 
+import std.string : format, indexOf; 
 
 class Calculator : public QDialog
 {
-        
+
 public:
-        
         this(QWidget parent = null)
         {
                 super(parent);
@@ -70,7 +69,7 @@ public:
                 display.setAlignment(Qt.AlignRight);
                 display.setMaxLength(15);
 
-		auto font = new QFont(display.font());
+                auto font = new QFont(display.font());
                 font.setPointSize(font.pointSize() + 8);
                 display.setFont(font);
 
@@ -150,7 +149,8 @@ public:
                         display.clear();
                         waitingForOperand = false;
                 }
-                display.setText(display.text() ~ format("%g", digitValue));
+
+                display.setText(display.text() ~ format("%s", digitValue));
         }
 
         void slot_unaryOperatorClicked()
@@ -267,7 +267,7 @@ public:
 
                 if (indexOf(text, '.') >= text.length)
                         display.setText(text ~ tr("."));
-                
+
                 waitingForOperand = false;
         }
 

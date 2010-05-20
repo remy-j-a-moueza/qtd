@@ -40,6 +40,7 @@
 ****************************************************************************/
 module main;
 
+import std.stdio; // BUG: needed to workaround std.stdio initialization failure
 
 import qt.gui.QMessageBox;
 import qt.gui.QApplication;
@@ -50,15 +51,15 @@ import window;
 
 int main(string[] args)
 {
-	auto app = new QApplication(args);
+    auto app = new QApplication(args);
 
-	if (!QSystemTrayIcon.isSystemTrayAvailable()) {
-		QMessageBox.critical(null, tr("Systray"), tr("I couldn't detect any system tray on this system."));
-		return 1;
-	}
-	QApplication.setQuitOnLastWindowClosed(false);
+    if (!QSystemTrayIcon.isSystemTrayAvailable()) {
+        QMessageBox.critical(null, tr("Systray"), tr("I couldn't detect any system tray on this system."));
+        return 1;
+    }
+    QApplication.setQuitOnLastWindowClosed(false);
 
-	auto window = new Window;
-	window.show();
-	return app.exec();
+    auto window = new Window;
+    window.show();
+    return app.exec();
 }

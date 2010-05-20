@@ -1,38 +1,23 @@
 module qtd.MOC;
 
-import std.typetuple;
+import
+    std.typetuple,
+    std.traits,
+    std.typetuple,
+    std.conv,
+    qt.QGlobal,
+    qtd.Signal,
+    qtd.Marshal,
+    qtd.Array,
+    qtd.Str,
+    qtd.meta.Compiletime,
+    qtd.ctfe.Format;
 
-import qt.QGlobal;
-import qtd.Signal;
-import qtd.Marshal;
-import qtd.Meta;
-import qtd.ctfe.Format;
+import qt.core.QString;
 
-public import qt.core.QString;
-
-public import std.traits;
 /**
    Utils.
-  */
-
-bool is_digit_char(const char s)
-{
-    return (s >= '0' && s <= '9');
-}
-
-bool is_octal_char(const char s)
-{
-    return (s >= '0' && s <= '7');
-}
-
-bool is_hex_char(const char s)
-{
-    return ((s >= 'a' && s <= 'f')
-            || (s >= 'A' && s <= 'F')
-            || (s >= '0' && s <= '9')
-       );
-}
-
+ */
 int lastIndexOf(T)(T[] haystack, T[] needle, int from = -1)
 {
     auto l = haystack.length;
@@ -44,7 +29,7 @@ int lastIndexOf(T)(T[] haystack, T[] needle, int from = -1)
         return -1;
     if (from > delta)
         from = delta;
-    
+
     while(from >= 0)
     {
         if (haystack[from..from+ol] == needle)
@@ -52,21 +37,6 @@ int lastIndexOf(T)(T[] haystack, T[] needle, int from = -1)
         from--;
     }
     return -1;
-}
-
-
-T[] newArray(T)(size_t len, T[] from = [])
-{
-    if (len == from.length)
-        return from;
-
-    if (!from.length)
-        from = [T.init];
-
-    if (from.length < len)
-        return newArray!T(len, from ~ from);
-
-    return from[0..len];
 }
 
 string replicate(int n, char value)
@@ -113,7 +83,7 @@ struct FunctionDef
 //    string name;
     string sig;
     string arguments;
-    Access access;    
+    Access access;
 /*    bool returnTypeIsVolatile;
 
     QList<ArgumentDef> arguments;
@@ -163,12 +133,12 @@ int lengthOfEscapeSequence(string s, uint i)
     auto ch = s[i];
     if (ch == 'x') {
         ++i;
-        while (i < s.length && is_hex_char(s[i]))
+        while (i < s.length && isHexChar(s[i]))
             ++i;
-    } else if (is_octal_char(ch)) {
+    } else if (isOctalChar(ch)) {
         while (i < startPos + 4
                && i < s.length
-               && is_octal_char(s[i])) {
+               && isOctalChar(s[i])) {
             ++i;
         }
     } else { // single character escape sequence
@@ -253,10 +223,10 @@ string generateCode(string className, FunctionDef[] signalList, FunctionDef[] sl
     qualifiedClassNameIdentifier.replace(':', '_');
 */
     bool isConstructible = false;
-    
+
     FunctionDef[] propertyList, enumList, constructorList;
     int index = 12;
-    gen.output ~= format_ctfe("static const uint[] qt_meta_data_${} = [\n", className);
+    gen.output ~= "private static const uint[] qt_meta_data = [\n";
     gen.output ~= format_ctfe("\n // content:\n");
     gen.output ~= format_ctfe("    ${},       // revision\n", 2);
     gen.output ~= format_ctfe("    ${},       // classname\n", strreg(gen, className));
@@ -323,7 +293,7 @@ string generateCode(string className, FunctionDef[] signalList, FunctionDef[] sl
 //
 // Build stringdata array
 //
-    gen.output ~= format_ctfe("static const string qt_meta_stringdata_${} = \n", className);
+    gen.output ~= "private static const string qt_meta_stringdata = \n";
     gen.output ~= format_ctfe("    \"");
     int col = 0;
     int len = 0;
@@ -358,19 +328,8 @@ string generateCode(string className, FunctionDef[] signalList, FunctionDef[] sl
         col += len + 2;
     }
     gen.output ~=  "\";\n\n";
-    
-    return gen.output;
-}
 
-string metaCallArgs(Args...)()
-{
-    string res;
-    foreach(i, _; Args) {
-        if (i > 0)
-            res ~= ",";
-        res ~= metaCallArgument!(Args[i])("_a[" ~ __toString(i+1) ~ "]");
-    }
-    return res;
+    return gen.output;
 }
 
 string qtDeclArgs(Args...)()
@@ -385,36 +344,6 @@ string qtDeclArgs(Args...)()
     return ret;
 }
 
-string generate_qt_metacall(alias Signals, alias Slots)()
-{
-    string res = "
-protected int qt_metacall(QMetaObject.Call _c, int _id, void **_a)
-    {
-        _id = super.qt_metacall(_c, _id, _a);
-        if (_id < 0)
-            return _id;\n";
-
-    alias TypeTuple!(Signals.at, Slots.at) Methods;
-    enum methodCount = Methods.length;
-    if(methodCount)
-    {
-        res ~= "
-        if (_c == QMetaObject.Call.InvokeMetaMethod) {
-            switch (_id) {";
-        foreach(i, _; Repeat!(void, methodCount)) {
-            res ~= "
-            case " ~ __toString(i) ~ ": " ~ MetaEntryName!(Methods[i].at) ~ "(" ~ metaCallArgs!(MetaEntryArgs!(Methods[i].at))() ~ "); break;";
-        }
-        res ~= "\n            default: ;\n            }\n";
-        res ~= "            _id -= " ~ __toString(methodCount) ~ ";";
-        res ~= "\n        }";
-    }
-    
-    res ~= "\n        return _id;
-    }";
-    return res;
-}
-
 string dDeclArgs(Args...)()
 {
     string ret;
@@ -422,64 +351,9 @@ string dDeclArgs(Args...)()
     {
         if (i > 0)
             ret ~= ", ";
-        ret ~= fullDName!(Args[i]);
+        ret ~= fullName!(Args[i]);
     }
     return ret;
-}
-string genMetaMethodsConstr(alias Funcs)(string className)
-{
-    string res;
-    enum funcsCount = Funcs.at.length;
-    foreach(i, bogus; Repeat!(void, funcsCount))
-    {
-        res ~= "        index++;\n" ~
-               "        _staticMetaObject.addMethod(new " ~ className ~ "(signature!(" ~ dDeclArgs!(MetaEntryArgs!(Funcs.at[i].at))()~ ")(\"" ~ MetaEntryName!(Funcs.at[i].at) ~ "\"), index));\n\n";
-    }
-    return res;
-}
-string generateMetaObjectConstruction(alias Signals, alias Slots)()
-{
-    string res;
-    res ~= "\n
-    private static void _populateMetaInfo() {
-        alias BaseClassesTuple!(typeof(this))[0] BaseClass;
-        int index = BaseClass.staticMetaObject().methodCount() - 1;\n\n";
-    
-    res ~= genMetaMethodsConstr!(Signals)("QMetaSignal");
-    res ~= genMetaMethodsConstr!(Slots)("QMetaSlot");
-    
-    res ~= "
-    }\n";
-    return res;
-}
-
-string generateQMetaObject(string className)
-{
-    string res;
-    res ~= "
-    public QMetaObject metaObject() { return staticMetaObject(); }
-    private static __gshared QMetaObject _staticMetaObject;
-    private static __gshared QMetaObjectNative _nativeStaticMetaObject;
-    public static QMetaObject staticMetaObject()
-    {
-        if(!_staticMetaObject)
-            createStaticMetaObject();
-        return _staticMetaObject;
-    }
-    protected static void createStaticMetaObject() {
-        assert(!_staticMetaObject);
-        alias BaseClassesTuple!(typeof(this))[0] BaseClass;
-        if (!BaseClass._staticMetaObject)
-            BaseClass.createStaticMetaObject;
-        auto base = BaseClass._staticMetaObject;
-        _nativeStaticMetaObject = QMetaObjectNative(base.nativeId, qt_meta_stringdata_" ~ className ~ ".ptr,
-                                                    qt_meta_data_" ~ className ~ ".ptr, null );
-        
-        _staticMetaObject = new QMetaObject(&_nativeStaticMetaObject, base);
-//        _staticMetaObject.construct!(typeof(this));
-        _populateMetaInfo();
-    }\n\n";
-    return res;
 }
 
 size_t commaCount(int argCount)
@@ -490,14 +364,15 @@ size_t commaCount(int argCount)
     return ret;
 }
 
-FunctionDef[] genFuncDefs(alias Funcs, alias newFunc)()
+FunctionDef[] generateFuncDefs(alias newFunc, Funcs...)()
 {
     typeof(return) res;
-    enum funcsCount = Funcs.at.length;
+    enum funcsCount = Funcs.length;
     foreach(i, bogus; Repeat!(void, funcsCount))
     {
-        string args = replicate(commaCount((MetaEntryArgs!(Funcs.at[i].at)).length), ',');
-        string funcSig = MetaEntryName!(Funcs.at[i].at) ~ "(" ~ qtDeclArgs!(MetaEntryArgs!(Funcs.at[i].at))() ~ ")";
+        alias ParameterTypeTuple!(Funcs[i]) Args;
+        string args = replicate(commaCount(Args.length), ',');
+        string funcSig = methodName!(Funcs[i]) ~ "(" ~ qtDeclArgs!(Args)() ~ ")";
         res ~= newFunc(funcSig, args);
     }
     return res;
@@ -509,52 +384,136 @@ template Q_OBJECT_BIND()
 
 // ------------------------------------------------------------------------------------------
 
-string generateSignalEmitters(alias Funcs)()
-{
-    string res;
-    enum funcsCount = Funcs.at.length;
-    foreach(i, bogus; Repeat!(void, funcsCount))
-    {
-        res ~= SignalEmitter!(MetaEntryArgs!(Funcs.at[i].at))(SignalType.NewSignal, MetaEntryName!(Funcs.at[i].at), cast(string[])[], i);
-    }
-    return res;
-}
-
-string generateSlotAliases(alias Funcs)()
-{
-    string res;
-    enum funcsCount = Funcs.at.length;
-    foreach(i, bogus; Repeat!(void, funcsCount))
-    {
-        string name = MetaEntryName!(Funcs.at[i].at);
-        res ~= format_ctfe("    alias slot_${} ${};\n", name, name);
-    }
-    return res;
-}
-
-
-string generateMetaInfo(T, alias Signals, alias Slots)()
+string generateSignalEmitters(uint signalCount)
 {
     string res = "";
-    auto signalList = genFuncDefs!(Signals, newSignal)();
-    auto slotList = genFuncDefs!(Slots, newSlot)();
-    res ~= generateSignalEmitters!(Signals)();
-    res ~= generateSlotAliases!(Slots)();
-    res ~= generateCode(T.stringof, signalList, slotList);
-    res ~= generate_qt_metacall!(Signals, Slots);
-    res ~= generateMetaObjectConstruction!(Signals, Slots);
-    res ~= generateQMetaObject(T.stringof);
+    foreach (i; 0..signalCount)
+    {
+        auto iStr = to!string(i);
+        res ~= "mixin SignalEmitter!(SignalKind.NewSignal, " ~ iStr ~ ");\n";
+    }
     return res;
 }
 
-template Q_OBJECT()
+private mixin template SlotAlias(alias slot)
 {
-    alias findSignals!(typeof(this)) SignalFuncs;
-    alias toMetaEntries!(SignalFuncs) SignalMetaEntries;
-    alias findSlots!(typeof(this)) SlotFuncs;
-    alias toMetaEntries!(SlotFuncs) SlotMetaEntries;
-
-    mixin(generateMetaInfo!(typeof(this), SignalMetaEntries, SlotMetaEntries)());
-    // debug output
-//    pragma(msg, generateMetaInfo!(typeof(this), SignalMetaEntries, SlotMetaEntries)());
+    mixin ("alias slot " ~ methodName!slot ~ ";");
 }
+
+string generateSlotAliases(uint slotCount)
+{
+    string res = "";
+    foreach(i; 0..slotCount)
+    {
+        auto iStr = to!string(i);
+        res ~= "mixin SlotAlias!(slots[" ~ iStr ~ "]);\n";
+    }
+    return res;
+}
+
+string generateMetaCall(string methodName, size_t argCount)
+{
+    string res = "";
+    foreach (i; 1..argCount)
+        res ~= generateConvToD(i);
+
+    res ~= methodName ~ "(";
+    foreach (i; 1..argCount)
+    {
+        if (i > 1)
+            res ~= ", ";
+        res ~= "_out" ~ to!string(i);
+    }
+    return res ~ ");\n";
+}
+
+string generateDispatchSwitch(size_t methodCount)
+{
+    string res = "switch(_id) {\n";
+
+    foreach(i; 0..methodCount)
+    {
+        string iStr = to!string(i);
+        res ~= "    case " ~ iStr ~ ":\n";
+        res ~= "        alias methods[" ~ iStr ~ "] method;\n";
+        res ~= "        alias TypeTuple!(void, ParameterTypeTuple!method) Args;\n";
+        res ~= "        mixin(generateMetaCall(methodName!method, Args.length));\n";
+        res ~= "        break;\n";
+    }
+
+    res ~= "    default:\n";
+
+    return res ~ "}\n";
+}
+
+mixin template Q_OBJECT()
+{
+    import std.typetuple;
+    import qtd.Marshal;
+    import qt.core.QString; // for QStringUtil.toNative
+
+public: // required to override the outside scope protection.
+
+    alias typeof(this) This;
+
+    alias findSignals!(This) signals;
+    alias findSlots!(This) slots;
+    alias TypeTuple!(signals, slots) methods;
+
+ 
+    mixin (generateSignalEmitters(signals.length));
+    mixin (generateSlotAliases(slots.length));
+
+    auto signalList = generateFuncDefs!(newSignal, signals)();
+    auto slotList = generateFuncDefs!(newSlot, slots)();
+    mixin (generateCode(typeof(this).stringof, signalList, slotList));
+
+    protected int qt_metacall(QMetaObject.Call _c, int _id, void **_a)
+    {
+        _id = super.qt_metacall(_c, _id, _a);
+
+        static if (methods.length)
+        {
+            if (_id < 0)
+                return _id;
+
+            if (_c == QMetaObject.Call.InvokeMetaMethod) {
+                //pragma(msg, generateDispatchSwitch(methods.length));
+                mixin (generateDispatchSwitch(methods.length));
+            }
+            _id -= methods.length;
+        }
+
+        return _id;
+    }
+
+    @property
+    override QMetaObject metaObject() const { return staticMetaObject(); }
+
+    private static __gshared QMetaObject _staticMetaObject;
+    private static __gshared QMetaObjectNative _nativeStaticMetaObject;
+
+    @property
+    static QMetaObject staticMetaObject()
+    {
+        // TODO: synchronize or enable static constructors in circular modules
+        if(!_staticMetaObject)
+        {
+            alias BaseClassesTuple!(This)[0] Base;
+
+            _nativeStaticMetaObject = QMetaObjectNative(
+                Base.staticMetaObject.nativeId,
+                qt_meta_stringdata.ptr,
+                qt_meta_data.ptr, null);
+
+            QMetaObject.create!This(&_nativeStaticMetaObject);
+        }
+        return _staticMetaObject;
+    }
+
+    /*internal*/ static void setStaticMetaObject(QMetaObject m)
+    {
+        _staticMetaObject = m;
+    }
+}
+
