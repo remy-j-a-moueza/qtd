@@ -1702,30 +1702,20 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
     if (!d_class->hasConstructors())
         return;
 
-    bool isTheQObject = d_class->name() == "QObject";
-    if (isTheQObject || !d_class->isQObject())
+    if (d_class->isDestructorBase())
     {
         s << INDENT << "protected override void __deleteNative() {" << endl;
         {
-            if (isTheQObject)
-                s << INDENT << "qtd_delete_qobject(__nativeId);" << endl;
-            else if (!d_class->isQObject())
-                s << INDENT << "qtd_" << d_class->name() << "_destructor(__nativeId);" << endl;
+            s << INDENT << "qtd_" << d_class->name() << "_delete(__nativeId);" << endl;
         }
         s << INDENT << "}" << endl << endl;
-    }
 
-    if (d_class->typeEntry()->isValue())
-    {
-        s << INDENT << "public static void __deleteNativeObject(void* ptr) {" << endl
-          << INDENT << "    qtd_" << d_class->name() << "_destructor(ptr);" << endl
+        s << INDENT << "static void __deleteNativeObject(void* ptr) {" << endl
+          << INDENT << "    qtd_" << d_class->name() << "_delete(ptr);" << endl
           << INDENT << "}" << endl << endl;
-    }
 
-    if (d_class->typeEntry()->isValue())
-    {
-        s << INDENT << "public static void __callNativeDestructor(void* ptr) {" << endl
-          << INDENT << "    qtd_" << d_class->name() << "_call_destructor(ptr);" << endl
+        s << INDENT << "static void __callNativeDestructor(void* nativeId) {" << endl
+          << INDENT << "    qtd_" << d_class->name() << "_destroy(nativeId);" << endl
           << INDENT << "}" << endl << endl;
     }
 }
@@ -2482,9 +2472,9 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 //    if (d_class->needsConversionFunc)
         writeConversionFunction(s, d_class);
 
-    if (d_class->hasConstructors() && !d_class->isQObject())
-        s << "extern (C) void qtd_" << d_class->name() << "_destructor(void *ptr);" << endl
-          << "extern (C) void qtd_" << d_class->name() << "_call_destructor(void *ptr);" << endl << endl;
+    if (d_class->hasConstructors() && d_class->isDestructorBase())
+        s << "extern (C) void qtd_" << d_class->name() << "_delete(void *ptr);" << endl
+          << "extern (C) void qtd_" << d_class->name() << "_destroy(void *ptr);" << endl << endl;
 
     // qtd
 

@@ -1172,7 +1172,7 @@ bool AbstractMetaClass::generateShellClass() const
 {
     return m_force_shell_class ||
         (!isFinal()
-         && (hasVirtualFunctions()
+         && (isPolymorphic()
              || hasProtectedFunctions()
              || hasFieldAccessors()
              || typeEntry()->isObject())); // qtd2 for being more consistent
@@ -1773,7 +1773,10 @@ void AbstractMetaClass::fixFunctions()
                         }
 
                         // Set the class which first declares this function, afawk
-                        f->setDeclaringClass(sf->declaringClass());
+                        if (!f->isFinal() && sf->isFinal())
+                            f->setDeclaringClass(f->ownerClass());
+                        else
+                            f->setDeclaringClass(sf->declaringClass());
 
                         if (sf->isFinalInTargetLang() && !sf->isPrivate() && !f->isPrivate() && !sf->isStatic() && !f->isStatic()) {
                             // Shadowed funcion, need to make base class

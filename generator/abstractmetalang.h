@@ -689,6 +689,7 @@ public:
           m_has_hash_function(false),
           m_has_equals_operator(false),
           m_has_clone_operator(false),
+          m_has_virtual_destructor(false),
           m_is_type_alias(false),
           m_enclosing_class(0),
           m_base_class(0),
@@ -781,6 +782,51 @@ public:
     bool hasVirtualFunctions() const { return !isFinal() && m_has_virtuals; }
     bool hasProtectedFunctions() const;
 
+    // returns true if this class or its base classes have a
+    // virtual destructor
+    bool hasVirtualDestructor() const { return m_has_virtual_destructor
+        || m_base_class && m_base_class->hasVirtualDestructor(); }
+
+    const AbstractMetaClass* destructorBase() const
+    {
+        const AbstractMetaClass* ret = this;
+        for (const AbstractMetaClass* base = this->m_base_class; base; base = base->m_base_class) {
+            if (base->m_has_virtual_destructor)
+                ret = base;
+        }
+        return ret;
+    }
+
+    bool isDestructorBase() const
+    {
+        return this == destructorBase();
+    }
+
+    const AbstractMetaClass* polymorphicBase() const
+    {
+        const AbstractMetaClass *ret = 0;
+
+        for (const AbstractMetaClass *base = this; base; base = base->baseClass()) {
+            if (base->m_has_virtuals || base->m_has_virtual_destructor)
+                ret = base;
+        }
+
+        return ret;
+    }
+
+
+
+    bool isPolymorphic() const
+    {
+        for (const AbstractMetaClass *base = this; base; base = base->baseClass()) {
+            if (base->m_has_virtuals || base->m_has_virtual_destructor)
+                return true;
+        }
+        return false;
+    }
+
+    bool setHasVirtualDestructor(bool value) { m_has_virtual_destructor = value; }
+
     QList<TypeEntry *> templateArguments() const { return m_template_args; }
     void setTemplateArguments(const QList<TypeEntry *> &args) { m_template_args = args; }
 
@@ -864,7 +910,8 @@ private:
     uint m_has_equals_operator : 1;
     uint m_has_clone_operator :1;
     uint m_is_type_alias : 1;
-    uint m_reserved : 19;
+    uint m_has_virtual_destructor : 1;
+    uint m_reserved : 18;
 
     const AbstractMetaClass *m_enclosing_class;
     AbstractMetaClass *m_base_class;

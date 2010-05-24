@@ -71,11 +71,11 @@ typedef void (*pfunc_abstr)();
 #endif
 
 QTD_EXPORT(void, qtd_toUtf8, (const unsigned short* arr, uint size, void* str))
-QTD_EXPORT(void, qtd_dummy, ())
+QTD_EXPORT(void, qtd_QtdObject_delete, (void* dId))
 
 #ifdef CPP_SHARED
 #define qtd_toUtf8 qtd_get_qtd_toUtf8()
-#define qtd_dummy qtd_get_qtd_dummy()
+#define qtd_QtdObject_delete qtd_get_qtd_QtdObject_delete()
 #endif
 
 extern "C" QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia);
@@ -90,4 +90,5 @@ void call_destructor(T *a)
 {
     a->~T();
 }
+
 #endif // QTD_CORE_H

@@ -40,21 +40,14 @@ template QT_END_HEADER() {
 mixin QT_BEGIN_HEADER;
 mixin QT_BEGIN_NAMESPACE;
 
-//TODO: this sucks
-extern(C) void qtd_dummy() {}
-// Defined in QObject.d
-extern(C) void qtd_delete_d_qobject(void* dPtr);
+// Defined in qtd.QtdObject
+extern(C) void qtd_QtdObject_delete(void* dPtr);
 
 version(cpp_shared)
 {
-    extern (C) void qtd_core_initCallBacks(void* toUtf8, void* dummy);
+    extern (C) void qtd_core_initCallBacks(void* toUtf8, void* del_d_obj);
     static this() {
-        qtd_core_initCallBacks(&qtd_toUtf8, &qtd_dummy);
-    }
-
-    extern (C) void qtd_QObjectEntity_initCallBacks(void* del_d_obj);
-    static this() {
-        qtd_QObjectEntity_initCallBacks(&qtd_delete_d_qobject);
+        qtd_core_initCallBacks(&qtd_toUtf8, &qtd_QtdObject_delete);
     }
 }
 

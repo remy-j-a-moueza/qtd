@@ -82,10 +82,11 @@ public:
             && !(java_class->attributes() & AbstractMetaAttributes::Fake);
     }
 
-    static QString shellClassName(const AbstractMetaClass *java_class) {
-        return java_class->generateShellClass()
-               ? java_class->name() + "_QtDShell"
-               : java_class->qualifiedCppName();
+    static QString shellClassName(const AbstractMetaClass *java_class, bool fullName = true) {
+        if (java_class->generateShellClass())
+            return java_class->name() + "_QtDShell";
+        else
+            return fullName ? java_class->qualifiedCppName() : java_class->typeEntry()->name();
     }
 
  protected:

@@ -12,12 +12,6 @@
 #include "qtd_core.h"
 #include <iostream>
 
-
-extern "C" DLL_PUBLIC void* qtd_qobject(void* parent)
-{
-    return new QObject((QObject*)parent);
-}
-
 extern "C" DLL_PUBLIC QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia)
 {
     return * (QModelIndex *) (&mia) ;
@@ -45,14 +39,14 @@ extern "C" DLL_PUBLIC bool qtd_qSharedBuild()
     return qSharedBuild();
 }
 
+//TODO: this has to be replaced with something that makes some sense
 #ifdef CPP_SHARED
 QTD_EXPORT_VAR(qtd_toUtf8);
-QTD_EXPORT_VAR(qtd_dummy);
+QTD_EXPORT_VAR(qtd_QtdObject_delete);
 
-extern "C" DLL_PUBLIC void qtd_core_initCallBacks(pfunc_abstr d_func, pfunc_abstr dummy) {
+extern "C" DLL_PUBLIC void qtd_core_initCallBacks(pfunc_abstr d_func, pfunc_abstr del_d_qobj) {
     QTD_EXPORT_VAR_SET(qtd_toUtf8, d_func);
-    QTD_EXPORT_VAR_SET(qtd_dummy, dummy);
-    //std::cout << "qtd_core initialized" << std::endl;
+    QTD_EXPORT_VAR_SET(qtd_QtdObject_delete, del_d_qobj);
 }
 #endif
 

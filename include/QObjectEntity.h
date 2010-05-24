@@ -7,10 +7,6 @@
 
 QTD_EXPORT(void, qtd_delete_d_qobject, (void* dPtr))
 
-#ifdef CPP_SHARED
-#define qtd_delete_d_qobject qtd_get_qtd_delete_d_qobject()
-#endif
-
 //TODO: user data ID must be registered with QObject::registerUserData;
 #define userDataId 0
 
@@ -32,7 +28,7 @@ public:
     inline void destroyEntity(QObject *qObject = NULL)
     {
         Q_ASSERT(dId);
-        qtd_delete_d_qobject(dId);
+        qtd_QtdObject_delete(dId);
         if (qObject)
         {
             qObject->setUserData(userDataId, NULL);

@@ -587,8 +587,8 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     writeDefaultConstructedValues(s, java_class);
 
     if (hasCustomDestructor(java_class)) */
-    if (!java_class->isQObject())
-        writeFinalDestructor(s, java_class);
+
+    writeFinalDestructor(s, java_class);
 
     if (java_class->isQObject()) {
         writeQObjectEntity(s, java_class);
@@ -1500,14 +1500,14 @@ void CppImplGenerator::writeShellConstructor(QTextStream &s, const AbstractMetaF
 
 void CppImplGenerator::writeShellDestructor(QTextStream &s, const AbstractMetaClass *java_class)
 {
-    s << shellClassName(java_class) << "::~"
-      << shellClassName(java_class) << "()" << endl
-      << "{" << endl;
-    {
-        //s << "    std::cout << \"In shell destructor of " << java_class->name() << ", nativeId: \" << this << std::endl;";  
-        if (java_class->isQObject())
-            s << "    destroyEntity(this);";
-    }
+    QString className = shellClassName(java_class);
+    s << className << "::~" << className << "() {" << endl;
+
+    if (java_class->isQObject())
+        s << "    destroyEntity(this);";
+    //else if (java_class->isPolymorphic())
+    //    s << "    qtd_QtdObject_delete(dId);" << endl;
+
     s << "}" << endl << endl;
 }
 
@@ -2385,15 +2385,15 @@ void CppImplGenerator::writeFieldAccessors(QTextStream &s, const AbstractMetaFie
 
 void CppImplGenerator::writeFinalDestructor(QTextStream &s, const AbstractMetaClass *cls)
 {
-    if (cls->hasConstructors()) {
-        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_destructor(void *ptr)" << endl
+    if (cls->hasConstructors() && cls->isDestructorBase()) {
+        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_delete(void* nativeId)" << endl
           << INDENT << "{" << endl
-          << INDENT << "    delete (" << shellClassName(cls) << " *)ptr;" << endl
+          << INDENT << "    delete (" << shellClassName(cls) << "*)nativeId;" << endl
           << INDENT << "}" << endl << endl;
 
-        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_call_destructor(" << shellClassName(cls) << " *ptr)" << endl
+        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_destroy(void* nativeId)" << endl
           << INDENT << "{" << endl
-          << INDENT << "    call_destructor(ptr);" << endl
+          << INDENT << "    call_destructor((" << shellClassName(cls) << "*)nativeId);" << endl
           << INDENT << "}" << endl << endl;
     }
 }

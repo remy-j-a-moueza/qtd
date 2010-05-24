@@ -60,3 +60,15 @@ package abstract class QtdObject
         }
     }
 }
+
+extern(C) void qtd_QtdObject_delete(void* dId)
+{
+    auto obj = cast(QtdObject)dId;
+
+    if (!(obj.__flags & QtdObjectFlags.dOwnership))
+    {
+        // Avoid deleting native object twice
+        obj.__setFlags(QtdObjectFlags.nativeOwnership, true);
+        delete obj;
+    }
+}
