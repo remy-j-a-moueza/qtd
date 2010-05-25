@@ -2365,13 +2365,12 @@
 
 extern "C" DLL_PUBLIC void* qtd_get_d_qobject(void *nativeId)
 {
-    QtD_QObjectEntity *entity = QtD_QObjectEntity::getQObjectEntity((QObject*)nativeId);
-    return entity ? entity-&gt;dId : NULL;
+    return QObjectEntity::getDId((QObject*)nativeId);
 }
 
 extern "C" DLL_PUBLIC void qtd_create_qobject_entity(void* nativeId, void *dId)
 {
-	new QtD_QObjectEntity((QObject*)nativeId, dId);
+	new QObjectLink((QObject*)nativeId, dId);
 }
 
 extern "C" DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
@@ -2379,10 +2378,11 @@ extern "C" DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
     return (void*)((QObject*)nativeId)->metaObject();
 }
 
+<!--
 extern "C" DLL_PUBLIC void qtd_connect(void* nativeId, char* signal, int id, bool dynamicEntity)
 {   
     QObject *sender = (QObject*)nativeId;
-    QObject *receiver = dynamicEntity ? dynamic_cast&lt;QObject*&gt;(QtD_QObjectEntity::getQObjectEntity(sender)) : sender;
+    QObject *receiver = dynamicEntity ? dynamic_cast&lt;QObject*&gt;(QObject::getQObjectEntity(sender)) : sender;
     const QMetaObject *mo = sender->metaObject();
     int nativeSigId = mo-&gt;indexOfSignal(signal);
     QMetaObject::connect(sender, nativeSigId, receiver, receiver-&gt;metaObject()-&gt;methodCount() + id);
@@ -2396,6 +2396,7 @@ extern "C" DLL_PUBLIC void qtd_disconnect(void* nativeId, char* signal, int id, 
     int nativeSigId = mo-&gt;indexOfSignal(signal);
     QMetaObject::disconnect(sender, nativeSigId, receiver, receiver-&gt;metaObject()-&gt;methodCount() + id);
 }
+-->
 
  	</inject-code>
 

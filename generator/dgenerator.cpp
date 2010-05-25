@@ -778,25 +778,27 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         s << d_function->marshalledName() << "(";
     }
 
+    bool arg_written = false;
+
     if (!d_function->isConstructor() && !d_function->isStatic()) {
-        if(dVersion == 2 && d_function->isConstant())
-            s << "(cast(" << d_function->ownerClass()->name() << ")this).__nativeId";
-        else
-            s << "__nativeId";
+        s << "(cast(" << d_function->ownerClass()->name() << ")this).__nativeId";
+        arg_written = true;
     }
 
     if (d_function->isConstructor() &&
-        ( d_function->implementingClass()->hasVirtualFunctions()
+        ( d_function->ownerClass()->isPolymorphic()
         || d_function->implementingClass()->typeEntry()->isObject() ) ) { // qtd
-        s << "cast(void*) this";
-        if (arguments.count() > 0)
+        if (arg_written)
             s << ", ";
+        s << "cast(void*) this";
+        arg_written = true;
     }
 
-    if(return_in_arg) { // qtd
-        if (!d_function->isStatic() && !d_function->isConstructor()) // qtd
+    if(return_in_arg) {
+        if (arg_written)
             s << ", ";
         s << "&res";
+        arg_written = true;
     }
 
     for (int i=0; i<arguments.count(); ++i) {
@@ -805,8 +807,9 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         const TypeEntry *te = type->typeEntry();
 
         if (!d_function->argumentRemoved(i+1)) {
-            if (i > 0 || (!d_function->isStatic() && !d_function->isConstructor()) || return_in_arg) // qtd
+            if (arg_written)
                 s << ", ";
+            arg_written = true;
 
             // qtd
             QString modified_type = d_function->typeReplaced(arg->argumentIndex() + 1);
@@ -854,13 +857,14 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
     }
 
     if (useJumpTable) {
-        if ((!d_function->isConstructor() && !d_function->isStatic()) || arguments.size() > 0)
+        if (arg_written)
             s << ", ";
 
         if (d_function->isStatic())
             s << "null";
         else
             s << "this";
+        arg_written = true;
     }
 
     s << ")";
@@ -1754,10 +1758,10 @@ void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_
 */
         AbstractMetaArgumentList arguments = signal->arguments();
 
-        s << "/*private extern(C) void " << sigExternName << "_handle(void* d_entity, void** args) {" << endl;
+        s << "/*private extern(C) void " << sigExternName << "_handle(void* dId, void** args) {" << endl;
         {
             Indentation indent(INDENT);
-            s << INDENT << "auto d_object = cast(" << d_class->name() << ") d_entity;" << endl;
+            s << INDENT << "auto d_object = cast(" << d_class->name() << ") dId;" << endl;
             int sz = arguments.count();
 
             for (int j=0; j<sz; ++j) {
@@ -2042,34 +2046,43 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << ">";
     }
 
+    AbstractMetaClassList interfaces = d_class->interfaces();
+    bool implements = false;
     if (!d_class->isNamespace() && !d_class->isInterface()) {
         if (!d_class->baseClassName().isEmpty()) {
             s << " : " << d_class->baseClass()->name();
+            implements = true;
         } else {
+
+            /*
             QString sc = type->defaultSuperclass();
-            if ((sc != d_class->name()) && !sc.isEmpty())
+            if ((sc != d_class->name()) && !sc.isEmpty()) {
                 s << " : " << sc;
+                implements = true;
+            }
+            */
+            if (d_class->isQObject())
+                s << " : QtdObject";
+            else
+                s << " : QtdObject";
+            implements = true;
         }
     }/* qtd else if (d_class->isInterface()) {
         s << " extends QtJambiInterface";
     }*/
 
     // implementing interfaces...
-    bool implements = false;
-    AbstractMetaClassList interfaces = d_class->interfaces();
-    if (!interfaces.isEmpty()) {
-        if (!d_class->isInterface())
+    for (int i=0; i<interfaces.size(); ++i) {
+        if (implements)
             s << ", ";
         else {
+            s << " : ";
             implements = true;
-            s << ": ";
         }
-        for (int i=0; i<interfaces.size(); ++i) {
-            AbstractMetaClass *iface = interfaces.at(i);
-            if (i) s << ", ";
-            s << iface->name();
-        }
+        AbstractMetaClass *iface = interfaces.at(i);
+        s << iface->name();
     }
+
 /* qtd
     if (isComparable(d_class)) {
         if (!implements) {
@@ -2454,7 +2467,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     }
 
     if (d_class->generateShellClass()) { // qtd2
-        if (d_class->hasVirtualFunctions()
+        if (d_class->isPolymorphic()
             && (d_class->typeEntry()->isObject() && !d_class->typeEntry()->isQObject()) )
         s << endl << "extern (C) void *__" << d_class->name() << "_entity(void *q_ptr);" << endl << endl;
     }
@@ -2557,19 +2570,19 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             s << INDENT << "void*[" << virtualFunctions.size() << "] virt_arr;" << endl;
             for (int pos = 0; pos<virtualFunctions.size(); ++pos) {
                 const AbstractMetaFunction *function = virtualFunctions.at(pos);
-                if (!notWrappedYet(function)) // qtd2
-                    s << INDENT << "virt_arr[" << pos << "] = &" << function->marshalledName() << "_dispatch;" <<endl;
+                if (!notWrappedYet(function) && d_class == function->declaringClass()) // qtd2
+                    s << INDENT << "virt_arr[" << pos << "] = &" << function->marshalledName(false) << "_dispatch;" <<endl;
             }
             if (virtualFunctions.size() == 0)
                 initArgs = "null";
             else
                 initArgs = "virt_arr.ptr";
 
-            if (d_class->isQObject()) {
+            if (d_class->name() == "QObject") {
                 // qt_metacall, metaObject
                 s << endl << INDENT << "void*[2] sign_arr;" << endl;
-                s << INDENT << "sign_arr[0] = &qtd_" << d_class->name() << "_qt_metacall_dispatch;" << endl;
-                s << INDENT << "sign_arr[1] = &qtd_" << d_class->name() << "_metaObject_dispatch;" << endl;
+                s << INDENT << "sign_arr[0] = &qtd_QObject_qt_metacall_dispatch;" << endl;
+                s << INDENT << "sign_arr[1] = &qtd_QObject_metaObject_dispatch;" << endl;
                 initArgs += ", sign_arr.ptr";
             }
 
@@ -2807,13 +2820,7 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
   s << INDENT << "mixin Q_OBJECT_BIND;" << endl << endl;
 }
 
-/*
-void DGenerator::writeMarshallFunction(QTextStream &s, const AbstractMetaClass *d_class)
-{
-
-}
-*/
-void DGenerator::marshallFromCppToD(QTextStream &s, const ComplexTypeEntry* ctype)
+void DGenerator::marshalFromCppToD(QTextStream &s, const ComplexTypeEntry* ctype)
 {
     if(ctype->isQObject()) {
         QString type_name = ctype->name();
@@ -2938,13 +2945,20 @@ void DGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFun
     Q_UNUSED(id);
     Q_UNUSED(implementor);
 
+    if (implementor != d_function->declaringClass())
+        return;
+
     s << "private extern(C) ";
-    CppImplGenerator::writeVirtualDispatchFunction(s, d_function, true);
+    CppImplGenerator::writeVirtualDispatchFunction(s, d_function, implementor, true);
     s << "{" << endl;
 
     const AbstractMetaClass *own_class = d_function->ownerClass();
 
-    s << INDENT << "auto d_object = cast(" << own_class->name() << ") d_entity;" << endl;
+    InterfaceTypeEntry *ite = own_class->typeEntry()->designatedInterface();
+    if (ite)
+        s << INDENT << "auto d_object = cast(" << ite->name() << ")cast(Object) dId;" << endl;
+    else
+        s << INDENT << "auto d_object = cast(" << own_class->name() << ") dId;" << endl;
 
     // the function arguments
     AbstractMetaArgumentList arguments = d_function->arguments();

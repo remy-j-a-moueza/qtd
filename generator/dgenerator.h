@@ -138,7 +138,7 @@ public:
 
     void writeShellVirtualFunction(QTextStream &s, const AbstractMetaFunction *function,
                                           const AbstractMetaClass *implementor, int id);
-    void marshallFromCppToD(QTextStream &s, const ComplexTypeEntry* ctype);
+    void marshalFromCppToD(QTextStream &s, const ComplexTypeEntry* ctype);
 
 private:
     QString subDirectoryForPackage(const QString &package) const { return QString(package).replace(".", "/"); }

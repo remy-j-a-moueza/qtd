@@ -2,7 +2,7 @@
 #define QVARIANT_SHELL_H
 
 #include <QtCore/QHash>
-#include <QObjectEntity.h>
+#include <qtd_core.h>
 #include <qvariant.h>
 
 #include <QVariant>

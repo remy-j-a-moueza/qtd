@@ -1720,12 +1720,8 @@ QString ContainerTypeEntry::qualifiedCppName() const
 QString EnumTypeEntry::javaQualifier() const
 {
     TypeEntry *te = TypeDatabase::instance()->findType(m_qualifier);
-    if (te != 0) {
-        if (te->designatedInterface())
-            te = te->designatedInterface();
-
+    if (te != 0)
         return te->targetLangName();
-    }
     else
         return m_qualifier;
 }

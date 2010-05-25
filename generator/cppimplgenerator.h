@@ -208,7 +208,7 @@ public:
 
     static QString jniReturnName(const AbstractMetaFunction *java_function, uint options = StandardJNISignature, bool d_export = false);
     static void writeVirtualFunctionDispatchName(QTextStream &s, const AbstractMetaFunction *function, bool d_export = false);
-    static void writeVirtualDispatchFunction(QTextStream &s, const AbstractMetaFunction *function, bool d_export = false);
+    static void writeVirtualDispatchFunction(QTextStream &s, const AbstractMetaFunction *function, const AbstractMetaClass *java_class, bool d_export = false);
     static void writeInterfaceCasts(QTextStream &s, const AbstractMetaClass *java_class);
     void writeSignalsHandling(QTextStream &s, const AbstractMetaClass *java_class);
     void writeQObjectLink(QTextStream &s, const AbstractMetaClass *java_class);

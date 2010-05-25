@@ -1,13 +1,7 @@
 /**
-*
-*  Copyright: Copyright QtD Team, 2008-2009
-*  License: <a href="http://www.boost.org/LICENSE_1_0.txt>Boost License 1.0</a>
-*
-*  Copyright QtD Team, 2008-2009
-*  Distributed under the Boost Software License, Version 1.0.
-*  (See accompanying file boost-license-1.0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-*
-*/
+ *  Copyright: Copyright QtD Team, 2008-2010
+ *  License: Boost Software License 1.0
+ */
 
 #ifndef QTD_CORE_H
 #define QTD_CORE_H
@@ -34,6 +28,8 @@
     extern "C" TYPE NAME ARGS;
 #endif
 
+extern uint userDataId;
+
 struct QModelIndexAccessor {
 	int row;
 	int col;
@@ -54,14 +50,44 @@ enum QtdObjectFlags
     //gcManaged                 = 0x04
 };
 
-class QtD_Entity
+class DLL_PUBLIC QtdObjectLink
 {
 public:
-    void* dId;
+    void* dId; // TODO: needs to be atomic
 
-    QtD_Entity(void* id) : dId(id)
+    QtdObjectLink(void* id) : dId(id) {}
+
+    template<typename T>
+    static QtdObjectLink* getLink(const T* object)
     {
+        return dynamic_cast<QtdObjectLink*>((T*)object);
     }
+
+    template<typename T>
+    static void* getDId(const T* object)
+    {
+        QtdObjectLink *link = getLink((T*)object);
+        return link ? link->dId : NULL;
+    }
+};
+
+class DLL_PUBLIC QObjectLink : public QtdObjectLink, public QObjectUserData
+{
+public:
+    enum Flags
+    {
+        None,
+        CreatedByD = 0x1
+    };
+
+    Flags flags;
+
+    QObjectLink(QObject* qObject, void* dId);
+    bool createdByD();
+    virtual ~QObjectLink();
+    void destroyLink(QObject* qObject = NULL);
+    static QObjectLink* getLink(const QObject* qObject);
+    static void* getDId(const QObject* qObject);
 };
 
 #define Array DArray

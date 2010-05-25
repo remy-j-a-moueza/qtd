@@ -475,7 +475,7 @@ void ContainerGenerator::writeArrayFunctions(QTextStream &s, const ComplexTypeEn
       << "package " << d_type << " qtd_" << cls_name << "_cpp_to_d(" << cpp_type << " ret)" << endl
       << "{" << endl;
 
-    marshallFromCppToD(s, centry);
+    marshalFromCppToD(s, centry);
 
     s << "}" << endl;
 }

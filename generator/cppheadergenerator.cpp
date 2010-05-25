@@ -126,7 +126,7 @@ void CppHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *java_cla
       << "#define " << include_block << endl << endl
 //      << "#include <qtjambi_core.h>" << endl
       << "#include <QtCore/QHash>" << endl
-      << "#include <QObjectEntity.h>" << endl;
+      << "#include <qtd_core.h>" << endl;
 
     Include inc = java_class->typeEntry()->include();
     s << "#include ";
@@ -178,10 +178,11 @@ void CppHeaderGenerator::write(QTextStream &s, const AbstractMetaClass *java_cla
 
     s << "class " << shellClassName(java_class)
       << " : public " << java_class->qualifiedCppName();
-    if (java_class->isQObject())
-        s << ", public QtD_QObjectEntity";
-    else if(java_class->hasVirtualFunctions())
-        s << ", public QtD_Entity";
+    if (java_class->isQObject()) {
+        s << ", public QObjectLink";
+    }
+    else if (java_class->isPolymorphic())
+        s << ", public QtdObjectLink";
     s << endl  << "{" << endl;
 
     if (java_class->isQObject()) {

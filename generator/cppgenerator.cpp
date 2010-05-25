@@ -230,7 +230,7 @@ void CppGenerator::writeFunctionSignature(QTextStream &s,
     s << "(";
     const AbstractMetaClass *owner = java_function->ownerClass();
 
-    bool has_d_ptr = java_function->isConstructor() && owner && (owner->hasVirtualFunctions()/* || owner->typeEntry()->isObject()*/ );
+    bool has_d_ptr = java_function->isConstructor() && owner && (owner->isPolymorphic()/* || owner->typeEntry()->isObject()*/ );
     const AbstractMetaArgumentList arg_list = java_function->arguments();
     if (has_d_ptr) {
         s << "void *d_ptr";
@@ -249,4 +249,21 @@ void CppGenerator::writeFunctionSignature(QTextStream &s,
     s << ")";
     if (java_function->isConstant())
         s << " const";
+}
+
+void CppGenerator::writeInclude(QTextStream &s, Include inc)
+{
+    if (!inc.name.isEmpty()) {
+        s << "#include ";
+        if (inc.type == Include::IncludePath)
+            s << "<";
+        else
+            s << "\"";
+        s << inc.name;
+        if (inc.type == Include::IncludePath)
+            s << ">";
+        else
+            s << "\"";
+        s << endl;
+    }
 }
