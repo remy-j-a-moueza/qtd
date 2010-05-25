@@ -1,6 +1,6 @@
 module qt.QGlobal;
 
-public import qtd.Str;
+public import qtd.String;
 public import qt.QDefines;
 
 version (Tango)

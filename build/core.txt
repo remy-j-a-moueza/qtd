@@ -27,7 +27,7 @@ set (d_qt_files
 set (d_qtd_files
     QtdObject
     Signal
-    Str
+    String
     Atomic
     Marshal
     MOC

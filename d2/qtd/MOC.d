@@ -9,7 +9,7 @@ import
     qtd.Signal,
     qtd.Marshal,
     qtd.Array,
-    qtd.Str,
+    qtd.String,
     qtd.meta.Compiletime,
     qtd.ctfe.Format;
 

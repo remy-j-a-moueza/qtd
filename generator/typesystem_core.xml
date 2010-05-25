@@ -2378,26 +2378,6 @@ extern "C" DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
     return (void*)((QObject*)nativeId)->metaObject();
 }
 
-<!--
-extern "C" DLL_PUBLIC void qtd_connect(void* nativeId, char* signal, int id, bool dynamicEntity)
-{   
-    QObject *sender = (QObject*)nativeId;
-    QObject *receiver = dynamicEntity ? dynamic_cast&lt;QObject*&gt;(QObject::getQObjectEntity(sender)) : sender;
-    const QMetaObject *mo = sender->metaObject();
-    int nativeSigId = mo-&gt;indexOfSignal(signal);
-    QMetaObject::connect(sender, nativeSigId, receiver, receiver-&gt;metaObject()-&gt;methodCount() + id);
-}
-
-extern "C" DLL_PUBLIC void qtd_disconnect(void* nativeId, char* signal, int id, bool dynamicEntity)
-{
-    QObject *sender = (QObject*)nativeId;
-    QObject *receiver = dynamicEntity ? dynamic_cast&lt;QObject*&gt;(QtD_QObjectEntity::getQObjectEntity(sender)) : sender;
-    const QMetaObject *mo = sender->metaObject();    
-    int nativeSigId = mo-&gt;indexOfSignal(signal);
-    QMetaObject::disconnect(sender, nativeSigId, receiver, receiver-&gt;metaObject()-&gt;methodCount() + id);
-}
--->
-
  	</inject-code>
 
 	<inject-code class="java-free">
@@ -2484,7 +2464,7 @@ extern(C) void qtd_disconnect(void *nativeId, cstringz signal, int id, bool dyna
     </extra-includes>
 
     <extra-includes>
-        <include file-name="qtd.Str" location="java"/>
+        <include file-name="qtd.String" location="java"/>
     </extra-includes>
 
     <modify-function signature="argv()" remove="all"/> <!-- Obsolete -->
