@@ -566,7 +566,7 @@ public: // required to override the outside scope protection.
 
     /*internal*/ static void setStaticMetaObject(QMetaObject m)
     {
-        _staticMetaObject = m;
+        staticMetaObject_ = m;
     }
 }
 

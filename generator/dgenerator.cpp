@@ -2753,23 +2753,23 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
           << "    }" << endl << endl;
     }
 
-    s << "    private static __gshared QMetaObject _staticMetaObject;" << endl
+    s << "    private static __gshared QMetaObject staticMetaObject_;" << endl
       << "    protected static void setStaticMetaObject(QMetaObject m) {" << endl
-      << "        _staticMetaObject = m;" << endl
+      << "        staticMetaObject_ = m;" << endl
       << "    }" << endl << endl
 
       << "    @property QMetaObject metaObject() {" << endl
-      << "        return _staticMetaObject;" << endl
+      << "        return staticMetaObject_;" << endl
       << "    }" << endl << endl
 
       << "    @property static QMetaObject staticMetaObject() {" << endl
-      << "        if (!_staticMetaObject)" << endl
+      << "        if (!staticMetaObject_)" << endl
       << "            QMetaObject.create!(typeof(this))(qtd_" << d_class->name() << "_staticMetaObject());" << endl
-      << "        return _staticMetaObject;" << endl
+      << "        return staticMetaObject_;" << endl
       << "    }" << endl << endl
 
       << "    static " << d_class->name() << " __getObject(void* nativeId) {" << endl
-      << "        return static_cast!(" << d_class->name() << ")(_staticMetaObject.getObject(nativeId));" << endl
+      << "        return static_cast!(" << d_class->name() << ")(staticMetaObject_.getObject(nativeId));" << endl
       << "    }" << endl << endl
 
       << "    /* internal */ static void __createEntity(void* nativeId, void* dId) {" << endl
@@ -2789,8 +2789,8 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
       do // need this to look for default arguments and generate extra signatures
       {
           AbstractMetaFunction *fn = signal_funcs.at(i);
-    s << "        index = _staticMetaObject.indexOfMethod_Cpp(__signalSignatures[" << staticId << "]);" << endl
-    << "        _staticMetaObject.addMethod(new QMetaSignal(signature!(";
+    s << "        index = staticMetaObject_.indexOfMethod_Cpp(__signalSignatures[" << staticId << "]);" << endl
+    << "        staticMetaObject_.addMethod(new QMetaSignal(signature!(";
           writeMetaMethodArguments(s, fn, j);
     s << ")(\"" << fn->name() << "\"), index));" << endl << endl;
           AbstractMetaArgumentList args = fn->arguments();
@@ -2811,8 +2811,8 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
       do // need this to look for default arguments and generate extra signatures
       {
           AbstractMetaFunction *fn = slot_funcs.at(i);
-    s << "        index = _staticMetaObject.indexOfMethod_Cpp(__slotSignatures[" << staticId << "]);" << endl
-    << "        _staticMetaObject.addMethod(new QMetaSlot(signature!(";
+    s << "        index = staticMetaObject_.indexOfMethod_Cpp(__slotSignatures[" << staticId << "]);" << endl
+    << "        staticMetaObject_.addMethod(new QMetaSlot(signature!(";
           writeMetaMethodArguments(s, fn, j);
     s << ")(\"" << fn->name() << "\"), index));" << endl << endl;
           AbstractMetaArgumentList args = fn->arguments();
