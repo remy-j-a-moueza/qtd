@@ -206,13 +206,16 @@ bool AbstractMetaFunction::needsSuppressUncheckedWarning() const
     return false;
 }
 
-QString AbstractMetaFunction::marshalledName(bool classIsOwner) const
+QString AbstractMetaFunction::marshalledName(Options options) const
 {
-    QString returned = "qtd_";
-    if(classIsOwner)
-        returned += ownerClass()->name();
-    else
+    QString returned;
+    if (!(options & NoExternNamespace))
+        returned += "qtd_";
+
+    if(options & DeclaringClass)
         returned += declaringClass()->name();
+    else
+        returned += ownerClass()->name();
 
     returned += "_" + name();
     AbstractMetaArgumentList arguments = this->arguments();

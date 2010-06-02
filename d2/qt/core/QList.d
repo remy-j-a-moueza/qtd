@@ -98,17 +98,17 @@ private:
         uint sharable;
         void*[1] array;
     }
-    
+
     enum { DataHeaderSize = Data.sizeof - (void*).sizeof }
-    
+
     static Data shared_null;
     Data *d;
-    
+
     static this()
     {
         shared_null = Data(Atomic!int(1), 0, 0, 0, true, [null]);
     }
-    
+
 
 //    Data *detach(); // remove in 5.0
 
@@ -128,7 +128,7 @@ private:
 
         return x;
     }
-    
+
     void realloc(int alloc)
     {
 //        assert(d.ref_ == 1);
@@ -141,7 +141,7 @@ private:
         if (!alloc)
             d.begin = d.end = 0;
     }
-    
+
     void** append()
     {
 // #TODO        Q_ASSERT(d.ref_ == 1);
@@ -318,10 +318,12 @@ private:
 import std.stdio;
 import std.conv;
 
-alias void Dummy; // DMD bug #3538 
+alias void Dummy; // DMD bug #3538
 
 struct QList(T, alias Default = Dummy)
 {
+    alias T ElementType;
+
     static if (is(Default == Dummy))
         alias QTypeInfo!T TI;
     else
@@ -330,7 +332,7 @@ struct QList(T, alias Default = Dummy)
     struct Node
     {
         void *v;
-        
+
         static if (isQObjectType!T || isObjectType!T || isValueType!T || is(T == string)) // binded Qt types
         {
             T t()
@@ -352,7 +354,7 @@ struct QList(T, alias Default = Dummy)
             }
         }
         else // native types
-        {    
+        {
             ref T t()
             {
                 static if(TI.isLarge || TI.isStatic)
@@ -362,7 +364,7 @@ struct QList(T, alias Default = Dummy)
             }
         }
     }
-    
+
     union {
         QListData p;
         QListData.Data* d;
@@ -375,15 +377,15 @@ public:
         writeln("QList atomic ", d.ref_.load());
     }
     */
-    
+
     static QList!T opCall()
     {
         QList!T res;
 //        writeln("QList opCall");
-        
+
         res.d = &QListData.shared_null;
         res.d.ref_.increment();
-        
+
         return res;
     }
 
@@ -416,12 +418,12 @@ public:
         }
         return this;
     }
-    
+
     int length() const { return p.size(); }
     int size() const { return length; }
 
     void detach() { if (d.ref_.load() != 1) detach_helper(); }
-    
+
     private void detach_helper()
     {
         Node *n = cast(Node*)(p.begin());
@@ -430,7 +432,7 @@ public:
         if (!x.ref_.decrement())
             free(x);
     }
-    
+
     void append(const T t) // fix to const ref for complex types TODO
     {
         detach();
@@ -444,9 +446,9 @@ public:
             node_construct(cast(Node*)(p.append()), cpy);
         }
     }
-    
+
     alias append opCatAssign;
-    
+
     static if (isQObjectType!T || isObjectType!T || isValueType!T || is(T == string))
     {
         T at(int i) const
@@ -472,8 +474,8 @@ public:
             assert(i >= 0 && i < p.size(), "QList!T.at(): index out of range");
             return (cast(Node*)(p.at(i))).t();
         }
-    }   
-    
+    }
+
     static if (isQObjectType!T || isObjectType!T || isValueType!T) //binded types
         void node_construct(Node *n, const T t)
         {
@@ -506,7 +508,7 @@ public:
             else
                 *cast(T*)(n) = cast(T)(t);
         }
-    
+
     void node_copy(Node *from, Node *to, Node *src)
     {
 //        writeln("QList node_copy");
@@ -527,13 +529,13 @@ public:
                     T.__constructPlacedNativeCopy(src++, from++); // new (from++) T(*reinterpret_cast<T*>(src++));
         }
         else static if (TI.isLarge || TI.isStatic)
-            while(from != to) 
+            while(from != to)
                 (from++).v = q_new!T(*cast(T*)((src++).v));
         else static if (TI.isComplex)
             while(from != to)
                 q_new_at(from++, *cast(T*)(src++));
     }
-    
+
     T[] toArray()
     {
         T[] res;
@@ -547,7 +549,7 @@ public:
         }
         return res;
     }
-    
+
     void free(QListData.Data* data)
     {
 //        writeln("QList data destroyed");
@@ -556,7 +558,7 @@ public:
         if (data.ref_.load() == 0)
             qFree(data);
     }
-    
+
     void node_destruct(Node *from, Node *to)
     {
         static if (isQObjectType!T || isObjectType!T) //binded types
@@ -583,7 +585,7 @@ public:
                 while (from != to) --to, cast(T*)(to).__dtor();
         }
     }
-    
+
     //iteration support
     int opApply(int delegate(ref T) dg)
     {

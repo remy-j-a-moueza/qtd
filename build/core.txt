@@ -25,6 +25,7 @@ set (d_qt_files
     core/QVariant
     )
 set (d_qtd_files
+    Core
     QtdObject
     Signal
     String

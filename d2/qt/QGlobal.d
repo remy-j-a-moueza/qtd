@@ -1,55 +1,16 @@
 module qt.QGlobal;
 
-public import qtd.String;
 public import qt.QDefines;
 
-version (Tango)
-{
-    import tango.io.Stdout;
-    void writeln(string s)
-    {
-        Stdout(s).newline;
-    }
-    package import tango.stdc.stdlib,
-                   tango.core.Memory;
-}
-else
-{
-    import std.stdio;
-    package import std.c.stdlib,
-                   core.memory;
-}
+import
+    std.stdio,
+    std.c.stdlib,
+    core.memory;
 
-T static_cast(T, U)(U obj)
-{
-    return cast(T)cast(void*)obj;
-}
+public import // TODO: import privately
+    qtd.String,
+    qtd.Core;
 
-template QT_BEGIN_NAMESPACE() {
-}
-
-template QT_END_NAMESPACE() {
-}
-
-template QT_BEGIN_HEADER() {
-}
-
-template QT_END_HEADER() {
-}
-
-mixin QT_BEGIN_HEADER;
-mixin QT_BEGIN_NAMESPACE;
-
-// Defined in qtd.QtdObject
-extern(C) void qtd_QtdObject_delete(void* dPtr);
-
-version(cpp_shared)
-{
-    extern (C) void qtd_core_initCallBacks(void* toUtf8, void* del_d_obj);
-    static this() {
-        qtd_core_initCallBacks(&qtd_toUtf8, &qtd_QtdObject_delete);
-    }
-}
 
 string tr(string arg) {
     return arg;
@@ -62,9 +23,8 @@ bool QT_VERSION_CHECK( ushort major, ushort minor, ushort patch )
 {
 	return cast(bool)((major<<16)|(minor<<8)|(patch));
 }
-//TODO(katrina) get this from the C++ side
+
 const char[] QT_PACKAGEDATE_STR = "2008-09-27";
-//TODO(katrina) get this from the C++ side
 const char[] QT_PACKAGE_TAG = "gc9953de622c6a0f655322e0d9f5bd6dc2803b470";
 
 /*
@@ -93,7 +53,7 @@ else version (X86_64)
     alias qint64 qptrdiff;
 }
 
-const byte QT_POINTER_SIZE = 8;
+enum byte QT_POINTER_SIZE = 8;
 
 alias int QNoImplicitBoolCast;
 
@@ -466,61 +426,6 @@ void * qRealloc(void * ptr, size_t size);
 void * qMemCopy(void * dest, void * src, size_t n);
 void * qMemSet(void * dest, int c, size_t n);
 
-struct QFlags(Enum)
-{
-private:
-    alias void **Zero;
-    int i;
-
-public:
-    alias Enum enum_type;
-
-    public static QFlags!(Enum) opCall(Enum)(QFlags f) {
-        QFlags!(Enum) res;
-        res.i = f.i;
-        return res;
-	}
-
-    public static QFlags opCall(Enum)(Enum f) {
-	    QFlags!(Enum) res;
-	    res.i = f;
-		return res;
-	}
-
-    public static QFlags opCall(Enum)(int f) {
-	    QFlags!(Enum) res;
-	    res.i = cast(Enum) f;
-		return res;
-	}
-
-//    this(Zero = 0) : i(0) {}
-//    this(QFlag f) : i(f) {}
-
-//    QFlags!(Enum) opAssign(QFlags f) { i = f.i; return *this; }
-    QFlags!(Enum) opAssign(int f) { i = f; return *this; }
-    QFlags!(Enum) opAndAssign(int mask) { i &= mask; return *this; }
-    QFlags!(Enum) opAndAssign(uint mask) { i &= mask; return *this; }
-    QFlags!(Enum) opOrAssign(QFlags f) { i |= f.i; return *this; }
-    QFlags!(Enum) opOrAssign(Enum f) { i |= f; return *this; }
-    QFlags!(Enum) opXorAssign(QFlags f) { i ^= f.i; return *this; }
-    QFlags!(Enum) opXorAssign(Enum f) { i ^= f; return *this; }
-
-    int toInt() { return i; }
-
-    QFlags!(Enum) opOr(QFlags f) { QFlags g; g.i = i | f.i; return g; }
-    QFlags!(Enum) opOr(Enum f) { QFlags g; g.i = i | f; return g; }
-    QFlags!(Enum) opXor(QFlags f) { QFlags g; g.i = i ^ f.i; return g; }
-    QFlags!(Enum) opXor(Enum f) { QFlags g; g.i = i ^ f; return g; }
-    QFlags!(Enum) opAnd(int mask) { QFlags g; g.i = i & mask; return g; }
-    QFlags!(Enum) opAnd(uint mask) { QFlags g; g.i = i & mask; return g; }
-    QFlags!(Enum) opAnd(Enum f) { QFlags g; g.i = i & f; return g; }
-    QFlags!(Enum) opCom() { QFlags g; g.i = ~i; return g; }
-
-//    bool operator!() { return !i; }
-
-//    bool testFlag(Enum f) { return i & f; }
-}
-
 /* TODO typesafety
 #define Q_DECLARE_FLAGS(Flags, Enum)\
 typedef QFlags<Enum> Flags;
@@ -553,42 +458,43 @@ int qrand();
    This gives us the possibility to check which modules the user can
    use. These are purely compile time checks and will generate no code.
 */
+enum : ushort
+{
+    /* Qt modules */
 
-/* Qt modules */
-
-const ushort QT_MODULE_CORE =                 0x0001;
-const ushort QT_MODULE_GUI =                  0x0002;
-const ushort QT_MODULE_NETWORK =              0x0004;
-const ushort QT_MODULE_OPENGL =               0x0008;
-const ushort QT_MODULE_SQL =                  0x0010;
-const ushort QT_MODULE_XML =                  0x0020;
-const ushort QT_MODULE_QT3SUPPORTLIGHT =      0x0040;
-const ushort QT_MODULE_QT3SUPPORT =           0x0080;
-const ushort QT_MODULE_SVG =                  0x0100;
-const ushort QT_MODULE_ACTIVEQT =             0x0200;
-const ushort QT_MODULE_GRAPHICSVIEW =         0x0400;
-const ushort QT_MODULE_SCRIPT =               0x0800;
-const ushort QT_MODULE_XMLPATTERNS =          0x1000;
-const ushort QT_MODULE_HELP =                 0x2000;
-const ushort QT_MODULE_TEST =                 0x4000;
-const ushort QT_MODULE_DBUS =                 0x8000;
+    QT_MODULE_CORE =                 0x0001,
+    QT_MODULE_GUI =                  0x0002,
+    QT_MODULE_NETWORK =              0x0004,
+    QT_MODULE_OPENGL =               0x0008,
+    QT_MODULE_SQL =                  0x0010,
+    QT_MODULE_XML =                  0x0020,
+    QT_MODULE_QT3SUPPORTLIGHT =      0x0040,
+    QT_MODULE_QT3SUPPORT =           0x0080,
+    QT_MODULE_SVG =                  0x0100,
+    QT_MODULE_ACTIVEQT =             0x0200,
+    QT_MODULE_GRAPHICSVIEW =         0x0400,
+    QT_MODULE_SCRIPT =               0x0800,
+    QT_MODULE_XMLPATTERNS =          0x1000,
+    QT_MODULE_HELP =                 0x2000,
+    QT_MODULE_TEST =                 0x4000,
+    QT_MODULE_DBUS =                 0x8000,
 
 /* Qt editions */
 
-const ushort QT_EDITION_CONSOLE = (QT_MODULE_CORE
+    QT_EDITION_CONSOLE = (QT_MODULE_CORE
                                  | QT_MODULE_NETWORK
                                  | QT_MODULE_SQL
                                  | QT_MODULE_SCRIPT
                                  | QT_MODULE_XML
                                  | QT_MODULE_XMLPATTERNS
                                  | QT_MODULE_TEST
-                                 | QT_MODULE_DBUS);
-const ushort QT_EDITION_DESKTOPLIGHT = (QT_MODULE_CORE
+                                 | QT_MODULE_DBUS),
+    QT_EDITION_DESKTOPLIGHT = (QT_MODULE_CORE
                                  | QT_MODULE_GUI
                                  | QT_MODULE_QT3SUPPORTLIGHT
                                  | QT_MODULE_TEST
-                                 | QT_MODULE_DBUS);
-const ushort QT_EDITION_OPENSOURCE = (QT_MODULE_CORE
+                                 | QT_MODULE_DBUS),
+    QT_EDITION_OPENSOURCE = (QT_MODULE_CORE
                                  | QT_MODULE_GUI
                                  | QT_MODULE_NETWORK
                                  | QT_MODULE_OPENGL
@@ -602,15 +508,16 @@ const ushort QT_EDITION_OPENSOURCE = (QT_MODULE_CORE
                                  | QT_MODULE_GRAPHICSVIEW
                                  | QT_MODULE_HELP
                                  | QT_MODULE_TEST
-                                 | QT_MODULE_DBUS);
-const ushort QT_EDITION_DESKTOP = (QT_EDITION_OPENSOURCE
-                                 | QT_MODULE_ACTIVEQT);
-const ushort QT_EDITION_UNIVERSAL =   QT_EDITION_DESKTOP;
-const ushort QT_EDITION_ACADEMIC =    QT_EDITION_DESKTOP;
-const ushort QT_EDITION_EDUCATIONAL = QT_EDITION_DESKTOP;
-const ushort QT_EDITION_EVALUATION =  QT_EDITION_DESKTOP;
+                                 | QT_MODULE_DBUS),
+    QT_EDITION_DESKTOP = (QT_EDITION_OPENSOURCE
+                                 | QT_MODULE_ACTIVEQT),
+    QT_EDITION_UNIVERSAL =   QT_EDITION_DESKTOP,
+    QT_EDITION_ACADEMIC =    QT_EDITION_DESKTOP,
+    QT_EDITION_EDUCATIONAL = QT_EDITION_DESKTOP,
+    QT_EDITION_EVALUATION =  QT_EDITION_DESKTOP
+}
 
-mixin QT_END_NAMESPACE;
+/+
 
 private
 struct Align
@@ -632,55 +539,6 @@ template AlignPad(size_t base, size_t aligned)
             + aligned;
 }
 
-template InstanceSize(T)
-{
-    static if( is( T == Object ) )
-        const InstanceSize = 2*(void*).sizeof;
-    else
-        const InstanceSize = Max!(
-            AlignPad!(
-                InstanceSize!(Super!(T)),
-                InterfaceCount!(T)*(void*).sizeof),
-
-            AlignPad!(
-                InstanceSizeImpl!(T, 0),
-                + InterfaceCount!(T)*(void*).sizeof));
-}
-
-private
-template Super(T)
-{
-    static if( is( T S == super ) )
-        alias First!(S) Super;
-    else
-        static assert(false, "Can't get super of "~T.mangleof);
-}
-
-private
-template First(T)
-{
-    alias T First;
-}
-
-private
-template First(T, Ts...)
-{
-    alias T First;
-}
-
-private
-template InstanceSizeImpl(T, size_t i)
-{
-    static if( i < T.tupleof.length )
-        const InstanceSizeImpl = Max!(
-            T.tupleof[i].offsetof + T.tupleof[i].sizeof,
-            InstanceSizeImpl!(T, i+1));
-    else
-        // This is necessary to account for classes without member
-        // variables.
-        const InstanceSizeImpl = 2*(void*).sizeof;
-}
-
 private
 template Max(size_t a, size_t b)
 {
@@ -689,51 +547,6 @@ template Max(size_t a, size_t b)
     else
         const Max = b;
 }
-
-private
-template InterfaceCount(T)
-{
-    static if( is( T == Object ) )
-        const InterfaceCount = 0u;
-    else static if( is( T S == super ) )
-        const InterfaceCount = InterfaceCountImpl!(S);
-}
-
-private
-template InterfaceCountImpl(TBase, TInterfaces...)
-{
-    const InterfaceCountImpl = TInterfaces.length;
-}
-
-/+
-scope class StackObject(C)
-{
-    byte[InstanceSize!(C)] data;
-    bool constructed;
-
-    C opCall(A...)(A args)
-    {
-        assert(!constructed);
-
-        auto r = new(&data)C(args);
-        r.__stackAllocated = true;
-        constructed = true;
-
-        return r;
-    }
-
-    ~this()
-    {
-        if (constructed)
-        {
-            auto obj = cast(C)&data;
-            delete obj;
-        }
-    }
-}
 +/
 
 alias void DArray;
-
-mixin QT_END_HEADER;
-

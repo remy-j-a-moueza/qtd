@@ -5,7 +5,7 @@
 
 // ---externC---
 // QPointF::operator<<(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void qtd_QPointF_writeTo_QDataStream
+QTD_EXTERN QTD_DLL_EXPORT void qtd_QPointF_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -16,7 +16,7 @@ extern "C" DLL_PUBLIC void qtd_QPointF_writeTo_QDataStream
 }
 
 // QPointF::operator>>(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void qtd_QPointF_readFrom_QDataStream
+QTD_EXTERN QTD_DLL_EXPORT void qtd_QPointF_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {

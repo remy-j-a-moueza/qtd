@@ -8,7 +8,7 @@ import
 import std.string : startsWith;
 
 
-template isQObjectType(T)
+template isQObjectType(T) //
 {
     enum isQObjectType = is(T.__isQObjectType);
 }
@@ -33,7 +33,7 @@ template isQtType(T)
     enum isQtType = isQObjectType!(T) || isObjectType!(T) || isValueType!(T) || is(T.__isQtType);
 }
 */
-template isNativeType(T) // type that doesn't require conversion i.e. is the same in C++ and D
+template isNativeType(T)
 {
     enum isNativeType = isNumeric!T || is(T == bool) || is(T == struct);
 }
@@ -45,7 +45,7 @@ template isStringType(T) // string type
 
 template isQList(T)
 {
-    enum isQList = startsWith(Unqual!(T).stringof, "QList!");
+    enum isQList = startsWith(Unqual!(T).stringof, "QList!"); //hack
 }
 
 // returns full name of enum:
@@ -64,7 +64,6 @@ template enumFullName(T)
         enum enumFullName = qualifiedDName!T;
 }
 
-
 // converts a D argument type to C++ for registering in Qt meta system
 string qtDeclArg(T)()
 {
@@ -76,11 +75,10 @@ string qtDeclArg(T)()
         return "QString";
     else static if (isQList!T)
     {
-        alias templateParam!T ElementType;
-        static if (is(ElementType == string))
+        static if (is(T.ElementType == string))
             return "QStringList";
         else
-            return "QList<" ~ qtDeclArg!(templateParam!T)() ~ ">";
+            return "QList<" ~ qtDeclArg!(T.ElementType)() ~ ">";
     }
     else static if (is(T == enum))
         return enumFullName!T;
@@ -103,7 +101,7 @@ string generateConvToD(uint argIndex)
         else static if (isValueType!(Args[${0}]))
         {
             // COMPILER BUG: 'new' chokes on Args[argIndex], hence the alias
-            alias Args[${0}] Args${0}; 
+            alias Args[${0}] Args${0};
             auto _out${0} = new Args${0}(Args[${0}].__constructNativeCopy(_a[${0}]));
         }
         else static if (isStringType!(Args[${0}]))

@@ -2,13 +2,6 @@ module qt.core.QMetaType;
 public import qt.core.Qt;
 private import qt.core.QDataStream;
 
-version (Tango)
-{
-    import tango.core.Array;
-    import tango.stdc.stringz;
-    import tango.core.Traits;
-}
-
 alias extern(C) void *function(void *copy) Ctor;
 alias extern(C) void function(void *obj) Dtor;
 alias extern(C) void function(void *stream, void * object) StreamOp;
@@ -45,7 +38,7 @@ public template MetaTypeOps(T)
 	    return cast(void*)data;
 	}
     }
-    
+
 
     extern(C) void dtor(void* obj)
     {
@@ -65,7 +58,7 @@ public template MetaTypeOps(T)
 public int qRegisterMetaType(T)(string name = null)
 {
     if (!name.length)
-	name = typeid(T).toString; 
+	name = typeid(T).toString;
 
     return qtd_registerType(toStringz(name), &MetaTypeOps!(T).ctor, &MetaTypeOps!(T).dtor);
 }
@@ -86,20 +79,20 @@ public void qRegisterMetaTypeStreamOperators(T)(void function(ref QDataStream, T
     static void function (ref QDataStream, ref T)  LoadOp;
     SaveOp = saveOp;
     LoadOp = loadOp;
-    
+
     if (!name.length)
-	name = typeid(T).toString; 
-    
+	name = typeid(T).toString;
+
     extern(C) void saveOpC(void *stream, void *object)
     {
 	QDataStream dstream = new DataStreamPriv(stream);
 	Stdout(object).newline;
 	static if (is(T == class) || is(T == interface))
-	    SaveOp(dstream, cast(T)object);	
-	else 
+	    SaveOp(dstream, cast(T)object);
+	else
 	    SaveOp(dstream, *cast(T*)object);
     }
-    
+
     extern(C) void loadOpC(void *stream, void *object)
     {
 	//return stream;

@@ -140,6 +140,9 @@ public:
                                           const AbstractMetaClass *implementor, int id);
     void marshalFromCppToD(QTextStream &s, const ComplexTypeEntry* ctype);
 
+    // generates output analogous to that of qtd.Core.qtdExport
+    static void writeDExport(QTextStream &s, QString retType, QString name, QString args, QString body);
+
 private:
     QString subDirectoryForPackage(const QString &package) const { return QString(package).replace(".", "/"); }
     void writeInstantiatedType(QTextStream &s, const AbstractMetaType *abstractMetaType) const;

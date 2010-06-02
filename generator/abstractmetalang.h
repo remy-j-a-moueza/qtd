@@ -395,7 +395,7 @@ public:
         SignalFunction,
         EmptyFunction,
         SlotFunction,
-        GlobalScopeFunction
+        GlobalScopeFunction,
     };
 
     enum CompareResult {
@@ -414,6 +414,15 @@ public:
         Equal                       = 0x0000001f,
         NotEqual                    = 0x00001000
     };
+
+    enum Option
+    {
+        NoOptions                   = 0,
+        DeclaringClass              = 0x01,
+        NoExternNamespace           = 0x02
+    };
+
+    typedef QFlags<Option> Options;
 
     AbstractMetaFunction()
         : m_function_type(NormalFunction),
@@ -444,7 +453,7 @@ public:
     QString minimalSignature(int reduce = 0) const;
     QStringList possibleIntrospectionCompatibleSignatures() const;
 
-    QString marshalledName(bool classIsOwner = true) const;
+    QString marshalledName(Options options = NoOptions) const;
 
     // true if one or more of the arguments are of QtJambiObject subclasses
     bool argumentsHaveNativeId() const

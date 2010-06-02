@@ -106,6 +106,12 @@ struct FunctionDef
     */
 }
 
+struct ClassInfoDef
+{
+    string name;
+    string value;
+}
+
 FunctionDef newSlot(string sig, string args)
 {
     return FunctionDef(sig, args, Access.Public);
@@ -116,13 +122,25 @@ FunctionDef newSignal(string sig, string args)
     return FunctionDef(sig, args, Access.Protected);
 }
 
+struct ClassDef
+{
+    string classname;
+    FunctionDef[] signalList;
+    FunctionDef[] slotList;
+    ClassInfoDef[] classInfoList;
+}
+
 struct Generator
 {
     string output;
     string[] strings;
 //    QByteArray purestSuperClass;
 //    QList<QByteArray> metaTypes;
+
+    ClassDef cdef;
 }
+
+
 
 int lengthOfEscapeSequence(string s, uint i)
 {
@@ -187,10 +205,31 @@ void generateFunctions(ref Generator gen, FunctionDef[] list, string functype, b
     }
 }
 
-string generateCode(string className, FunctionDef[] signalList, FunctionDef[] slotList)
+ClassInfoDef[] generateClassInfoDefs(T)()
 {
-    auto gen = Generator("", []);
+    ClassInfoDef[] defs;
+    alias GetAttributes!(T, "Q_CLASSINFO") classInfos;
+    // COMPILER BUG:
+    enum len = classInfos.length;
+    foreach (i, _; Repeat!(void, len))
+        defs ~= ClassInfoDef(classInfos[i].tuple[2], classInfos[i].tuple[3]);
 
+    return defs;
+}
+
+void generateClassInfos(ref Generator gen)
+{
+    if (!gen.cdef.classInfoList.length)
+        return;
+
+    gen.output ~= "\n // classinfo: key, value\n";
+
+    foreach (c; gen.cdef.classInfoList)
+        gen.output ~= format_ctfe("    ${}, ${},\n", strreg(gen, c.name), strreg(gen, c.value));
+}
+
+string generateCode(ref Generator gen)
+{
 /*    bool isQt = (cdef->classname == "Qt");
     bool isQObject = (cdef->classname == "QObject");
     bool isConstructible = !cdef->constructorList.isEmpty();
@@ -229,11 +268,11 @@ string generateCode(string className, FunctionDef[] signalList, FunctionDef[] sl
     gen.output ~= "private static const uint[] qt_meta_data = [\n";
     gen.output ~= format_ctfe("\n // content:\n");
     gen.output ~= format_ctfe("    ${},       // revision\n", 2);
-    gen.output ~= format_ctfe("    ${},       // classname\n", strreg(gen, className));
-    gen.output ~= format_ctfe("    ${}, ${}, // classinfo\n", 0, 0);
-//    index += cdef->classInfoList.count() * 2;
+    gen.output ~= format_ctfe("    ${},       // classname\n", strreg(gen, gen.cdef.classname));
+    gen.output ~= format_ctfe("    ${}, ${}, // classinfo\n", gen.cdef.classInfoList.length, gen.cdef.classInfoList.length ? index : 0);
+    index += gen.cdef.classInfoList.length * 2;
 
-    int methodCount = signalList.length + slotList.length;// + cdef->methodList.count();
+    int methodCount = gen.cdef.signalList.length + gen.cdef.slotList.length;// + cdef->methodList.count();
     gen.output ~= format_ctfe("    ${}, ${}, // methods\n", methodCount, methodCount ? index : 0);
     index += methodCount * 5;
     gen.output ~= format_ctfe("    ${}, ${}, // properties\n", propertyList.length, propertyList.length ? index : 0);
@@ -251,17 +290,17 @@ string generateCode(string className, FunctionDef[] signalList, FunctionDef[] sl
 //
 // Build classinfo array
 //
-//    generateClassInfos();
+    generateClassInfos(gen);
 
 //
 // Build signals array first, otherwise the signal indices would be wrong
 //
-    generateFunctions(gen, signalList, "signal", MethodFlags.MethodSignal);
+    generateFunctions(gen, gen.cdef.signalList, "signal", MethodFlags.MethodSignal);
 
 //
 // Build slots array
 //
-    generateFunctions(gen, slotList, "slot", MethodFlags.MethodSlot);
+    generateFunctions(gen, gen.cdef.slotList, "slot", MethodFlags.MethodSlot);
 
 //
 // Build method array
@@ -344,18 +383,6 @@ string qtDeclArgs(Args...)()
     return ret;
 }
 
-string dDeclArgs(Args...)()
-{
-    string ret;
-    foreach(i, _; Args)
-    {
-        if (i > 0)
-            ret ~= ", ";
-        ret ~= fullName!(Args[i]);
-    }
-    return ret;
-}
-
 size_t commaCount(int argCount)
 {
     size_t ret = 0;
@@ -364,7 +391,7 @@ size_t commaCount(int argCount)
     return ret;
 }
 
-FunctionDef[] generateFuncDefs(alias newFunc, Funcs...)()
+FunctionDef[] genFuncDefs(alias newFunc, Funcs...)()
 {
     typeof(return) res;
     enum funcsCount = Funcs.length;
@@ -446,10 +473,26 @@ string generateDispatchSwitch(size_t methodCount)
     return res ~ "}\n";
 }
 
+string generateMetaInfo(T)()
+{
+    Generator gen;
+
+    gen.cdef.classname = T.stringof;
+
+    gen.cdef.slotList = genFuncDefs!(newSignal, T.signals)();
+    gen.cdef.signalList = genFuncDefs!(newSlot, T.slots)();
+    gen.cdef.classInfoList = generateClassInfoDefs!T();
+
+    generateCode(gen);
+
+    return gen.output;
+}
+
 mixin template Q_OBJECT()
 {
     import std.typetuple;
     import qtd.Marshal;
+    import std.stdio;
     import qt.core.QString; // for QStringUtil.toNative
 
 public: // required to override the outside scope protection.
@@ -460,13 +503,10 @@ public: // required to override the outside scope protection.
     alias findSlots!(This) slots;
     alias TypeTuple!(signals, slots) methods;
 
- 
     mixin (generateSignalEmitters(signals.length));
     mixin (generateSlotAliases(slots.length));
-
-    auto signalList = generateFuncDefs!(newSignal, signals)();
-    auto slotList = generateFuncDefs!(newSlot, slots)();
-    mixin (generateCode(typeof(this).stringof, signalList, slotList));
+    //pragma(msg, generateMetaInfo!This());
+    mixin (generateMetaInfo!This());
 
     protected int qt_metacall(QMetaObject.Call _c, int _id, void **_a)
     {
@@ -490,25 +530,38 @@ public: // required to override the outside scope protection.
     @property
     override QMetaObject metaObject() const { return staticMetaObject(); }
 
-    private static __gshared QMetaObject _staticMetaObject;
-    private static __gshared QMetaObjectNative _nativeStaticMetaObject;
+    private static
+    {
+        __gshared QMetaObject staticMetaObject_;
+        __gshared QMetaObjectNative nativeStaticMetaObject_;
+        bool staticMoInited_;
+    }
 
     @property
     static QMetaObject staticMetaObject()
     {
-        // TODO: synchronize or enable static constructors in circular modules
-        if(!_staticMetaObject)
+        // using a thread-local flag to mitigate
+        // the performance hit caused by lazy initialization
+        if(!staticMoInited_)
         {
-            alias BaseClassesTuple!(This)[0] Base;
+            synchronized(qtdMoLock)
+            {
+                if (!staticMetaObject_)
+                {
+                    alias BaseClassesTuple!(This)[0] Base;
 
-            _nativeStaticMetaObject = QMetaObjectNative(
-                Base.staticMetaObject.nativeId,
-                qt_meta_stringdata.ptr,
-                qt_meta_data.ptr, null);
+                    nativeStaticMetaObject_ = QMetaObjectNative(
+                        Base.staticMetaObject.nativeId,
+                        qt_meta_stringdata.ptr,
+                        qt_meta_data.ptr, null);
 
-            QMetaObject.create!This(&_nativeStaticMetaObject);
+                    QMetaObject.create!This(&nativeStaticMetaObject_);
+                }
+            }
+            staticMoInited_ = true;
         }
-        return _staticMetaObject;
+
+        return staticMetaObject_;
     }
 
     /*internal*/ static void setStaticMetaObject(QMetaObject m)

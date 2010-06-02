@@ -12,7 +12,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
     #set( SUFFIXBIN "${SUFFIXBIN}-debug" )
     add_definitions(-DDEBUG)
 elseif (NOT ${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS])
-    message(STATUS "Only debug and release configurations are supproted. The configuration is changed to 'Release'")
+    message(STATUS "Only debug and release configurations are supported. The configuration is changed to 'Release'")
     set(CMAKE_BUILD_TYPE Release)
 endif (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
 
@@ -28,7 +28,7 @@ if (NOT SECOND_RUN)
 option(ALLOW_IN_SOURCE_BUILDS "Allow in-source builds" "OFF")
 if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT ALLOW_IN_SOURCE_BUILDS)
     message(FATAL_ERROR "In-source builds are not allowed. "
-    "Please create a directory and run cmake from there, passing the path"
+    "Please create a directory and run cmake from there, passing the path "
     "to this source directory as the last argument. "
     "This process created the file `CMakeCache.txt` and the directory `CMakeFiles'. Please delete them. "
     "Or you can restart cmake with `-DALLOW_IN_SOURCE_BUILDS=1`, but it is not recommended."
@@ -180,13 +180,10 @@ if(CMAKE_HOST_WIN32)
 endif(CMAKE_HOST_WIN32)
 
 if(CMAKE_HOST_WIN32 AND D_IS_MARS)
-    set(CPP_SHARED 1 CACHE INTERNAL "")
-endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
-
-if(D_IS_MARS)
     set(D_FLAGS -version=cpp_shared)
     add_definitions(-DCPP_SHARED)
-endif(D_IS_MARS)
+    set(CPP_SHARED 1 CACHE INTERNAL "")
+endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
 
 if(UNITTEST)
     add_d_versions(QtdUnittest)
@@ -438,7 +435,7 @@ foreach(package_big ${all_packages})
         endforeach(d_source ${d_sources})
     endif(NOT GENERATE_DI_FILES)
 
-    ## Build the CPP part.
+    ### Build the CPP part.
     if(CPP_SHARED)
         set(cpp_method SHARED)
     else(CPP_SHARED)
@@ -447,6 +444,8 @@ foreach(package_big ${all_packages})
     add_library(cpp_${package} ${cpp_method} ${cpp_sources})
     set_property(TARGET cpp_${package} PROPERTY RUNTIME_OUTPUT_DIRECTORY lib)
     set_property(TARGET cpp_${package} PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
+    set_property(TARGET cpp_${package} PROPERTY COMPILE_DEFINITIONS QTD_${package_upper})
+
     set(link_cpp ${link_cpp} ${QT_QT${package_upper}_LIBRARY})
     if(CPP_SHARED)
     else(CPP_SHARED)
@@ -498,7 +497,7 @@ foreach(package_big ${all_packages})
         add_custom_command(
             OUTPUT "${d_implib}"
             COMMAND "${IMPLIB}"
-            ARGS  /system /PAGESIZE:32 ${d_implib_native} ${cpp_lib_native}
+            ARGS  /system /PAGESIZE:64 ${d_implib_native} ${cpp_lib_native}
             DEPENDS  "cpp_${package}"
             COMMENT "Creating implib ${lib_name}"
             )
@@ -516,6 +515,7 @@ foreach(package_big ${all_packages})
     ## Generate dependences for make (or nmake).
     add_custom_target(${package})
     add_dependencies(${package} ${lib_name})
+
     add_dependencies(${lib_name} cpp_${package})
     foreach(depend ${required})
         string(TOLOWER ${depend} depend)

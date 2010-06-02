@@ -3,7 +3,7 @@
 #include "qtd_core.h"
 
 // QSizeF::operator<<(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void __qtd_QSizeF_writeTo_QDataStream
+QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSizeF_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -14,7 +14,7 @@ extern "C" DLL_PUBLIC void __qtd_QSizeF_writeTo_QDataStream
 }
 
 // QSizeF::operator>>(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void __qtd_QSizeF_readFrom_QDataStream
+QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSizeF_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -25,7 +25,7 @@ extern "C" DLL_PUBLIC void __qtd_QSizeF_readFrom_QDataStream
 }
 
 // QSizeF::scale(const QSizeF & s, Qt::AspectRatioMode mode)
-extern "C" DLL_PUBLIC void __qtd_QSizeF_scale_QSizeF_AspectRatioMode
+QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSizeF_scale_QSizeF_AspectRatioMode
 (void* __this_nativeId,
  void* s0,
  int mode1)

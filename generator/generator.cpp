@@ -140,6 +140,24 @@ bool Generator::hasDefaultConstructor(const AbstractMetaType *type)
     return false;
 }
 
+// hackery to get qt module names
+QString Generator::packageToQtModule(QString package, ModuleNameType nameType)
+{
+    if (!package.startsWith("qt."))
+        qFatal(qPrintable("Package " + package + " does not start with 'qt.'"));
+
+    QString module = package.right(package.length() - 3);
+
+    if (nameType == ShortUpper)
+        return module.toUpper();
+    else if (nameType == LongCamel) {
+        module[0] = module[0].toTitleCase();
+        return "Qt" + module;
+    }
+    else
+        Q_ASSERT(0);
+}
+
 bool isLinearContainer(const ContainerTypeEntry *type)
 {
     if (type->type() == ContainerTypeEntry::ListContainer

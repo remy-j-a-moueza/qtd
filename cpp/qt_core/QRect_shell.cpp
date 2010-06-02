@@ -4,7 +4,7 @@
 #include "qtd_core.h"
 
 // QRect::contains(const QPoint & p, bool proper) const
-extern "C" DLL_PUBLIC bool qtd_QRect_contains_QPoint_bool
+QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRect_contains_QPoint_bool
 (void* __this_nativeId,
  void* p0,
  bool proper1)
@@ -19,7 +19,7 @@ extern "C" DLL_PUBLIC bool qtd_QRect_contains_QPoint_bool
 }
 
 // QRect::contains(const QRect & r, bool proper) const
-extern "C" DLL_PUBLIC bool qtd_QRect_contains_QRect_bool
+QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRect_contains_QRect_bool
 (void* __this_nativeId,
  void* r0,
  bool proper1)
@@ -34,7 +34,7 @@ extern "C" DLL_PUBLIC bool qtd_QRect_contains_QRect_bool
 }
 
 // QRect::intersects(const QRect & r) const
-extern "C" DLL_PUBLIC bool qtd_QRect_intersects_QRect
+QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRect_intersects_QRect
 (void* __this_nativeId,
  void* r0)
 {
@@ -48,7 +48,7 @@ extern "C" DLL_PUBLIC bool qtd_QRect_intersects_QRect
 }
 
 // QRect::normalized() const
-extern "C" DLL_PUBLIC QRect qtd_QRect_normalized
+QTD_EXTERN QTD_DLL_PUBLIC QRect qtd_QRect_normalized
 (void* __this_nativeId)
 {
     QRect *__qt_this = (QRect *) __this_nativeId;
@@ -56,7 +56,7 @@ extern "C" DLL_PUBLIC QRect qtd_QRect_normalized
 }
 
 // QRect::operator&(const QRect & r) const
-extern "C" DLL_PUBLIC QRect qtd_QRect_operator_and_QRect
+QTD_EXTERN QTD_DLL_PUBLIC QRect qtd_QRect_operator_and_QRect
 (void* __this_nativeId,
  void* r0)
 {
@@ -66,7 +66,7 @@ extern "C" DLL_PUBLIC QRect qtd_QRect_operator_and_QRect
 }
 
 // QRect::operator<<(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void qtd_QRect_writeTo_QDataStream
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QRect_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -77,7 +77,7 @@ extern "C" DLL_PUBLIC void qtd_QRect_writeTo_QDataStream
 }
 
 // QRect::operator>>(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void qtd_QRect_readFrom_QDataStream
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QRect_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -88,7 +88,7 @@ extern "C" DLL_PUBLIC void qtd_QRect_readFrom_QDataStream
 }
 
 // QRect::operator|(const QRect & r) const
-extern "C" DLL_PUBLIC QRect qtd_QRect_operator_or_QRect
+QTD_EXTERN QTD_DLL_PUBLIC QRect qtd_QRect_operator_or_QRect
 (void* __this_nativeId,
  void* r0)
 {

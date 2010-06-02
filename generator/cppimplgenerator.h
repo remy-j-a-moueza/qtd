@@ -210,13 +210,12 @@ public:
     static void writeVirtualFunctionDispatchName(QTextStream &s, const AbstractMetaFunction *function, bool d_export = false);
     static void writeVirtualDispatchFunction(QTextStream &s, const AbstractMetaFunction *function, const AbstractMetaClass *java_class, bool d_export = false);
     static void writeInterfaceCasts(QTextStream &s, const AbstractMetaClass *java_class);
-    void writeSignalsHandling(QTextStream &s, const AbstractMetaClass *java_class);
     void writeQObjectLink(QTextStream &s, const AbstractMetaClass *java_class);
     void writeSignalEmitter(QTextStream &s, const AbstractMetaClass *java_class, AbstractMetaFunction *signal);
-    static void writeInitCallbacks(QTextStream &s, const AbstractMetaClass *java_class);
     static void writeQtdEntityFunction(QTextStream &s, const AbstractMetaClass *java_class);
     void writeRefArguments(QTextStream &s, const AbstractMetaFunction *java_function);
     void writeValueFunctions(QTextStream &s, const AbstractMetaClass *java_class);
+    void writeInitCallbacks(QTextStream &s, const  AbstractMetaClass *java_class);
 
 private:
     void writeDefaultConstructedValues_helper(QSet<QString> &values,

@@ -95,6 +95,12 @@ public:
         ForceValueType                  = ExcludeReference | ExcludeConst
     };
 
+    enum ModuleNameType
+    {
+        ShortUpper,
+        LongCamel
+    };
+
     Generator();
 
     void setClasses(const AbstractMetaClassList &classes) { m_classes = classes; }
@@ -114,6 +120,9 @@ public:
     virtual void write(QTextStream &s, const AbstractMetaClass *java_class);
 
     bool hasDefaultConstructor(const AbstractMetaType *type);
+
+    // TODO: this should be a property of the generator set, not inferred from java package.
+    static QString packageToQtModule(QString package, ModuleNameType nameType = ShortUpper);
 
 protected:
     void verifyDirectoryFor(const QFile &file);

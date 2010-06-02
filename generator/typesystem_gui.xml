@@ -19,7 +19,7 @@ private extern (C) void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant(void *d_ptr,
 
 <template name="gui.class_from_variant_native">
 // %CLASS_NAME from QVariant
-extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
+QTD_EXTERN QTD_DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
 (void *d_ptr,
  void* arg__1)
 {
@@ -32,7 +32,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
 
 <template name="gui.class_from_variant_native_shell">
 // %CLASS_NAME from QVariant
-extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
+QTD_EXTERN QTD_DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
 (void *d_ptr,
  void* arg__1)
 {
@@ -47,7 +47,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
         <insert-template name="gui.class_from_variant_java">
             <replace from="%CLASS_NAME" to=""/>
         </insert-template>
-    </inject-code>   
+    </inject-code>
     <inject-code class="java-free">
         <insert-template name="gui.class_from_variant_java_free">
             <replace from="%CLASS_NAME" to=""/>
@@ -58,13 +58,13 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
             <replace from="%CLASS_NAME" to=""/>
         </insert-template>
     </inject-code>
-    
+
   with shell
     <inject-code class="java">
         <insert-template name="gui.class_from_variant_java">
             <replace from="%CLASS_NAME" to=""/>
         </insert-template>
-    </inject-code>   
+    </inject-code>
     <inject-code class="java-free">
         <insert-template name="gui.class_from_variant_java_free">
             <replace from="%CLASS_NAME" to=""/>
@@ -77,7 +77,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
     </inject-code>
 -->
 
-        
+
 <template name="gui.getter_returning_nativepointer">
         public final %RETURN_TYPE %FUNCTION_NAME() {
             QNativePointer np = %FUNCTION_NAME_private();
@@ -222,9 +222,9 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
 
   <rejection class="*" field-name="d_ptr"/>
   <rejection class="*" field-name="d"/>
-  
+
   <rejection class="QAccessibleTableInterface"/>
-  
+
   <rejection class="QWindowsCEStyle"/>
   <rejection class="QWindowsMobileStyle"/>
   <rejection class="QAbstractUndoItem"/>
@@ -712,7 +712,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
     <modify-function signature="operator/=(double)" access="private"/>
     <modify-function signature="operator*(QTransform)const" rename="multiplied"/>
     <modify-function signature="operator*=(QTransform)" access="private"/>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTransform___" quote-before-line="}// class"/>
         </inject-code>
@@ -934,7 +934,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
             <remove-default-expression/>
         </modify-argument>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QBitmap___" quote-before-line="}// class"/>
         </inject-code>
@@ -952,7 +952,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
     <modify-function signature="cursorToX(int*,QTextLine::Edge)const">
         <remove/>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTextLine___" quote-before-line="}// class"/>
         </inject-code>
@@ -999,7 +999,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
     <modify-function signature="inputFormats()" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="outputFormatList()" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="outputFormats()" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPicture___" quote-before-line="}// class"/>
         </inject-code>
@@ -1093,7 +1093,7 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
     <modify-function signature="operator&amp;=(QRect)" remove="all"/>
     <modify-function signature="operator+=(QRect)" remove="all"/>
 
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QRegion___" quote-before-line="}// class"/>
         </inject-code>
@@ -1130,17 +1130,17 @@ extern "C" DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
     <extra-includes>
         <include file-name="qt.core.QPoint" location="java"/>
     </extra-includes>
-    
+
     <modify-function signature="QPolygon(int, const int *)" remove="all"/>
     <modify-function signature="operator+(QVector&lt;QPoint&gt;)const" remove="all"/>
     <modify-function signature="operator&lt;&lt;(QPoint)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(QVector&lt;QPoint&gt;)" remove="all"/>
-    
+
     <inject-code class="java">
     public final void insert(int i, QPoint t) {
         qtd_QPolygon_insert_int_QPoint(__nativeId, i, t);
     }
-    
+
     public final void insert(int i, int n, QPoint t) {
         qtd_QPolygon_insert_int_int_QPoint(__nativeId, i, n, t);
     }
@@ -1156,7 +1156,7 @@ private extern(C) void  qtd_QPolygon_insert_int_int_QPoint(void* __this_nativeId
     </inject-code>
     <inject-code class="native">
 // QPolygon::insert(int i, const QPoint &amp; t)
-extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_QPoint
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygon_insert_int_QPoint
 (void* __this_nativeId,
  int i0,
  QPoint t1)
@@ -1167,7 +1167,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_QPoint
 }
 
 // QPolygon::insert(int i, int n, const QPoint &amp; t)
-extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
 (void* __this_nativeId,
  int i0,
  int n1,
@@ -1178,13 +1178,13 @@ extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
 
 }
     </inject-code>
-    
+
     <inject-code>
         <import-file name="typesystem_gui-java.java" quote-after-line="class QPolygon___" quote-before-line="}// class"/>
     </inject-code>
 <!-- qtd2
         <inject-code class="native">
-      extern "C" JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QPolygon_add_1private)
+      QTD_EXTERN QTD_JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QPolygon_add_1private)
       (JNIEnv *__jni_env, jobject, jlong nativeId, jint x, jint y)
       {
           Q_UNUSED(__jni_env);
@@ -1200,7 +1200,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
     <modify-function signature="operator+(QVector&lt;QPointF&gt;)const" remove="all"/>
     <modify-function signature="operator&lt;&lt;(QPointF)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(QVector&lt;QPointF&gt;)" remove="all"/>
-  
+
         <extra-includes>
             <include file-name="qt.core.QPoint" location="java"/>
         </extra-includes>
@@ -1210,7 +1210,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
         </inject-code>
 <!--
         <inject-code class="native">
-      extern "C" JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QPolygonF_add_1private)
+      QTD_EXTERN QTD_JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QPolygonF_add_1private)
       (JNIEnv *__jni_env, jobject, jlong nativeId, jdouble x, jdouble y)
       {
           Q_UNUSED(__jni_env);
@@ -1241,7 +1241,7 @@ private extern(C) void  qtd_QPolygonF_insert_int_int_QPointF(void* __this_native
     </inject-code>
     <inject-code class="native">
 // QPolygonF::insert(int i, const QPointF &amp; t)
-extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_QPointF
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygonF_insert_int_QPointF
 (void* __this_nativeId,
  int i0,
  QPointF t1)
@@ -1252,7 +1252,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_QPointF
 }
 
 // QPolygonF::insert(int i, int n, const QPointF &amp; t)
-extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 (void* __this_nativeId,
  int i0,
  int n1,
@@ -1272,7 +1272,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <replace from="%CLASS_NAME" to="QIcon"/>
         </insert-template>
 
-    </inject-code>   
+    </inject-code>
     <inject-code class="java-free">
         <insert-template name="gui.class_from_variant_java_free">
             <replace from="%CLASS_NAME" to="QIcon"/>
@@ -1312,7 +1312,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="operator=(QTextFrame::iterator)" remove="all"/>
     <modify-function signature="operator++()" access="private"/>
     <modify-function signature="operator--()" access="private"/>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTextFrame_iterator___" quote-before-line="}// class"/>
         </inject-code>
@@ -1334,7 +1334,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="operator++()" access="private"/>
     <modify-function signature="operator--()" access="private"/>
     <modify-function signature="operator*()const" access="private"/>
-   
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTreeWidgetItemIterator___" quote-before-line="}// class"/>
         </inject-code>
@@ -1348,7 +1348,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="operator--()" access="private"/>
     <modify-function signature="operator++(int)" remove="all"/>
     <modify-function signature="operator--(int)" remove="all"/>
-   
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTextBlock_iterator___" quote-before-line="}// class"/>
         </inject-code>
@@ -1366,7 +1366,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="operator QVariant()const" access="private"/>
     <modify-function signature="QPixmap(const char **)" access="private"/>
     <modify-function signature="serialNumber()const" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPixmap___" quote-before-line="}// class"/>
         </inject-code>
@@ -1381,12 +1381,12 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <include file-name="QBitmap" location="global"/>
             <include file-name="QMatrix" location="global"/>
         </extra-includes>
-        
+
     <inject-code class="java">
         <insert-template name="gui.class_from_variant_java">
             <replace from="%CLASS_NAME" to="QPixmap"/>
         </insert-template>
-    </inject-code>   
+    </inject-code>
     <inject-code class="java-free">
         <insert-template name="gui.class_from_variant_java_free">
             <replace from="%CLASS_NAME" to="QPixmap"/>
@@ -1509,7 +1509,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="selectedTableCells(int*,int*,int*,int*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTextCursor___" quote-before-line="}// class"/>
         </inject-code>
@@ -1536,7 +1536,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="operator+=(const QItemSelectionRange&amp;)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(const QList&lt;QItemSelectionRange&gt;&amp;)" remove="all"/>
     <modify-function signature="operator&lt;&lt;(QItemSelectionRange)" remove="all"/>
-<!--  
+<!--
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QItemSelection___" quote-before-line="}// class"/>
         </inject-code>
@@ -1598,7 +1598,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <replace from="%ARGUMENT_NAMES" to="dx, dy"/>
       </insert-template>
     </inject-code>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QMatrix___" quote-before-line="}// class"/>
         </inject-code>
@@ -1640,7 +1640,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-field name="type" write="false"/>
     <include file-name="QPainterPath" location="global"/>
     <modify-function signature="operator QPointF()const" access="private"/>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPainterPath_Element___" quote-before-line="}// class"/>
         </inject-code>
@@ -1766,7 +1766,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
       <modify-function signature="serialNumber()const" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="textLanguages()const" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QImage___" quote-before-line="}// class"/>
         </inject-code>
@@ -1871,7 +1871,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <include file-name="QPixmap" location="global"/>
     </extra-includes>
     <modify-function signature="operator=(QCursor)" remove="all"/>
-<!--  
+<!--
         <template name="gui.cursor_bitmap_getter">
             <insert-template name="gui.getter_returning_nativepointer">
                 <replace from="%RETURN_TYPE" to="QBitmap"/>
@@ -1912,7 +1912,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </extra-includes>
 
     <modify-function signature="operator=(QPen)" remove="all"/>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPen___" quote-before-line="}// class"/>
         </inject-code>
@@ -1923,11 +1923,11 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="operator=(const QBrush &amp;)" remove="all"/>
 	<!-- restore later - abstract class not handled-->
 	<modify-function signature="gradient() const" remove="all"/>
-    
+
 	<extra-includes>
         <include file-name="QPixmap" location="global"/>
     </extra-includes>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QBrush___" quote-before-line="}// class"/>
         </inject-code>
@@ -1979,7 +1979,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
       <modify-function signature="dark(int)const" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="light(int)const" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QColor___" quote-before-line="}// class"/>
         </inject-code>
@@ -2022,7 +2022,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <remove-default-expression/>
         </modify-argument>
     </modify-function>
-   
+
         <template name="gui.fontmetricsf_boundingrect">
             <insert-template name="gui.fontmetrics_tabarray_function">
                 <replace from="%RETURN_TYPE" to="qt.core.QRectF"/>
@@ -2096,7 +2096,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         </modify-argument>
     </modify-function>
 
- <!-- 
+ <!--
         <template name="gui.fontmetrics_tabarray_function">
         public final %RETURN_TYPE %FUNCTION_NAME(%RECT_ARGUMENTSint flags, String text, int tabStops, int tabArray[]) {
             QNativePointer np = tabArray == null ? null : new QNativePointer(QNativePointer.Type.Int, tabArray.length + 1);
@@ -2185,17 +2185,17 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </modify-field>
   </interface-type>
   <interface-type name="QPaintDevice">
-	
+
 	<modify-function signature="paintEngine () const">
 		<store-result/>
 	</modify-function>
-	
+
   </interface-type>
-  
+
   <interface-type name="QGraphicsItem" delete-in-main-thread="yes">
 	<modify-function signature="setExtension(QGraphicsItem::Extension,QVariant)" remove="all"/>
 	<modify-function signature="supportsExtension(QGraphicsItem::Extension)const" remove="all"/>
-	
+
     <modify-function signature="matrix()const" remove="all"/>
     <modify-function signature="resetMatrix()" remove="all"/>
     <modify-function signature="sceneMatrix()const" remove="all"/>
@@ -2290,7 +2290,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="ignore"/>
         </modify-argument>
     </modify-function>
-  
+
 
         <modify-function signature="QGraphicsItem(QGraphicsItem*,QGraphicsScene*)">
             <inject-code position="end">
@@ -2390,7 +2390,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     __rcDelegatesForRows = new HashMap!(int, QAbstractItemDelegate);
         </inject-code>
       </modify-function>
- --> 
+ -->
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QAbstractItemView___" quote-before-line="}// class"/>
         </inject-code>
@@ -2495,7 +2495,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
   <object-type name="QAccessible2Interface"/>
 <!--  <object-type name="QAccessibleTableInterface">
     <modify-function signature="qAccessibleTableCastHelper()" remove="all"/>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QAccessibleTableInterface___" quote-before-line="}// class"/>
         </inject-code>
@@ -2709,10 +2709,10 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="relationTo(int,const QAccessibleInterface*,int)const">
         <modify-argument invalidate-after-use="yes" index="2"/>
     </modify-function>
-    
+
 <!--    <modify-function signature="navigate(QAccessible::RelationFlag,int,QAccessibleInterface**)const" remove="all"/> --><!-- TODO -->
 
-<!--  
+<!--
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QAccessibleInterface___" quote-before-line="}// class"/>
         </inject-code>
@@ -2805,7 +2805,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionButton*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionButton"/>
@@ -2857,7 +2857,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="ignore"/> <!-- Handled in injected code -->
         </modify-argument>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QDesktopServices___" quote-before-line="}// class"/>
         </inject-code>
@@ -2930,7 +2930,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         </modify-argument>
     </modify-function>
 
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QWizardPage___" quote-before-line="}// class"/>
         </inject-code>
@@ -3256,7 +3256,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <define-ownership class="shell" owner="c++"/>
         </modify-argument>-->
     </modify-function>
-	
+
     <inject-code>
         <import-file name="typesystem_gui-java.java" quote-after-line="class QIconEngineV2___" quote-before-line="}// class"/>
     </inject-code>
@@ -3323,7 +3323,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="set" variable-name="__rcDefaultItemEditorFactory"/>
         </modify-argument>
     </modify-function>
-  
+
         <modify-function signature="setDefaultFactory(QItemEditorFactory*)">
             <modify-argument index="1">
                 <define-ownership class="java" owner="c++"/>
@@ -3511,7 +3511,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="addAction(QIcon,QString,const QObject*,const char*,QKeySequence)">
         <remove/>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QMenu___" quote-before-line="}// class"/>
         </inject-code>
@@ -3599,7 +3599,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="ignore"/>
         </modify-argument>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QMenuBar___" quote-before-line="}// class"/>
         </inject-code>
@@ -3657,13 +3657,13 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <access modifier="private"/>
     </modify-function>
 
-  
+
         <inject-code>
 
         public this(QIODevice ioDevice, string format) {
             this(ioDevice, toStringz(format));
         }
-        
+
         public this(string fileName, string format) {
             this(fileName, toStringz(format));
         }
@@ -3692,7 +3692,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="find(QString,QPixmap&amp;)">
         <remove/>
     </modify-function>
-	
+
 <!--
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPixmapCache___" quote-before-line="}// class"/>
@@ -3711,13 +3711,13 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
       <modify-function signature="accepted()" remove="all"/>
       <modify-function signature="open(QObject *, const char *)" remove="all"/> <!-- # TODO -->
 
-  </object-type> 
+  </object-type>
   <object-type name="QPrintEngine"/>
   <object-type name="QProgressBar">
 <!--    <modify-function signature="initStyleOption(QStyleOptionProgressBar*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionProgressBar"/>
@@ -3766,7 +3766,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <remove-default-expression/>
         </modify-argument>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QShortcut___" quote-before-line="}// class"/>
         </inject-code>
@@ -3788,7 +3788,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
 
-  
+
         <modify-function signature="appendColumn(const QList&lt;QStandardItem *&gt; &amp;)">
             <modify-argument index="1">
                 <define-ownership class="java" owner="c++"/>
@@ -4157,7 +4157,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <define-ownership class="shell" owner="c++"/>
         </modify-argument>
     </modify-function>
-  
+
         <modify-function signature="setDefaultWidget(QWidget*)">
             <modify-argument index="1">
                 <define-ownership class="java" owner="c++"/>
@@ -4307,7 +4307,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <modify-argument index="1" invalidate-after-use="yes"/>
       </modify-function>
 
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QStyle___" quote-before-line="}// class"/>
         </inject-code>
@@ -4548,7 +4548,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
   </object-type>
 
   <object-type name="QLayout">
-  
+
     <modify-function signature="addItem(QLayoutItem*)">
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
@@ -4595,7 +4595,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
     <modify-function signature="margin()const" remove="all"/> <!--### Obsolete in 4.3-->
     <!-- <modify-function signature="setMargin(int)" remove="all"/> --> <!--### Obsolete in 4.3-->
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QLayout___" quote-before-line="}// class"/>
         </inject-code>
@@ -4759,7 +4759,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="getItemPosition(int,int*,int*,int*,int*)">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QGridLayout___" quote-before-line="}// class"/>
         </inject-code>
@@ -5019,7 +5019,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="set" variable-name="__rcFocusItem"/>
         </modify-argument>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QGraphicsScene___" quote-before-line="}// class"/>
         </inject-code>
@@ -5299,11 +5299,11 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
       <modify-function signature="setTextColor(QColor)" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="textColor()const" remove="all"/> <!--### Obsolete in 4.3-->
   </object-type>
-  
+
   <object-type name="QGraphicsObject">
     <modify-function signature="children()const" remove="all"/>
   </object-type>
-  
+
   <object-type name="QGraphicsTextItem"> <!-- a QObject so main-thread delete redundant -->
     <extra-includes>
       <include file-name="QTextCursor" location="global"/>
@@ -5513,7 +5513,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         </modify-argument>
     </modify-function>
 
-  
+
 <!--        <modify-function signature="addItem(const QString &amp;)" remove="all"/>-->
         <modify-function signature="addItems(const QStringList &amp;)" remove="all"/>
         <modify-function signature="insertItem(int, const QString &amp;)" remove="all"/>
@@ -5621,7 +5621,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </modify-function>
 
     <inject-code class="native">
-        extern "C" JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QWidget__1_1qt_1QMessageBox_1setWindowTitle)
+        QTD_EXTERN QTD_JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QWidget__1_1qt_1QMessageBox_1setWindowTitle)
         (JNIEnv *__jni_env,
             jclass,
             jlong __this_nativeId,
@@ -5639,7 +5639,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </inject-code>
 
     <inject-code class="native">
-        extern "C" JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QWidget__1_1qt_1QMessageBox_1setWindowModality)
+        QTD_EXTERN QTD_JNIEXPORT void JNICALL QTJAMBI_FUNCTION_PREFIX(Java_com_trolltech_qt_gui_QWidget__1_1qt_1QMessageBox_1setWindowModality)
         (JNIEnv *__jni_env,
             jclass,
             jlong __this_nativeId,
@@ -5667,7 +5667,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <replace-default-expression with="RenderFlag.DrawWindowBackground, RenderFlag.DrawChildren"/>
         </modify-argument>
     </modify-function>
--->	
+-->
 <!--    <modify-function signature="setFocusProxy(QWidget*)">
         <modify-argument index="1">
             <reference-count action="set" variable-name="__rcFocusProxy"/>
@@ -5752,7 +5752,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
       <modify-function signature="setShown(bool)" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="topLevelWidget()const" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="windowActivationChange(bool)" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QWidget___" quote-before-line="}// class"/>
         </inject-code>
@@ -5843,7 +5843,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <no-null-pointer/>
         </modify-argument>
     </modify-function>
-<!--  
+<!--
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionSpinBox"/>
@@ -6097,7 +6097,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 
       <modify-function signature="clear()" remove="all"/> <!--### Obsolete in 4.3-->
       <modify-function signature="filterChanged()" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
         <modify-function signature="match(QModelIndex, int, QVariant, int, QFlags&lt;Qt::MatchFlag&gt;) const">
             <modify-argument index="5">
                 <replace-default-expression with="Qt.MatchFlag.MatchStartsWith | Qt.MatchFlag.MatchWrap"/>
@@ -6109,7 +6109,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionSlider*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionSlider"/>
@@ -6280,7 +6280,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         </modify-argument>
     </modify-function>
 
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QFileDialog___" quote-before-line="}// class"/>
         </inject-code>
@@ -6353,7 +6353,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionTab*,int)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTabBar___" quote-before-line="}// class"/>
         </inject-code>
@@ -6455,7 +6455,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionButton*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionButton"/>
@@ -6467,7 +6467,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionSlider*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionSlider"/>
@@ -6487,7 +6487,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </modify-function>
 
 
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QClipboard___" quote-before-line="}// class"/>
         </inject-code>
@@ -6534,7 +6534,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <modify-argument index="1" invalidate-after-use="yes"/>
     </modify-function>
 
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QAbstractScrollArea___" quote-before-line="}// class"/>
         </inject-code>
@@ -6560,7 +6560,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="resize(const QSize &amp;)" rename="resizeRubberBand"/>
     <modify-function signature="setGeometry(int,int,int,int)" rename="setRubberBandGeometry"/>
     <modify-function signature="setGeometry(const QRect &amp;)" rename="setRubberBandGeometry"/>
-  
+
 <!--        <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionRubberBand"/>
@@ -6653,7 +6653,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <define-ownership class="java" owner="c++"/>
         </modify-argument>
     </modify-function>
-<!--  
+<!--
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QTextDocument___" quote-before-line="}// class"/>
         </inject-code>
@@ -6675,7 +6675,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="ignore"/>
         </modify-argument>
     </modify-function>
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QSplitter___" quote-before-line="}// class"/>
         </inject-code>
@@ -6686,7 +6686,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionGroupBox*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionGroupBox"/>
@@ -6724,7 +6724,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionSlider*)const">
         <access modifier="private"/>
     </modify-function>
-  
+
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionSlider"/>
@@ -6746,7 +6746,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="set" variable-name="__rcValidator"/>
         </modify-argument>
     </modify-function>
-<!--  
+<!--
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionFrame"/>
@@ -6772,7 +6772,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
 <!--    <modify-function signature="initStyleOption(QStyleOptionDockWidget*)const">
         <access modifier="private"/>
     </modify-function>
-	
+
     <inject-code>
         <insert-template name="gui.init_style_option">
             <replace from="%TYPE" to="QStyleOptionDockWidget"/>
@@ -6905,7 +6905,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QToolBar___" quote-before-line="}// class"/>
         </inject-code>
-<!--  
+<!--
         <inject-code>
             <insert-template name="gui.init_style_option">
                 <replace from="%TYPE" to="QStyleOptionToolBar"/>
@@ -6954,7 +6954,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         <remove/>
     </modify-function>
     <modify-field name="state" read="false" write="false"/>
-<!--  
+<!--
         <modify-function signature="drawLines(const QLine *, int)">
             <modify-argument index="1">
                 <replace-type modified-type="qt.gui.QLine[]"/>
@@ -7274,8 +7274,8 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
   </object-type>
 
   <object-type name="QPrinter" delete-in-main-thread="yes">
-  
-  
+
+
     <modify-function signature="setEngines(QPrintEngine*,QPaintEngine*)">
         <modify-argument index="1">
             <reference-count action="set" variable-name="__rcPrintEngine"/>
@@ -7284,7 +7284,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="set" variable-name="__rcPaintEngine"/>
         </modify-argument>
     </modify-function>
-  
+
         <modify-function signature="getPageMargins(double*,double*,double*,double*,QPrinter::Unit)const" access="private"/>
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPrinter___" quote-before-line="}// class"/>
@@ -7298,7 +7298,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
         </modify-argument>
     </modify-function>
 
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QAction___" quote-before-line="}// class"/>
         </inject-code>
@@ -7355,7 +7355,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="drawPoints(const QPointF *, int)">
         <access modifier="private"/>
     </modify-function>
-    
+
     <modify-function signature="drawPolygon(const QPoint *, int, Qt::FillRule)">
         <access modifier="private"/>
     </modify-function>
@@ -7369,14 +7369,14 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="drawPolyline(const QPointF *, int)">
         <access modifier="private"/>
     </modify-function>
-    
+
     <modify-function signature="drawRects(const QRect *, int)">
         <access modifier="private"/>
     </modify-function>
     <modify-function signature="drawRects(const QRectF *, int)">
         <access modifier="private"/>
     </modify-function>
-    
+
     <!-- removed stuff -->
     <modify-function signature="drawRects(const QVector&lt;QRect&gt; &amp;)">
         <remove/>
@@ -7443,7 +7443,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     <modify-function signature="matrixEnabled()const" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="setMatrix(QMatrix, bool)" remove="all"/> <!--### Obsolete in 4.3-->
     <modify-function signature="setMatrixEnabled(bool)" remove="all"/> <!--### Obsolete in 4.3-->
-  
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QPainter___" quote-before-line="}// class"/>
         </inject-code>
@@ -7592,13 +7592,13 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             return %FUNCTION_NAME(%PRE_CALL_ARGUMENTS %COMMA className == null ? null : className.data());
         }
         </template>
-        
+
       <inject-code class="java-free">
         QApplication qApp()
         {
             return cast(QApplication) QCoreApplication.instance();
         }
-      </inject-code>      
+      </inject-code>
     </object-type>
 
   <object-type name="QCommandLinkButton"/>
@@ -7703,7 +7703,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <define-ownership class="java" owner="c++"/>
         </modify-argument>
     </modify-function>
-  
+
         <modify-function signature="getLayoutPosition(QLayout*,int*,QFormLayout::ItemRole*)const" access="private"/>
         <modify-function signature="getWidgetPosition(QWidget*,int*,QFormLayout::ItemRole*)const" access="private"/>
         <modify-function signature="getItemPosition(int,int*,QFormLayout::ItemRole*)const" access="private"/>
@@ -7738,7 +7738,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="set" variable-name="__rcParentLayoutItem"/>
         </modify-argument>
     </modify-function>
-  
+
        <!-- <modify-function signature="getContentsMargins(double*,double*,double*,double*)const" access="private"/> -->
 	<modify-function signature="getContentsMargins(double*,double*,double*,double*)const" remove="all"/>
         <inject-code>
@@ -7755,17 +7755,17 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="set" variable-name="__rcParentLayoutItem"/>
         </modify-argument>
     </modify-function>
-  
+
         <modify-function signature="getContentsMargins(double*,double*,double*,double*)const" access="private"/>
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class Subclass_of_QGraphicsLayoutItem___" quote-before-line="}// class"/>
         </inject-code>
         <inject-code class="interface">
             public QMarginsF getContentsMargins();
-        </inject-code>  
+        </inject-code>
     -->
     </interface-type>
- 
+
   <object-type name="QGraphicsLinearLayout" delete-in-main-thread="yes">
     <modify-function signature="addItem(QGraphicsLayoutItem*)">
         <modify-argument index="1">
@@ -7794,7 +7794,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
     </modify-function>
   </object-type>
   <object-type name="QGraphicsProxyWidget">
-    <modify-function signature="getContentsMargins(double*,double*,double*,double*)const" remove="all" />  
+    <modify-function signature="getContentsMargins(double*,double*,double*,double*)const" remove="all" />
     <!--
     <modify-function signature="setWidget(QWidget*)">
         <modify-argument index="1">
@@ -7872,7 +7872,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
   <!--
         <modify-function signature="getContentsMargins(double*,double*,double*,double*)const" access="private"/>
         <modify-function signature="getWindowFrameMargins(double*,double*,double*,double*)const" access="private"/>
-   
+
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QGraphicsWidget___" quote-before-line="}// class"/>
             <import-file name="typesystem_gui-java.java" quote-after-line="class Subclass_of_QGraphicsLayoutItem___" quote-before-line="}// class"/>
@@ -7949,7 +7949,7 @@ extern "C" DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
             <reference-count action="ignore"/>
         </modify-argument>
     </modify-function>
-<!--  
+<!--
         <modify-function signature="initStyleOption(QStyleOptionViewItem*,QModelIndex)const">
             <modify-argument index="1">
                 <conversion-rule class="shell">

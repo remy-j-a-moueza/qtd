@@ -371,8 +371,8 @@ else version( LDC )
             return oldval == equalTo;
         }
     }
-    
-    
+
+
     ////////////////////////////////////////////////////////////////////////////
     // Atomic Increment
     ////////////////////////////////////////////////////////////////////////////
@@ -399,8 +399,8 @@ else version( LDC )
             return val;
         }
     }
-    
-    
+
+
     ////////////////////////////////////////////////////////////////////////////
     // Atomic Decrement
     ////////////////////////////////////////////////////////////////////////////
@@ -440,7 +440,7 @@ else version( D_InlineAsm_X86 )
     {
         version( BuildInfo )
         {
-            pragma( msg, "tango.core.Atomic: using IA-32 inline asm" );
+            pragma( msg, "qtd.Atomic: using IA-32 inline asm" );
         }
 
         version(darwin){
@@ -454,7 +454,7 @@ else version( D_InlineAsm_X86 )
     {
         version( BuildInfo )
         {
-            pragma( msg, "tango.core.Atomic: using AMD64 inline asm" );
+            pragma( msg, "qtd.core.Atomic: using AMD64 inline asm" );
         }
 
         version = Has64BitOps;
@@ -1184,7 +1184,7 @@ else
 {
     version( BuildInfo )
     {
-        pragma( msg, "tango.core.Atomic: using synchronized ops" );
+        pragma( msg, "qtd.Atomic: using synchronized ops" );
     }
 
     private

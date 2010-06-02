@@ -40,6 +40,7 @@ import qt.gui.QSlider;
 import qt.gui.QHBoxLayout;
 
 import glwidget;
+import std.stdio;
 
 class Window : public QWidget
 {
@@ -47,31 +48,32 @@ class Window : public QWidget
         this()
         {
             glWidget = new GLWidget;
-            
+
             xSlider = createSlider();
             ySlider = createSlider();
             zSlider = createSlider();
-            
+
             connect(xSlider, "valueChanged", glWidget, "setXRotation");
             connect(glWidget, "xRotationChanged", xSlider, "setValue");
             connect(ySlider, "valueChanged", glWidget, "setYRotation");
             connect(glWidget, "yRotationChanged", ySlider, "setValue");
             connect(zSlider, "valueChanged", glWidget, "setZRotation");
             connect(glWidget, "zRotationChanged", zSlider, "setValue");
-            
+            writeln("connected");
+
             QHBoxLayout mainLayout = new QHBoxLayout;
             mainLayout.addWidget(glWidget);
             mainLayout.addWidget(xSlider);
             mainLayout.addWidget(ySlider);
             mainLayout.addWidget(zSlider);
             setLayout(mainLayout);
-            
+
             xSlider.setValue(15 * 16);
             ySlider.setValue(345 * 16);
             zSlider.setValue(0 * 16);
             setWindowTitle(tr("Hello GL"));
         }
-        
+
     private:
         QSlider createSlider()
         {
@@ -83,11 +85,11 @@ class Window : public QWidget
             slider.setTickPosition(QSlider.TicksRight);
             return slider;
         }
-        
+
         GLWidget glWidget;
         QSlider xSlider;
         QSlider ySlider;
         QSlider zSlider;
-        
+
         mixin Q_OBJECT;
 }

@@ -4,7 +4,7 @@
 #include "qtd_core.h"
 
 // QLine::operator<<(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void qtd_QLine_writeTo_QDataStream
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLine_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -15,7 +15,7 @@ extern "C" DLL_PUBLIC void qtd_QLine_writeTo_QDataStream
 }
 
 // QLine::operator>>(QDataStream & arg__1)
-extern "C" DLL_PUBLIC void qtd_QLine_readFrom_QDataStream
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLine_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {

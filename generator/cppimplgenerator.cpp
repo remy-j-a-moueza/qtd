@@ -382,7 +382,7 @@ QString jni_function_signature(QString package, QString class_name,
     QString s;
 
     if (options & CppImplGenerator::ExternC)
-        s += "extern \"C\" DLL_PUBLIC ";
+        s += "QTD_EXTERN QTD_DLL_PUBLIC ";
 /* qtd
     if (options & CppImplGenerator::JNIExport)
         s += "Q_DECL_EXPORT ";
@@ -478,7 +478,7 @@ void CppImplGenerator::writeInterfaceCasts(QTextStream &s, const AbstractMetaCla
                 InterfaceTypeEntry *ite = static_cast<InterfaceTypeEntry*>(iface->typeEntry());
                 QString real_name = ite->origin()->qualifiedCppName();
 
-                s << "extern \"C\" DLL_PUBLIC " << real_name << "* qtd_" << java_class->name() << "_cast_to_" << iface->qualifiedCppName()
+                s << "QTD_EXTERN QTD_DLL_PUBLIC " << real_name << "* qtd_" << java_class->name() << "_cast_to_" << iface->qualifiedCppName()
                   << "(" << java_class->qualifiedCppName() << " *ptr)" << endl << "{" << endl;
                 Indentation indent(INDENT);
                 s << INDENT << "return dynamic_cast<" << real_name << "*>(ptr);" << endl;
@@ -486,33 +486,6 @@ void CppImplGenerator::writeInterfaceCasts(QTextStream &s, const AbstractMetaCla
             }
         }
 }
-
-void CppImplGenerator::writeInitCallbacks(QTextStream &s, const AbstractMetaClass *java_class)
-{
-    QString initArgs = "pfunc_abstr *virts";
-    if (java_class->isQObject())
-        initArgs += ", pfunc_abstr *sigs, pfunc_abstr qobj_del";
-
-    s << "extern \"C\" DLL_PUBLIC void qtd_" << java_class->name()
-      << QString("_initCallBacks(%1) {").arg(initArgs) << endl;
-
-    // virtual functions handlers
-    AbstractMetaFunctionList virtualFunctions = java_class->virtualFunctions();
-    for (int pos = 0; pos<virtualFunctions.size(); ++pos) {
-        const AbstractMetaFunction *function = virtualFunctions.at(pos);
-        if (!notWrappedYet(function) && java_class == function->declaringClass()) { // qtd2
-            s << "    " << function->marshalledName(false) << "_dispatch = "
-                 "(pf" << function->marshalledName(false) << "_dispatch) virts[" << pos << "];" << endl;
-        }
-    }
-    // D-side signal callbacks
-    if (java_class->name() == "QObject") {
-        s << "    qtd_QObject_qt_metacall_dispatch = (QtMetacallCallback)sigs[0];" << endl
-          << "    qtd_QObject_metaObject_dispatch = (MetaObjectCallback)sigs[1];" << endl;
-    }
-    s << "}" << endl;
-}
-
 
 void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class)
 {
@@ -575,8 +548,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     writeFinalDestructor(s, java_class);
 
     if (java_class->isQObject()) {
-        writeQObjectEntity(s, java_class);
-        writeSignalsHandling(s, java_class);
+        writeQObjectEntity(s, java_class);        
     }
     if (shellClass) {
         foreach (AbstractMetaFunction *function, java_class->functions()) {
@@ -699,7 +671,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
     if (java_class->isQObject())
     {
         s << endl << endl
-          << "extern \"C\" DLL_PUBLIC void* qtd_" << java_class->name() << "_staticMetaObject() {" << endl
+          << "QTD_EXTERN QTD_DLL_PUBLIC  void* qtd_" << java_class->name() << "_staticMetaObject() {" << endl
           << "    return (void*)&" << java_class->name() << "::staticMetaObject;" << endl
           << "}" << endl;
     }
@@ -710,7 +682,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
         {
             QString argName = "orig";
             s << endl << endl
-              << "extern \"C\" DLL_PUBLIC void qtd_" << java_class->name() << "_placed_copy(void* "
+              << "QTD_EXTERN QTD_DLL_PUBLIC void qtd_" << java_class->name() << "_placed_copy(void* "
               << argName << ", void* place) {" << endl
               << QString("    const %1&  __qt_%2 = (const %1& ) *(%1 *)%2;").arg(shellClassName(java_class)).arg(argName) << endl
               << QString("    %1 *result = new (place) %1 (__qt_%2);").arg(java_class->qualifiedCppName()).arg(argName) << endl;
@@ -718,7 +690,7 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
             s << "}";
 
             s << endl << endl
-              << "extern \"C\" DLL_PUBLIC void* qtd_" << java_class->name() << "_native_copy(void* " << argName << ") {" << endl
+              << "QTD_EXTERN QTD_DLL_PUBLIC void* qtd_" << java_class->name() << "_native_copy(void* " << argName << ") {" << endl
               << QString("    const %1&  __qt_%2 = (const %1& ) *(%1 *)%2;").arg(shellClassName(java_class)).arg(argName) << endl
               << QString("    %1 *result = new %1 (__qt_%2);").arg(java_class->qualifiedCppName()).arg(argName) << endl
               << "    return result;" << endl;
@@ -733,39 +705,46 @@ void CppImplGenerator::write(QTextStream &s, const AbstractMetaClass *java_class
 
 void CppImplGenerator::writeValueFunctions(QTextStream &s, const AbstractMetaClass *java_class)
 {
-    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isComplex() { return (bool) QTypeInfo<%2>::isComplex; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
-    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isStatic() { return (bool) QTypeInfo<%2>::isStatic; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
-    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isLarge() { return (bool) QTypeInfo<%2>::isLarge; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
-    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isPointer() { return (bool) QTypeInfo<%2>::isPointer; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
-    s << QString("extern \"C\" DLL_PUBLIC bool qtd_%1_QTypeInfo_isDummy() { return (bool) QTypeInfo<%2>::isDummy; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("QTD_EXTERN QTD_DLL_PUBLIC bool qtd_%1_QTypeInfo_isComplex() { return (bool) QTypeInfo<%2>::isComplex; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("QTD_EXTERN QTD_DLL_PUBLIC bool qtd_%1_QTypeInfo_isStatic() { return (bool) QTypeInfo<%2>::isStatic; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("QTD_EXTERN QTD_DLL_PUBLIC bool qtd_%1_QTypeInfo_isLarge() { return (bool) QTypeInfo<%2>::isLarge; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("QTD_EXTERN QTD_DLL_PUBLIC bool qtd_%1_QTypeInfo_isPointer() { return (bool) QTypeInfo<%2>::isPointer; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
+    s << QString("QTD_EXTERN QTD_DLL_PUBLIC bool qtd_%1_QTypeInfo_isDummy() { return (bool) QTypeInfo<%2>::isDummy; }\n").arg(java_class->name()).arg(java_class->qualifiedCppName());
 }
 
 void CppImplGenerator::writeVirtualDispatchFunction(QTextStream &s, const AbstractMetaFunction *function, const AbstractMetaClass *java_class, bool d_export)
 {
-            uint options2 = ReturnType | ExternC;
-            QString return_type = jniReturnName(function, options2);
-            QString f_name = function->marshalledName(false) + "_dispatch";
+    uint options2 = ReturnType | ExternC;
+    QString return_type = jniReturnName(function, options2);
 
-            if(!d_export)
-                s << "extern \"C\" ";
+    AbstractMetaFunction::Options opts(AbstractMetaFunction::NoExternNamespace | AbstractMetaFunction::DeclaringClass);
+    QString f_name = function->marshalledName(opts) + "_dispatch";
 
-            if (!cpp_shared || d_export) {
-                s << return_type << " " << f_name;
-                writeVirtualDispatchArguments(s, function, d_export);
-                if(!d_export)
-                    s << ";";
-            } else if (cpp_shared) {
-                if (function->declaringClass() == java_class) {
-                    s << "typedef " << return_type << " " << "(*pf" << f_name << ")";
-                    writeVirtualDispatchArguments(s, function, false);
-                    s << ";" << endl
-                      << "pf" << f_name << " " << f_name << ";";
-                } else {
-                    s << "extern pf" << f_name << " " << f_name << ";";
-                }
-            }
+    if (d_export) {
+        QString qtdExtern = "extern(C)"; // TODO: should be settable via a generator switch
+        if (cpp_shared) {
 
-            s << endl;
+            s << qtdExtern << "{ extern export " << return_type << " function";
+            writeVirtualDispatchArguments(s, function, d_export);
+            s << " qtd_" << f_name << "; }" << endl;
+
+            s << qtdExtern << " " << return_type << " qtd_export_" << f_name;
+            writeVirtualDispatchArguments(s, function, d_export);
+
+        } else {
+            s << qtdExtern << " " << return_type << " qtd_" << f_name;
+            writeVirtualDispatchArguments(s, function, d_export);
+        }
+    } else {
+        QString module = packageToQtModule(java_class->package());
+        s << "QTD_EXPORT_DECL(" << module << ", " << return_type << ", " << f_name << ", ";
+        writeVirtualDispatchArguments(s, function, d_export);
+        s << ")" << endl;
+
+        if (function->declaringClass() == java_class) {
+            s << "QTD_EXPORT(" << module << ", " << f_name << ")" << endl;
+        }
+    }
 }
 
 void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractMetaFunction *function,
@@ -861,7 +840,7 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
                         s << "(" << f_type->typeEntry()->qualifiedCppName() <<") ";
                 }
 
-                s << function->marshalledName(false) << "_dispatch(";
+                s << function->marshalledName(AbstractMetaFunction::DeclaringClass) << "_dispatch(";
                 if (implementor->isQObject())
                     s << "QObjectLink::getLink(this)->dId";
                 else
@@ -891,9 +870,6 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
                 if (f_type) {
                     if (f_type->name() == "QModelIndex") {
                         s << INDENT << "QModelIndex __qt_return_value = qtd_to_QModelIndex( __d_return_value );" << endl;
-#ifdef Q_OS_WIN32
-s << "qtd_dummy();" << endl; // hack!!!
-#endif
                         s << INDENT << "return __qt_return_value;" << endl;
                     } else if (f_type->typeEntry()->isStructInD())
                         s << INDENT << "return __d_return_value;" << endl;
@@ -919,6 +895,34 @@ s << "qtd_dummy();" << endl; // hack!!!
 
             s << "}" << endl << endl;
             // ----------------------------
+}
+
+void CppImplGenerator::writeInitCallbacks(QTextStream &s, const  AbstractMetaClass *java_class)
+{
+    QString initArgs = "pfunc_abstr *virts";
+    if (java_class->name() == "QObject")
+        initArgs += ", pfunc_abstr *sigs";
+
+    s << "QTD_EXTERN QTD_DLL_EXPORT void qtd_" << java_class->name()
+      << QString("_initCallBacks(%1) {").arg(initArgs) << endl;
+
+    // virtual functions handlers
+    AbstractMetaFunctionList virtualFunctions = java_class->virtualFunctions();
+    AbstractMetaFunction::Options opts(AbstractMetaFunction::DeclaringClass | AbstractMetaFunction::NoExternNamespace);
+    for (int pos = 0; pos<virtualFunctions.size(); ++pos) {
+        const AbstractMetaFunction *function = virtualFunctions.at(pos);
+        if (!notWrappedYet(function) && java_class == function->declaringClass()) { // qtd2
+            QString mName = function->marshalledName(opts);
+            s << "    qtd_" << mName << "_dispatch = "
+                 "(qtd_" << mName << "_dispatch_t) virts[" << pos << "];" << endl;
+        }
+    }
+    // D-side signal callbacks
+    if (java_class->name() == "QObject") {
+        s << "    qtd_QObject_qt_metacall_dispatch = (QtMetacallCallback)sigs[0];" << endl
+          << "    qtd_QObject_metaObject_dispatch = (MetaObjectCallback)sigs[1];" << endl;
+    }
+    s << "}" << endl;
 }
 
 void CppImplGenerator::writeVirtualDispatchArguments(QTextStream &s, const AbstractMetaFunction *d_function, bool d_export)
@@ -1284,7 +1288,7 @@ void CppImplGenerator::writeQObjectEntity(QTextStream &s, const AbstractMetaClas
       << "    return -1;" << endl
       << "}" << endl << endl;
 */
-    s << "extern \"C\" DLL_PUBLIC void qtd_" << className << "_createEntity(void *nativeId, void* dId)" << endl
+    s << "QTD_EXTERN QTD_DLL_PUBLIC void qtd_" << className << "_createEntity(void *nativeId, void* dId)" << endl
       << "{" << endl
       << "    new " << entityName << "((QObject*)nativeId, dId);" << endl
       << "}" << endl << endl;
@@ -1344,16 +1348,14 @@ void CppImplGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaC
       << "}" << endl << endl;
       */
 
-    if(cpp_shared) {
-        QString attr;
-        if (java_class->name() == "QObject")
-            attr = "extern ";
+    QString module = packageToQtModule(java_class->package());
 
-        s << attr << "MetaObjectCallback qtd_QObject_metaObject_dispatch;" << endl
-          << attr << "QtMetacallCallback qtd_QObject_qt_metacall_dispatch;" << endl;
-    } else {
-        s << "extern \"C\" const QMetaObject* qtd_QObject_metaObject_dispatch(void *dId);" << endl
-          << "extern \"C\" int qtd_QObject_qt_metacall_dispatch(void *dId, QMetaObject::Call _c, int _id, void **_a);" << endl;
+    s << "QTD_EXPORT_DECL(" << module << ", const QMetaObject*, QObject_metaObject_dispatch, (void *dId))" << endl
+      << "QTD_EXPORT_DECL(" << module << ", int, QObject_qt_metacall_dispatch, (void *dId, QMetaObject::Call _c, int _id, void **_a))" << endl;
+
+    if (java_class->name() == "QObject") {
+        s << "QTD_EXPORT(" << module << ", QObject_metaObject_dispatch)" << endl
+          << "QTD_EXPORT(" << module << ", QObject_qt_metacall_dispatch)" << endl;
     }
 
     // TODO: QMetaObject should be included in the typesystem
@@ -1380,7 +1382,7 @@ void CppImplGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaC
       << "    return " << java_class->qualifiedCppName() << "::qt_metacall(_c, _id, _a);"
       << "}" << endl << endl
 
-      << "extern \"C\" DLL_PUBLIC int qtd_" << java_class->name() << "_qt_metacall(void* __this_nativeId, QMetaObject::Call _c, int _id, void **_a)"
+      << "QTD_EXTERN QTD_DLL_PUBLIC int qtd_" << java_class->name() << "_qt_metacall(void* __this_nativeId, QMetaObject::Call _c, int _id, void **_a)"
       << "{" << endl
       << "    " << shellClassName(java_class) << " *__qt_this = (" << shellClassName(java_class) << " *) __this_nativeId;" << endl
       << "    return __qt_this->__override_qt_metacall(_c, _id, _a);" << endl
@@ -1431,41 +1433,6 @@ void CppImplGenerator::writeSignalEmitter(QTextStream &s, const AbstractMetaClas
     s << endl << "}";
     s << endl << endl;
 }
-
-void CppImplGenerator::writeSignalsHandling(QTextStream &s, const AbstractMetaClass *java_class)
-{
-    return; // #TODO probably don't need this function at all
-
-    s << "extern \"C\" typedef void (*EmitCallback)(void*, void**);" << endl;
-    AbstractMetaFunctionList signal_funcs = signalFunctions(java_class);
-
-    if (cpp_shared)
-	if(signal_funcs.size() > 0)
-	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[" << signal_funcs.size() << "];" << endl;
-	else
-	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[1];" << endl; // Hack for msvc.
-    else {
-        // D-side signal callbacks
-        for(int i = 0; i < signal_funcs.size(); i++) {
-            AbstractMetaFunction *signal = signal_funcs.at(i);
-            s << "extern \"C\" DLL_PUBLIC void " << signalExternName(java_class, signal) << "_handle(void* dId, void** args);" << endl;
-        }
-
-	if(signal_funcs.size() > 0)
-	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[" << signal_funcs.size() << "] = {" << endl;
-	else
-	    s << "EmitCallback emit_callbacks_" << java_class->name() << "[1] = {" << endl; // Hack for msvc.
-        for(int i = 0; i < signal_funcs.size(); i++) {
-            AbstractMetaFunction *signal = signal_funcs.at(i);
-            s << endl;
-            if (i != 0)
-                s << ", ";
-            s << "&" << signalExternName(java_class, signal) << "_handle";
-        }
-        s << endl << "};" << endl << endl;
-    }
-}
-
 
 void CppImplGenerator::writeShellConstructor(QTextStream &s, const AbstractMetaFunction *java_function)
 {
@@ -1834,7 +1801,7 @@ void CppImplGenerator::writePublicFunctionOverride(QTextStream &s,
 
 void CppImplGenerator::writeQtdEntityFunction(QTextStream &s, const AbstractMetaClass *java_class)
 {
-    s << "extern \"C\" DLL_PUBLIC void *__" << java_class->name() << "_entity(void *q_ptr)" << endl;
+    s << "QTD_EXTERN QTD_DLL_PUBLIC void *__" << java_class->name() << "_entity(void *q_ptr)" << endl;
     s << "{" << endl;
     {
         Indentation indent(INDENT);
@@ -2393,12 +2360,12 @@ void CppImplGenerator::writeFieldAccessors(QTextStream &s, const AbstractMetaFie
 void CppImplGenerator::writeFinalDestructor(QTextStream &s, const AbstractMetaClass *cls)
 {
     if (cls->hasConstructors() && cls->isDestructorBase()) {
-        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_delete(void* nativeId)" << endl
+        s << INDENT << "QTD_EXTERN QTD_DLL_PUBLIC void qtd_" << cls->name() << "_delete(void* nativeId)" << endl
           << INDENT << "{" << endl
           << INDENT << "    delete (" << shellClassName(cls) << "*)nativeId;" << endl
           << INDENT << "}" << endl << endl;
 
-        s << INDENT << "extern \"C\" DLL_PUBLIC void qtd_" << cls->name() << "_destroy(void* nativeId)" << endl
+        s << INDENT << "QTD_EXTERN QTD_DLL_PUBLIC void qtd_" << cls->name() << "_destroy(void* nativeId)" << endl
           << INDENT << "{" << endl
           << INDENT << "    call_destructor((" << shellClassName(cls) << "*)nativeId);" << endl
           << INDENT << "}" << endl << endl;

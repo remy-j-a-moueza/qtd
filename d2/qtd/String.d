@@ -11,7 +11,9 @@
 
 module qtd.String;
 
-import core.stdc.string;
+import
+    core.stdc.string,
+    qtd.Core;
 import std.utf : toUTF8;
 
 alias immutable(char)* stringz;
@@ -67,10 +69,11 @@ string fromStringz(const (char) *s)
     return s ? s[0 .. strlen(s)].idup : cast(string)null;
 }
 
-extern(C) void qtd_toUtf8(wchar* arr, uint size, string* str)
-{
-    *str = toUTF8(arr[0..size]);
-}
+mixin(qtdExport("void", "toUtf8", "wchar* arr, uint size, string* str",
+    q{
+        *str = toUTF8(arr[0..size]);
+    }));
+
 
 
 

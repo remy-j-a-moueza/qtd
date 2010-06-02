@@ -220,50 +220,29 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
       << "#include \"qtd_core.h\"" << endl
       << "#include \"ArrayOps_" << package << ".h\"" << endl
       << "#include \"ArrayOps_qt_core.h\"" << endl
-      << "#include \"ArrayOpsPrimitive.h\"" << endl << endl
-      << "#ifdef CPP_SHARED" << endl << endl;
-
+      << "#include \"ArrayOpsPrimitive.h\"" << endl << endl;
 
     foreach (const TypeEntry *te, containerTypes) {
         if (te->javaPackage() == cls->package()) {
             const ComplexTypeEntry *centry = static_cast<const ComplexTypeEntry *>(te);
             QString cls_name = centry->name();
 
+            QString module = packageToQtModule(cls->package());
             setFuncNames(cls_name);
-            s << "QTD_EXPORT_VAR(" << all_name << ")" << endl
-              << "QTD_EXPORT_VAR(" << ass_name << ")" << endl
-              << "QTD_EXPORT_VAR(" << get_name << ")" << endl << endl;
+            s << "QTD_EXPORT(" << module << ", " << all_name << ")" << endl
+              << "QTD_EXPORT(" << module << ", " << ass_name << ")" << endl
+              << "QTD_EXPORT(" << module << ", " << get_name << ")" << endl << endl;
         }
     }
 
-    s << endl
-      << "extern \"C\" DLL_PUBLIC void qtd_" << cls->package().replace(".", "_") << "_ArrayOps_initCallBacks(pfunc_abstr *callbacks)" << endl
-      << "{" << endl;
-
-    int num_funcs = 0;
-    foreach (const TypeEntry *te, containerTypes) {
-        if (te->javaPackage() == cls->package()) {
-            const ComplexTypeEntry *centry = static_cast<const ComplexTypeEntry *>(te);
-            QString cls_name = centry->name();
-
-            setFuncNames(cls_name);
-            s << "    QTD_EXPORT_VAR_SET(" << all_name << ", callbacks[" << num_funcs + 0 << "]);" << endl
-              << "    QTD_EXPORT_VAR_SET(" << ass_name << ", callbacks[" << num_funcs + 1 << "]);" << endl
-              << "    QTD_EXPORT_VAR_SET(" << get_name << ", callbacks[" << num_funcs + 2 << "]);" << endl << endl;
-
-            num_funcs += NUM_ARRAY_FUNCS;
-        }
-    }
-    s << "}" << endl
-      << "#endif" << endl;
-/*
+    /*
     QMap<const TypeEntry*, AbstractMetaType*> typeList = signalEntries[cls->package()];
 
     QMapIterator<const TypeEntry*, AbstractMetaType*> i(typeList);
     while (i.hasNext()) {
         i.next();
         s << "// " << i.key()->targetLangName() << endl
-          << "extern \"C\" DLL_PUBLIC void qtd_" << package << "_" << i.key()->targetLangName() << "_to_d_array(void *cpp_ptr, DArray* __d_container) {" << endl;
+          << "QTD_EXTERN QTD_DLL_PUBLIC void qtd_" << package << "_" << i.key()->targetLangName() << "_to_d_array(void *cpp_ptr, DArray* __d_container) {" << endl;
 
         AbstractMetaType *arg_type = i.value();
         m_cpp_impl_generator->writeTypeInfo(s, arg_type, NoOption);
@@ -280,7 +259,7 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
     foreach(AbstractMetaType* arg_type, signalEntries[cls->package()]) {
         const TypeEntry *te = arg_type->instantiations().first()->typeEntry();
         s << "// " << te->targetLangName() << endl
-          << "extern \"C\" DLL_PUBLIC void " << cppContainerConversionName(cls, arg_type, FromCpp) << "(void *cpp_ptr, DArray* __d_container) {" << endl;
+          << "QTD_EXTERN QTD_DLL_PUBLIC void " << cppContainerConversionName(cls, arg_type, FromCpp) << "(void *cpp_ptr, DArray* __d_container) {" << endl;
 
         m_cpp_impl_generator->writeTypeInfo(s, arg_type, NoOption);
         s << "container = (*reinterpret_cast< ";
@@ -316,9 +295,9 @@ void ContainerGenerator::writeHeaderContent(QTextStream &s, AbstractMetaClass *c
 
 void ContainerGenerator::setFuncNames(const QString& cls_name)
 {
-    all_name = QString("qtd_allocate_%1_array").arg(cls_name);
-    ass_name = QString("qtd_assign_%1_array_element").arg(cls_name);
-    get_name = QString("qtd_get_%1_from_array").arg(cls_name);
+    all_name = QString("allocate_%1_array").arg(cls_name);
+    ass_name = QString("assign_%1_array_element").arg(cls_name);
+    get_name = QString("get_%1_from_array").arg(cls_name);
 }
 
 void ContainerGenerator::writeHeaderArrayFunctions(QTextStream &s, const ComplexTypeEntry *centry)
@@ -337,17 +316,14 @@ void ContainerGenerator::writeHeaderArrayFunctions(QTextStream &s, const Complex
 
     setFuncNames(cls_name);
 
-    s << "QTD_EXPORT(void, " << all_name << ", (void* arr, size_t len))" << endl
-      << "QTD_EXPORT(void, " << ass_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl
-      << "QTD_EXPORT(void, " << get_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl;
+    QString module = packageToQtModule(centry->javaPackage());
 
-    s << "#ifdef CPP_SHARED" << endl
-      << "#define " << all_name << " qtd_get_" << all_name << "()" << endl
-      << "#define " << ass_name << " qtd_get_" << ass_name << "()" << endl
-      << "#define " << get_name << " qtd_get_" << get_name << "()" << endl
-      << "#endif" << endl;
+    s << "QTD_EXPORT_DECL(" << module << ", void, " << all_name << ", (void* arr, size_t len))" << endl
+      << "QTD_EXPORT_DECL(" << module << ", void, " << ass_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl
+      << "QTD_EXPORT_DECL(" << module << ", void, " << get_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl;
 
     s << endl;
+
 }
 
 void ContainerGenerator::writeDContent(QTextStream &s, AbstractMetaClass *cls)
@@ -371,33 +347,6 @@ void ContainerGenerator::writeDContent(QTextStream &s, AbstractMetaClass *cls)
     }
     if (num_funcs == 0)
         return;
-
-    s << "version (cpp_shared) {" << endl
-      << "    private extern (C) void qtd_" << cls->package().replace(".", "_") << "_ArrayOps_initCallBacks(void* callbacks);" << endl << endl
-      << "    static this() {" << endl
-      << "        void*[" << num_funcs << "] callbacks; " << endl << endl;
-
-    num_funcs = 0;
-    foreach (const TypeEntry *te, containerTypes) {
-        if (te->javaPackage() == cls->package()) {
-            const ComplexTypeEntry *centry = static_cast<const ComplexTypeEntry *>(te);
-
-            QString cls_name = centry->name();
-            setFuncNames(cls_name);
-
-            s << "        callbacks[" << num_funcs + 0 << "] = &" << all_name << ";" << endl
-              << "        callbacks[" << num_funcs + 1 << "] = &" << ass_name << ";" << endl
-              << "        callbacks[" << num_funcs + 2 << "] = &" << get_name << ";" << endl;
-
-            s << endl;
-            num_funcs += NUM_ARRAY_FUNCS;
-        }
-    }
-    s << "        qtd_" << cls->package().replace(".", "_") << "_ArrayOps_initCallBacks(callbacks.ptr);" << endl
-      << "    }" << endl
-      << "}" << endl;
-
-
 }
 
 void ContainerGenerator::writeDContent2(QTextStream &s, AbstractMetaClass *cls)
@@ -422,6 +371,8 @@ void ContainerGenerator::writeNotice(QTextStream &s)
       << "****************************************************************************/" << endl << endl;
 }
 
+
+// TODO: rewrite
 void ContainerGenerator::writeArrayFunctions(QTextStream &s, const ComplexTypeEntry *centry)
 {
     QString cls_name = centry->name();
@@ -457,22 +408,16 @@ void ContainerGenerator::writeArrayFunctions(QTextStream &s, const ComplexTypeEn
         nativeId = ".__ptr_" + type_name;
     }
 
-    s << "private extern(C) void qtd_allocate_" << cls_name << "_array(" << type_name << "[]* arr, size_t len)" << endl
-      << "{" << endl
-      << INDENT << "*arr = new " << type_name << "[len];" << endl
-      << "}" << endl << endl;
+    DGenerator::writeDExport(s, "void", QString("allocate_%1_array").arg(cls_name), QString("%1[]* arr, size_t len").arg(type_name),
+        QString(" *arr = new %1[len]; ").arg(type_name));
 
-    s << "private extern(C) void qtd_assign_" << cls_name << "_array_element(" << type_name << "[]* arr, size_t pos, " << cpp_type << " elem)" << endl
-      << "{" << endl
-      << INDENT << "(*arr)[pos] = " << convert << ";" << endl
-      << "}" << endl << endl
+    DGenerator::writeDExport(s, "void", QString("assign_%1_array_element").arg(cls_name), QString("%1[]* arr, size_t pos, %2 elem").arg(type_name, cpp_type),
+        QString(" (*arr)[pos] = %1; ").arg(convert));
 
-      << "private extern(C) void qtd_get_" << cls_name << "_from_array(" << type_name << "* arr, size_t pos, " << cpp_assign_type << " elem)" << endl
-      << "{" << endl
-      << INDENT << "*elem = arr[pos]" << nativeId << ";" << endl
-      << "}" << endl << endl
+    DGenerator::writeDExport(s, "void", QString("get_%1_from_array").arg(cls_name), QString("%1* arr, size_t pos, %2 elem").arg(type_name, cpp_assign_type),
+        QString(" *elem = arr[pos]%1; ").arg(nativeId));
 
-      << "package " << d_type << " qtd_" << cls_name << "_cpp_to_d(" << cpp_type << " ret)" << endl
+    s << "package " << d_type << " qtd_" << cls_name << "_cpp_to_d(" << cpp_type << " ret)" << endl
       << "{" << endl;
 
     marshalFromCppToD(s, centry);

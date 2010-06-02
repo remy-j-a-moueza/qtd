@@ -11,10 +11,7 @@
  */
 module qtd.Array;
 
-version (Tango)
-    import tango.stdc.string;
-else
-    import core.stdc.string;
+import core.stdc.string;
 
 void remove(T)(ref T[] haystack, T needle)
 {

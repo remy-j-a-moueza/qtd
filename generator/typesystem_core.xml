@@ -2363,17 +2363,17 @@
   <object-type name="QObject">
 	<inject-code class="native">
 
-extern "C" DLL_PUBLIC void* qtd_get_d_qobject(void *nativeId)
+QTD_EXTERN QTD_DLL_PUBLIC void* qtd_get_d_qobject(void *nativeId)
 {
     return QObjectEntity::getDId((QObject*)nativeId);
 }
 
-extern "C" DLL_PUBLIC void qtd_create_qobject_entity(void* nativeId, void *dId)
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_create_qobject_entity(void* nativeId, void *dId)
 {
 	new QObjectLink((QObject*)nativeId, dId);
 }
 
-extern "C" DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
+QTD_EXTERN QTD_DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
 {
     return (void*)((QObject*)nativeId)->metaObject();
 }
@@ -2384,9 +2384,6 @@ extern "C" DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
 extern(C) void* qtd_get_d_qobject(void* nativeId);
 extern(C) void* qtd_create_qobject_entity(void* nativeId, void* dId);
 extern(C) void* qtd_QObject_metaObject(void* nativeId);
-extern(C) void qtd_connect(void *nativeId, cstringz signal, int id, bool dynamicEntity);
-extern(C) void qtd_disconnect(void *nativeId, cstringz signal, int id, bool dynamicEntity);
-
 	</inject-code>
 
     <modify-function signature="childEvent(QChildEvent*)">

@@ -1,15 +1,17 @@
 module qt.core.QMetaObject;
 
-import qt.QGlobal;
-import qt.core.QObject;
-import qtd.QtdObject;
-
-import std.algorithm;
-import std.string;
-import std.stdio;
-
-import qtd.meta.Runtime;
-import qtd.Marshal;
+import
+    qt.QGlobal,
+    qt.core.QObject,
+    qtd.QtdObject,
+    std.algorithm,
+    qtd.meta.Runtime,
+    qtd.meta.Compiletime,
+    qtd.Marshal,
+    qtd.MOC,
+    std.string,
+    std.typetuple,
+    std.c.stdlib;
 
 class QMetaArgument : Meta
 {
@@ -22,13 +24,13 @@ class QMetaMethod : Meta
 //    QMetaArgument[]  arguments;
     string signature;
     int indexOfMethod;
-    
+
     this(string signature_, int indexOfMethod_)
     {
         signature = signature_;
         indexOfMethod = indexOfMethod_;
     }
-    
+
     string args() const
     {
         int openBracket = indexOf(signature, '(');
@@ -37,7 +39,7 @@ class QMetaMethod : Meta
         else
             return "";
     }
-    
+
     string name() const
     {
         int openBracket = indexOf(signature, '(');
@@ -55,7 +57,7 @@ class QMetaMethod : Meta
 class QMetaSignal : QMetaMethod
 {
     alias typeof(this) This;
-    
+
     this(string signature_, int indexOfMethod_)
     {
         super(signature_, indexOfMethod_);
@@ -70,7 +72,7 @@ class QMetaSignal : QMetaMethod
 class QMetaSlot : QMetaMethod
 {
     alias typeof(this) This;
-    
+
     this(string signature_, int indexOfMethod_)
     {
         super(signature_, indexOfMethod_);
@@ -102,7 +104,7 @@ final class QMetaObject
     alias typeof(this) This;
 
     private this() {}
-    
+
     enum Call
     {
         InvokeMetaMethod,
@@ -116,7 +118,7 @@ final class QMetaObject
         QueryPropertyUser,
         CreateInstance
     }
-    
+
     private
     {
         QMetaObjectNative* _nativeId;
@@ -208,7 +210,7 @@ final class QMetaObject
     {
         return _base;
     }
-    
+
     /++
     +/
     QMetaObjectNative* nativeId()
@@ -222,17 +224,17 @@ final class QMetaObject
     {
         return _classInfo;
     }
-    
+
     const (QMetaMethod[]) methods()
     {
         return _methods;
     }
-    
+
     void addMethod(QMetaMethod method_)
     {
         _methods ~= method_;
     }
-    
+
     QMetaMethod lookUpMethod(string slot)
     {
         foreach (method; _methods)
@@ -243,7 +245,7 @@ final class QMetaObject
         else
             return null;
     }
-    
+
     QMetaSignal lookUpSignal(string signal)
     {
         foreach (method; _methods)
@@ -276,11 +278,11 @@ final class QMetaObject
             result ~= _base.lookUpSignalOverloads(signalName);
         return result;
     }
-    
+
     private QMetaObject lookupDerived(void*[] moIds)
     {
         assert (moIds.length >= 1);
-                
+
         for (auto mo = _firstDerived; mo !is null; mo = mo._next)
         {
             if (mo._nativeId == moIds[0])
@@ -291,19 +293,19 @@ final class QMetaObject
                     return mo.lookupDerived(moIds[1..$]);
             }
         }
-        
+
         // no initialized wrapper that matches the native object.
         // use the base class wrapper
         return this;
     }
-    
+
     QObject getObject(void* nativeObjId)
     {
         QObject result;
 
         if (nativeObjId)
         {
-            result = cast(QObject)qtd_get_d_qobject(nativeObjId);            
+            result = cast(QObject)qtd_get_d_qobject(nativeObjId);
             if (!result)
             {
                 auto moId = qtd_QObject_metaObject(nativeObjId);
@@ -317,9 +319,9 @@ final class QMetaObject
 
                     for (void* tmp = moId;;)
                     {
-                        tmp = qtd_QMetaObject_superClass(tmp);                        
+                        tmp = qtd_QMetaObject_superClass(tmp);
                         assert(tmp);
-                        if (tmp == _nativeId)                        
+                        if (tmp == _nativeId)
                             break;
                         moCount++;
                     }
@@ -337,12 +339,12 @@ final class QMetaObject
 
         return result;
     }
-    
+
     static void activate(QObject sender, QMetaObject m, int local_signal_index, void **argv)
     {
         qtd_QMetaObject_activate_3(sender.__nativeId, m.nativeId, local_signal_index, argv);
     }
-    
+
     static void activate(QObject sender, QMetaObject m, int from_local_signal_index, int to_local_signal_index, void **argv)
     {
         qtd_QMetaObject_activate_4(sender.__nativeId, m.nativeId, from_local_signal_index, to_local_signal_index, argv);
@@ -354,7 +356,7 @@ final class QMetaObject
     {
         return qtd_QMetaObject_connect(sender.__nativeId, signal_index, receiver.__nativeId, method_index, type, types);
     }
-    
+
     int indexOfMethod_Cpp(string method)
     {
         return qtd_QMetaObject_indexOfMethod(_nativeId, toStringz(method));
@@ -423,11 +425,33 @@ final class QMetaObject
         {
             int signalIndex = signal.indexOfMethod;
             int methodIndex = method.indexOfMethod;
+
             success = QMetaObject.connect(sender, signalIndex, receiver, methodIndex, type);
         }
 
         if(!success)
-            throw new QMetaException("QMetaObject: Signal " ~ signalString ~ " and slot " ~ methodString ~ " cannot be found");
+            throw new QMetaException("QMetaObject: Signal " ~ signalString ~ " cannot be connected to slot " ~ methodString);
+    }
+}
+
+/**
+ */
+mixin template Q_CLASSINFO(string name, string value)
+{
+    mixin InnerAttribute!("Q_CLASSINFO", AttributeOptions.allowMultiple, name, value);
+}
+
+version (QtdUnittest)
+{
+    unittest
+    {
+        static class Test : QObject
+        {
+            mixin Q_CLASSINFO!("author", "Sabrina Schweinsteiger");
+            mixin Q_CLASSINFO!("url", "http://doc.moosesoft.co.uk/1.0/");
+
+            mixin Q_OBJECT;
+        }
     }
 }
 

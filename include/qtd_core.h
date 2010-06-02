@@ -1,6 +1,6 @@
 /**
- *  Copyright: Copyright QtD Team, 2008-2010
- *  License: Boost Software License 1.0
+    Copyright: Copyright QtD Team, 2008-2010
+    License: Boost License 1.0
  */
 
 #ifndef QTD_CORE_H
@@ -8,28 +8,84 @@
 
 #include <QAbstractItemModel>
 
-#if defined WIN32
-  #define DLL_PUBLIC __declspec(dllexport)
+#define QTD_EXTERN extern "C"
+
+#ifdef WIN32
+
+    #define QTD_DLL_EXPORT __declspec(dllexport)
+    #define QTD_DLL_IMPORT __declspec(dllimport)
+
+    #ifdef CPP_SHARED
+
+        QTD_EXTERN typedef void (*pfunc_abstr)();
+
+        #define QTD_EXPORT_DECL(MODULE, TYPE, NAME, ARGS) \
+            QTD_EXTERN typedef TYPE (*qtd_##NAME##_t)ARGS; \
+            QTD_EXTERN { extern QTD_##MODULE##_DLL_PUBLIC qtd_##NAME##_t qtd_##NAME; }
+
+        #define QTD_EXPORT(MODULE, NAME) \
+            QTD_EXTERN { QTD_##MODULE##_DLL_PUBLIC qtd_##NAME##_t qtd_##NAME; } \
+            QTD_EXTERN QTD_DLL_EXPORT void qtd_set_##NAME(pfunc_abstr func) { qtd_##NAME = (qtd_##NAME##_t)func; }
+
+    #endif
+
 #else
-  #define DLL_PUBLIC
+
+    #define QTD_DLL_EXPORT
+    #define QTD_DLL_IMPORT
+
+    #define QTD_EXPORT_DECL(MODULE, TYPE, NAME, ARGS) \
+        QTD_EXTERN TYPE qtd_##NAME ARGS;
+
+    #define QTD_EXPORT(MODULE, NAME)
+
 #endif
 
-#ifdef CPP_SHARED
-  #define QTD_EXPORT(TYPE, NAME, ARGS) \
-    extern "C" typedef TYPE (*pf_##NAME)ARGS; \
-    extern "C" pf_##NAME qtd_get_##NAME();
-  #define QTD_EXPORT_VAR(NAME) \
-    pf_##NAME m_##NAME;        \
-    extern "C" DLL_PUBLIC pf_##NAME qtd_get_##NAME() { return m_##NAME; }
-#define QTD_EXPORT_VAR_SET(NAME, VALUE) \
-    m_##NAME = (pf_##NAME) VALUE
+#define QTD_DLL_PUBLIC QTD_DLL_EXPORT
+
+#ifdef QTD_CORE
+    #define QTD_CORE_DLL_PUBLIC QTD_DLL_EXPORT
 #else
-  #define QTD_EXPORT(TYPE, NAME, ARGS) \
-    extern "C" TYPE NAME ARGS;
+    #define QTD_CORE_DLL_PUBLIC QTD_DLL_IMPORT
 #endif
 
-extern uint userDataId;
+#ifdef QTD_GUI
+    #define QTD_GUI_DLL_PUBLIC QTD_DLL_EXPORT
+#else
+    #define QTD_GUI_DLL_PUBLIC QTD_DLL_IMPORT
+#endif
 
+#ifdef QTD_OPENGL
+    #define QTD_OPENGL_DLL_PUBLIC QTD_DLL_EXPORT
+#else
+    #define QTD_OPENGL_DLL_PUBLIC QTD_DLL_IMPORT
+#endif
+
+#ifdef QTD_NETWORK
+    #define QTD_NETWORK_DLL_PUBLIC QTD_DLL_EXPORT
+#else
+    #define QTD_NETWORK_DLL_PUBLIC QTD_DLL_IMPORT
+#endif
+
+#ifdef QTD_SVG
+    #define QTD_SVG_DLL_PUBLIC QTD_DLL_EXPORT
+#else
+    #define QTD_SVG_DLL_PUBLIC QTD_DLL_IMPORT
+#endif
+
+#ifdef QTD_XML
+    #define QTD_XML_DLL_PUBLIC QTD_DLL_EXPORT
+#else
+    #define QTD_XML_DLL_PUBLIC QTD_DLL_IMPORT
+#endif
+
+#ifdef QTD_WEBKIT
+    #define QTD_WEBKIT_DLL_PUBLIC QTD_DLL_EXPORT
+#else
+    #define QTD_WEBKIT_DLL_PUBLIC QTD_DLL_IMPORT
+#endif
+
+//TODO: ditch
 struct QModelIndexAccessor {
 	int row;
 	int col;
@@ -50,10 +106,10 @@ enum QtdObjectFlags
     //gcManaged                 = 0x04
 };
 
-class DLL_PUBLIC QtdObjectLink
+class QTD_CORE_DLL_PUBLIC QtdObjectLink
 {
 public:
-    void* dId; // TODO: needs to be atomic
+    void* dId;
 
     QtdObjectLink(void* id) : dId(id) {}
 
@@ -71,7 +127,7 @@ public:
     }
 };
 
-class DLL_PUBLIC QObjectLink : public QtdObjectLink, public QObjectUserData
+class QTD_CORE_DLL_PUBLIC QObjectLink : public QtdObjectLink, public QObjectUserData
 {
 public:
     enum Flags
@@ -81,6 +137,7 @@ public:
     };
 
     Flags flags;
+    static uint userDataId;
 
     QObjectLink(QObject* qObject, void* dId);
     bool createdByD();
@@ -92,24 +149,15 @@ public:
 
 #define Array DArray
 
-#ifdef CPP_SHARED
-typedef void (*pfunc_abstr)();
-#endif
+QTD_EXPORT_DECL(CORE, void, toUtf8, (const unsigned short* arr, uint size, void* str))
+QTD_EXPORT_DECL(CORE, void, QtdObject_delete, (void* dId))
 
-QTD_EXPORT(void, qtd_toUtf8, (const unsigned short* arr, uint size, void* str))
-QTD_EXPORT(void, qtd_QtdObject_delete, (void* dId))
+QTD_EXTERN QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia);
+QTD_EXTERN QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index);
 
-#ifdef CPP_SHARED
-#define qtd_toUtf8 qtd_get_qtd_toUtf8()
-#define qtd_QtdObject_delete qtd_get_qtd_QtdObject_delete()
-#endif
-
-extern "C" QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia);
-extern "C" QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index);
-
-extern "C" typedef void (*EmitCallback)(void*, void**);
-extern "C" typedef int (*QtMetacallCallback)(void *d_entity, QMetaObject::Call _c, int _id, void **_a);
-extern "C" typedef const QMetaObject* (*MetaObjectCallback)(void *d_entity);
+QTD_EXTERN typedef void (*EmitCallback)(void*, void**);
+QTD_EXTERN typedef int (*QtMetacallCallback)(void *d_entity, QMetaObject::Call _c, int _id, void **_a);
+QTD_EXTERN typedef const QMetaObject* (*MetaObjectCallback)(void *d_entity);
 
 template <class T>
 void call_destructor(T *a)

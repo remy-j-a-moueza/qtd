@@ -10,6 +10,7 @@
 */
 
 module qtd.QtdObject;
+import qtd.Core;
 
 enum QtdObjectFlags : ubyte
 {
@@ -61,14 +62,14 @@ package abstract class QtdObject
     }
 }
 
-extern(C) void qtd_QtdObject_delete(void* dId)
-{
-    auto obj = cast(QtdObject)dId;
+mixin(qtdExport("void", "QtdObject_delete", "void* dId",
+    q{
+        auto obj = cast(QtdObject)dId;
 
-    if (!(obj.__flags & QtdObjectFlags.dOwnership))
-    {
-        // Avoid deleting native object twice
-        obj.__setFlags(QtdObjectFlags.nativeOwnership, true);
-        delete obj;
-    }
-}
+        if (!(obj.__flags & QtdObjectFlags.dOwnership))
+        {
+            // Avoid deleting native object twice
+            obj.__setFlags(QtdObjectFlags.nativeOwnership, true);
+            delete obj;
+        }
+    }));
