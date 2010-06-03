@@ -23,8 +23,9 @@ static this()
 }
 
 /**
-    Defines a function that can be called from QtD C++ libraries,
-    which will register the function with the DLL at program startup.
+    Defines a function that can be called from QtD C++ libraries.
+    The function will be automatically
+    registered with the DLL at program startup.
  */
 string qtdExport(string retType, string name, string args, string funcBody)
 {
