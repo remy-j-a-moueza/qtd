@@ -148,7 +148,14 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
             if (option & EnumAsInts)
                 s = "int";
             else
-                s = d_type->typeEntry()->qualifiedTargetLangName();
+            {
+                // Hack around forward-referencing the implementing class in an interface.
+                if (context->typeEntry()->designatedInterface() && d_type->typeEntry()->javaQualifier() == context->name())
+                    s = d_type->name();
+                else
+                    s = d_type->typeEntry()->qualifiedTargetLangName();
+            }
+
         }
     } else if (d_type->isFlags()) { // qtd2 begin
         if (d_type->isFlags() && ((FlagsTypeEntry *)d_type->typeEntry())->forceInteger()) {

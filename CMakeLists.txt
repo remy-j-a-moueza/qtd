@@ -138,13 +138,11 @@ add_dependencies(install preinstall)
 ## CPack.
 ##--------------------------------------------
 set(CPACK_PACKAGE_VERSION_PATCH 1)
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application and UI framework.
-This package installs binding and static library for qt port on D programming language.
-")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application and UI framework.")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/changelog.txt")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
 set(CPACK_PACKAGE_VENDOR "QtD team")
-set(CPACK_PACKAGE_CONTACT "e@mail.ru" )
+set(CPACK_PACKAGE_CONTACT "e@mail.ru")
 SET(CPACK_PACKAGE_VERSION "0.1")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "qtd ${CPACK_PACKAGE_VERSION}")
 set(CPACK_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
@@ -428,7 +426,7 @@ foreach(package_big ${all_packages})
         get_filename_component(name ${d_source} NAME_WE)
         regex_safe_string(cbd_safe_tmp ${CMAKE_CURRENT_BINARY_DIR})
         regex_safe_string(csd_safe_tmp ${CMAKE_CURRENT_SOURCE_DIR})
-        regex_safe_string(ver_safe_tmp ${CMAKE_CURRENT_SOURCE_DIR}/qt/d${D_VERSION})
+        regex_safe_string(ver_safe_tmp ${CMAKE_CURRENT_SOURCE_DIR}/d${D_VERSION})
         set(regexp_str_tmp "(${ver_safe_tmp}/|${cbd_safe_tmp}/|${csd_safe_tmp}/|)(.+)")
         string(REGEX REPLACE ${regexp_str_tmp} "\\2" ins_path "${path}")
         install(FILES ${d_source} DESTINATION include/d/${ins_path} COMPONENT qtd RENAME ${name}.di)
@@ -442,9 +440,12 @@ foreach(package_big ${all_packages})
         set(cpp_method STATIC)
     endif(CPP_SHARED)
     add_library(cpp_${package} ${cpp_method} ${cpp_sources})
-    set_property(TARGET cpp_${package} PROPERTY RUNTIME_OUTPUT_DIRECTORY lib)
-    set_property(TARGET cpp_${package} PROPERTY ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles)
-    set_property(TARGET cpp_${package} PROPERTY COMPILE_DEFINITIONS QTD_${package_upper})
+    set_target_properties(cpp_${package} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY lib
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles
+        LINK_FLAGS -Wl,-enable-auto-import
+        COMPILE_DEFINITIONS QTD_${package_upper}
+    )
 
     set(link_cpp ${link_cpp} ${QT_QT${package_upper}_LIBRARY})
     if(CPP_SHARED)
@@ -524,7 +525,7 @@ foreach(package_big ${all_packages})
     endforeach(depend ${required})
     add_dependencies(allpackages ${package})
 
-    ## TODO: Do we need generating of *.di files?
+    ## TODO: Do we need to generate *.di files?
     if(GENERATE_DI_FILES)
         regexseafestring(cbd_safe ${CMAKE_BINARY_DIR})
         regexseafestring(csd_safe ${CMAKE_SOURCE_DIR})
