@@ -17,7 +17,7 @@
 
     #ifdef CPP_SHARED
 
-        QTD_EXTERN typedef void (*pfunc_abstr)();
+        QTD_EXTERN typedef void (*VoidFunc)();
 
         #define QTD_EXPORT_DECL(MODULE, TYPE, NAME, ARGS) \
             QTD_EXTERN typedef TYPE (*qtd_##NAME##_t)ARGS; \
@@ -25,7 +25,7 @@
 
         #define QTD_EXPORT(MODULE, NAME) \
             QTD_EXTERN { QTD_##MODULE##_DLL_PUBLIC qtd_##NAME##_t qtd_##NAME; } \
-            QTD_EXTERN QTD_DLL_EXPORT void qtd_set_##NAME(pfunc_abstr func) { qtd_##NAME = (qtd_##NAME##_t)func; }
+            QTD_EXTERN QTD_DLL_EXPORT void qtd_set_##NAME(VoidFunc func) { qtd_##NAME = (qtd_##NAME##_t)func; }
 
     #endif
 

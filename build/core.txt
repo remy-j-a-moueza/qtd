@@ -1,19 +1,25 @@
 configure_file(d${D_VERSION}/qt/QDefines.d.inc qt/QDefines.d)
 
 ## Module specific cpp files.
-set (cpp_files qt_qtd/qtd_core qt_qtd/ArrayOpsPrimitive_shell
-    qt_core/QPoint_shell qt_core/QPointF_shell
-    qt_core/QSize_shell qt_core/QSizeF_shell
-    qt_core/QLine_shell qt_core/QLineF_shell
-    qt_core/QRect_shell qt_core/QRectF_shell
-    qt_core/QString_shell qt_core/QVariant_shell
-    qt_core/QModelIndex_shell qt_core/QMetaType_shell
+set (cpp_files
+    qt_qtd/qtd_core
+    qt_qtd/ArrayOpsPrimitive_shell
+    qt_core/QPoint_shell
+    qt_core/QPointF_shell
+    qt_core/QSize_shell
+    qt_core/QSizeF_shell
+    qt_core/QLine_shell
+    qt_core/QLineF_shell
+    qt_core/QRect_shell
+    qt_core/QRectF_shell
+    qt_core/QString_shell
+    qt_core/QVariant_shell
+    qt_core/QModelIndex_shell
     qt_core/QMetaObject_shell)
 ## Module specific d files.
 set (d_qt_files
     QGlobal
     core/QString
-    core/QMetaType
     core/QMetaObject
     core/QTypeInfo
     core/QList
@@ -34,6 +40,7 @@ set (d_qtd_files
     MOC
     Array
     ArrayOpsPrimitive
+    QMetaTypeImpl
     util/Tuple
     ctfe/Integer
     ctfe/String
@@ -84,5 +91,6 @@ set (classes
     QXmlStreamEntityResolver
     QFileSystemWatcher
     QDynamicPropertyChangeEvent
+    QMetaType
     )
 

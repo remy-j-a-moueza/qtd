@@ -1726,9 +1726,9 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
 
 void DGenerator::writeFlagsSetter(QTextStream &s, const AbstractMetaClass *d_class)
 {
-    if (d_class->isInterface() || d_class->isNamespace())
+    if (d_class->isInterface())
         s << INDENT << "void __setFlags(QtdObjectFlags flags, bool val);";
-    else // COMPILER BUG:
+    else if (!d_class->isNamespace()) // COMPILER BUG:
         s << INDENT << "void __setFlags(QtdObjectFlags flags, bool val) { super.__setFlags(flags, val); }";
 }
 
@@ -1844,7 +1844,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     auxFile.isDone = true;
     auxFile.stream << "module " << auxModName << ";" << endl << endl;
 
-    bool staticInit = d_class->isQObject() || d_class->typeEntry()->isValue() || (cpp_shared && d_class->generateShellClass() && !d_class->isInterface());
+    bool staticInit = d_class->isQObject() || d_class->typeEntry()->isValue()
+                      || (cpp_shared && d_class->generateShellClass() && !d_class->isInterface() && !d_class->isNamespace());
     if (staticInit)
     {
         auxFile.isDone = false;

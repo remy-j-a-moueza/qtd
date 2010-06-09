@@ -1,31 +1,62 @@
-import qt.core.QCoreApplication;
+import qt.core.QMetaType;
 
-version(Tango) { import tango.io.Stdout; } else { import std.stdio; }
+import std.stdio;
+import std.conv;
+import qtd.QtdObject;
 
-int main(string[] args)
+class A
 {
-    auto app = new QCoreApplication(args);
-    
-    auto parent = new QObject();
-    parent.setObjectName("papa");
-    auto child1 = new QObject(parent);
-    child1.setObjectName("child1");
-    auto child2 = new QObject(parent);
-    child2.setObjectName("child2");
-    auto child3 = new QObject(parent);
-    child3.setObjectName("child3");
-    
-    auto cd = parent.children;
-    Stdout(parent.children.length).newline;
+    string name;
 
-    Stdout(app.arguments).newline;
-    foreach(child; cd)
-        Stdout(child.objectName).newline;
-    
-    app.setLibraryPaths(["freakin", "bloody", "awesome!"]);
+    this(A copy)
+    {
+        writeln("Creating new from ", copy.name);
+        name = "Copy of " ~ copy.name;
+    }
 
-    Stdout(app.libraryPaths).newline;
-    
-    return 5;
-//    return app.exec();
+    this(string name)
+    {
+        this.name = name;
+    }
+
+    void dispose()
+    {
+        writeln("Disposing ", name);
+    }
+}
+
+void main(string[] args)
+{
+    int id = qRegisterMetaType!A();
+    qRegisterMetaTypeStreamOperators!A();
+
+    foreach (i; 0..10)
+    {
+        writeln("Iter ", i);
+
+        void foo(int x, int y, int z)
+        {
+            auto a = new A("A" ~ to!string(i));
+            auto b = cast(A)QMetaType.construct(id, cast(void*)a);
+            writeln(b.name);
+
+            QMetaType.destroy(id, cast(void*)a);
+            QMetaType.destroy(id, cast(void*)b);
+
+            scope ds = new QDataStream(cast(void*)3, QtdObjectFlags.nativeOwnership);
+            QMetaType.save(ds, id, cast(void*)i);
+            QMetaType.load(ds, id, cast(void*)i);
+            writeln("Done iterating ", x, " ", y, " ", z);
+        }
+
+        foo(i + 1, i + 2, i + 3);
+    }
+    /+
+
+    writeln("Great!");
+
+
+    writeln("Even greater!");
+    +/
+
 }

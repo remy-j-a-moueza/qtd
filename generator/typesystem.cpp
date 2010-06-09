@@ -779,6 +779,7 @@ bool Handler::startElement(const QString &, const QString &n,
         case StackElement::Include:
             attributes["file-name"] = QString();
             attributes["location"] = QString();
+            attributes["protection"] = QString();
             break;
         case StackElement::CustomMetaConstructor:
             attributes["name"] = topElement.entry->name().toLower() + "_create";
@@ -1406,13 +1407,34 @@ bool Handler::startElement(const QString &, const QString &n,
                     locationNames["java"] = Include::TargetLangImport;
                 }
 
+                if (locationNames.isEmpty()) {
+                    locationNames["global"] = Include::IncludePath;
+                    locationNames["local"] = Include::LocalPath;
+                    locationNames["java"] = Include::TargetLangImport;
+                }
+
                 if (!locationNames.contains(location)) {
                     m_error = QString("Location not recognized: '%1'").arg(location);
                     return false;
                 }
 
                 Include::IncludeType loc = locationNames[location];
-                Include inc(loc, attributes["file-name"]);
+
+                QString protection = attributes["protection"];
+                if (!protection.isEmpty()) {
+                    if (loc != Include::TargetLangImport) {
+                        m_error = QString("Protection attribute is allowed only if 'java' location is specified");
+                        return false;
+                    }
+
+                    if (protection != "public"
+                        || protection != "private"
+                        || protection != "package") {
+                        m_error = QString("Import protection is not recognized: '%1'").arg(protection);
+                    }
+                }
+
+                Include inc(loc, protection, attributes["file-name"]);
 
                 ComplexTypeEntry *ctype = static_cast<ComplexTypeEntry *>(element->entry);
                 if (topElement.type & StackElement::ComplexTypeEntryMask) {
@@ -1645,8 +1667,12 @@ QString Include::toString() const
         return "#include <" + name + '>';
     else if (type == LocalPath)
         return "#include \"" + name + "\"";
-    else
-        return "import " + name + ";";
+    else {
+        QString result;
+        if (!protection.isEmpty())
+            result += protection + " ";
+        return result + "import " + name + ";";
+    }
 }
 
 QString Modification::accessModifierString() const

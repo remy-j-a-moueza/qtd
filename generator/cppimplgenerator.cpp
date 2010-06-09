@@ -899,9 +899,9 @@ void CppImplGenerator::writeShellVirtualFunction(QTextStream &s, const AbstractM
 
 void CppImplGenerator::writeInitCallbacks(QTextStream &s, const  AbstractMetaClass *java_class)
 {
-    QString initArgs = "pfunc_abstr *virts";
+    QString initArgs = "VoidFunc *virts";
     if (java_class->name() == "QObject")
-        initArgs += ", pfunc_abstr *sigs";
+        initArgs += ", VoidFunc *sigs";
 
     s << "QTD_EXTERN QTD_DLL_EXPORT void qtd_" << java_class->name()
       << QString("_initCallBacks(%1) {").arg(initArgs) << endl;

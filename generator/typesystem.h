@@ -73,12 +73,21 @@ struct Include
     };
 
     Include() : type(IncludePath) { }
-    Include(IncludeType t, const QString &nam) : type(t), name(nam) { };
+    Include(IncludeType t, const QString prot, const QString &nam) :
+            type(t),
+            protection(prot),
+            name(nam) { };
+
+    Include(IncludeType t, const QString &nam) :
+            type(t),
+            protection(QString()),
+            name(nam) { };
 
     bool isValid() { return !name.isEmpty(); }
 
     IncludeType type;
     QString name;
+    QString protection;
 
     QString toString() const;
 

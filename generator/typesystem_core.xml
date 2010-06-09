@@ -427,7 +427,6 @@
   <rejection class="QMap"/>
   <rejection class="QMapData"/>
   <rejection class="QMapIterator"/>
-  <rejection class="QMetaType"/>
   <rejection class="QMetaTypeId"/>
   <rejection class="QMetaProperty"/>
   <rejection class="QMetaObject"/>
@@ -1977,6 +1976,27 @@
   <object-type name="QTemporaryFile">
     <modify-function signature="fileName()const" rename="uniqueFilename"/>
   </object-type>
+
+  <namespace-type name="QMetaType">
+    <extra-includes>
+        <include file-name="qtd.QMetaTypeImpl" location="java" protection="public"/>
+    </extra-includes>
+
+    <inject-code class="native">
+QTD_EXTERN QTD_DLL_PUBLIC int qtd_registerType(char* namePtr, VoidFunc dtor, VoidFunc ctor)
+{
+    return QMetaType::registerType(namePtr, (QMetaType::Destructor)dtor, (QMetaType::Constructor)ctor);
+}
+
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_registerStreamOperators(const char *typeName, VoidFunc saveOp,
+                                        VoidFunc loadOp)
+{
+    QMetaType::registerStreamOperators(typeName, (QMetaType::SaveOperator)saveOp,
+                                       (QMetaType::LoadOperator)loadOp);
+}
+    </inject-code>
+  </namespace-type>
+
   <object-type name="QMimeData">
     <extra-includes>
         <include file-name="QStringList" location="global"/>
