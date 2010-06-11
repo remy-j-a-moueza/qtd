@@ -8,6 +8,7 @@ module qtd.meta.Runtime;
 //and leave switch dispatch only in C interface
 
 import
+    qtd.Core,
     qtd.meta.Compiletime,
 
     std.typetuple,
@@ -87,13 +88,13 @@ class MetaException : Exception
     }
 }
 
-abstract class Meta
+abstract class MetaBase
 {
     alias typeof(this) This;
 
     string name;
     MetaAttribute[] attributes;
-    Meta[] members;
+    MetaBase[] members;
 
     template createImpl(M : This)
     {
@@ -153,7 +154,7 @@ abstract class MetaAttribute
     }
 }
 
-abstract class MetaType : Meta
+abstract class MetaType : MetaBase
 {
 }
 
@@ -164,7 +165,63 @@ abstract class MetaAggregate : MetaType
 class MetaClass : MetaAggregate
 {
     alias typeof(this) This;
-    alias createImpl!This create;
+
+private:
+    This base_;
+    This firstDerived_;
+    This next_;
+    TypeInfo_Class classInfo_;
+
+    this() {}
+
+public:
+    /**
+        Returns the meta-object of the base class.
+     */
+    @property
+    This base()
+    {
+        return base_;
+    }
+
+    /**
+        Returns next meta-object on this level of the derivation hierarchy.
+     */
+    @property
+    This next()
+    {
+        return next_;
+    }
+
+    /**
+        Returns meta-object of the first derived class.
+     */
+    @property
+    This firstDerived()
+    {
+        return firstDerived_;
+    }
+
+    /**
+        D class info.
+     */
+    @property
+    TypeInfo_Class classInfo()
+    {
+        return classInfo_;
+    }
+
+    /* internal */ alias createImpl!This create;
+
+    /* internal */ void construct(T : Object)()
+    {
+        static if (!is(T == Object))
+        {
+            alias BaseClassesTuple!(T)[0] Base;
+            base_ = meta!Base;
+        }
+        classInfo_ = T.classinfo;
+    }
 }
 
 class MetaStruct : MetaAggregate
@@ -174,24 +231,21 @@ class MetaStruct : MetaAggregate
 }
 
 @property
-auto meta(alias symbol, M : Meta)()
+auto meta(alias symbol, M : MetaBase)()
 {
-    __gshared static M m;
-
-    {
-        lock.reader.lock;
-        scope(exit)
-            lock.reader.unlock;
-        if (m)
-            return m;
-    }
-
-    lock.writer.lock;
-    scope(exit)
-        lock.writer.unlock;
+    __gshared static M sharedM;
+    static M m;
 
     if (!m)
-        m = M.create!symbol;
+    {
+        synchronized(qtdMoLock)
+        {
+            if (!sharedM)
+                sharedM = M.create!symbol;
+        }
+        m = sharedM;
+    }
+
     return m;
 }
 
@@ -199,8 +253,8 @@ auto meta(alias symbol, M : Meta)()
 @property
 auto meta(T)()
 {
-    static if (is(typeof(T.staticMetaObject)))
-        return T.staticMetaObject;
+    static if (is(T.Meta)) // If the type defines a meta-class - use that.
+        return meta!(T, T.Meta);
     else static if (is(T == class))
         return meta!(T, MetaClass);
     else static if (is(T == struct))

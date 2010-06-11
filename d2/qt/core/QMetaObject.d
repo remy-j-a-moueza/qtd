@@ -13,11 +13,11 @@ import
     std.typetuple,
     std.c.stdlib;
 
-class QMetaArgument : Meta
+class QMetaArgument : MetaBase
 {
 }
 
-class QMetaMethod : Meta
+class QMetaMethod : MetaBase
 {
     alias typeof(this) This;
 
@@ -84,9 +84,31 @@ class QMetaSlot : QMetaMethod
     }
 }
 
-class MetaObject : MetaType
+/**
+    Base class for QtD meta-classes.
+ */
+abstract class QtdMetaClass : MetaClass
 {
-    MetaObject _base;
+private:
+    void* nativeId_;
+
+    this() {}
+
+public:
+
+    /**
+     */
+    @property
+    void* nativeId()
+    {
+        return nativeId_;
+    }
+
+    /* internal */ void construct(T)()
+    {
+        super.construct!T();
+        nativeId_ = T.qtd_nativeMetaObject;
+    }
 }
 
 struct QMetaObjectNative
@@ -99,11 +121,9 @@ struct QMetaObjectNative
 
 class QMetaException : Exception { this(string msg) { super(msg); } }
 
-final class QMetaObject
+final class QMetaObject : QtdMetaClass
 {
     alias typeof(this) This;
-
-    private this() {}
 
     enum Call
     {
@@ -121,40 +141,13 @@ final class QMetaObject
 
     private
     {
-        QMetaObjectNative* _nativeId;
-        QMetaObject _base; // super class
-        QMetaObject _firstDerived; // head of the linked list of derived classes
-        QMetaObject _next; // next sibling on this derivation level
         QMetaMethod[] _methods;
-        ClassInfo _classInfo;
-
         QObject function(void* nativeId) _createWrapper;
     }
 
-    private void addDerived(QMetaObject mo)
+    void construct(T : QObject)()
     {
-        mo._next = _firstDerived;
-        _firstDerived = mo;
-    }
-
-    // ctor
-    void construct(T : QObject)(void* nativeId)
-    {
-        alias BaseClassesTuple!(T)[0] Base;
-        This base;
-        static if (is(Base : QObject))
-            base = Base.staticMetaObject;
-
-        _nativeId = cast(QMetaObjectNative*)nativeId;
-        T.setStaticMetaObject(this);
-
-        if (base)
-        {
-            base.addDerived(this);
-            _base = base;
-        }
-        _classInfo = T.classinfo;
-
+        super.construct!T();
 
         static if (isQtType!T)
         {
@@ -171,9 +164,11 @@ final class QMetaObject
 
             T._populateMetaInfo;
         }
+
         // create run time meta-objects for user-defined signals and slots
         else static if (is(typeof(T.methods)))
         {
+            alias BaseClassesTuple!(T)[0] Base;
             int index = Base.staticMetaObject().methodCount();
 
             static if (T.signals.length)
@@ -196,35 +191,41 @@ final class QMetaObject
         }
     }
 
-    // new
-    static This create(T : QObject)(void* nativeId)
+    /* internal */ alias createImpl!This create;
+
+    /**
+     */
+    @property
+    override This base()
     {
-        auto m = new This();
-        m.construct!T(nativeId);
-        return m;
+        return super.base;
     }
 
-    /++
-    +/
-    QMetaObject base()
+    /**
+     */
+    @property
+    override This firstDerived()
     {
-        return _base;
+        return super.firstDerived;
     }
 
-    /++
-    +/
-    QMetaObjectNative* nativeId()
+    /**
+     */
+    @property
+    override This next()
     {
-        return _nativeId;
+        return super.next;
     }
 
-    /++
-    +/
-    ClassInfo classInfo()
+    /**
+     */
+    @property
+    override QMetaObjectNative* nativeId()
     {
-        return _classInfo;
+        return cast(QMetaObjectNative*)super.nativeId;
     }
 
+    @property
     const (QMetaMethod[]) methods()
     {
         return _methods;
@@ -240,8 +241,8 @@ final class QMetaObject
         foreach (method; _methods)
             if (method.signature == slot)
                 return method;
-        if (_base)
-            return _base.lookUpMethod(slot);
+        if (base)
+            return base.lookUpMethod(slot);
         else
             return null;
     }
@@ -251,8 +252,8 @@ final class QMetaObject
         foreach (method; _methods)
             if (method.signature == signal && cast(QMetaSignal)method)
                 return cast(QMetaSignal)method;
-        if (_base)
-            return _base.lookUpSignal(signal);
+        if (base)
+            return base.lookUpSignal(signal);
         else
             return null;
     }
@@ -263,8 +264,8 @@ final class QMetaObject
         foreach (method; _methods)
             if (method.name == methodName)
                 result ~= method;
-        if (_base)
-            result ~= _base.lookUpMethodOverloads(methodName);
+        if (base)
+            result ~= base.lookUpMethodOverloads(methodName);
         return result;
     }
 
@@ -274,8 +275,8 @@ final class QMetaObject
         foreach (method; _methods)
             if (method.name == signalName && cast(QMetaSignal)method)
                 result ~= cast(QMetaSignal)method;
-        if (_base)
-            result ~= _base.lookUpSignalOverloads(signalName);
+        if (base)
+            result ~= base.lookUpSignalOverloads(signalName);
         return result;
     }
 
@@ -283,9 +284,9 @@ final class QMetaObject
     {
         assert (moIds.length >= 1);
 
-        for (auto mo = _firstDerived; mo !is null; mo = mo._next)
+        for (auto mo = firstDerived; mo !is null; mo = mo.next)
         {
-            if (mo._nativeId == moIds[0])
+            if (mo.nativeId == moIds[0])
             {
                 if (moIds.length == 1) // exact match found
                     return mo;
@@ -308,8 +309,9 @@ final class QMetaObject
             result = cast(QObject)qtd_get_d_qobject(nativeObjId);
             if (!result)
             {
+                auto nId = nativeId;
                 auto moId = qtd_QObject_metaObject(nativeObjId);
-                if (_nativeId == moId)
+                if (nId == moId)
                      result = _createWrapper(nativeObjId);
                 else
                 {
@@ -321,7 +323,7 @@ final class QMetaObject
                     {
                         tmp = qtd_QMetaObject_superClass(tmp);
                         assert(tmp);
-                        if (tmp == _nativeId)
+                        if (tmp == nId)
                             break;
                         moCount++;
                     }
@@ -359,12 +361,12 @@ final class QMetaObject
 
     int indexOfMethod_Cpp(string method)
     {
-        return qtd_QMetaObject_indexOfMethod(_nativeId, toStringz(method));
+        return qtd_QMetaObject_indexOfMethod(nativeId, toStringz(method));
     }
 
     int methodCount()
     {
-        return qtd_QMetaObject_methodCount(_nativeId);
+        return qtd_QMetaObject_methodCount(nativeId);
     }
 
     static void connectImpl(QObject sender, string signalString, QObject receiver, string methodString, int type)
