@@ -1958,9 +1958,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         if (d_class->isQObject()) {
             s << "public import qtd.Signal;" << endl
               << "public import qtd.MOC;" << endl
-              << "public import qtd.Traits;" << endl              
-              << "public import qt.core.QMetaObject;" << endl
-              << "import qtd.meta.Runtime;" << endl;
+              << "public import qtd.Traits;" << endl
+              << "public import qt.core.QMetaObject;" << endl;
 
             if (d_class->name() != "QObject")
                 s << "public import qt.core.QObject;" << endl;
@@ -2569,6 +2568,11 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         if (d_class->typeEntry()->isValue())
             s << INDENT << d_class->name() << ".QTypeInfo.init();" << endl;
 
+        if (d_class->isQObject()) {
+            // ensure meta-object is created at static construction
+            s << INDENT << d_class->name() << ".staticMetaObject();" << endl;
+        }
+
         if (cpp_shared && d_class->generateShellClass()) {
 
             AbstractMetaFunction::Options opts(AbstractMetaFunction::DeclaringClass | AbstractMetaFunction::NoExternNamespace);
@@ -2690,7 +2694,7 @@ void DGenerator::writeConversionFunction(QTextStream &s, const AbstractMetaClass
 
 void DGenerator::writeQObjectFreeFunctions(QTextStream &s, const AbstractMetaClass *d_class)
 {
-    s << "extern(C) void* qtd_" << d_class->name() << "_staticMetaObject();" << endl << endl
+    s << "extern(C) QMetaObjectNative* qtd_" << d_class->name() << "_staticMetaObject();" << endl << endl
       << "extern(C) void qtd_" << d_class->name() << "_createEntity(void* nativeId, void* dId);" <<  endl << endl
       << "extern(C) int qtd_" << d_class->name() << "_qt_metacall(void *nativeId, QMetaObject.Call _c, int _id, void **_a);" << endl;
 
@@ -2757,29 +2761,31 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
           << "    }" << endl << endl;
     }
 
-    s << "    @property static void* qtd_nativeMetaObject() {" << endl
-      << "          return qtd_" << d_class->name() << "_staticMetaObject();" << endl
-      << "    }"
+    s << "    private static __gshared QMetaObject staticMetaObject_;" << endl
+      << "    protected static void setStaticMetaObject(QMetaObject m) {" << endl
+      << "        staticMetaObject_ = m;" << endl
+      << "    }" << endl << endl
 
       << "    @property QMetaObject metaObject() {" << endl
-      << "        return staticMetaObject;" << endl
+      << "        return staticMetaObject_;" << endl
       << "    }" << endl << endl
 
       << "    @property static QMetaObject staticMetaObject() {" << endl
-      << "        return meta!(typeof(this));" << endl
+      << "        if (!staticMetaObject_)" << endl
+      << "            QMetaObject.create!(typeof(this))(qtd_" << d_class->name() << "_staticMetaObject());" << endl
+      << "        return staticMetaObject_;" << endl
       << "    }" << endl << endl
 
       << "    static " << d_class->name() << " __getObject(void* nativeId) {" << endl
-      << "        return static_cast!(" << d_class->name() << ")(staticMetaObject.getObject(nativeId));" << endl
+      << "        return static_cast!(" << d_class->name() << ")(staticMetaObject_.getObject(nativeId));" << endl
       << "    }" << endl << endl
 
-      << "    static void __createEntity(void* nativeId, void* dId) {" << endl
+      << "    /* internal */ static void __createEntity(void* nativeId, void* dId) {" << endl
       << "        return qtd_" << d_class->name() << "_createEntity(nativeId, dId);" << endl
       << "    }" << endl << endl
 
-      << "    static void _populateMetaInfo() {" << endl
-      << "        int index;" << endl
-      << "        auto mo = staticMetaObject;" << endl << endl;
+      << "    /* internal */ static void _populateMetaInfo() {" << endl
+      << "        int index;" << endl << endl;
 
     AbstractMetaFunctionList signal_funcs = signalFunctions(d_class, false);
 
@@ -2791,8 +2797,8 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
       do // need this to look for default arguments and generate extra signatures
       {
           AbstractMetaFunction *fn = signal_funcs.at(i);
-    s << "        index = mo.indexOfMethod_Cpp(__signalSignatures[" << staticId << "]);" << endl
-      << "        mo.addMethod(new QMetaSignal(signature!(";
+    s << "        index = staticMetaObject_.indexOfMethod_Cpp(__signalSignatures[" << staticId << "]);" << endl
+    << "        staticMetaObject_.addMethod(new QMetaSignal(signature!(";
           writeMetaMethodArguments(s, fn, j);
     s << ")(\"" << fn->name() << "\"), index));" << endl << endl;
           AbstractMetaArgumentList args = fn->arguments();
@@ -2813,8 +2819,8 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
       do // need this to look for default arguments and generate extra signatures
       {
           AbstractMetaFunction *fn = slot_funcs.at(i);
-    s << "        index = mo.indexOfMethod_Cpp(__slotSignatures[" << staticId << "]);" << endl
-      << "        mo.addMethod(new QMetaSlot(signature!(";
+    s << "        index = staticMetaObject_.indexOfMethod_Cpp(__slotSignatures[" << staticId << "]);" << endl
+    << "        staticMetaObject_.addMethod(new QMetaSlot(signature!(";
           writeMetaMethodArguments(s, fn, j);
     s << ")(\"" << fn->name() << "\"), index));" << endl << endl;
           AbstractMetaArgumentList args = fn->arguments();

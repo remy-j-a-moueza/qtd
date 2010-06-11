@@ -45,12 +45,10 @@ import qt.*;
 import qt.core.*;
 
 class QObject___ extends QObject {
-
-    alias QMetaObject Meta;
-
+    
     /* TODO: test whether the linked list is really a better solution
     public bool __stackAllocated = false;
-
+    
     new(size_t size, void* p = null)
     {
         if (!p)
@@ -74,23 +72,23 @@ class QObject___ extends QObject {
         }
     }
     */
-
+    
     private
     {
         static QObject __root;
         QObject __next;
         QObject __prev;
     }
-/*
+/*    
     override void onSignalHandlerCreated(ref SignalHandler sh)
     {
         sh.signalEvent = &onSignalEvent;
     }
-
+    
     private void onSignalEvent(int signalId, SignalEventId event)
     {
         stringz signature;
-        signalSignature(signalId, signature);
+        signalSignature(signalId, signature);        
         if (signature)
         {
             switch (event)
@@ -113,11 +111,11 @@ class QObject___ extends QObject {
             __prev.__next = __next;
         else
             __root = __next;
-
-        if (__next)
-            __next.__prev = __prev;
+        
+        if (__next)      
+            __next.__prev = __prev;        
     }
-
+    
     /**
     */
     T findChild(T : QObject = QObject)(string name = null)
@@ -127,23 +125,23 @@ class QObject___ extends QObject {
             auto tmp = cast(T)obj;
             if (tmp && (!name.length || tmp.objectName == name))
                 return tmp;
-
+            
             tmp = obj.findChild!(T)(name);
             if (tmp)
                 return tmp;
         }
-
+        
         return null;
     }
-
+    
     /**
     */
     T[] findChildren(T : QObject = QObject)(string name = null)
     {
         T[] result;
-
+        
         void find(QObject[] objects)
-        {
+        {        
             foreach (obj; objects)
             {
                 auto tmp = cast(T)obj;
@@ -152,11 +150,11 @@ class QObject___ extends QObject {
                 find(obj.children);
             }
         }
-
+        
         find(children);
         return result;
     }
-
+    
     static void connect(QObject sender, string signal, QObject receiver, string method, int type = 0)
     {
         QMetaObject.connectImpl(sender, signal, receiver, method, type);

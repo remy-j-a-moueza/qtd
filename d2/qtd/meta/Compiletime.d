@@ -6,11 +6,10 @@
 module qtd.meta.Compiletime;
 
 import
+    std.traits,
     std.conv,
     std.variant,
     std.typetuple;
-
-public import std.traits;
 
 import std.string : startsWith;
 
