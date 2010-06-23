@@ -13,18 +13,18 @@ module qtd.Signal;
 
 import core.stdc.stdlib : crealloc = realloc, cfree = free;
 import core.stdc.string : memmove;
+import std.string : strip;
 
 import
     core.thread,
     core.exception,
 
-    std.algorithm,
     std.typetuple,
     std.conv,
     std.traits,
-    std.string,
 
     qt.QGlobal,
+    qtd.String,
     qtd.Marshal,
     qtd.meta.Compiletime,
     qtd.ctfe.Format;
@@ -126,12 +126,12 @@ string genSignalEmitter(SignalKind signalKind, string name, uint localIndex, uin
         res ~= "protected ";
 
     res ~= "Args[0] " ~ name;
-    
+
     if (signalKind == SignalKind.BindQtSignal)
         res ~= "_emit";
 
     res ~= "(";
-    
+
     foreach (i; 1..argCount)
     {
         auto iStr = to!string(i);

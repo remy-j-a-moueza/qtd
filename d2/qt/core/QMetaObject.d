@@ -4,14 +4,15 @@ import
     qt.QGlobal,
     qt.core.QObject,
     qtd.QtdObject,
-    std.algorithm,
     qtd.meta.Runtime,
     qtd.meta.Compiletime,
     qtd.Marshal,
     qtd.MOC,
-    std.string,
+    qtd.String,
     std.typetuple,
     std.c.stdlib;
+
+import std.string : indexOf;
 
 class QMetaArgument : Meta
 {

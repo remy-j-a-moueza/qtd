@@ -6,12 +6,11 @@
 module qtd.meta.Compiletime;
 
 import
+    qtd.String,
     std.traits,
     std.conv,
     std.variant,
     std.typetuple;
-
-import std.string : startsWith;
 
 /**
  */

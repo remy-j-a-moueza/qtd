@@ -3,9 +3,8 @@ module qtd.Marshal;
 import
     std.traits,
     qtd.meta.Compiletime,
+    qtd.String,
     qtd.ctfe.Format;
-
-import std.string : startsWith;
 
 
 template isQObjectType(T) //

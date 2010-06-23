@@ -9,6 +9,7 @@
 #include <QAbstractItemModel>
 
 #define QTD_EXTERN extern "C"
+QTD_EXTERN typedef void (*VoidFunc)();
 
 #ifdef WIN32
 
@@ -16,8 +17,6 @@
     #define QTD_DLL_IMPORT __declspec(dllimport)
 
     #ifdef CPP_SHARED
-
-        QTD_EXTERN typedef void (*VoidFunc)();
 
         #define QTD_EXPORT_DECL(MODULE, TYPE, NAME, ARGS) \
             QTD_EXTERN typedef TYPE (*qtd_##NAME##_t)ARGS; \
