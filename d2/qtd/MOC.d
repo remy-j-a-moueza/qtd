@@ -490,10 +490,11 @@ string generateMetaInfo(T)()
 
 mixin template Q_OBJECT()
 {
-    import std.typetuple;
-    import qtd.Marshal;
-    import std.stdio;
-    import qt.core.QString; // for QStringUtil.toNative
+    import
+        std.typetuple,
+        std.traits,
+        qtd.Marshal,
+        qt.core.QString; // for QStringUtil.toNative
 
 public: // required to override the outside scope protection.
 

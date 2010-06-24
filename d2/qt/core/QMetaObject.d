@@ -10,6 +10,7 @@ import
     qtd.MOC,
     qtd.String,
     std.typetuple,
+    std.traits,
     std.c.stdlib;
 
 import std.string : indexOf;

@@ -157,6 +157,8 @@ string genSignalEmitter(SignalKind signalKind, string name, uint localIndex, uin
 // BUG: parameter storage classes are not supported yet
 mixin template SignalEmitter(SignalKind signalKind, int localIndex)
 {
+    import std.traits;
+
     alias signals[localIndex] signal;
     alias TypeTuple!(ReturnType!(signal), ParameterTypeTuple!(signal)) Args;
 

@@ -1958,7 +1958,6 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         if (d_class->isQObject()) {
             s << "public import qtd.Signal;" << endl
               << "public import qtd.MOC;" << endl
-              << "public import qtd.Traits;" << endl
               << "public import qt.core.QMetaObject;" << endl;
 
             if (d_class->name() != "QObject")
