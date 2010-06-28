@@ -4,21 +4,25 @@
     License: Boost Software License 1.0
 **************************************************************************/
 module qtd.meta.Runtime;
-//TODO: Probably replace switch dispatch with pointer dispatch
-//and leave switch dispatch only in C interface
 
 import
     qtd.meta.Compiletime,
 
     std.typetuple,
     std.conv,
-    std.variant,
-    core.sync.rwmutex;
+    std.stdio,
+    std.traits,
+    std.variant;
 
-private __gshared ReadWriteMutex lock;
+import std.range : isForwardRange, isRandomAccessRange;
+
+/**
+    Object to lock on when accessing thread-shared meta-objects.
+ */
+immutable Object metaLock;
 shared static this()
 {
-    lock = new ReadWriteMutex;
+    metaLock = cast(immutable)new Object;
 }
 
 /**
@@ -87,13 +91,14 @@ class MetaException : Exception
     }
 }
 
-abstract class Meta
+abstract class MetaBase
 {
     alias typeof(this) This;
 
     string name;
     MetaAttribute[] attributes;
-    Meta[] members;
+
+    protected MetaBase[] members_;
 
     template createImpl(M : This)
     {
@@ -125,35 +130,91 @@ abstract class Meta
 
     protected void construct(alias symbol)()
     {
+        name = symbol.stringof;
         createAttrs!symbol;
+    }
+
+    static struct MembersRange
+    {
+        private MetaBase[] members_;
+
+        @property
+        MetaBase front()
+        {
+            return members_[0];
+        }
+
+        @property
+        bool empty()
+        {
+            return members_.length == 0;
+        }
+
+        @property
+        MembersRange save()
+        {
+            return this;
+        }
+
+        @property
+        MetaBase back()
+        {
+            return members_[$ - 1];
+        }
+
+        void popFront()
+        {
+            members_ = members_[1..$];
+        }
+
+        void popBack()
+        {
+            members_ = members_[0..$ - 1];
+        }
+
+        MetaBase opIndex(size_t i)
+        {
+            return members_[i];
+        }
+
+        @property
+        size_t length()
+        {
+            return members_.length;
+        }
+    }
+
+    /**
+        Returns a random access range of members of the class described by this meta-object.
+     */
+    @property
+    MembersRange members()
+    {
+        return MembersRange(members_);
     }
 }
 
+version (QtdUnittest) unittest
+{
+    static assert(isRandomAccessRange!(MetaBase.MembersRange));
+}
+
 /**
-    Base class for run time attributes.
+    Base class for run-time attributes.
  */
 abstract class MetaAttribute
 {
-    alias typeof(this) This;
-
     string name;
     AttributeOptions options;
 
-    This create(string name, AttributeOptions opts, A...)()
-    {
-        auto ma = new This;
-        ma.construct!(name, opts, A)();
-        return ma;
-    }
-
-    void construct(string name, AttributeOptions opts)()
+    this(string name, AttributeOptions opts)
     {
         this.name = name;
         options = opts;
     }
 }
 
-abstract class MetaType : Meta
+abstract class MetaType : MetaBase
 {
 }
 
@@ -164,7 +225,148 @@ abstract class MetaAggregate : MetaType
 class MetaClass : MetaAggregate
 {
     alias typeof(this) This;
+
+    private
+    {
+        This base_;
+        This firstDerived_;
+        This next_;
+        ClassInfo classInfo_;
+    }
+
     alias createImpl!This create;
+
+    static struct AllMembersRange
+    {
+        public //private
+        {
+            This metaClass_;
+            MetaBase[] members_;
+
+            void skipEmpty()
+            {
+                while (!metaClass_.members_.length)
+                {
+                    metaClass_ = metaClass_.base_;
+                    if (!metaClass_)
+                    {
+                        members_ = null;
+                        return;
+                    }
+                }
+
+                members_ = metaClass_.members_;
+            }
+        }
+
+        this(This metaClass)
+        {
+            metaClass_ = metaClass;
+            skipEmpty();
+        }
+
+        @property
+        MetaBase front()
+        {
+            return members_[0];
+        }
+
+        @property
+        bool empty()
+        {
+            return members_.length == 0;
+        }
+
+        @property
+        AllMembersRange save()
+        {
+            return this;
+        }
+
+        void popFront()
+        {
+            members_ = members_[1..$];
+            if (!members_.length)
+            {
+                metaClass_ = metaClass_.base_;
+                if (metaClass_)
+                    skipEmpty();
+            }
+        }
+    }
+
+    /**
+        Returns a forward range of members of the class described by this meta-object,
+        including base class members.
+     */
+    @property
+    AllMembersRange allMembers()
+    {
+        return AllMembersRange(this);
+    }
+
+    /**
+        Returns the meta-object of the base class.
+     */
+    @property
+    This base()
+    {
+        return base_;
+    }
+
+    /**
+        Returns the next meta-object on this level of the inheritance hierarchy.
+     */
+    @property
+    This next()
+    {
+        return next_;
+    }
+
+    /**
+        Returns the meta-object for the first derived class.
+     */
+    @property
+    This firstDerived()
+    {
+        return firstDerived_;
+    }
+
+    /**
+        D class info.
+     */
+    @property
+    ClassInfo classInfo()
+    {
+        return classInfo_;
+    }
+
+
+    /* internal */ void construct(T : Object)()
+    {
+        super.construct!T();
+        static if (!is(T == Object))
+        {
+            alias BaseClassesTuple!(T)[0] Base;
+            base_ = meta!Base;
+
+            next_ = base_.firstDerived_;
+            base_.firstDerived_ = this;
+        }
+        classInfo_ = T.classinfo;
+    }
+
+    /**
+     */
+    override string toString() const
+    {
+        return "MetaClass for " ~ classInfo_.name;
+    }
+}
+
+version (QtdUnittest) unittest
+{
+    static assert (isForwardRange!(MetaClass.AllMembersRange));
 }
 
 class MetaStruct : MetaAggregate
@@ -173,58 +375,72 @@ class MetaStruct : MetaAggregate
     alias createImpl!This create;
 }
 
+/**
+ */
 @property
-auto meta(alias symbol, M : Meta)()
+M meta(alias symbol, M : MetaBase)()
 {
-    __gshared static M m;
-
-    {
-        lock.reader.lock;
-        scope(exit)
-            lock.reader.unlock;
-        if (m)
-            return m;
-    }
-
-    lock.writer.lock;
-    scope(exit)
-        lock.writer.unlock;
+    __gshared static M sharedM;
+    static M m;
 
     if (!m)
-        m = M.create!symbol;
+    {
+        synchronized(metaLock)
+        {
+            if (!sharedM)
+                sharedM = M.create!symbol;
+        }
+        m = sharedM;
+    }
+
+    assert (m is sharedM);
     return m;
 }
 
+version (QtdUnittest) unittest
+{
+    class A
+    {
+    }
+
+    auto m = meta!A;
+    assert(m is meta!A);
+}
+
+/**
+ */
 // only classes and structs for now
 @property
 auto meta(T)()
 {
-    static if (is(typeof(T.staticMetaObject)))
-        return T.staticMetaObject;
+    static if (is(T.Meta))
+        return meta!(T, T.Meta);
     else static if (is(T == class))
         return meta!(T, MetaClass);
     else static if (is(T == struct))
         return meta!(T, MetaStruct);
     else
-        static assert(false, "No meta object for symbol " ~ T.stringof);
+        static assert(false, "No meta-object for symbol " ~ T.stringof);
 }
 
 /**
-    A run time attribute implementation that stores the attribute data in an
+    A run-time attribute implementation that stores the attribute data in an
     array of variants.
  */
 class MetaVariantAttribute : MetaAttribute
 {
+    alias typeof(this) This;
+
     Variant[] values;
 
-    private this()
+    private this(string name, AttributeOptions opts)
     {
+        super(name, opts);
     }
 
-    static MetaVariantAttribute create(string category, AttributeOptions opts, A...)()
+    static MetaVariantAttribute create(string name, AttributeOptions opts, A...)()
     {
-        auto ret = new MetaVariantAttribute;
-        ret.construct!(category, opts)();
+        auto ret = new This(name, opts);
         foreach(i, _; A)
         {
             static if (__traits(compiles, { ret.values ~= Variant(A[i]); } ))
@@ -235,7 +451,7 @@ class MetaVariantAttribute : MetaAttribute
 }
 
 /**
-    A run time attribute implementation that stores the attribute data in an
+    A run-time attribute implementation that stores the attribute data in an
     assiciative array of variants.
  */
 class MetaVariantDictAttribute : MetaAttribute
@@ -243,14 +459,14 @@ class MetaVariantDictAttribute : MetaAttribute
     Variant[string] values;
     alias typeof(this) This;
 
-    private this()
+    private this(string name, AttributeOptions opts)
     {
+        super(name, opts);
     }
 
-    static This create(string category, AttributeOptions opts, A...)()
+    static This create(string name, AttributeOptions opts, A...)()
     {
-        auto ret = new This;
-        ret.construct!(category, opts)();
+        auto ret = new This(name, opts);
         foreach(i, _; A)
         {
             static if (i % 2 == 0 && __traits(compiles, { ret.values[A[i]] = Variant(A[i + 1]); } ))
@@ -260,33 +476,30 @@ class MetaVariantDictAttribute : MetaAttribute
     }
 }
 
-version (QtdUnittest)
+version(QtdUnittest) unittest
 {
-    unittest
+    static void foo() {}
+
+    static class C
     {
-        static void foo() {}
-
-        static class C
-        {
-            mixin InnerAttribute!("variantAttribute", MetaVariantAttribute, "22", foo, 33);
-            mixin InnerAttribute!("variantDictAttribute", MetaVariantDictAttribute,
-                //"a", "33", // PHOBOS BUG: variant is unusable with AAs
-                "b", foo
-                //"c", 44
-                );
-        }
-
-        auto attrs = meta!(C).attributes;
-        assert(attrs.length == 2);
-        auto attr = cast(MetaVariantAttribute)attrs[0];
-
-        assert(attr.name == "variantAttribute");
-        assert(attr.values[0] == "22");
-        assert(attr.values[1] == 33);
-
-        auto attr2 = cast(MetaVariantDictAttribute) attrs[1];
-        assert(attr2.name == "variantDictAttribute");
-        //assert(attr2.values["a"] == "33");
-        //assert(attr2.values["c"] == 44);
+        mixin InnerAttribute!("variantAttribute", MetaVariantAttribute, "22", foo, 33);
+        mixin InnerAttribute!("variantDictAttribute", MetaVariantDictAttribute,
+            //"a", "33", // PHOBOS BUG: variant is unusable with AAs
+            "b", foo
+            //"c", 44
+            );
     }
+
+    auto attrs = meta!(C).attributes;
+    assert(attrs.length == 2);
+    auto attr = cast(MetaVariantAttribute)attrs[0];
+
+    assert(attr.name == "variantAttribute");
+    assert(attr.values[0] == "22");
+    assert(attr.values[1] == 33);
+
+    auto attr2 = cast(MetaVariantDictAttribute) attrs[1];
+    assert(attr2.name == "variantDictAttribute");
+    //assert(attr2.values["a"] == "33");
+    //assert(attr2.values["c"] == 44);
 }

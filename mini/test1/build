@@ -1,3 +1,4 @@
 #! /bin/bash
 
-dmd main.d -L-L../../lib -L-lqtdcore -I../../ -I../../qt/d2 -L-lQtCore
+dmd main.d -L-L/home/maxter/qtsdk-2010.02/qt/lib -L-L../../output-linux/build/lib -L-lqtdcore -I../../output-linux/build/ -I../../d2 -L-lQtCore
+

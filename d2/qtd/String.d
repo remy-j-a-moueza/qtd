@@ -74,13 +74,10 @@ mixin(qtdExport("void", "toUtf8", "wchar* arr, uint size, string* str",
         *str = toUTF8(arr[0..size]);
     }));
 
-
 // to work around the standard startsWith not being runnable at compile time.
-size_t startsWith(string s, string pattern)
+bool startsWith(string s, string pattern)
 {
-    if (pattern.length <= s.length && s[0..pattern.length] == pattern)
-        return pattern.length;
-    return 0;
+    return pattern.length <= s.length && s[0..pattern.length] == pattern;
 }
 
 

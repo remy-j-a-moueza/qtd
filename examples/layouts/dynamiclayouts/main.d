@@ -44,10 +44,12 @@ module main;
 import qt.gui.QApplication;
 import dialog;
 
+import std.stdio;
+
 
 int main(string[] args)
 {
-	scope app = new QApplication(args);
-	scope dialog = new Dialog;
-	return dialog.exec();
+    scope app = new QApplication(args);
+    scope dialog = new Dialog;
+    return dialog.exec();
 }

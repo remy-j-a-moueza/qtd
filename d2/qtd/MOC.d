@@ -494,6 +494,7 @@ mixin template Q_OBJECT()
         std.typetuple,
         std.traits,
         qtd.Marshal,
+        qtd.meta.Runtime,
         qt.core.QString; // for QStringUtil.toNative
 
 public: // required to override the outside scope protection.
@@ -529,45 +530,32 @@ public: // required to override the outside scope protection.
     }
 
     @property
-    override QMetaObject metaObject() const { return staticMetaObject(); }
-
-    private static
+    override QMetaObject metaObject() const
     {
-        __gshared QMetaObject staticMetaObject_;
-        __gshared QMetaObjectNative nativeStaticMetaObject_;
-        bool staticMoInited_;
+        return staticMetaObject;
     }
 
     @property
     static QMetaObject staticMetaObject()
     {
-        // using a thread-local flag to mitigate
-        // the performance hit caused by lazy initialization
-        if(!staticMoInited_)
-        {
-            synchronized(qtdMoLock)
-            {
-                if (!staticMetaObject_)
-                {
-                    alias BaseClassesTuple!(This)[0] Base;
-
-                    nativeStaticMetaObject_ = QMetaObjectNative(
-                        Base.staticMetaObject.nativeId,
-                        qt_meta_stringdata.ptr,
-                        qt_meta_data.ptr, null);
-
-                    QMetaObject.create!This(&nativeStaticMetaObject_);
-                }
-            }
-            staticMoInited_ = true;
-        }
-
-        return staticMetaObject_;
+        return meta!This;
     }
 
-    /*internal*/ static void setStaticMetaObject(QMetaObject m)
+    __gshared static QMetaObjectNative nativeStaticMetaObject_;
+
+    static void* qtd_nativeStaticMetaObject()
     {
-        staticMetaObject_ = m;
+        alias BaseClassesTuple!(This)[0] Base;
+
+        if (!nativeStaticMetaObject_.data)
+        {
+            nativeStaticMetaObject_ = QMetaObjectNative(
+                meta!(Base).nativeId,
+                qt_meta_stringdata.ptr,
+                qt_meta_data.ptr, null);
+        }
+
+        return &nativeStaticMetaObject_;
     }
 }
 

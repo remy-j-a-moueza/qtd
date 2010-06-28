@@ -46,6 +46,8 @@ import qt.core.*;
 
 class QObject___ extends QObject {
     
+    alias QMetaObject Meta;
+    
     /* TODO: test whether the linked list is really a better solution
     public bool __stackAllocated = false;
     

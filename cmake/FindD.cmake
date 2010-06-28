@@ -87,7 +87,8 @@ else(D_IS_LLVM)
     set(D_DEBUG_FLAG -debug)
 endif(D_IS_LLVM)
 if(CMAKE_HOST_WIN32)
-    set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -L/subsystem:windows)
+    # Linking fails with this. Commenting out for now.
+    # set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -L/subsystem:windows)
 endif(CMAKE_HOST_WIN32)
 set(D_DEBUG_FLAGS ${D_DEBUG_FLAGS} ${D_DEBUG_FLAG})
 
