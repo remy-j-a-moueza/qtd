@@ -16,9 +16,6 @@ import
 import std.string : indexOf;
 import std.algorithm : filter;
 
-//TODO: remove
-import std.stdio;
-
 class QMetaArgument : MetaBase
 {
 }
