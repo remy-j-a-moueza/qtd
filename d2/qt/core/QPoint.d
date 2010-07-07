@@ -139,17 +139,17 @@ public struct QPointF
         yp = p.y();
     }
 
-    bool isNull() //const
+    bool isNull() const
     {
         return qIsNull(xp) && qIsNull(yp);
     }
 
-    qreal x() //const
+    qreal x() const
     {
         return xp;
     }
 
-    qreal y() //const
+    qreal y() const
     {
         return yp;
     }
@@ -164,12 +164,12 @@ public struct QPointF
         yp = ypos;
     }
 /*
-inline qreal &QPointF::rx()
+ref qreal rx()
 {
         return xp;
 }
 
-inline qreal &QPointF::ry()
+ref qreal ry()
 {
     return yp;
 }
@@ -208,7 +208,7 @@ inline qreal &QPointF::ry()
         return QPointF(xp/c, yp/c);
     }
 
-    QPoint toPoint() //const
+    QPoint toPoint() const
     {
         return QPoint(qRound(xp), qRound(yp));
     }

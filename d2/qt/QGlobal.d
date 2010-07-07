@@ -450,9 +450,18 @@ int qIntCast(float f) { return cast(int)(f); }
 /*
   Reentrant versions of basic rand() functions for random number generation
 */
-void qsrand(uint seed);
-int qrand();
+private extern(C) int qtd_qrand();
+private extern(C) void qtd_qsrand(uint);
 
+void qsrand(uint seed)
+{
+    qtd_qsrand(seed);
+}
+
+int qrand()
+{
+    return qtd_qrand();
+}
 
 /*
    This gives us the possibility to check which modules the user can
