@@ -15,7 +15,8 @@ set (cpp_files
     qt_core/QString_shell
     qt_core/QVariant_shell
     qt_core/QModelIndex_shell
-    qt_core/QMetaObject_shell)
+    qt_core/QMetaObject_shell
+    )
 ## Module specific d files.
 set (d_qt_files
     QGlobal
@@ -23,11 +24,15 @@ set (d_qt_files
     core/QMetaObject
     core/QTypeInfo
     core/QList
-    core/QLine core/QLineF
+    core/QLine
+    core/QLineF
     core/QModelIndex
-    core/QRect core/QRectF
-    core/QSize core/QSizeF
-    core/QPoint core/QPointF
+    core/QRect
+    core/QRectF
+    core/QSize
+    core/QSizeF
+    core/QPoint
+    core/QPointF
     core/QVariant
     )
 set (d_qtd_files
@@ -48,6 +53,23 @@ set (d_qtd_files
     meta/Compiletime
     meta/Runtime
     )
+
+# unittest files
+if(UNITTEST)
+    set (cpp_files ${cpp_files}
+        qt_core/test/Objects
+    )
+    set (d_qt_files ${d_qt_files}
+        core/test/Objects
+    )
+endif()
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR UNITTEST)
+set (d_qtd_files ${d_qtd_files}
+        Debug
+    )
+endif()
+
 set (d_generated_files core/Qt QDefines)
 ## Classes.
 set (classes

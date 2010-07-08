@@ -496,30 +496,29 @@ foreach(package_big ${all_packages})
     target_link_libraries(cpp_${package} ${link_cpp} )
     set(d_objs ${d_objs} ${objects})
 
-    if(CPP_SHARED AND CMAKE_HOST_WIN32)
-        ## Create an implib library which will be linked to the D part.
-        set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.dll)
-        set(cpp_lib_native ${cpp_lib})
-        make_native_path(cpp_lib_native)
-        set(d_implib ${CMAKE_BINARY_DIR}/CMakeFiles/${package}.dir/cpp_${package}.lib)
-        set(d_implib_native ${d_implib})
-        make_native_path(d_implib_native)
-        add_custom_command(
-            OUTPUT "${d_implib}"
-            COMMAND "${IMPLIB}"
-            ARGS  /system /PAGESIZE:64 ${d_implib_native} ${cpp_lib_native}
-            DEPENDS  "cpp_${package}"
-            COMMENT "Creating implib ${lib_name}"
-            )
+    if(CPP_SHARED)
+        set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.${CMAKE_SHARED_LIBRARY_SUFFIX})
         install(FILES ${cpp_lib} COMPONENT qtd DESTINATION lib)
+
+        if(CMAKE_HOST_WIN32)
+            ## Create an implib library which will be linked to the D part.
+            set(cpp_lib_native ${cpp_lib})
+            make_native_path(cpp_lib_native)
+            set(d_implib ${CMAKE_BINARY_DIR}/CMakeFiles/${package}.dir/cpp_${package}.lib)
+            set(d_implib_native ${d_implib})
+            make_native_path(d_implib_native)
+            add_custom_command(
+                OUTPUT "${d_implib}"
+                COMMAND "${IMPLIB}"
+                ARGS  /system /PAGESIZE:64 ${d_implib_native} ${cpp_lib_native}
+                DEPENDS  "cpp_${package}"
+                COMMENT "Creating implib ${lib_name}"
+                )
+        endif()
     else()
         set(${package}_lib_param Qt${package_big})
     endif()
-    #FIXME remove redundancy again. see above
-    if(CPP_SHARED AND CMAKE_HOST_UNIX)
-        set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.so)
-        install(FILES ${cpp_lib} COMPONENT qtd DESTINATION lib)
-    endif()
+
     ## Link the D part.
     add_d_target(${lib_name} NOT_DETECT_DEPENDS TYPE ${build_type} INCLUDES ${QTD_IMPORT_PATH} SOURCES ${d_sources} OBJECTS ${cpp_objs} ${d_implib}
           OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib DEPENDS ${d_implib} )

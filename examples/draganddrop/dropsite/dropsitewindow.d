@@ -53,101 +53,114 @@ import qt.gui.QDialogButtonBox;
 import droparea;
 
 
+import std.stdio; //TODO: remove
+
+
 class DropSiteWindow : public QWidget
 {
 public:
 
-	this()
-	{
-		abstractLabel = new QLabel(tr("This example accepts drags from other "
-			"applications and displays the MIME types "
-			"provided by the drag object."));
+    this()
+    {
+        abstractLabel = new QLabel(tr("This example accepts drags from other "
+            "applications and displays the MIME types "
+            "provided by the drag object."));
 
-		abstractLabel.setWordWrap(true);
-		abstractLabel.adjustSize();
+        abstractLabel.setWordWrap(true);
+        abstractLabel.adjustSize();
 
-		dropArea = new DropArea;
-		connect(dropArea, "changed", this, "updateFormatsTable");
+        dropArea = new DropArea;
+        connect(dropArea, "changed", this, "updateFormatsTable");
 
-		string[] labels;
-		labels ~= tr("Format");
-		labels ~= tr("Content");
+        string[] labels;
+        labels ~= tr("Format");
+        labels ~= tr("Content");
 
-		formatsTable = new QTableWidget;
-		formatsTable.setColumnCount(2);
-		formatsTable.setEditTriggers(QAbstractItemView.NoEditTriggers);
-		formatsTable.setHorizontalHeaderLabels(labels.toQList());
-		formatsTable.horizontalHeader().setStretchLastSection(true);
+        formatsTable = new QTableWidget;
+        formatsTable.setColumnCount(2);
+        formatsTable.setEditTriggers(QAbstractItemView.NoEditTriggers);
+        formatsTable.setHorizontalHeaderLabels(labels.toQList());
+        formatsTable.horizontalHeader().setStretchLastSection(true);
 
-		clearButton = new QPushButton(tr("Clear"));
-		quitButton = new QPushButton(tr("Quit"));
+        clearButton = new QPushButton(tr("Clear"));
+        quitButton = new QPushButton(tr("Quit"));
 
-		buttonBox = new QDialogButtonBox;
-		buttonBox.addButton(clearButton, QDialogButtonBox.ActionRole);
-		buttonBox.addButton(quitButton, QDialogButtonBox.RejectRole);
+        buttonBox = new QDialogButtonBox;
+        buttonBox.addButton(clearButton, QDialogButtonBox.ActionRole);
+        buttonBox.addButton(quitButton, QDialogButtonBox.RejectRole);
 
-		connect(quitButton, "pressed", this, "close");
-		connect(clearButton, "pressed", dropArea, "clearArea");
+        connect(quitButton, "pressed", this, "close");
+        connect(clearButton, "pressed", dropArea, "clearArea");
 
-		QVBoxLayout mainLayout = new QVBoxLayout;
-		mainLayout.addWidget(abstractLabel);
-		mainLayout.addWidget(dropArea);
-		mainLayout.addWidget(formatsTable);
-		mainLayout.addWidget(buttonBox);
-		setLayout(mainLayout);
+        QVBoxLayout mainLayout = new QVBoxLayout;
+        mainLayout.addWidget(abstractLabel);
+        mainLayout.addWidget(dropArea);
+        mainLayout.addWidget(formatsTable);
+        mainLayout.addWidget(buttonBox);
+        setLayout(mainLayout);
 
-		setWindowTitle(tr("Drop Site"));
-		setMinimumSize(350, 500);
-	}
+        setWindowTitle(tr("Drop Site"));
+        setMinimumSize(350, 500);
+    }
 
-	void slot_updateFormatsTable(QMimeData mimeData)
-	{
-		formatsTable.setRowCount(0);
-		if (!mimeData)
-			return;
+    void slot_updateFormatsTable(QMimeData mimeData)
+    {
+        formatsTable.setRowCount(0);
+        if (!mimeData)
+            return;
 
-		foreach (string format; mimeData.formats()) {
-			QTableWidgetItem formatItem = new QTableWidgetItem(format);
-			formatItem.setFlags(Qt.ItemIsEnabled);
-			formatItem.setTextAlignment(Qt.AlignTop | Qt.AlignLeft);
+        foreach (string format; mimeData.formats()) {
 
-			string text;
-			if (format == "text/plain") {
-				text = strip(mimeData.text());
-			} else if (format == "text/html") {
-				text = strip(mimeData.html());
-			} else if (format == "text/uri-list") {
-				auto urlList = mimeData.urls();
-				for (int i = 0; i < urlList.length && i < 32; ++i) {
-					string url = urlList[i].path();
-					text ~= url ~ " ";
-				}
-			} else {
-				QByteArray data = mimeData.data(format);
-				for (int i = 0; i < data.size() && i < 32; ++i) {
-					string hex = toupper(std.string.format("%x", data.at(i)));
-					text ~= hex ~ " ";
-				}
-			}
+            writeln("Point 1");
+            QTableWidgetItem formatItem = new QTableWidgetItem(format);
+            formatItem.setFlags(Qt.ItemIsEnabled);
+            formatItem.setTextAlignment(Qt.AlignTop | Qt.AlignLeft);
 
-			int row = formatsTable.rowCount();
-			formatsTable.insertRow(row);
-			formatsTable.setItem(row, 0, new QTableWidgetItem(format));
-			formatsTable.setItem(row, 1, new QTableWidgetItem(text));
-		}
+            string text;
+            if (format == "text/plain") {
+                text = strip(mimeData.text());
+            } else if (format == "text/html") {
+                text = strip(mimeData.html());
+            } else if (format == "text/uri-list") {
+                auto urlList = mimeData.urls();
+                for (int i = 0; i < urlList.length && i < 32; ++i) {
+                    string url = urlList[i].path();
+                    text ~= url ~ " ";
+                }
+            } else {
+                QByteArray data = mimeData.data(format);
+                for (int i = 0; i < data.size() && i < 32; ++i) {
+                    string hex = toupper(std.string.format("%x", data.at(i)));
+                    text ~= hex ~ " ";
+                }
+            }
 
-		formatsTable.resizeColumnToContents(0);
-	}
+            int row = formatsTable.rowCount();
+            formatsTable.insertRow(row);
+
+            writeln("Point 2");
+            formatsTable.setItem(row, 0, new QTableWidgetItem(format));
+            writeln("Point 3");
+            formatsTable.setItem(row, 1, new QTableWidgetItem(text));
+        }
+
+        formatsTable.resizeColumnToContents(0);
+    }
+
+    ~this()
+    {
+        writeln("deleting dropsitewindow");
+    }
 
 private:
 
-	DropArea dropArea;
-	QLabel abstractLabel;
-	QTableWidget formatsTable;
+    DropArea dropArea;
+    QLabel abstractLabel;
+    QTableWidget formatsTable;
 
-	QPushButton clearButton;
-	QPushButton quitButton;
-	QDialogButtonBox buttonBox;
+    QPushButton clearButton;
+    QPushButton quitButton;
+    QDialogButtonBox buttonBox;
 
     mixin Q_OBJECT;
 }

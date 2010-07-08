@@ -40,8 +40,9 @@ import qt.gui.QPushButton;
 
 int main(string[] args)
 {
-    QApplication app = new QApplication(args);
-    QPushButton hello = new QPushButton("Hello world!");
+    scope app = new QApplication(args);
+    scope hello = new QPushButton("Hello world!");
     hello.show();
+
     return app.exec();
 }

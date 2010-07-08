@@ -345,7 +345,7 @@ struct QList(T, alias Default = Dummy)
                 else static if (isValueType!T)
                 {
                     void* ptr = cast(void*)(isLarge!T() || isStatic!T() ? v : &this);
-                    return new T(ptr, QtdObjectFlags.nativeOwnership);
+                    return new T(ptr, QtdObjectInitFlags.nativeOwnership);
                 }
                 else
                 {
@@ -482,14 +482,14 @@ public:
             static if (isValueType!T)
                 {
                     if (isLarge!T() || isStatic!T()) // TODO should be static if
-                        n.v = T.__constructNativeCopy(t.__nativeId); // n.v = new T(t);
+                        n.v = T.__constructNativeCopy(t.qtdNativeId); // n.v = new T(t);
                     else if (isComplex!T())
-                        T.__constructPlacedNativeCopy(t.__nativeId, n); //  new (n) T(t);
+                        T.__constructPlacedNativeCopy(t.qtdNativeId, n); //  new (n) T(t);
                     else
-                        T.__constructPlacedNativeCopy(t.__nativeId, n); // TODO should be *cast(T*)(n) = cast(T)(t); as it is a primitive type. fix when they are implemented with structs
+                        T.__constructPlacedNativeCopy(t.qtdNativeId, n); // TODO should be *cast(T*)(n) = cast(T)(t); as it is a primitive type. fix when they are implemented with structs
                 }
             else // in case of QObject or Object Qt types we place a pointer to a native object in the node
-                n = cast(Node*) t.__nativeId;
+                n = cast(Node*) t.qtdNativeId;
         }
     else static if (is(T == string))
     {
@@ -543,7 +543,7 @@ public:
         for(int i = 0; i < res.length; ++i)
         {
             static if (isValueType!T)
-                res[i] = new T(T.__constructNativeCopy(this.at(i).__nativeId)); // Node should probably provide a ptr method to directly extract pointer to the native value stored in the list to avoid creating a dummy D object in t()
+                res[i] = new T(T.__constructNativeCopy(this.at(i).qtdNativeId)); // Node should probably provide a ptr method to directly extract pointer to the native value stored in the list to avoid creating a dummy D object in t()
             else
                 res[i] = this.opIndex(i);
         }

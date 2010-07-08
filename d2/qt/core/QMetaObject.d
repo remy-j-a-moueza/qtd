@@ -9,6 +9,7 @@ import
     qtd.Marshal,
     qtd.MOC,
     qtd.String,
+    qtd.Signal,
     std.typetuple,
     std.traits,
     std.c.stdlib;
@@ -85,32 +86,7 @@ class QMetaSlot : QMetaMethod
     }
 }
 
-/**
-    Base class for QtD meta-classes.
- */
-abstract class QtdMetaClass : MetaClass
-{
-private:
-    void* nativeId_;
 
-public:
-
-    this() {}
-
-    /**
-     */
-    @property
-    void* nativeId()
-    {
-        return nativeId_;
-    }
-
-    void construct(T)()
-    {
-        super.construct!T();
-        nativeId_ = T.qtd_nativeStaticMetaObject();
-    }
-}
 
 struct QMetaObjectNative
 {
@@ -120,6 +96,20 @@ struct QMetaObjectNative
     void *extradata;
 }
 
+// COMPILER BUG: causes a forward reference error if placed inside QMetaObject
+enum MetaCall
+{
+    InvokeMetaMethod,
+    ReadProperty,
+    WriteProperty,
+    ResetProperty,
+    QueryPropertyDesignable,
+    QueryPropertyScriptable,
+    QueryPropertyStored,
+    QueryPropertyEditable,
+    QueryPropertyUser,
+    CreateInstance
+}
 
 /**
  */
@@ -127,23 +117,7 @@ final class QMetaObject : QtdMetaClass
 {
     alias typeof(this) This;
 
-    private QObject function(void* nativeId) _createWrapper;
-
     this() {}
-
-    enum Call
-    {
-        InvokeMetaMethod,
-        ReadProperty,
-        WriteProperty,
-        ResetProperty,
-        QueryPropertyDesignable,
-        QueryPropertyScriptable,
-        QueryPropertyStored,
-        QueryPropertyEditable,
-        QueryPropertyUser,
-        CreateInstance
-    }
 
     alias createImpl!This create;
 
@@ -157,12 +131,6 @@ final class QMetaObject : QtdMetaClass
                 alias T.ConcreteType Concrete;
             else
                 alias T Concrete;
-
-            _createWrapper = function QObject(void* nativeId) {
-                    auto obj = new Concrete(nativeId, cast(QtdObjectFlags)(QtdObjectFlags.nativeOwnership | QtdObjectFlags.dynamicEntity));
-                    T.__createEntity(nativeId, cast(void*)obj);
-                    return obj;
-                };
 
             T._populateMetaInfo(this);
         }
@@ -277,7 +245,7 @@ final class QMetaObject : QtdMetaClass
         return this;
     }
 
-    QObject getObject(void* nativeObjId)
+    override QObject getWrapper(void* nativeObjId, QtdObjectInitFlags initFlags = QtdObjectInitFlags.none)
     {
         QObject result;
 
@@ -289,7 +257,7 @@ final class QMetaObject : QtdMetaClass
                 auto moId = qtd_QObject_metaObject(nativeObjId);
                 auto nId = nativeId;
                 if (nId == moId)
-                     result = _createWrapper(nativeObjId);
+                     result = static_cast!QObject(_createWrapper(nativeObjId, initFlags));
                 else
                 {
                     // get native metaobjects for the entire derivation lattice
@@ -311,7 +279,8 @@ final class QMetaObject : QtdMetaClass
                     while (moCount > 0)
                         moIds[--moCount] = moId = qtd_QMetaObject_superClass(moId);
 
-                    result = lookUpDerived(moIds)._createWrapper(nativeObjId);
+                    auto mo = lookUpDerived(moIds);
+                    result = static_cast!QObject(mo._createWrapper(nativeObjId, initFlags));
                 }
             }
         }
@@ -321,19 +290,19 @@ final class QMetaObject : QtdMetaClass
 
     static void activate(QObject sender, QMetaObject m, int local_signal_index, void **argv)
     {
-        qtd_QMetaObject_activate_3(sender.__nativeId, m.nativeId, local_signal_index, argv);
+        qtd_QMetaObject_activate_3(sender.qtdNativeId, m.nativeId, local_signal_index, argv);
     }
 
     static void activate(QObject sender, QMetaObject m, int from_local_signal_index, int to_local_signal_index, void **argv)
     {
-        qtd_QMetaObject_activate_4(sender.__nativeId, m.nativeId, from_local_signal_index, to_local_signal_index, argv);
+        qtd_QMetaObject_activate_4(sender.qtdNativeId, m.nativeId, from_local_signal_index, to_local_signal_index, argv);
     }
 
     static bool connect(const QObject sender, int signal_index,
                         const QObject receiver, int method_index,
                         int type = 0, int *types = null)
     {
-        return qtd_QMetaObject_connect(sender.__nativeId, signal_index, receiver.__nativeId, method_index, type, types);
+        return qtd_QMetaObject_connect(sender.qtdNativeId, signal_index, receiver.qtdNativeId, method_index, type, types);
     }
 
     int indexOfMethod_Cpp(string method)
@@ -425,6 +394,7 @@ final class QMetaObject : QtdMetaClass
  */
 mixin template Q_CLASSINFO(string name, string value)
 {
+    import qtd.meta.Compiletime;
     mixin InnerAttribute!("Q_CLASSINFO", AttributeOptions.allowMultiple, name, value);
 }
 
@@ -434,44 +404,6 @@ mixin template Q_PROPERTY(T, string params)
 {
     static assert(false, "not implemented");
 }
-
-version (QtdUnittest)
-{
-    // COMPILER BUG: cannot put this inside the unittest block as static class.
-    class QMetaObject_A : QObject
-    {
-        mixin Q_CLASSINFO!("author", "Sabrina Schweinsteiger");
-        mixin Q_CLASSINFO!("url", "http://doc.moosesoft.co.uk/1.0/");
-
-        static int slot1Called;
-
-        final
-        {
-            void signal_signal1();
-            void signal_signal2(int);
-        }
-
-
-        void slot_slot1()
-        {
-            slot1Called++;
-        }
-
-        mixin Q_OBJECT;
-    }
-
-    unittest
-    {
-        scope a = new QMetaObject_A;
-        QObject.connect(a, "signal1", a, "slot1");
-        a.signal1();
-        assert(QMetaObject_A.slot1Called == 1);
-
-        QObject.connect(a, "signal2", a, "slot1");
-        a.signal2(42);
-        assert(QMetaObject_A.slot1Called == 2);
-    }
- }
 
 extern(C) void qtd_QMetaObject_activate_3(void* sender, void* m, int local_signal_index, void **argv);
 extern(C) void qtd_QMetaObject_activate_4(void *sender, void* m, int from_local_signal_index, int to_local_signal_index, void **argv);

@@ -86,13 +86,13 @@ inline int &ry()
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QPoint_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPoint_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QPoint_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPoint_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
-    
+
     // service stuff
     public alias void __isNativeValueType;
 
@@ -214,11 +214,11 @@ inline qreal &QPointF::ry()
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QPointF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPointF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QPointF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QPointF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     // service stuff

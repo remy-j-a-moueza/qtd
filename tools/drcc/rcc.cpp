@@ -733,7 +733,7 @@ bool RCCResourceLibrary::writeDataBlobs()
 {
     Q_ASSERT(m_errorDevice);
     if (m_format == C_Code)
-        writeString("static const ubyte[] qt_resource_data = [\n");
+        writeString("static immutable ubyte[] qt_resource_data = [\n");
     else if (m_format == Binary)
         m_dataOffset = m_out.size();
     QStack<RCCFileInfo*> pending;
@@ -766,7 +766,7 @@ bool RCCResourceLibrary::writeDataBlobs()
 bool RCCResourceLibrary::writeDataNames()
 {
     if (m_format == C_Code)
-        writeString("static const ubyte[] qt_resource_name = [\n");
+        writeString("static immutable ubyte[] qt_resource_name = [\n");
     else if (m_format == Binary)
         m_namesOffset = m_out.size();
 
@@ -806,7 +806,7 @@ static bool qt_rcc_compare_hash(const RCCFileInfo *left, const RCCFileInfo *righ
 bool RCCResourceLibrary::writeDataStructure()
 {
     if (m_format == C_Code)
-        writeString("static const ubyte[] qt_resource_struct = [\n");
+        writeString("static immutable ubyte[] qt_resource_struct = [\n");
     else if (m_format == Binary)
         m_treeOffset = m_out.size();
     QStack<RCCFileInfo*> pending;
@@ -894,8 +894,8 @@ bool RCCResourceLibrary::writeInitializer()
         if (m_useNameSpace)
             writeString("// QT_BEGIN_NAMESPACE\n\n");
         if (m_root) {
-            writeString("extern(C) bool qtd_register_resource_data(int version_, in ubyte *tree, in ubyte *name, in ubyte *data);\n\n");
-            writeString("extern(C) bool qtd_unregister_resource_data(int version_, in ubyte *tree, in ubyte *name, in ubyte *data);\n\n");
+            writeString("extern(C) bool qtd_qRegisterResourceData(int version_, in ubyte *tree, in ubyte *name, in ubyte *data);\n\n");
+            writeString("extern(C) bool qtd_qUnregisterResourceData(int version_, in ubyte *tree, in ubyte *name, in ubyte *data);\n\n");
         }
         if (m_useNameSpace)
             writeString("// QT_END_NAMESPACE\n\n\n");
@@ -907,7 +907,7 @@ bool RCCResourceLibrary::writeInitializer()
 
         if (m_root) {
             writeString("    ");
-            writeString("qtd_register_resource_data(0x01, qt_resource_struct.ptr, "
+            writeString("qtd_qRegisterResourceData(0x01, qt_resource_struct.ptr, "
                        "qt_resource_name.ptr, qt_resource_data.ptr);\n");
         }
         writeString("    return 1;\n");
@@ -921,12 +921,12 @@ bool RCCResourceLibrary::writeInitializer()
         writeString("()\n{\n");
         if (m_root) {
             writeString("    ");
-            writeString("qtd_unregister_resource_data(0x01, qt_resource_struct.ptr, "
+            writeString("qtd_qUnregisterResourceData(0x01, qt_resource_struct.ptr, "
                       "qt_resource_name.ptr, qt_resource_data.ptr);\n");
         }
         writeString("    return 1;\n");
         writeString("}\n\n");
-	
+        
         if(staticInitialize())
         {
             writeString("static this() \n{\n    ");

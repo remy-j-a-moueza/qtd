@@ -46,79 +46,79 @@ import qt.gui.QLabel;
 class DropArea : public QLabel
 {
 public:
-	this(QWidget parent = null)
-	{
-		super(parent);
+    this(QWidget parent = null)
+    {
+        super(parent);
 
-		setMinimumSize(200, 200);
-		setFrameStyle(QFrame.Sunken | QFrame.StyledPanel);
-		setAlignment(Qt.AlignCenter);
-		setAcceptDrops(true);
-		setAutoFillBackground(true);
-		clearArea();
-	}
-   
-	void slot_clearArea()
-	{
-		setText(tr("<drop content>"));
-		setBackgroundRole(QPalette.Dark);
+        setMinimumSize(200, 200);
+        setFrameStyle(QFrame.Sunken | QFrame.StyledPanel);
+        setAlignment(Qt.AlignCenter);
+        setAcceptDrops(true);
+        setAutoFillBackground(true);
+        clearArea();
+    }
 
-		changed(null);
-	}
+    void slot_clearArea()
+    {
+        setText(tr("<drop content>"));
+        setBackgroundRole(QPalette.Dark);
 
-	final void signal_changed(QMimeData);
-	
+        changed(null);
+    }
+
+    final void signal_changed(QMimeData);
+
 protected:
-	void dragEnterEvent(QDragEnterEvent event)
-	{
-		setText(tr("<drop content>"));
-		setBackgroundRole(QPalette.Highlight);
+    void dragEnterEvent(QDragEnterEvent event)
+    {
+        setText(tr("<drop content>"));
+        setBackgroundRole(QPalette.Highlight);
 
-		event.acceptProposedAction();
-		changed(event.mimeData);
-	}
-	
-	void dragMoveEvent(QDragMoveEvent event)
-	{
-		event.acceptProposedAction();
-	}
-	
-	void dragLeaveEvent(QDragLeaveEvent event)
-	{
-		clearArea();
-		event.accept();
-	}
-	
-	void dropEvent(QDropEvent event)
-	{
-		QMimeData mimeData = event.mimeData();
+        event.acceptProposedAction();
+        changed(event.mimeData);
+    }
 
-		if (mimeData.hasImage()) {
-			setPixmap(new QPixmap(mimeData.imageData));
-		} else if (mimeData.hasHtml()) {
-			setText(mimeData.html());
-			setTextFormat(Qt.RichText);
-		} else if (mimeData.hasText()) {
-			setText(mimeData.text());    
-			setTextFormat(Qt.PlainText);
-		} else if (mimeData.hasUrls()) {
-			auto urlList = mimeData.urls();
-			string text;
-			for (int i = 0; i < urlList.length && i < 32; ++i) {
-				text ~= urlList[i].path() ~ "\n";
-			}
-			setText(text);
-		} else {
-			setText(tr("Cannot display data"));
-		}
+    void dragMoveEvent(QDragMoveEvent event)
+    {
+        event.acceptProposedAction();
+    }
 
-		setBackgroundRole(QPalette.Dark);
-		event.acceptProposedAction();
-	}
+    void dragLeaveEvent(QDragLeaveEvent event)
+    {
+        clearArea();
+        event.accept();
+    }
+
+    void dropEvent(QDropEvent event)
+    {
+        QMimeData mimeData = event.mimeData();
+
+        if (mimeData.hasImage()) {
+            setPixmap(new QPixmap(mimeData.imageData));
+        } else if (mimeData.hasHtml()) {
+            setText(mimeData.html());
+            setTextFormat(Qt.RichText);
+        } else if (mimeData.hasText()) {
+            setText(mimeData.text());
+            setTextFormat(Qt.PlainText);
+        } else if (mimeData.hasUrls()) {
+            auto urlList = mimeData.urls();
+            string text;
+            for (int i = 0; i < urlList.length && i < 32; ++i) {
+                text ~= urlList[i].path() ~ "\n";
+            }
+            setText(text);
+        } else {
+            setText(tr("Cannot display data"));
+        }
+
+        setBackgroundRole(QPalette.Dark);
+        event.acceptProposedAction();
+    }
 
 private:
-	QLabel label;
-    
+    QLabel label;
+
     mixin Q_OBJECT;
 }
 

@@ -156,7 +156,7 @@ private:
     AbstractMetaFunctionList generatedClassFunctions(const AbstractMetaClass *d_class);
 
     void writeDestructor(QTextStream &s, const AbstractMetaClass *d_class);
-    void writeFlagsSetter(QTextStream &s, const AbstractMetaClass *d_class);
+    void writeOwnershipSetter(QTextStream &s, const AbstractMetaClass *d_class);
     void writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_class);
     void writeEnumAliases(QTextStream &s, const AbstractMetaEnum *d_enum);
     void writeSignalSignatures(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunctionList signal_funcs);

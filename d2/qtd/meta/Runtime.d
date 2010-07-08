@@ -91,6 +91,9 @@ class MetaException : Exception
     }
 }
 
+/**
+    All meta-object classes inherit from this base class.
+ */
 abstract class MetaBase
 {
     alias typeof(this) This;
@@ -123,7 +126,7 @@ abstract class MetaBase
             {
                 alias attr[2] MA;
                 alias TypeTuple!(attr[0..2], attr[3..$]) args;
-                attributes ~= MA /*COMPILER BUG: tuple element as tuple*/[0].create!args();
+                attributes ~= MA /*COMPILER BUG: tuple element as tuple*/[0].create(args);
             }
         }
     }
@@ -238,7 +241,7 @@ class MetaClass : MetaAggregate
 
     static struct AllMembersRange
     {
-        public //private
+        private
         {
             This metaClass_;
             MetaBase[] members_;
@@ -249,10 +252,7 @@ class MetaClass : MetaAggregate
                 {
                     metaClass_ = metaClass_.base_;
                     if (!metaClass_)
-                    {
-                        members_ = null;
                         return;
-                    }
                 }
 
                 members_ = metaClass_.members_;
@@ -345,6 +345,7 @@ class MetaClass : MetaAggregate
     /* internal */ void construct(T : Object)()
     {
         super.construct!T();
+        classInfo_ = T.classinfo;
         static if (!is(T == Object))
         {
             alias BaseClassesTuple!(T)[0] Base;
@@ -353,7 +354,6 @@ class MetaClass : MetaAggregate
             next_ = base_.firstDerived_;
             base_.firstDerived_ = this;
         }
-        classInfo_ = T.classinfo;
     }
 
     /**
@@ -393,18 +393,7 @@ M meta(alias symbol, M : MetaBase)()
         m = sharedM;
     }
 
-    assert (m is sharedM);
     return m;
-}
-
-version (QtdUnittest) unittest
-{
-    class A
-    {
-    }
-
-    auto m = meta!A;
-    assert(m is meta!A);
 }
 
 /**
@@ -438,14 +427,13 @@ class MetaVariantAttribute : MetaAttribute
         super(name, opts);
     }
 
-    static MetaVariantAttribute create(string name, AttributeOptions opts, A...)()
+    static MetaVariantAttribute create(A...)(string name, AttributeOptions opts, A args)
     {
         auto ret = new This(name, opts);
+
         foreach(i, _; A)
-        {
-            static if (__traits(compiles, { ret.values ~= Variant(A[i]); } ))
-                ret.values ~= Variant(A[i]);
-        }
+            ret.values ~= Variant(args[i]);
+
         return ret;
     }
 }
@@ -464,42 +452,50 @@ class MetaVariantDictAttribute : MetaAttribute
         super(name, opts);
     }
 
-    static This create(string name, AttributeOptions opts, A...)()
+    static This create(A...)(string name, AttributeOptions opts, A args)
     {
         auto ret = new This(name, opts);
         foreach(i, _; A)
-        {
-            static if (i % 2 == 0 && __traits(compiles, { ret.values[A[i]] = Variant(A[i + 1]); } ))
-                ret.values[A[i]] = Variant(A[i + 1]); // PHOBOS BUG: phobos asserts on this
-        }
+            ret.values[args[i]] = Variant(args[i + 1]); // PHOBOS BUG: phobos asserts on this
+
         return ret;
     }
 }
 
 version(QtdUnittest) unittest
 {
+    enum x = 42;
     static void foo() {}
 
     static class C
     {
-        mixin InnerAttribute!("variantAttribute", MetaVariantAttribute, "22", foo, 33);
+
+        mixin InnerAttribute!("variantAttribute", MetaVariantAttribute, "22", x, 33);
+
+        /+ PHOBOS BUG: variant is unusable with AAs
         mixin InnerAttribute!("variantDictAttribute", MetaVariantDictAttribute,
-            //"a", "33", // PHOBOS BUG: variant is unusable with AAs
-            "b", foo
-            //"c", 44
+            "a", "33",
+            "b", 44,
+            "c", x
             );
+        +/
     }
 
     auto attrs = meta!(C).attributes;
-    assert(attrs.length == 2);
+    assert(attrs.length == 1);
     auto attr = cast(MetaVariantAttribute)attrs[0];
 
     assert(attr.name == "variantAttribute");
     assert(attr.values[0] == "22");
-    assert(attr.values[1] == 33);
+    assert(attr.values[1] == x);
+    assert(attr.values[2] == 33);
+
+    /+
 
     auto attr2 = cast(MetaVariantDictAttribute) attrs[1];
     assert(attr2.name == "variantDictAttribute");
     //assert(attr2.values["a"] == "33");
-    //assert(attr2.values["c"] == 44);
+    //assert(attr2.values["b"] == 44);
+    //assert(attr2.values["c"] == x);
+    +/
 }

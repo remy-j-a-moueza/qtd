@@ -4,14 +4,22 @@
  */
 
 #include "qtd_core.h"
-#include <iostream>
+#include <typeinfo>
 
 QTD_EXPORT(CORE, toUtf8);
 QTD_EXPORT(CORE, QtdObject_delete);
 
-QTD_EXTERN QTD_DLL_EXPORT void qtd_initCore()
+QTD_EXTERN QTD_DLL_PUBLIC void qtdInitCore()
 {
     QObjectLink::userDataId = QObject::registerUserData();
+}
+
+QTD_EXTERN QTD_DLL_PUBLIC bool qtdTypeInfosEqual(void* info1, void* info2)
+{
+    std::type_info* i1 = (std::type_info*)info1;
+    std::type_info* i2 = (std::type_info*)info2;
+
+    return i1 == i2 || strcmp(i1->name(), i2->name()) == 0;
 }
 
 QTD_EXTERN QTD_DLL_PUBLIC QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia)
@@ -47,13 +55,13 @@ extern bool qRegisterResourceData
 extern bool qUnregisterResourceData
     (int, const unsigned char *, const unsigned char *, const unsigned char *);
 
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_register_resource_data(int version, const unsigned char *tree,
+QTD_EXTERN QTD_DLL_PUBLIC bool qtd_qRegisterResourceData(int version, const unsigned char *tree,
                                          const unsigned char *name, const unsigned char *data)
 {
     return qRegisterResourceData(version, tree, name, data);
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_unregister_resource_data(int version, const unsigned char *tree,
+QTD_EXTERN QTD_DLL_PUBLIC bool qtd_qUnregisterResourceData(int version, const unsigned char *tree,
                                            const unsigned char *name, const unsigned char *data)
 {
     return qUnregisterResourceData(version, tree, name, data);

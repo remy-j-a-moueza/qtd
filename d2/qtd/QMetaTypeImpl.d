@@ -19,11 +19,16 @@ private struct DArrayToC
 }
 
 /**
- */
+    Default implementation of constructors/destructors
+    registered with Qt when qtd_qRegisterMetaType is called
+    for a T.
+
+    For Ts that are passed-by-reference objects, we follow Qt's convention and
+    allocate/copy references, not objects. To override this behavior,
+    supply qtd_qRegisterMetaType with a custom constructor/destructor implementation.
+*/
 template MetaTypeOps(T)
 {
-    // Note that in case of byref objects we follow Qt's convention and
-    // allocate/copy references, not objects.
     static void* construct(void* copy)
     {
         auto T* p = cast(T*)GC.malloc(T.sizeof);
@@ -51,7 +56,7 @@ template MetaTypeOps(T)
 
     static void destroy(void* ptr)
     {
-        // Run destructors for value types. Let the GC reclaim the memory.
+        // Run destructors for structs. Let the GC reclaim the memory.
         static if (is(T == struct) && __traits(compiles, T.__dtor))
             (cast(T*)ptr).__dtor;
     }
@@ -63,16 +68,14 @@ template MetaTypeStreamOps(T)
 {
     void save(QDataStream ds, const void* data)
     {
-        writeln("Saving ", ds.__nativeId, " ", data);
     }
 
     void load(QDataStream ds, void* data)
     {
-        writeln("Loading ", ds.__nativeId, " ", data);
     }
 }
 
-// TODO: only GNU C++ is supported
+// TODO: only GNU C++ x86 is supported
 private template typeOpShim(alias op)
 {
     extern(C) void typeOpShim()
@@ -97,13 +100,14 @@ int qRegisterMetaType(T, alias ops = MetaTypeOps)(string name = null)
     if (!name.length)
         name = typeid(T).toString; //TODO: use compile time full name
 
-    return qtd_registerType(toStringz(name), &typeOpShim!(ops!T.destroy), &typeOpShim!(ops!T.construct));
+    return qtd_QMetaType_registerType(toStringz(name), &typeOpShim!(ops!T.destroy), &typeOpShim!(ops!T.construct));
 }
 
 version (QtdUnittest)
 {
     unittest
     {
+        /+
         static class A
         {
             int x;
@@ -189,6 +193,7 @@ version (QtdUnittest)
         assert(paa2 !is &aa);
         assert(*paa2 == aa);
         QMetaType.destroy(aaId, paa);
+        +/
     }
 }
 
@@ -223,25 +228,22 @@ void qRegisterMetaTypeStreamOperators(T, alias ops = MetaTypeStreamOps)(string n
 
     static void save(void* ds, const void* data)
     {
-        scope dataStream = new QDataStream(ds, QtdObjectFlags.nativeOwnership);
+        scope dataStream = new QDataStream(ds, QtdObjectInitFlags.onStack);
         ops!T.save(dataStream, data);
     }
 
     static void load(void* ds, void* data)
     {
-        scope dataStream = new QDataStream(ds, QtdObjectFlags.nativeOwnership);
+        scope dataStream = new QDataStream(ds, QtdObjectInitFlags.onStack);
         ops!T.load(dataStream, data);
     }
 
-    qtd_registerStreamOperators(toStringz(name), &streamOpShim!save, &streamOpShim!load);
+    qtd_QMetaType_registerStreamOperators(toStringz(name), &streamOpShim!save, &streamOpShim!load);
 }
 
-/**
- */
-private extern(C)
+extern(C)
 {
-    void qtd_registerStreamOperators(in char *typeName, VoidFunc saveOp, VoidFunc loadOp);
-    int qtd_registerType(in char* namePtr, VoidFunc ctor, VoidFunc dtor);
+    void qtd_QMetaType_registerStreamOperators(in char *typeName, VoidFunc saveOp, VoidFunc loadOp);
+    int qtd_QMetaType_registerType(in char* namePtr, VoidFunc ctor, VoidFunc dtor);
     int qtd_QMetaType_type_nativepointerchar(in char* typeName0);
 }
-

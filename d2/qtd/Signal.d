@@ -105,9 +105,12 @@ string genConvToCpp(uint argIndex)
            _a[${0}] = cast(void*)&_tmp${0};
         }
         else static if (isQObjectType!(Args[${0}]) || isObjectType!(Args[${0}]))
-           _a[${0}] = _t${0} ? &(_t${0}.__nativeId) : cast(void*)&_t${0};
+        {
+            void* _tmp${0} = _t${0} ? _t${0}.qtdNativeId : null;
+            _a[${0}] =  &_tmp${0};
+        }
         else static if (isValueType!(Args[${0}]))
-           _a[${0}] = _t${0}.__nativeId;
+           _a[${0}] = _t${0}.qtdNativeId;
         else
            _a[${0}] = cast(void*)&_t${0};
 

@@ -2,24 +2,47 @@ module qtd.Core;
 
 import
     qtd.ctfe.Format,
-    std.stdio;
+    std.traits;
 
+/**
+    Casts T to U, bypassing dynamic cast checks
+ */
 T static_cast(T, U)(U obj)
 {
     return cast(T)cast(void*)obj;
 }
 
+/**
+    Strips qualifiers off the argument.
+ */
+auto ref unqual(T)(auto ref T v)
+{
+    static if (__traits(isRef, v))
+    {
+        auto p = cast(Unqual!(T)*)&v;
+        return *p;
+    }
+    else
+        return cast(Unqual!T)v;
+}
+
+/**
+    Just an alias to the type T. Useful for declarations
+    with anonymous types.
+ */
+template Type(T)
+{
+    alias T Type;
+}
+
 enum qtdExtern = "extern (C)";
 
 extern(C) alias void function() VoidFunc;
-extern(C) void qtd_initCore();
-
-immutable Object qtdMoLock;
+extern(C) void qtdInitCore();
 
 static this()
 {
-    qtdMoLock = cast(immutable)new Object;
-    qtd_initCore();
+    qtdInitCore();
 }
 
 /**

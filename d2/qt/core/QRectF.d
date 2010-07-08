@@ -286,11 +286,11 @@ public struct QRectF
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QRectF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QRectF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QRectF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QRectF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final QRectF opOr(ref QRectF r) const {
@@ -301,7 +301,7 @@ public struct QRectF
     {
         return qtd_QRectF_toAlignedRect(cast(void*)&this);
     }
-    
+
     // service stuff
     public alias void __isNativeValueType;
 

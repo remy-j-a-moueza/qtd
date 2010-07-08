@@ -15,6 +15,8 @@ import
 
 import qt.core.QString;
 
+private:
+
 /**
    Utils.
  */
@@ -265,7 +267,7 @@ string generateCode(ref Generator gen)
 
     FunctionDef[] propertyList, enumList, constructorList;
     int index = 12;
-    gen.output ~= "private static const uint[] qt_meta_data = [\n";
+    gen.output ~= "private static immutable uint[] qt_meta_data = [\n";
     gen.output ~= format_ctfe("\n // content:\n");
     gen.output ~= format_ctfe("    ${},       // revision\n", 2);
     gen.output ~= format_ctfe("    ${},       // classname\n", strreg(gen, gen.cdef.classname));
@@ -332,7 +334,7 @@ string generateCode(ref Generator gen)
 //
 // Build stringdata array
 //
-    gen.output ~= "private static const string qt_meta_stringdata = \n";
+    gen.output ~= "private static immutable char[] qt_meta_stringdata = \n";
     gen.output ~= format_ctfe("    \"");
     int col = 0;
     int len = 0;
@@ -405,13 +407,9 @@ FunctionDef[] genFuncDefs(alias newFunc, Funcs...)()
     return res;
 }
 
-template Q_OBJECT_BIND()
-{
-}
-
 // ------------------------------------------------------------------------------------------
 
-string generateSignalEmitters(uint signalCount)
+public string generateSignalEmitters(uint signalCount)
 {
     string res = "";
     foreach (i; 0..signalCount)
@@ -422,12 +420,12 @@ string generateSignalEmitters(uint signalCount)
     return res;
 }
 
-private mixin template SlotAlias(alias slot)
+mixin template SlotAlias(alias slot)
 {
     mixin ("alias slot " ~ methodName!slot ~ ";");
 }
 
-string generateSlotAliases(uint slotCount)
+public string generateSlotAliases(uint slotCount)
 {
     string res = "";
     foreach(i; 0..slotCount)
@@ -438,7 +436,7 @@ string generateSlotAliases(uint slotCount)
     return res;
 }
 
-string generateMetaCall(string methodName, size_t argCount)
+public string generateMetaCall(string methodName, size_t argCount)
 {
     string res = "";
     foreach (i; 1..argCount)
@@ -454,7 +452,7 @@ string generateMetaCall(string methodName, size_t argCount)
     return res ~ ");\n";
 }
 
-string generateDispatchSwitch(size_t methodCount)
+public string generateDispatchSwitch(size_t methodCount)
 {
     string res = "switch(_id) {\n";
 
@@ -473,7 +471,7 @@ string generateDispatchSwitch(size_t methodCount)
     return res ~ "}\n";
 }
 
-string generateMetaInfo(T)()
+public string generateMetaInfo(T)()
 {
     Generator gen;
 
@@ -488,13 +486,17 @@ string generateMetaInfo(T)()
     return gen.output;
 }
 
-mixin template Q_OBJECT()
+// TODO: move to a better place
+public mixin template Q_OBJECT()
 {
     import
         std.typetuple,
         std.traits,
         qtd.Marshal,
+        qtd.Signal,
         qtd.meta.Runtime,
+        qtd.MOC,
+        qt.core.QMetaObject,
         qt.core.QString; // for QStringUtil.toNative
 
 public: // required to override the outside scope protection.
@@ -510,7 +512,7 @@ public: // required to override the outside scope protection.
     //pragma(msg, generateMetaInfo!This());
     mixin (generateMetaInfo!This());
 
-    protected int qt_metacall(QMetaObject.Call _c, int _id, void **_a)
+    protected int qt_metacall(MetaCall _c, int _id, void **_a)
     {
         _id = super.qt_metacall(_c, _id, _a);
 
@@ -519,7 +521,7 @@ public: // required to override the outside scope protection.
             if (_id < 0)
                 return _id;
 
-            if (_c == QMetaObject.Call.InvokeMetaMethod) {
+            if (_c == MetaCall.InvokeMetaMethod) {
                 //pragma(msg, generateDispatchSwitch(methods.length));
                 mixin (generateDispatchSwitch(methods.length));
             }
@@ -543,7 +545,7 @@ public: // required to override the outside scope protection.
 
     __gshared static QMetaObjectNative nativeStaticMetaObject_;
 
-    static void* qtd_nativeStaticMetaObject()
+    static void* qtdNativeStaticMetaObject()
     {
         alias BaseClassesTuple!(This)[0] Base;
 

@@ -400,7 +400,7 @@ void ContainerGenerator::writeArrayFunctions(QTextStream &s, const ComplexTypeEn
         d_type = cls_name;
         if (centry->designatedInterface())
             d_type = centry->designatedInterface()->name();
-        nativeId = ".__nativeId";
+        nativeId = ".qtdNativeId";
     }
 
     if (centry->designatedInterface()) {

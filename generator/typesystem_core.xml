@@ -1983,12 +1983,12 @@
     </extra-includes>
 
     <inject-code class="native">
-QTD_EXTERN QTD_DLL_PUBLIC int qtd_registerType(char* namePtr, VoidFunc dtor, VoidFunc ctor)
+QTD_EXTERN QTD_DLL_PUBLIC int qtd_QMetaType_registerType(char* namePtr, VoidFunc dtor, VoidFunc ctor)
 {
     return QMetaType::registerType(namePtr, (QMetaType::Destructor)dtor, (QMetaType::Constructor)ctor);
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_registerStreamOperators(const char *typeName, VoidFunc saveOp,
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_QMetaType_registerStreamOperators(const char *typeName, VoidFunc saveOp,
                                         VoidFunc loadOp)
 {
     QMetaType::registerStreamOperators(typeName, (QMetaType::SaveOperator)saveOp,

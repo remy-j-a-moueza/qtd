@@ -60,7 +60,7 @@ public int qRegisterMetaType(T)(string name = null)
     if (!name.length)
 	name = typeid(T).toString;
 
-    return qtd_registerType(toStringz(name), &MetaTypeOps!(T).ctor, &MetaTypeOps!(T).dtor);
+    return qtd_qRegisterMetaType(toStringz(name), &MetaTypeOps!(T).ctor, &MetaTypeOps!(T).dtor);
 }
 
 /* Not work....
@@ -101,6 +101,3 @@ public void qRegisterMetaTypeStreamOperators(T)(void function(ref QDataStream, T
     qtd_registerStreamOperators(toStringz(name), cast(StreamOp)&saveOpC, cast(StreamOp)&loadOpC);
 }
 */
-private extern(C) void qtd_registerStreamOperators(char *typeName, StreamOp saveOp, StreamOp loadOp);
-private extern(C) int qtd_registerType(in char* namePtr, Ctor ctor, Dtor dtor);
-extern(C) int qtd_MetatypeId(in char *id); // TODO: wrap to D.

@@ -1,4 +1,4 @@
 #! /bin/bash
 
-dmd main.d -L-L/home/maxter/qtsdk-2010.02/qt/lib -L-L../../output-linux/build/lib -L-lqtdcore -I../../output-linux/build/ -I../../d2 -L-lQtCore
+dmd main.d -debug -unittest -version=QtdUnittest -L-L/home/maxter/qtsdk-2010.02/qt/lib -L-L../../output-linux/build/lib -L-lqtdcore -I../../output-linux/build/ -I../../d2 -L-lQtCore -L-lcpp_core
 

@@ -306,11 +306,11 @@ public struct QRect
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QRect_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QRect_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QRect_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QRect_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final QRect opAnd(const QRect r) const {

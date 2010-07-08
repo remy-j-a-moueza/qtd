@@ -129,13 +129,13 @@ public struct QLine
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QLine_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QLine_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QLine_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QLine_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
-    
+
     // service stuff
     public alias void __isNativeValueType;
 
@@ -347,11 +347,11 @@ public struct QLineF
     }
 
     public final void writeTo(QDataStream arg__1) {
-        qtd_QLineF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QLineF_writeTo_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final void readFrom(QDataStream arg__1) {
-        qtd_QLineF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.__nativeId);
+        qtd_QLineF_readFrom_QDataStream(&this, arg__1 is null ? null : arg__1.qtdNativeId);
     }
 
     public final void setAngle(double angle) {

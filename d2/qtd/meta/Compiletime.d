@@ -313,6 +313,8 @@ mixin template InnerAttribute(string attrClass, A...)
 
 private mixin template AttributeImpl(alias symbol, string attrClass, AttributeOptions opts, size_t index, A...)
 {
+    import std.typetuple;
+
     private enum attrId = attributeId!(symbol, index) ~ (opts & AttributeOptions.inner ? "_inner" : "");
 
     static if (is(typeof(mixin(attrId))))
