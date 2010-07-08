@@ -46,12 +46,9 @@ import qt.gui.QTreeView;
 import qt.gui.QListView;
 import qt.gui.QIcon;
 import qt.gui.QPixmap;
-import std.stdio;
 
 int main(string[] args)
-{    
-    writeln("Interview");
-        
+{        
     scope app = new QApplication(args);
     
     scope page = new QSplitter;

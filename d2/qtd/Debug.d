@@ -4,7 +4,7 @@ version (QtdUnittest)
     debug = UseQtdDebug;
 else debug (QtdDebug)
     debug = UseQtdDebug;
-    
+
 debug (UseQtdDebug)
 {
     import
@@ -55,7 +55,7 @@ debug (UseQtdDebug)
 
             this() {}
         }
-        
+
         string wrapperToString(QtdObject wrapper)
         {
             static assert (QtdObjectFlags.sizeof == ubyte.sizeof);
@@ -87,9 +87,9 @@ debug (UseQtdDebug)
             nativeDeletedCount_++;
         }
 
-        void onWrapperOwnershipChanged(QtdObject wrapper)
+        void onObjectOwnershipChanged(QtdObject wrapper)
         {
-            info("Wrapper ownership chaged: " ~ wrapperToString(wrapper));
+            info("Object ownership changed: " ~ wrapperToString(wrapper));
         }
 
         void onDeletingWrapperFromNative(void* dId)

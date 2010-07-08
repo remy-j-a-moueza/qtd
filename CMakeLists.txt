@@ -497,7 +497,7 @@ foreach(package_big ${all_packages})
     set(d_objs ${d_objs} ${objects})
 
     if(CPP_SHARED)
-        set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}.${CMAKE_SHARED_LIBRARY_SUFFIX})
+        set(cpp_lib ${CMAKE_BINARY_DIR}/lib/libcpp_${package}${CMAKE_SHARED_LIBRARY_SUFFIX})
         install(FILES ${cpp_lib} COMPONENT qtd DESTINATION lib)
 
         if(CMAKE_HOST_WIN32)

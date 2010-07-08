@@ -52,10 +52,6 @@ import qt.gui.QDialogButtonBox;
 
 import droparea;
 
-
-import std.stdio; //TODO: remove
-
-
 class DropSiteWindow : public QWidget
 {
 public:
@@ -111,7 +107,6 @@ public:
 
         foreach (string format; mimeData.formats()) {
 
-            writeln("Point 1");
             QTableWidgetItem formatItem = new QTableWidgetItem(format);
             formatItem.setFlags(Qt.ItemIsEnabled);
             formatItem.setTextAlignment(Qt.AlignTop | Qt.AlignLeft);
@@ -136,22 +131,15 @@ public:
             }
 
             int row = formatsTable.rowCount();
-            formatsTable.insertRow(row);
 
-            writeln("Point 2");
+            formatsTable.insertRow(row);
             formatsTable.setItem(row, 0, new QTableWidgetItem(format));
-            writeln("Point 3");
             formatsTable.setItem(row, 1, new QTableWidgetItem(text));
         }
 
         formatsTable.resizeColumnToContents(0);
     }
-
-    ~this()
-    {
-        writeln("deleting dropsitewindow");
-    }
-
+    
 private:
 
     DropArea dropArea;
