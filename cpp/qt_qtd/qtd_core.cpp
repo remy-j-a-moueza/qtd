@@ -67,6 +67,16 @@ QTD_EXTERN QTD_DLL_PUBLIC bool qtd_qUnregisterResourceData(int version, const un
     return qUnregisterResourceData(version, tree, name, data);
 }
 
+QTD_EXTERN QTD_DLL_PUBLIC int qtd_qrand()
+{
+    return qrand();
+}
+
+QTD_EXTERN QTD_DLL_PUBLIC void qtd_qsrand(uint seed)
+{
+    qsrand(seed);
+}
+
 //
 // QObjectLink implementation
 //
