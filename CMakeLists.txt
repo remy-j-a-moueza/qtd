@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 PROJECT(qtd CXX C)
 
 # Debug and release flags.
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
-endif (NOT CMAKE_BUILD_TYPE)
+endif ()
 
 if(${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
     set(CMAKE_BUILD_TYPE Debug)
@@ -14,11 +14,11 @@ if(${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
 elseif (NOT ${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS])
     message(STATUS "Only debug and release configurations are supported. The configuration is changed to 'Release'")
     set(CMAKE_BUILD_TYPE Release)
-endif (${CMAKE_BUILD_TYPE} MATCHES [dD][eE][bB][uU][gG])
+endif ()
 
 if (${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS])
     #add_definitions(-UNO_DEBUG)
-endif(${CMAKE_BUILD_TYPE} MATCHES [rR][eE][lL][eE][aA][sS] )
+endif()
 
 ##########################################################
 ## Build generator.
@@ -33,7 +33,7 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT ALLOW_IN_SOURCE_BUILDS)
     "This process created the file `CMakeCache.txt` and the directory `CMakeFiles'. Please delete them. "
     "Or you can restart cmake with `-DALLOW_IN_SOURCE_BUILDS=1`, but it is not recommended."
     )
-endif (CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT ALLOW_IN_SOURCE_BUILDS)
+endif ()
 
 FIND_PACKAGE(Qt4 REQUIRED)
 set(QT_USE_QTMAIN false)
@@ -61,7 +61,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STRE
     set(CMAKE_INSTALL_PREFIX
     ${DC_PATH} CACHE PATH "QtD install prefix"
     )
-endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "")
+endif()
 
 # Check D compiler version
 if(D_VERSION EQUAL "1")
@@ -71,7 +71,7 @@ if(D_VERSION EQUAL "1")
     set(D_TARGET d1-tango CACHE INTERNAL "")
 elseif(D_VERSION EQUAL "2")
     set(D_TARGET d2-phobos CACHE INTERNAL "")
-endif(D_VERSION EQUAL "1")
+endif()
 
 # System specific settings.
 if(CMAKE_HOST_WIN32)
@@ -79,12 +79,12 @@ if(CMAKE_HOST_WIN32)
     find_program(IMPLIB ${implib})
     if (NOT IMPLIB)
     message(FATAL_ERROR "implib is not found. You can donwload it from http://ftp.digitalmars.com/bup.zip")
-    endif (NOT IMPLIB)
+    endif ()
     if(D_IS_MARS)
       set(GEN_OPT ${GEN_OPT} --cpp_shared)
-    endif(D_IS_MARS)
-endif(CMAKE_HOST_WIN32)
-      add_definitions(-DCPP_SHARED)
+    endif()
+endif()
+add_definitions(-DCPP_SHARED)
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ./)
 set(GEN_OPT ${GEN_OPT} --d-target=${D_TARGET})
@@ -95,9 +95,9 @@ foreach(package_big ${all_packages})
     string(TOUPPER ${package_big} package_upper)
     option(BUILD_QT_${package_upper} "Build Qt${package_big}" "ON")
     if(BUILD_QT_${package_upper})
-    set(packages ${packages} ${package_big})
-    endif(BUILD_QT_${package_upper})
-endforeach(package_big ${all_packages})
+        set(packages ${packages} ${package_big})
+    endif()
+endforeach()
 
 add_subdirectory(generator)
 
@@ -109,15 +109,15 @@ if(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
 elseif(${CMAKE_GENERATOR} STREQUAL "MinGW Makefiles" OR
     ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles")
     set(make_util $(MAKE))
-else(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
+else()
     message(FATAL_ERROR "${CMAKE_GENERATOR} is not supported")
-endif(${CMAKE_GENERATOR} STREQUAL "NMake Makefiles")
+endif()
 
 if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     set(cd_path ${CMAKE_SOURCE_DIR})
-else(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+else()
     set(cd_path ${CMAKE_BINARY_DIR}/build)
-endif(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+endif()
 
 make_native_path(cd_path)
 add_custom_command(TARGET main POST_BUILD
@@ -134,26 +134,6 @@ add_custom_target(install
     )
 add_dependencies(install preinstall)
 
-##--------------------------------------------
-## CPack.
-##--------------------------------------------
-set(CPACK_PACKAGE_VERSION_PATCH 1)
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application and UI framework.")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/changelog.txt")
-SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
-set(CPACK_PACKAGE_VENDOR "QtD team")
-set(CPACK_PACKAGE_CONTACT "e@mail.ru")
-SET(CPACK_PACKAGE_VERSION "0.1")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "qtd ${CPACK_PACKAGE_VERSION}")
-set(CPACK_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
-set(CPACK_SOURCE_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
-if(CMAKE_HOST_WIN32)
-    set(CPACK_GENERATOR "ZIP")
-elseif(CMAKE_HOST_UNIX)
-    set(CPACK_GENERATOR "TBZ2;DEB;RPM")
-endif(CMAKE_HOST_WIN32)
-include(CPack)
-
 ##########################################################
 ## Build QtD.
 ##########################################################
@@ -162,7 +142,7 @@ else(NOT SECOND_RUN)
 PROJECT(qtd CXX C)
 if(NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     load_cache(${CMAKE_BINARY_DIR}/.. INCLUDE_INTERNALS all_packages QTD_VERSION_STR QTD_VERSION)
-endif(NOT ${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+endif()
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 FIND_PACKAGE(D REQUIRED)
 FIND_PACKAGE(Qt4 REQUIRED)
@@ -175,27 +155,27 @@ include_directories(${QT_INCLUDES} ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_B
 # System specifc settings.
 if(CMAKE_HOST_WIN32)
     string(REGEX REPLACE ".dll([A-Za-z\\.0-9]+)" "\\1" CMAKE_IMPORT_LIBRARY_SUFFIX "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
-endif(CMAKE_HOST_WIN32)
+endif()
 
 if(CMAKE_HOST_WIN32 AND D_IS_MARS)
     set(D_FLAGS -version=cpp_shared)
-endif(CMAKE_HOST_WIN32 AND D_IS_MARS)
-    add_definitions(-DCPP_SHARED)
-    set(CPP_SHARED 1 CACHE INTERNAL "")
+endif()
+add_definitions(-DCPP_SHARED)
+set(CPP_SHARED 1 CACHE INTERNAL "")
 
 
 if(UNITTEST)
     add_d_versions(QtdUnittest)
     set(D_FLAGS ${D_FLAGS} -unittest)
-endif(UNITTEST)
+endif()
 
 if(VERBOSE_DEBUG)
     add_d_debugs(QtdVerbose)
-endif(VERBOSE_DEBUG)
+endif()
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_d_debugs(QtdDebug)
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+endif()
 
 ## Bootstrap settings for QtD.
 set(DRCC ${CMAKE_BINARY_DIR}/tools/drcc/drcc CACHE INTERNAL "")
@@ -209,7 +189,7 @@ set(QTD_LIBRARIES_PATH ${CMAKE_BINARY_DIR}/lib CACHE INTERNAL "")
 
 macro(load_generated_classes )
     include(${CMAKE_BINARY_DIR}/cpp/qt_${package}/qt_${package}.txt)
-endmacro(load_generated_classes )
+endmacro()
 
 macro(qtd_add_resource output)
     set (params NAME OPTIONS)
@@ -219,57 +199,57 @@ macro(qtd_add_resource output)
     endif(NAME_tmp)
     qtd_command ("${output}" "${DRCC}" "${OPTIONS_tmp}" "qrc_"
     "Generate" ${RESOURCES_tmp})
-endmacro(qtd_add_resource output)
+endmacro()
 
 macro(qtd_wrap_ui output)
     set (params OPTIONS)
     qtd_parse_params (UI params ${ARGN})
     qtd_command ("${output}" "${DUIC}" "${OPTIONS_tmp}"  "uic_"
     "Generate" ${UI_tmp})
-endmacro(qtd_wrap_ui output)
+endmacro()
 
 macro(qtd_command output command options prefix comment)
     foreach(file "${ARGN}")
-    ## Test if the input file exists
-    get_filename_component(file_path ${file} PATH)
-    get_filename_component(file_name ${file} NAME_WE)
-    get_filename_component(file_ext ${file} EXT)
+        ## Test if the input file exists
+        get_filename_component(file_path ${file} PATH)
+        get_filename_component(file_name ${file} NAME_WE)
+        get_filename_component(file_ext ${file} EXT)
 
-    set(out ${CMAKE_CURRENT_BINARY_DIR}/${file_path}${prefix}${file_name}.d)
-    add_custom_command(OUTPUT "${out}"
+        set(out ${CMAKE_CURRENT_BINARY_DIR}/${file_path}${prefix}${file_name}.d)
+        add_custom_command(OUTPUT "${out}"
             COMMAND "${command}"
             ARGS ${options} ${file} -o ${out}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             DEPENDS ${file}
             COMMENT "${comment} ${file}"
             )
-    set(${output} ${${output}} ${out})
-    endforeach(file "${ARGN}")
-endmacro(qtd_command output command options files prefix comment)
+        set(${output} ${${output}} ${out})
+    endforeach()
+endmacro()
 
 ## Parses the parameters list.
 macro(qtd_parse_params default params)
     set(type_tmp ${default})
     set(params_tmp ${default} ${${params}})
     foreach(param_tmp ${params_tmp})
-    set(${param_tmp}_tmp )
-    endforeach(param_tmp ${params_tmp})
+        set(${param_tmp}_tmp )
+    endforeach()
     foreach(arg_tmp ${ARGN})
-    set(found_type_tmp)
-    if(NOT found_type_tmp)
-        foreach(param_tmp ${params_tmp})
-        if(arg_tmp STREQUAL param_tmp)
-            set(type_tmp ${param_tmp})
-            set(found_type_tmp 1)
-            break(param_tmp ${params_tmp})
-        endif(arg_tmp STREQUAL param_tmp)
-        endforeach(param_tmp ${params_tmp})
-    endif(NOT found_type_tmp)
-    if(NOT found_type_tmp)
-        set(${type_tmp}_tmp ${${type_tmp}_tmp} ${arg_tmp})
-    endif(NOT found_type_tmp)
-    endforeach(arg_tmp ${ARGN})
-endmacro(qtd_parse_params default)
+        set(found_type_tmp)
+        if(NOT found_type_tmp)
+            foreach(param_tmp ${params_tmp})
+                if(arg_tmp STREQUAL param_tmp)
+                    set(type_tmp ${param_tmp})
+                    set(found_type_tmp 1)
+                    break(param_tmp ${params_tmp})
+                endif()
+            endforeach()
+        endif()
+        if(NOT found_type_tmp)
+            set(${type_tmp}_tmp ${${type_tmp}_tmp} ${arg_tmp})
+        endif()
+    endforeach()
+endmacro()
 
 ## Adds a new example.
 ## name -- example name.
@@ -284,24 +264,24 @@ macro(build_example name)
     qtd_parse_params (SOURCES params ${ARGN})
 
     if(NOT PACKAGES_tmp)
-    set(PACKAGES_tmp QtCore QtGui)
-    endif(NOT PACKAGES_tmp)
+        set(PACKAGES_tmp QtCore QtGui)
+    endif()
 
     if(RESOURCES_tmp)
-    if(NOT BUILD_TOOLS)
-        message(STATUS "Example '${name}' requires drcc. Example will not be built")
-        return(build_example name)
-    endif(NOT BUILD_TOOLS)
-    qtd_add_resource(res_sources ${RESOURCES_tmp} NAME ${name} )
-    endif(RESOURCES_tmp)
+        if(NOT BUILD_TOOLS)
+            message(STATUS "Example '${name}' requires drcc. Example will not be built")
+            return(build_example name)
+        endif()
+        qtd_add_resource(res_sources ${RESOURCES_tmp} NAME ${name} )
+    endif()
 
     if(UIC_tmp)
-    if(NOT BUILD_TOOLS)
-        message(STATUS "Example '${name}' requires drcc. Example will not be built")
-        return(build_example name)
-    endif(NOT BUILD_TOOLS)
-    qtd_wrap_ui(uic_sources ${UIC_tmp})
-    endif(UIC_tmp)
+        if(NOT BUILD_TOOLS)
+            message(STATUS "Example '${name}' requires drcc. Example will not be built")
+            return(build_example name)
+        endif()
+        qtd_wrap_ui(uic_sources ${UIC_tmp})
+    endif()
 
     foreach(package ${PACKAGES_tmp})
         string(REGEX REPLACE "Qt([A-Za-z0-9])" "\\1" req "${package}")
@@ -329,7 +309,7 @@ macro(build_example name)
     #endif(STRIP AND ${CMAKE_BUILD_TYPE} EQUAL "Release" AND CMAKE_HOST_UNIX)
     add_dependencies(examples ${name})
     add_dependencies(${name} allpackages tools)
-endmacro(build_example sources)
+endmacro()
 
 ##--------------------------------------------
 ## Build and install the QtD libraries.
@@ -600,3 +580,23 @@ endif(BUILD_EXAMPLES)
 set(SECOND_RUN 0 CACHE INTERNAL "")
 
 endif(NOT SECOND_RUN)
+
+##--------------------------------------------
+## CPack.
+##--------------------------------------------
+set(CPACK_PACKAGE_VERSION_PATCH 1)
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QtD is a D binding to the Qt application and UI framework.")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/changelog.txt")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
+set(CPACK_PACKAGE_VENDOR "QtD team")
+set(CPACK_PACKAGE_CONTACT "e@mail.com")
+set(CPACK_PACKAGE_VERSION "0.2")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "qtd ${CPACK_PACKAGE_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "qtd-${CPACK_PACKAGE_VERSION}")
+if(CMAKE_HOST_WIN32)
+    set(CPACK_GENERATOR "ZIP")
+elseif(CMAKE_HOST_UNIX)
+    set(CPACK_GENERATOR "TBZ2;DEB")
+endif()
+include(CPack)
