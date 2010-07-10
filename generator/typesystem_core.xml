@@ -111,6 +111,8 @@
     <primitive-type name="signed short" java-name="short" preferred-conversion="no" jni-name="jchar"/>
     <primitive-type name="unsigned short" java-name="ushort" preferred-conversion="no" jni-name="jchar"/>
 
+    <primitive-type name="size_t" java-name="size_t" jni-name="jsize_t"/>
+
     <primitive-type name="char" java-name="char" jni-name="jbyte"/>
     <primitive-type name="signed char" java-name="byte" preferred-conversion="no" jni-name="jbyte"/>
     <primitive-type name="unsigned char" java-name="ubyte" preferred-conversion="no" jni-name="jbyte"/>

@@ -3164,6 +3164,8 @@ void CppImplGenerator::writeQtToJava(QTextStream &s,
         } else {
 // qtd            s << fromObject(java_type->typeEntry(),
 // qtd                            (java_type->isReference() ? "&" : "") + qt_name) << endl;
+            if (java_type->isReference())
+                s << "&";
             s << qt_name << ";" << endl;
         }
     }

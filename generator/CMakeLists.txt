@@ -140,7 +140,7 @@ set(res_files
 )
 
 ## Includes path.
-set(inc_paths
+set(inc_paths_for_build
     ${CMAKE_CURRENT_SOURCE_DIR}/../common 
     ${CMAKE_CURRENT_SOURCE_DIR}/parser
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -158,8 +158,8 @@ set (QT_USE_QTXML true)
 
 include(${QT_USE_FILE} ${CMAKE_CURRENT_SOURCE_DIR}) 
 
-set(inc_paths
-    ${inc_paths}
+set(inc_paths_for_build
+    ${inc_paths_for_build}
     ${QT_INCLUDES} 
 )
 set(lib_paths
@@ -176,7 +176,7 @@ qt4_add_resources(res_wrapped_files ${res_files})
 set (all_srcs 
     ${srcs} ${moc_srcs} 
     ${res_wrapped_files}) 
-include_directories(${inc_paths})
+include_directories(${inc_paths_for_build})
 add_executable(generator ${all_srcs} )
 target_link_libraries(generator ${libs})
 
@@ -201,17 +201,23 @@ if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}"
     file(REMOVE ${jambi_inc})
     file(APPEND ${dgen_build_conf} "<typesystem>\n")
     foreach(package_normal ${packages})
-	string(TOLOWER ${package_normal} package) 
-	string(TOUPPER ${package_normal} package_upper) 
-	file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
-	file(APPEND ${jambi_inc} "#include <${QT_QT${package_upper}_INCLUDE_DIR}/Qt${package_normal}>\n")
-    endforeach(package_normal ${packages})
+    	string(TOLOWER ${package_normal} package) 
+    	string(TOUPPER ${package_normal} package_upper) 
+    	file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
+    	# only append include if we have QT_QT${MODULE}_INCLUDE_DIR defined, otherwise handle customly
+    	if(NOT ${QT_QT${package_upper}_INCLUDE_DIR} STREQUAL "")
+        	file(APPEND ${jambi_inc} "#include <${QT_QT${package_upper}_INCLUDE_DIR}/Qt${package_normal}>\n")
+        endif()
+    endforeach()
     file(APPEND ${dgen_build_conf} "</typesystem>\n")
     set(packages_in_build_txt ${packages} CACHE INTERNAL "")
-endif(	NOT "${packages_in_build_txt}" STREQUAL "${packages}" 
-	OR NOT EXISTS ${dgen_build_conf}
-	OR NOT EXISTS ${jambi_inc})
-
+    # merge include file for Qwt
+    if(BUILD_QT_QWT)
+        file(READ "${CMAKE_SOURCE_DIR}/include/qwt_masterinclude.h" jambi_inc_qwt)
+        file(APPEND ${jambi_inc} ${jambi_inc_qwt})
+    endif()
+endif()
+    
 set(gen_sources)
 foreach(package_normal ${packages})
     string(TOLOWER ${package_normal} package)   
@@ -219,25 +225,22 @@ foreach(package_normal ${packages})
     set(d_inc_file_found d_inc_file_found-NOTFOUND) 
     find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_CURRENT_SOURCE_DIR}/) 
     if(d_inc_file_found)
-	set(gen_sources ${gen_sources} ${d_inc_file_found})
-    endif(d_inc_file_found)
-endforeach(package_normal ${packages})
+	    set(gen_sources ${gen_sources} ${d_inc_file_found})
+    endif()
+endforeach()
 mark_as_advanced(d_inc_file_found)
 set(d_inc_file_found 1)
 	
-if(CMAKE_HOST_WIN32)
-    set(sep ";")
-else(CMAKE_HOST_WIN32)
-    set(sep ":")
-endif(CMAKE_HOST_WIN32)
 foreach(path ${QT_INCLUDES})
-    set(inc_paths ${path}${sep})
-endforeach(path ${QT_INCLUDES})
+    set(inc_paths_tmp ${path}${sep})
+endforeach()
+set(inc_paths ${inc_paths}${sep}${inc_paths_tmp})
+
 if(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     set(out_dir ${CMAKE_SOURCE_DIR})
-else(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+else()
     set(out_dir ${CMAKE_BINARY_DIR}/build)
-endif(${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+endif()
 set(dgen_impl ${out_dir}/cpp/qt_core/ArrayOps_shell.cpp)
 add_custom_command(OUTPUT ${dgen_impl}
 	COMMAND ${CMAKE_COMMAND} -E remove -f ${dgen_impl}

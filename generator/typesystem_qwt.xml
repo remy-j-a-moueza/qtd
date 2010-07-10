@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="merge.xsl"?>
+
+<typesystem package="qt.qwt" default-superclass="QtdObject">
+<depend package="qt.core" />
+<depend package="qt.gui" />
+
+<enum-type name="QwtAbstractScaleDraw::ScaleComponent" />
+<enum-type name="QwtPlot::Axis" />
+<enum-type name="QwtPlot::LegendPosition" />
+<enum-type name="QwtPlotItem::RttiValues" />
+<enum-type name="QwtPlotItem::ItemAttribute" />
+<enum-type name="QwtPlotItem::RenderHint" />
+<enum-type name="QwtLegend::LegendDisplayPolicy" />
+<enum-type name="QwtScaleTransformation::Type" />
+<enum-type name="QwtScaleDraw::Alignment" />
+<enum-type name="QwtText::TextFormat" />
+<enum-type name="QwtText::PaintAttribute" />
+<enum-type name="QwtText::LayoutAttribute" />
+<enum-type name="QwtPlotCanvas::PaintAttribute" />
+<enum-type name="QwtPlotCanvas::FocusIndicator" />
+<enum-type name="QwtPlotMarker::LineStyle"/>
+<enum-type name="QwtPlotCurve::CurveType"/>
+<enum-type name="QwtPlotCurve::CurveStyle"/>
+<enum-type name="QwtPlotCurve::CurveAttribute"/>
+<enum-type name="QwtPlotCurve::PaintAttribute"/>
+
+<object-type name="QwtPlot"/>
+<interface-type name="QwtPlotDict"/>
+<object-type name="QwtPlotItem"/>
+<object-type name="QwtLegendItemManager"/>
+<value-type name="QwtText">
+    <modify-function signature="QwtText(QString, QwtText::TextFormat)">
+        <modify-argument index="1">
+            <replace-default-expression with="&quot;&quot;"/>
+        </modify-argument>
+    </modify-function>
+</value-type>
+
+<object-type name="QwtLegend"/>
+
+<value-type name="QwtScaleMap"/>
+
+<object-type name="QwtScaleWidget"/>
+
+<object-type name="QwtScaleTransformation"/>
+
+<object-type name="QwtTextLabel"/>
+
+<object-type name="QwtScaleDraw">
+    <modify-function signature="operator=(QwtScaleDraw)" remove="all"/>
+</object-type>
+
+<object-type name="QwtAbstractScaleDraw">
+    <modify-function signature="operator=(QwtAbstractScaleDraw)" remove="all"/>
+</object-type>
+
+<object-type name="QwtPlotCanvas"/>
+
+<object-type name="QwtPlotMarker"/>
+
+<object-type name="QwtPlotCurve">
+</object-type>
+
+<object-type name="QwtData">
+    <modify-function signature="operator=(QwtData)" remove="all"/>
+</object-type>
+
+<object-type name="QwtPolygonFData">
+    <modify-function signature="operator=(QwtPolygonFData)" remove="all"/>
+</object-type>
+
+<object-type name="QwtArrayData">
+    <modify-function signature="operator=(QwtArrayData)" remove="all"/>
+</object-type>
+
+<object-type name="QwtCPointerData">
+    <modify-function signature="operator=(QwtCPointerData)" remove="all"/>
+</object-type>
+
+
+<!--
+QwtPlotPrintFilter
+QwtScaleDiv
+QwtPlotLayout
+QwtTextEngine
+
+-->
+
+<!-- <object-type name=""/> -->
+
+</typesystem>

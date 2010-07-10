@@ -71,7 +71,7 @@ DGenerator::DGenerator()
                   << "signed short" << "Array" << "GLuint" << "GLenum" << "GLint"
                   << "unsigned long" << "ulong" << "long" << "QByteRef"
                   << "QStringList" << "QVector" << "QPair"
-                  << "QSet" << "QStringRef" << "quintptr";
+                  << "QSet" << "QStringRef" << "quintptr" << "size_t";
 }
 
 QString DGenerator::fileNameForClass(const AbstractMetaClass *d_class) const

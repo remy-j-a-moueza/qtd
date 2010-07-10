@@ -2048,15 +2048,16 @@ void ArgumentReplace::init()
         return;
 
     m_instance = new ArgumentReplace();
-    m_instance->data["version"] = "_version";
-    m_instance->data["parent"] = "_parent";
-    m_instance->data["delegate"] = "_delegate";
-    m_instance->data["align"] = "_align";
-    m_instance->data["in"] = "_in";
-    m_instance->data["out"] = "_out";
-    m_instance->data["scope"] = "_scope";
-    m_instance->data["default"] = "_default";
-    m_instance->data["body"] = "_body";
+    m_instance->data["version"] = "version_";
+    m_instance->data["parent"] = "parent_";
+    m_instance->data["delegate"] = "delegate_";
+    m_instance->data["align"] = "align_";
+    m_instance->data["in"] = "in_";
+    m_instance->data["out"] = "out_";
+    m_instance->data["scope"] = "scope_";
+    m_instance->data["default"] = "default_";
+    m_instance->data["body"] = "body_";
+    m_instance->data["ref"] = "ref_";
 }
 
 QString ArgumentReplace::translate(QString arg)

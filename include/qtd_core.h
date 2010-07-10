@@ -84,6 +84,12 @@ QTD_EXTERN typedef void (*VoidFunc)();
     #define QTD_WEBKIT_DLL_PUBLIC QTD_DLL_IMPORT
 #endif
 
+#ifdef QTD_QWT
+    #define QTD_QWT_DLL_PUBLIC QTD_DLL_EXPORT
+#else
+    #define QTD_QWT_DLL_PUBLIC QTD_DLL_IMPORT
+#endif
+
 //TODO: ditch
 struct QModelIndexAccessor {
 	int row;
