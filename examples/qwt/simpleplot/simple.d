@@ -78,8 +78,8 @@ public:
         insertLegend(new QwtLegend(cast(QWidget)null), QwtPlot.RightLegend);
 
         // Set axis titles
-        setAxisTitle(xBottom, "x -.");
-        setAxisTitle(yLeft, "y -.");
+        setAxisTitle(xBottom, "x -->");
+        setAxisTitle(yLeft, "y -->");
         
         // Insert new curves
         auto cSin = new QwtPlotCurve("y = sin(x)");

@@ -36,22 +36,24 @@ set (d_qt_files
     core/QVariant
     )
 set (d_qtd_files
+    Array
+    ArrayOpsPrimitive
+    Atomic
+    Attribute
     Core
+    Debug
+    Marshal
+    MOC
+    QMetaTypeImpl
     QtdObject
     Signal
     String
-    Atomic
-    Marshal
-    MOC
-    Array
-    ArrayOpsPrimitive
-    QMetaTypeImpl
-    util/Tuple
+    ctfe/Format
     ctfe/Integer
     ctfe/String
-    ctfe/Format
     meta/Compiletime
     meta/Runtime
+    util/Tuple
     )
 
 # unittest files

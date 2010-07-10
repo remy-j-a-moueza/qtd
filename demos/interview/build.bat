@@ -1,1 +1,1 @@
-dmd main.d model.d qtdcore.lib qtdgui.lib -I../../ -I../../qt/d2 -ofinterview
+dmd main.d model.d qtdcore.lib qtdgui.lib -ofinterview
