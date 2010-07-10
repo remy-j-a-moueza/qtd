@@ -2024,7 +2024,7 @@ QString AbstractMetaBuilder::translateDefaultValue(ArgumentModelItem item, Abstr
         if (expr == "QVariant()" /* qtd || expr == "QModelIndex()"*/) {
             return "null";
         } else if (expr == "QString()") {
-            return "null";
+            return "\"\"";
         } else if (expr.endsWith(")") && expr.contains("::")) {
             TypeEntry *typeEntry = TypeDatabase::instance()->findType(expr.left(expr.indexOf("::")));
             if (typeEntry)
@@ -2040,7 +2040,7 @@ QString AbstractMetaBuilder::translateDefaultValue(ArgumentModelItem item, Abstr
                     return "new " + typeEntry->qualifiedCppName() + expr.right(expr.length() - pos);
             } else
                 return expr;
-        } else if (expr == "0") {
+        } else if (expr == "0" || expr == "NULL") {
             return "null";
         } else if (type->isObject() || type->isValue() || expr.contains("::")) { // like Qt::black passed to a QColor
             TypeEntry *typeEntry = TypeDatabase::instance()->findType(expr.left(expr.indexOf("::")));

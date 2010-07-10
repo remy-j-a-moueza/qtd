@@ -73,9 +73,8 @@ class Plot : QwtPlot
 public:
     this()
     {
-        super(cast(QWidget)null);
         setTitle("A Simple QwtPlot Demonstration");
-        insertLegend(new QwtLegend(cast(QWidget)null), QwtPlot.RightLegend);
+        insertLegend(new QwtLegend(), QwtPlot.RightLegend);
 
         // Set axis titles
         setAxisTitle(xBottom, "x -->");
