@@ -16,6 +16,7 @@ import qt.qwt.QwtText;
 //      A simple example which shows how to use QwtPlot and QwtData
 //-----------------------------------------------------------------
 
+// hack to avoid linker error (undefined symbols), possibly a compiler bug
 real mysin(real arg)
 {
     return sin(arg);

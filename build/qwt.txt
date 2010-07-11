@@ -1,9 +1,9 @@
 set(required Core Gui)
 
 set(classes
+    QwtPlotItem
     QwtPlot
     QwtPlotDict
-    QwtPlotItem
     QwtLegendItemManager
     QwtText
     QwtLegend

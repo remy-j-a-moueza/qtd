@@ -104,17 +104,19 @@ foreach(package_big ${all_packages})
 endforeach()
 
 set(QWT_INCLUDE_PATH "/usr/include/qwt-qt4" CACHE STRING "Qwt include path")
-
+if(CMAKE_HOST_WIN32)
+    set(QWT_LIB_PATH "" CACHE STRING "Qwt lib path")
+endif()
 set(inc_paths "")
 
 if(CMAKE_HOST_WIN32)
-    set(sep ";")
+    set(sep "*")
 else()
     set(sep ":")
 endif()
 
 if(BUILD_QT_QWT)
-    set(inc_paths ${inc_paths}${sep}${QWT_INCLUDE_PATH})
+    set(inc_paths ${inc_paths}${sep}${QWT_INCLUDE_PATH}${sep})
 endif()
 
 add_subdirectory(generator)
@@ -169,7 +171,7 @@ set(QTD_VERSION_STR ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
 math(EXPR QTD_VERSION "(${QT_VERSION_MAJOR} << 16) + (${QT_VERSION_MINOR} << 8) + ${QT_VERSION_PATCH}")
 
 include_directories(${QT_INCLUDES} ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}/include)
-if(${BUILD_QT_QWT})
+if(BUILD_QT_QWT)
     include_directories(${QWT_INCLUDE_PATH})
 endif()
 
@@ -494,6 +496,18 @@ foreach(package_big ${all_packages})
         string(TOLOWER ${req} req_lower)
         set(link_cpp ${link_cpp} cpp_${req_lower} ${QT_QT${req_upper}_LIBRARY})
     endforeach()
+
+    if(${package_big} STREQUAL "Qwt" AND CMAKE_HOST_WIN32)
+        set(qwt_release_lib ${QWT_LIB_PATH}/libqwt5.a)
+        set(qwt_debug_lib ${QWT_LIB_PATH}/libqwtd5.a)
+        if(EXISTS ${qwt_release_lib})
+            set(qwt_lib ${qwt_release_lib})
+        elseif(EXISTS ${qwt_debug_lib})
+            set(qwt_lib ${qwt_debug_lib})
+        endif()
+        set(link_cpp ${link_cpp} ${qwt_lib})
+    endif()
+
     target_link_libraries(cpp_${package} ${link_cpp} )
     set(d_objs ${d_objs} ${objects})
 

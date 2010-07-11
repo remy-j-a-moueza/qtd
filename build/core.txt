@@ -39,7 +39,6 @@ set (d_qtd_files
     Array
     ArrayOpsPrimitive
     Atomic
-    Attribute
     Core
     Debug
     Marshal
