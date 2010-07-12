@@ -32,9 +32,9 @@ alias real function(real) double_func;
 class SimpleData: QwtData
 {
     // The x values depend on its index and the y values
-    // can be calculated from the corresponding x value. 
+    // can be calculated from the corresponding x value.
     // So we don't need to store the values.
-    // Such an implementation is slower because every point 
+    // Such an implementation is slower because every point
     // has to be recalculated for every replot, but it demonstrates how
     // QwtData can be used.
 
@@ -80,7 +80,7 @@ public:
         // Set axis titles
         setAxisTitle(xBottom, "x -->");
         setAxisTitle(yLeft, "y -->");
-        
+
         // Insert new curves
         auto cSin = new QwtPlotCurve("y = sin(x)");
         cSin.setRenderHint(QwtPlotItem.RenderAntialiased);
@@ -98,7 +98,7 @@ public:
         cCos.setData(new SimpleData(&mycos, nPoints));
 
         // Insert markers
-        
+
         //  ...a horizontal line at y = 0...
         auto mY = new QwtPlotMarker();
         mY.setLabel(new QwtText("y = 0"));
@@ -127,5 +127,5 @@ int main(string[] args)
     scope plot = new Plot;
     plot.resize(600,400);
     plot.show();
-    return a.exec(); 
+    return a.exec();
 }

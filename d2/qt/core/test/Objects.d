@@ -1,4 +1,6 @@
-module qt.core.test.QObject;
+module qt.core.test.Objects;
+
+import std.stdio;
 
 // make sure QtdUnittest is defined
 version (QtdUnittest) {} else { static assert(false); }
@@ -9,7 +11,7 @@ import
     qtd.meta.Runtime,
     qt.core.QObject,
     qt.core.QMetaObject;
-    
+
 import std.stdio;
 
 extern (C) void* qtd_test_QObject_create(void* parent);
@@ -95,6 +97,7 @@ void test5()
 
 unittest
 {
+    writeln("Here");
     static void reset()
     {
         qtdDebug.reset();
@@ -103,16 +106,13 @@ unittest
 
     qtdDebug.info("Running unittests (" ~ __FILE__ ~")");
 
-
     //test1
     reset();
     test1();
     GC.collect();
-    
-    writeln("Collected");
     assert(qtdDebug.wrapperCount == 1);
-    
-    
+
+
     //test2
     reset();
     test2();
@@ -124,7 +124,7 @@ unittest
     test3();
     assert(qtdDebug.wrapperCount == 0);
     assert(qtdDebug.nativeDeletedCount == 1);
-    
+
     //test4
     reset();
     test4();

@@ -60,8 +60,9 @@ debug (UseQtdDebug)
         {
             static assert (QtdObjectFlags.sizeof == ubyte.sizeof);
             auto flags = wrapper.qtdFlags;
-            return format("%s (nativeId: %s, this ptr: %s, flags: %b)", this, wrapper.qtdNativeId
-                , cast(void*)this, *cast(ubyte*)&flags);
+            return format("%s (nativeId: %s, this ptr: %s, flags: %b)"
+                , wrapper, wrapper.qtdNativeId
+                , cast(void*)wrapper, *cast(ubyte*)&flags);
         }
 
         void onWrapperConstructed(QtdObject wrapper)
@@ -77,13 +78,13 @@ debug (UseQtdDebug)
 
         void onWrapperDestroyed(QtdObject wrapper)
         {
-            info("Leaving QtdObject destructor: " ~ wrapperToString(wrapper));
+            info(format("Leaving QtdObject destructor (dId: %s)",  cast(void*)wrapper));
             wrapperCount_--;
         }
 
         void onNativeDeleted(QtdObject wrapper)
         {
-            info("Native object deleted: " ~ wrapperToString(wrapper));
+            info(format("Native object deleted (dId: %s)", cast(void*)wrapper));
             nativeDeletedCount_++;
         }
 
@@ -92,9 +93,9 @@ debug (UseQtdDebug)
             info("Object ownership changed: " ~ wrapperToString(wrapper));
         }
 
-        void onDeletingWrapperFromNative(void* dId)
+        void onDeletingWrapperFromNative(QtdObject wrapper)
         {
-            info(format("Wrapper deletion initiated from C++ (wrapper id: %s)", dId));
+            info(format("Wrapper deletion initiated from C++ (wrapper id: %s)", cast(void*)wrapper));
         }
 
         @property int wrapperCount()

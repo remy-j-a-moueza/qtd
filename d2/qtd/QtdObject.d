@@ -214,7 +214,6 @@ struct QtdObjectFlags
         if (!_flags.nativeDeleteDisabled)
         {
             // avoid deleting D object twice.
-
             _flags.wrapperDeleteDisabled = true;
             qtdDeleteNative;
 
@@ -319,7 +318,7 @@ mixin(qtdExport("void", "QtdObject_delete", "void* dId",
     q{
         auto obj = cast(QtdObject)dId;
 
-        mixin(debugHandler("onDeletingWrapperFromNative", "dId"));
+        mixin(debugHandler("onDeletingWrapperFromNative", "obj"));
 
         if (!obj._flags.wrapperDeleteDisabled)
         {
