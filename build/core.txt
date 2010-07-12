@@ -65,12 +65,6 @@ if(UNITTEST)
     )
 endif()
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR UNITTEST)
-set (d_qtd_files ${d_qtd_files}
-        Debug
-    )
-endif()
-
 set (d_generated_files core/Qt QDefines)
 ## Classes.
 set (classes

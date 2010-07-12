@@ -13,7 +13,7 @@ import
     std.bitmanip,
     qtd.Core,
     qtd.Debug,
-    qtd.meta.Runtime;  
+    qtd.meta.Runtime;
 
 /**
     QtdObject initialization options.
@@ -140,7 +140,7 @@ struct QtdObjectFlags
 
         Note that wrappers for QObject instances and instances of classes
         derived from QObject are always unique, therefore
-        the 'is' expression can be used instead of this function.
+        the 'is' operator can be used instead of this function.
      */
     final bool isSame(const(QtdObject) other) const
     {
@@ -198,7 +198,7 @@ struct QtdObjectFlags
         else
             assert(false);
 
-        mixin(debugHandler("onWrapperOwnershipChanged", "obj"));
+        mixin(debugHandler("onObjectOwnershipChanged", "obj"));
     }
 
     // COMPILER BUG: 3206

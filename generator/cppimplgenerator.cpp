@@ -180,6 +180,7 @@ QString default_return_statement_qt(const AbstractMetaType *java_type, Generator
         table["long"] = "0";
         table["float"] = "0f";
         table["double"] = "0.0";
+        table["size_t"] = "0";
         table["java.lang.Object"] = "0";
     }
 
@@ -189,6 +190,7 @@ QString default_return_statement_qt(const AbstractMetaType *java_type, Generator
         return returnStr + " " + signature;
 
     Q_ASSERT(!java_type->isPrimitive());
+
     if (java_type->isJObjectWrapper())
         return returnStr + " JObjectWrapper()";
     if (java_type->isVariant())
