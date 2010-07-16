@@ -4,7 +4,7 @@
 
 
 // QSize::operator<<(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSize_writeTo_QDataStream
+QTD_EXTERN QTD_EXPORT void __qtd_QSize_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -15,7 +15,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSize_writeTo_QDataStream
 }
 
 // QSize::operator>>(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSize_readFrom_QDataStream
+QTD_EXTERN QTD_EXPORT void __qtd_QSize_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -26,7 +26,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSize_readFrom_QDataStream
 }
 
 // QSize::scale(const QSize & s, Qt::AspectRatioMode mode)
-QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QSize_scale_QSize_AspectRatioMode
+QTD_EXTERN QTD_EXPORT void __qtd_QSize_scale_QSize_AspectRatioMode
 (void* __this_nativeId,
  void* s0,
  int mode1)

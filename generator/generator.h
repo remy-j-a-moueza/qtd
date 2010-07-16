@@ -50,10 +50,6 @@
 #include <QObject>
 #include <QFile>
 
-extern bool cpp_shared;
-extern bool dPhobos;
-extern int dVersion;
-
 class Generator : public QObject
 {
     Q_OBJECT

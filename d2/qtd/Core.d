@@ -35,8 +35,6 @@ template Type(T)
     alias T Type;
 }
 
-enum qtdExtern = "extern (C)";
-
 extern(C) alias void function() VoidFunc;
 extern(C) void qtdInitCore();
 
@@ -53,21 +51,27 @@ static this()
 string qtdExport(string retType, string name, string args, string funcBody)
 {
     string ret;
-    version (cpp_shared) // TODO: cpp_shared implies Windows, which is not correct
+    enum ext = "extern (C)";
+    version (QtdCppShared)
     {
+        version(Windows)
+            enum exp = "export";
+        else
+            enum exp = "";
+
         // TODO: hackery to workaround a dmd/optlink bug corrupting symbol names
         // when a direct function pointer export is used
         ret ~= format_ctfe(
             "    ${4} ${0} qtd_export_${1}(${2}) { ${3} }\n"
-            "    ${4} export void qtd_set_${1}(VoidFunc func);\n"
+            "    ${4} ${5} void qtd_set_${1}(VoidFunc func);\n"
             "    static this() { qtd_set_${1}(cast(VoidFunc)&qtd_export_${1}); }\n",
-            retType, name, args, funcBody, qtdExtern);
+            retType, name, args, funcBody, ext, exp);
     }
     else
     {
         ret = format_ctfe(
             "${4} ${0} qtd_${1}(${2}) { ${3} }\n",
-            retType, name, args, funcBody, qtdExtern);
+            retType, name, args, funcBody, ext);
     }
 
     return ret;

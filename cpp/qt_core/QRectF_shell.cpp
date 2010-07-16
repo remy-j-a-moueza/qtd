@@ -5,7 +5,7 @@
 
 
 // QRectF::contains(const QPointF & p) const
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRectF_contains_QPointF
+QTD_EXTERN QTD_EXPORT bool qtd_QRectF_contains_QPointF
 (void* __this_nativeId,
  void* p0)
 {
@@ -20,7 +20,7 @@ QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRectF_contains_QPointF
 }
 
 // QRectF::contains(const QRectF & r) const
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRectF_contains_QRectF
+QTD_EXTERN QTD_EXPORT bool qtd_QRectF_contains_QRectF
 (void* __this_nativeId,
  void* r0)
 {
@@ -34,7 +34,7 @@ QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRectF_contains_QRectF
 }
 
 // QRectF::intersects(const QRectF & r) const
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRectF_intersects_QRectF
+QTD_EXTERN QTD_EXPORT bool qtd_QRectF_intersects_QRectF
 (void* __this_nativeId,
  void* r0)
 {
@@ -48,7 +48,7 @@ QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QRectF_intersects_QRectF
 }
 
 // QRectF::normalized() const
-QTD_EXTERN QTD_DLL_PUBLIC QRectF qtd_QRectF_normalized
+QTD_EXTERN QTD_EXPORT QRectF qtd_QRectF_normalized
 (void* __this_nativeId)
 {
     QRectF *__qt_this = (QRectF *) __this_nativeId;
@@ -56,7 +56,7 @@ QTD_EXTERN QTD_DLL_PUBLIC QRectF qtd_QRectF_normalized
 }
 
 // QRectF::operator&(const QRectF & r) const
-QTD_EXTERN QTD_DLL_PUBLIC QRectF qtd_QRectF_operator_and_QRectF
+QTD_EXTERN QTD_EXPORT QRectF qtd_QRectF_operator_and_QRectF
 (void* __this_nativeId,
  void* r0)
 {
@@ -66,7 +66,7 @@ QTD_EXTERN QTD_DLL_PUBLIC QRectF qtd_QRectF_operator_and_QRectF
 }
 
 // QRectF::operator<<(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QRectF_writeTo_QDataStream
+QTD_EXTERN QTD_EXPORT void qtd_QRectF_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -77,7 +77,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QRectF_writeTo_QDataStream
 }
 
 // QRectF::operator>>(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QRectF_readFrom_QDataStream
+QTD_EXTERN QTD_EXPORT void qtd_QRectF_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -88,7 +88,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QRectF_readFrom_QDataStream
 }
 
 // QRectF::operator|(const QRectF & r) const
-QTD_EXTERN QTD_DLL_PUBLIC QRectF qtd_QRectF_operator_or_QRectF
+QTD_EXTERN QTD_EXPORT QRectF qtd_QRectF_operator_or_QRectF
 (void* __this_nativeId,
  void* r0)
 {
@@ -98,7 +98,7 @@ QTD_EXTERN QTD_DLL_PUBLIC QRectF qtd_QRectF_operator_or_QRectF
 }
 
 // QRectF::toAlignedRect() const
-QTD_EXTERN QTD_DLL_PUBLIC QRect qtd_QRectF_toAlignedRect
+QTD_EXTERN QTD_EXPORT QRect qtd_QRectF_toAlignedRect
 (void* __this_nativeId)
 {
     QRectF *__qt_this = (QRectF *) __this_nativeId;

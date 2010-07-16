@@ -46,14 +46,11 @@
 #include "generatorset.h"
 #include "fileout.h"
 #include "binder.h"
+#include "global.h"
 
 #include "abstractmetalang.h"
 
 #include <QDir>
-
-bool cpp_shared;
-bool dPhobos = false;
-int dVersion = 1;
 
 void ReportHandler_message_handler(const std::string &str)
 {
@@ -130,19 +127,20 @@ int main(int argc, char *argv[])
         TypeDatabase::instance()->setRebuildClasses(classes);
     }
 
-    if (args.contains("d-target"))
+    QString dTarget = args.value("d-target");
+    if (!dTarget.isEmpty())
     {
-        QString dTarget = args.value("d-target");
+        dTarget = args.value("d-target");
         if (dTarget == "d1-tango")
-            dVersion = 1;
+            global.dVersion = 1;
         /*
         else if (dtarget == "d2-tango")
             qFatal("Tango D2 target is not supported");
         */
         else if (dTarget == "d2-phobos")
         {
-            dVersion = 2;
-            dPhobos = true;
+            global.dVersion = 2;
+            global.dPhobos = true;
         }
         else
         {
@@ -179,7 +177,9 @@ int main(int argc, char *argv[])
     if (!gs->readParameters(args))
         displayHelp(gs);
 
-    cpp_shared = args.contains("cpp_shared");
+    global.cppShared = args.contains("cpp-shared");
+
+    global.setTargetPlatform(args.value("target-platform"));
 
     printf("Running the QtD Generator. Please wait while source files are being generated...\n");
 

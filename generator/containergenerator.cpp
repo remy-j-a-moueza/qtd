@@ -229,9 +229,9 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
 
             QString module = packageToQtModule(cls->package());
             setFuncNames(cls_name);
-            s << "QTD_EXPORT(" << module << ", " << all_name << ")" << endl
-              << "QTD_EXPORT(" << module << ", " << ass_name << ")" << endl
-              << "QTD_EXPORT(" << module << ", " << get_name << ")" << endl << endl;
+            s << "QTD_FUNC(" << module << ", " << all_name << ")" << endl
+              << "QTD_FUNC(" << module << ", " << ass_name << ")" << endl
+              << "QTD_FUNC(" << module << ", " << get_name << ")" << endl << endl;
         }
     }
 
@@ -242,7 +242,7 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
     while (i.hasNext()) {
         i.next();
         s << "// " << i.key()->targetLangName() << endl
-          << "QTD_EXTERN QTD_DLL_PUBLIC void qtd_" << package << "_" << i.key()->targetLangName() << "_to_d_array(void *cpp_ptr, DArray* __d_container) {" << endl;
+          << "QTD_EXTERN QTD_EXPORT void qtd_" << package << "_" << i.key()->targetLangName() << "_to_d_array(void *cpp_ptr, DArray* __d_container) {" << endl;
 
         AbstractMetaType *arg_type = i.value();
         m_cpp_impl_generator->writeTypeInfo(s, arg_type, NoOption);
@@ -259,7 +259,7 @@ void ContainerGenerator::writeCppContent(QTextStream &s, AbstractMetaClass *cls)
     foreach(AbstractMetaType* arg_type, signalEntries[cls->package()]) {
         const TypeEntry *te = arg_type->instantiations().first()->typeEntry();
         s << "// " << te->targetLangName() << endl
-          << "QTD_EXTERN QTD_DLL_PUBLIC void " << cppContainerConversionName(cls, arg_type, FromCpp) << "(void *cpp_ptr, DArray* __d_container) {" << endl;
+          << "QTD_EXTERN QTD_EXPORT void " << cppContainerConversionName(cls, arg_type, FromCpp) << "(void *cpp_ptr, DArray* __d_container) {" << endl;
 
         m_cpp_impl_generator->writeTypeInfo(s, arg_type, NoOption);
         s << "container = (*reinterpret_cast< ";
@@ -318,9 +318,9 @@ void ContainerGenerator::writeHeaderArrayFunctions(QTextStream &s, const Complex
 
     QString module = packageToQtModule(centry->javaPackage());
 
-    s << "QTD_EXPORT_DECL(" << module << ", void, " << all_name << ", (void* arr, size_t len))" << endl
-      << "QTD_EXPORT_DECL(" << module << ", void, " << ass_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl
-      << "QTD_EXPORT_DECL(" << module << ", void, " << get_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl;
+    s << "QTD_FUNC_DECL(" << module << ", void, " << all_name << ", (void* arr, size_t len))" << endl
+      << "QTD_FUNC_DECL(" << module << ", void, " << ass_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl
+      << "QTD_FUNC_DECL(" << module << ", void, " << get_name << ", (void* arr, size_t pos, " << cpp_type << " elem))" << endl;
 
     s << endl;
 

@@ -19,7 +19,7 @@ private extern (C) void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant(void *d_ptr,
 
 <template name="gui.class_from_variant_native">
 // %CLASS_NAME from QVariant
-QTD_EXTERN QTD_DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
+QTD_EXTERN QTD_EXPORT void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
 (void *d_ptr,
  void* arg__1)
 {
@@ -32,7 +32,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
 
 <template name="gui.class_from_variant_native_shell">
 // %CLASS_NAME from QVariant
-QTD_EXTERN QTD_DLL_PUBLIC void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
+QTD_EXTERN QTD_EXPORT void* qtd_%CLASS_NAME_%CLASS_NAME_QVariant
 (void *d_ptr,
  void* arg__1)
 {
@@ -1156,7 +1156,7 @@ private extern(C) void  qtd_QPolygon_insert_int_int_QPoint(void* __this_nativeId
     </inject-code>
     <inject-code class="native">
 // QPolygon::insert(int i, const QPoint &amp; t)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygon_insert_int_QPoint
+QTD_EXTERN QTD_EXPORT void qtd_QPolygon_insert_int_QPoint
 (void* __this_nativeId,
  int i0,
  QPoint t1)
@@ -1167,7 +1167,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygon_insert_int_QPoint
 }
 
 // QPolygon::insert(int i, int n, const QPoint &amp; t)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygon_insert_int_int_QPoint
+QTD_EXTERN QTD_EXPORT void qtd_QPolygon_insert_int_int_QPoint
 (void* __this_nativeId,
  int i0,
  int n1,
@@ -1241,7 +1241,7 @@ private extern(C) void  qtd_QPolygonF_insert_int_int_QPointF(void* __this_native
     </inject-code>
     <inject-code class="native">
 // QPolygonF::insert(int i, const QPointF &amp; t)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygonF_insert_int_QPointF
+QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_QPointF
 (void* __this_nativeId,
  int i0,
  QPointF t1)
@@ -1252,7 +1252,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygonF_insert_int_QPointF
 }
 
 // QPolygonF::insert(int i, int n, const QPointF &amp; t)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QPolygonF_insert_int_int_QPointF
+QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
 (void* __this_nativeId,
  int i0,
  int n1,

@@ -5,7 +5,7 @@
 
 
 // QLineF::angle() const
-QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_angle
+QTD_EXTERN QTD_EXPORT double qtd_QLineF_angle
 (void* __this_nativeId)
 {
     QLineF *__qt_this = (QLineF *) __this_nativeId;
@@ -17,7 +17,7 @@ QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_angle
 }
 
 // QLineF::angle(const QLineF & l) const
-QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_angle_QLineF
+QTD_EXTERN QTD_EXPORT double qtd_QLineF_angle_QLineF
 (void* __this_nativeId,
  void* l0)
 {
@@ -31,7 +31,7 @@ QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_angle_QLineF
 }
 
 // QLineF::angleTo(const QLineF & l) const
-QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_angleTo_QLineF
+QTD_EXTERN QTD_EXPORT double qtd_QLineF_angleTo_QLineF
 (void* __this_nativeId,
  void* l0)
 {
@@ -45,7 +45,7 @@ QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_angleTo_QLineF
 }
 
 // QLineF::intersect(const QLineF & l, QPointF * intersectionPoint) const
-QTD_EXTERN QTD_DLL_PUBLIC int qtd_QLineF_intersect_QLineF_nativepointerQPointF
+QTD_EXTERN QTD_EXPORT int qtd_QLineF_intersect_QLineF_nativepointerQPointF
 (void* __this_nativeId,
  void* l0,
  void* intersectionPoint1)
@@ -60,7 +60,7 @@ QTD_EXTERN QTD_DLL_PUBLIC int qtd_QLineF_intersect_QLineF_nativepointerQPointF
 }
 
 // QLineF::isNull() const
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QLineF_isNull
+QTD_EXTERN QTD_EXPORT bool qtd_QLineF_isNull
 (void* __this_nativeId)
 {
     QLineF *__qt_this = (QLineF *) __this_nativeId;
@@ -72,7 +72,7 @@ QTD_EXTERN QTD_DLL_PUBLIC bool qtd_QLineF_isNull
 }
 
 // QLineF::length() const
-QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_length
+QTD_EXTERN QTD_EXPORT double qtd_QLineF_length
 (void* __this_nativeId)
 {
     QLineF *__qt_this = (QLineF *) __this_nativeId;
@@ -84,7 +84,7 @@ QTD_EXTERN QTD_DLL_PUBLIC double qtd_QLineF_length
 }
 
 // QLineF::operator<<(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLineF_writeTo_QDataStream
+QTD_EXTERN QTD_EXPORT void qtd_QLineF_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -95,7 +95,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLineF_writeTo_QDataStream
 }
 
 // QLineF::operator>>(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLineF_readFrom_QDataStream
+QTD_EXTERN QTD_EXPORT void qtd_QLineF_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -106,7 +106,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLineF_readFrom_QDataStream
 }
 
 // QLineF::p1() const
-QTD_EXTERN QTD_DLL_PUBLIC QPointF qtd_QLineF_p1
+QTD_EXTERN QTD_EXPORT QPointF qtd_QLineF_p1
 (void* __this_nativeId)
 {
     QLineF *__qt_this = (QLineF *) __this_nativeId;
@@ -118,7 +118,7 @@ QTD_EXTERN QTD_DLL_PUBLIC QPointF qtd_QLineF_p1
 }
 
 // QLineF::setAngle(double angle)
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLineF_setAngle_double
+QTD_EXTERN QTD_EXPORT void qtd_QLineF_setAngle_double
 (void* __this_nativeId,
  double angle0)
 {
@@ -128,7 +128,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QLineF_setAngle_double
 }
 
 // QLineF::unitVector() const
-QTD_EXTERN QTD_DLL_PUBLIC QLineF qtd_QLineF_unitVector
+QTD_EXTERN QTD_EXPORT QLineF qtd_QLineF_unitVector
 (void* __this_nativeId)
 {
     QLineF *__qt_this = (QLineF *) __this_nativeId;
@@ -136,7 +136,7 @@ QTD_EXTERN QTD_DLL_PUBLIC QLineF qtd_QLineF_unitVector
 }
 
 // QLineF::fromPolar(double length, double angle)
-QTD_EXTERN QTD_DLL_PUBLIC QLineF qtd_QLineF_fromPolar_double_double
+QTD_EXTERN QTD_EXPORT QLineF qtd_QLineF_fromPolar_double_double
 (double length0,
  double angle1)
 {

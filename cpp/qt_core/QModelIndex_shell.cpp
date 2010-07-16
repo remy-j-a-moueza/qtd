@@ -6,14 +6,14 @@
 
 #include "qtd_core.h"
 
-QTD_EXTERN QTD_DLL_PUBLIC void __qtd_QModelIndex_destructor(void *ptr)
+QTD_EXTERN QTD_EXPORT void __qtd_QModelIndex_destructor(void *ptr)
 {
     delete (QModelIndex *)ptr;
 }
 
 // ---externC---
 // QModelIndex::QModelIndex()
-QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_QModelIndex
+QTD_EXTERN QTD_EXPORT void* __qtd_QModelIndex_QModelIndex
 ()
 {
     QModelIndex *__qt_this = new QModelIndex();
@@ -22,7 +22,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_QModelIndex
 }
 
 // QModelIndex::QModelIndex(const QModelIndex & other)
-QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_QModelIndex_QModelIndex
+QTD_EXTERN QTD_EXPORT void* __qtd_QModelIndex_QModelIndex_QModelIndex
 (QModelIndex other0)
 {
     QModelIndex *__qt_this = new QModelIndex((const QModelIndex& )other0);
@@ -31,7 +31,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_QModelIndex_QModelIndex
 }
 
 // QModelIndex::child(int row, int column) const
-QTD_EXTERN QTD_DLL_PUBLIC QModelIndex __qtd_QModelIndex_child_int_int
+QTD_EXTERN QTD_EXPORT QModelIndex __qtd_QModelIndex_child_int_int
 (void* __this_nativeId,
  int row0,
  int column1)
@@ -44,7 +44,7 @@ QTD_EXTERN QTD_DLL_PUBLIC QModelIndex __qtd_QModelIndex_child_int_int
 }
 
 // QModelIndex::column() const
-QTD_EXTERN QTD_DLL_PUBLIC int __qtd_QModelIndex_column
+QTD_EXTERN QTD_EXPORT int __qtd_QModelIndex_column
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -56,7 +56,7 @@ QTD_EXTERN QTD_DLL_PUBLIC int __qtd_QModelIndex_column
 }
 
 // QModelIndex::data(int role) const
-QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_data_int
+QTD_EXTERN QTD_EXPORT void* __qtd_QModelIndex_data_int
 (void* __this_nativeId,
  int role0)
 {
@@ -69,7 +69,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_data_int
 }
 
 // QModelIndex::flags() const
-QTD_EXTERN QTD_DLL_PUBLIC int __qtd_QModelIndex_flags
+QTD_EXTERN QTD_EXPORT int __qtd_QModelIndex_flags
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -81,7 +81,7 @@ QTD_EXTERN QTD_DLL_PUBLIC int __qtd_QModelIndex_flags
 }
 
 // QModelIndex::internalId() const
-QTD_EXTERN QTD_DLL_PUBLIC qint64 __qtd_QModelIndex_internalId
+QTD_EXTERN QTD_EXPORT qint64 __qtd_QModelIndex_internalId
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -93,7 +93,7 @@ QTD_EXTERN QTD_DLL_PUBLIC qint64 __qtd_QModelIndex_internalId
 }
 
 // QModelIndex::internalPointer() const
-QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_internalPointer
+QTD_EXTERN QTD_EXPORT void* __qtd_QModelIndex_internalPointer
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -105,7 +105,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_internalPointer
 }
 
 // QModelIndex::isValid() const
-QTD_EXTERN QTD_DLL_PUBLIC bool __qtd_QModelIndex_isValid
+QTD_EXTERN QTD_EXPORT bool __qtd_QModelIndex_isValid
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -117,7 +117,7 @@ QTD_EXTERN QTD_DLL_PUBLIC bool __qtd_QModelIndex_isValid
 }
 
 // QModelIndex::model() const
-QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_model
+QTD_EXTERN QTD_EXPORT void* __qtd_QModelIndex_model
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -129,7 +129,7 @@ QTD_EXTERN QTD_DLL_PUBLIC void* __qtd_QModelIndex_model
 }
 
 // QModelIndex::operator<(const QModelIndex & other) const
-QTD_EXTERN QTD_DLL_PUBLIC bool __qtd_QModelIndex_operator_less_QModelIndex
+QTD_EXTERN QTD_EXPORT bool __qtd_QModelIndex_operator_less_QModelIndex
 (void* __this_nativeId,
  QModelIndex other0)
 {
@@ -142,7 +142,7 @@ QTD_EXTERN QTD_DLL_PUBLIC bool __qtd_QModelIndex_operator_less_QModelIndex
 }
 
 // QModelIndex::operator==(const QModelIndex & other) const
-QTD_EXTERN QTD_DLL_PUBLIC bool __qtd_QModelIndex_operator_equal_QModelIndex
+QTD_EXTERN QTD_EXPORT bool __qtd_QModelIndex_operator_equal_QModelIndex
 (void* __this_nativeId,
  QModelIndex other0)
 {
@@ -155,7 +155,7 @@ QTD_EXTERN QTD_DLL_PUBLIC bool __qtd_QModelIndex_operator_equal_QModelIndex
 }
 
 // QModelIndex::parent() const
-QTD_EXTERN QTD_DLL_PUBLIC QModelIndex __qtd_QModelIndex_parent
+QTD_EXTERN QTD_EXPORT QModelIndex __qtd_QModelIndex_parent
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -166,7 +166,7 @@ QTD_EXTERN QTD_DLL_PUBLIC QModelIndex __qtd_QModelIndex_parent
 }
 
 // QModelIndex::row() const
-QTD_EXTERN QTD_DLL_PUBLIC int __qtd_QModelIndex_row
+QTD_EXTERN QTD_EXPORT int __qtd_QModelIndex_row
 (void* __this_nativeId)
 {
     QModelIndex *__qt_this = (QModelIndex *) __this_nativeId;
@@ -178,7 +178,7 @@ QTD_EXTERN QTD_DLL_PUBLIC int __qtd_QModelIndex_row
 }
 
 // QModelIndex::sibling(int row, int column) const
-QTD_EXTERN QTD_DLL_PUBLIC QModelIndex __qtd_QModelIndex_sibling_int_int
+QTD_EXTERN QTD_EXPORT QModelIndex __qtd_QModelIndex_sibling_int_int
 (void* __this_nativeId,
  int row0,
  int column1)

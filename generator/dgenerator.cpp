@@ -39,6 +39,7 @@
 **
 ****************************************************************************/
 
+#include "global.h"
 #include "dgenerator.h"
 #include "reporthandler.h"
 #include "docparser.h"
@@ -124,7 +125,7 @@ QString DGenerator::translateType(const AbstractMetaType *d_type, const Abstract
         d_type = d_type->originalTemplateType();
 
     QString constPrefix, constPostfix;
-    if (d_type && d_type->isConstant() && dVersion == 2) {
+    if (d_type && d_type->isConstant() && global.dVersion == 2) {
         constPrefix = "const(";
         constPostfix = ")";
     }
@@ -855,7 +856,7 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
                     s << arg_name << " is null ? null : ";
                 } // else if (value type is abstract) then we will get a null pointer exception, which is all right
 
-                if(dVersion == 2 && type->isConstant())
+                if(global.dVersion == 2 && type->isConstant())
                     s << "(cast(" << type->name() << ")" << arg_name << ").qtdNativeId";
                 else
                     s << arg_name << ".qtdNativeId";
@@ -1852,7 +1853,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     auxFile.stream << "module " << auxModName << ";" << endl << endl;
 
     bool staticInit = d_class->isQObject() || d_class->typeEntry()->isValue()
-                      || (cpp_shared && d_class->generateShellClass() && !d_class->isInterface() && !d_class->isNamespace());
+                      || (global.cppShared && d_class->generateShellClass() && !d_class->isInterface() && !d_class->isNamespace());
     if (staticInit)
     {
         auxFile.isDone = false;
@@ -1986,7 +1987,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         s << "// automatic imports-------------" << endl;
         writeRequiredImports(s, d_class);
         s << endl;
-        if (dPhobos)
+        if (global.dPhobos)
         {
             s << "import std.stdio;" << endl
               << "import std.string : toStringz;" << endl
@@ -2548,7 +2549,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
     // write static constructor
     if (staticInit) {
         QString initArgs;
-        if (cpp_shared && d_class->generateShellClass())
+        if (global.cppShared && d_class->generateShellClass())
         {
             initArgs = "void* virtuals";
             if (d_class->name() == "QObject")
@@ -2563,7 +2564,7 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         if (d_class->typeEntry()->isValue())
             s << INDENT << d_class->name() << ".QTypeInfo.init();" << endl;
 
-        if (cpp_shared && d_class->generateShellClass()) {
+        if (global.cppShared && d_class->generateShellClass()) {
 
             AbstractMetaFunction::Options opts(AbstractMetaFunction::DeclaringClass | AbstractMetaFunction::NoExternNamespace);
 
@@ -2688,7 +2689,7 @@ void DGenerator::writeQObjectFreeFunctions(QTextStream &s, const AbstractMetaCla
       << "extern(C) void qtd_" << d_class->name() << "_createEntity(void* nativeId, void* dId);" <<  endl << endl
       << "extern(C) int qtd_" << d_class->name() << "_qt_metacall(void *nativeId, MetaCall _c, int _id, void **_a);" << endl;
 
-    QString prefix = cpp_shared ? "qtd_export_" : "qtd_";
+    QString prefix = global.cppShared ? "qtd_export_" : "qtd_";
 
     if (d_class->name() == "QObject") {
         s << "extern(C) int " << prefix << "QObject_qt_metacall_dispatch(void *d_entity, MetaCall _c, int _id, void **_a) {" << endl
@@ -3485,16 +3486,21 @@ void DGenerator::writeCloneFunction(QTextStream &s, const AbstractMetaClass *d_c
 
 void DGenerator::writeDExport(QTextStream &s, QString retType, QString name, QString args, QString funcBody)
 {
-    QString qtdExtern = "extern (C)"; // TODO: should be settable via a generator switch
-    if (cpp_shared) {
+    QString ext = "extern (C)";
+
+    if (global.cppShared) {
+        QString exp;
+        if (global.targetPlatform == Global::Win32Target)
+            exp = "export";
+
         s << QString(
             "    %5 %1 qtd_export_%2(%3) { %4 }\n"
-            "    %5 export void qtd_set_%2(VoidFunc func);\n"
+            "    %5 %6 void qtd_set_%2(VoidFunc func);\n"
             "    static this() { qtd_set_%2(cast(VoidFunc)&qtd_export_%2); }\n")
-            .arg(retType, name, args, funcBody, qtdExtern);        
+            .arg(retType, name, args, funcBody, ext, exp);
     } else {
         s << QString("%5 %1 qtd_%2(%3) { %4 }\n")
-                .arg(retType, name, args, funcBody, qtdExtern);
+                .arg(retType, name, args, funcBody, ext);
     }
 }
 

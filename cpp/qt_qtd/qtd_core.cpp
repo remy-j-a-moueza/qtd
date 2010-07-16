@@ -6,15 +6,15 @@
 #include "qtd_core.h"
 #include <typeinfo>
 
-QTD_EXPORT(CORE, toUtf8);
-QTD_EXPORT(CORE, QtdObject_delete);
+QTD_FUNC(CORE, toUtf8);
+QTD_FUNC(CORE, QtdObject_delete);
 
-QTD_EXTERN QTD_DLL_PUBLIC void qtdInitCore()
+QTD_EXTERN QTD_EXPORT void qtdInitCore()
 {
     QObjectLink::userDataId = QObject::registerUserData();
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC bool qtdTypeInfosEqual(void* info1, void* info2)
+QTD_EXTERN QTD_EXPORT bool qtdTypeInfosEqual(void* info1, void* info2)
 {
     std::type_info* i1 = (std::type_info*)info1;
     std::type_info* i2 = (std::type_info*)info2;
@@ -22,12 +22,12 @@ QTD_EXTERN QTD_DLL_PUBLIC bool qtdTypeInfosEqual(void* info1, void* info2)
     return i1 == i2 || strcmp(i1->name(), i2->name()) == 0;
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia)
+QTD_EXTERN QTD_EXPORT QModelIndex qtd_to_QModelIndex(QModelIndexAccessor mia)
 {
     return * (QModelIndex *) (&mia) ;
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index)
+QTD_EXTERN QTD_EXPORT QModelIndexAccessor qtd_from_QModelIndex(const QModelIndex &index)
 {
     QModelIndexAccessor mia = {
         index.row(),
@@ -39,12 +39,12 @@ QTD_EXTERN QTD_DLL_PUBLIC QModelIndexAccessor qtd_from_QModelIndex(const QModelI
     return mia;
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC const char* qtd_qVersion()
+QTD_EXTERN QTD_EXPORT const char* qtd_qVersion()
 {
     return qVersion();
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_qSharedBuild()
+QTD_EXTERN QTD_EXPORT bool qtd_qSharedBuild()
 {
     return qSharedBuild();
 }
@@ -55,24 +55,24 @@ extern bool qRegisterResourceData
 extern bool qUnregisterResourceData
     (int, const unsigned char *, const unsigned char *, const unsigned char *);
 
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_qRegisterResourceData(int version, const unsigned char *tree,
+QTD_EXTERN QTD_EXPORT bool qtd_qRegisterResourceData(int version, const unsigned char *tree,
                                          const unsigned char *name, const unsigned char *data)
 {
     return qRegisterResourceData(version, tree, name, data);
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC bool qtd_qUnregisterResourceData(int version, const unsigned char *tree,
+QTD_EXTERN QTD_EXPORT bool qtd_qUnregisterResourceData(int version, const unsigned char *tree,
                                            const unsigned char *name, const unsigned char *data)
 {
     return qUnregisterResourceData(version, tree, name, data);
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC int qtd_qrand()
+QTD_EXTERN QTD_EXPORT int qtd_qrand()
 {
     return qrand();
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_qsrand(uint seed)
+QTD_EXTERN QTD_EXPORT void qtd_qsrand(uint seed)
 {
     qsrand(seed);
 }

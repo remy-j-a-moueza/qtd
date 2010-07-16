@@ -4,13 +4,14 @@ find_package(Qt4 REQUIRED)
 
 ## Hack for msvc: force Release settings
 string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type_upper)
-set(CMAKE_CXX_FLAGS_${build_type_upper} ${CMAKE_CXX_FLAGS_RELEASE}) 
-get_property(dir_prop DIRECTORY 
+set(CMAKE_CXX_FLAGS_${build_type_upper} ${CMAKE_CXX_FLAGS_RELEASE})
+get_property(dir_prop DIRECTORY
 	    PROPERTY COMPILE_DEFINITIONS_RELEASE)
 set_property(DIRECTORY PROPERTY COMPILE_DEFINITIONS_${build_type_upper} ${dir_prop})
 
 ## Sources
 set(srcs
+    global.cpp
     classlistgenerator.cpp
     cppgenerator.cpp
     cppheadergenerator.cpp
@@ -24,7 +25,7 @@ set(srcs
     qdocgenerator.cpp
     uiconverter.cpp
     containergenerator.cpp
-    
+
     generator.cpp
     main.cpp
     reporthandler.cpp
@@ -38,7 +39,7 @@ set(srcs
     abstractmetabuilder.cpp
     abstractmetalang.cpp
     prigenerator.cpp
-    
+
     # rxx
     parser/ast.cpp
     parser/lexer.cpp
@@ -58,7 +59,7 @@ set(srcs
     parser/class_compiler.cpp
     parser/codemodel_finder.cpp
     parser/compiler_utils.cpp
-    
+
     ## rpp
     parser/rpp/preprocessor.cpp
 )
@@ -90,7 +91,7 @@ set(moc_hdrs
     #abstractmetabuilder.h
     #abstractmetalang.h
     prigenerator.h
-    
+
     ## rxx
     #parser/ast.h
     #parser/lexer.h
@@ -115,7 +116,7 @@ set(moc_hdrs
     #parser/class_compiler.h
     #parser/codemodel_finder.h
     #parser/compiler_utils.h
-    
+
     # rpp
     #parser/rpp/pp-cctype.h
     #parser/rpp/pp-engine-bits.h
@@ -131,7 +132,7 @@ set(moc_hdrs
     #parser/rpp/pp-symbol.h
     #parser/rpp/pp.h
     #parser/rpp/preprocessor.h
-    
+
 )
 
 ## Resources.
@@ -141,11 +142,11 @@ set(res_files
 
 ## Includes path.
 set(inc_paths_for_build
-    ${CMAKE_CURRENT_SOURCE_DIR}/../common 
+    ${CMAKE_CURRENT_SOURCE_DIR}/../common
     ${CMAKE_CURRENT_SOURCE_DIR}/parser
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp   
-    #${CMAKE_CURRENT_SOURCE_DIR}/parser/include  
+    ${CMAKE_CURRENT_SOURCE_DIR}/parser/rpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/parser/include
 )
 
 add_definitions(-DRXX_ALLOCATOR_INIT_0)
@@ -156,15 +157,15 @@ set (QT_USE_QTMAIN true)
 set (QT_USE_QTGUI false)
 set (QT_USE_QTXML true)
 
-include(${QT_USE_FILE} ${CMAKE_CURRENT_SOURCE_DIR}) 
+include(${QT_USE_FILE} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(inc_paths_for_build
     ${inc_paths_for_build}
-    ${QT_INCLUDES} 
+    ${QT_INCLUDES}
 )
 set(lib_paths
     ${lib_paths}
-    ${QT_LIBRARY_DIR} 
+    ${QT_LIBRARY_DIR}
 )
 set(libs
     ${QT_LIBRARIES}
@@ -173,18 +174,18 @@ set(libs
 qt4_wrap_cpp(moc_srcs ${moc_hdrs})
 qt4_add_resources(res_wrapped_files ${res_files})
 
-set (all_srcs 
-    ${srcs} ${moc_srcs} 
-    ${res_wrapped_files}) 
+set (all_srcs
+    ${srcs} ${moc_srcs}
+    ${res_wrapped_files})
 include_directories(${inc_paths_for_build})
 add_executable(generator ${all_srcs} )
 target_link_libraries(generator ${libs})
 
-## TODO: Precompilated header works well, but I don't know a license of PCHSupport_26.cmake which  
-## was downloaded from http://www.vtk.org/Bug/view.php?id=1260. 
+## TODO: Precompilated header works well, but I don't know a license of PCHSupport_26.cmake which
+## was downloaded from http://www.vtk.org/Bug/view.php?id=1260.
 #OPTION(USEPCH "Build the project with precompiled-headers" ON)
 #include(../cmake/PCHSupport_26.cmake)
-#	
+#
 #IF(NOT USEPCH)
 #    MESSAGE(STATUS "NOT using precompiled-header")
 #ELSE(NOT USEPCH)
@@ -194,15 +195,15 @@ target_link_libraries(generator ${libs})
 
 set(dgen_build_conf ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt)
 set(jambi_inc ${CMAKE_BINARY_DIR}/CMakeFiles/qtjambi_masterinclude.h)
-if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}" 
+if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}"
 	OR NOT EXISTS ${dgen_build_conf}
 	OR NOT EXISTS ${jambi_inc})
     file(REMOVE ${dgen_build_conf})
     file(REMOVE ${jambi_inc})
     file(APPEND ${dgen_build_conf} "<typesystem>\n")
     foreach(package_normal ${packages})
-    	string(TOLOWER ${package_normal} package) 
-    	string(TOUPPER ${package_normal} package_upper) 
+    	string(TOLOWER ${package_normal} package)
+    	string(TOUPPER ${package_normal} package_upper)
     	file(APPEND ${dgen_build_conf} "	<load-typesystem name=\"typesystem_${package}.xml\" generate=\"yes\" />\n")
     	# only append include if we have QT_QT${MODULE}_INCLUDE_DIR defined, otherwise handle customly
     	if(NOT ${QT_QT${package_upper}_INCLUDE_DIR} STREQUAL "")
@@ -217,20 +218,20 @@ if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}"
         file(APPEND ${jambi_inc} ${jambi_inc_qwt})
     endif()
 endif()
-    
+
 set(gen_sources)
 foreach(package_normal ${packages})
-    string(TOLOWER ${package_normal} package)   
+    string(TOLOWER ${package_normal} package)
     set(gen_sources ${gen_sources} ${CMAKE_CURRENT_SOURCE_DIR}/typesystem_${package}.xml)
-    set(d_inc_file_found d_inc_file_found-NOTFOUND) 
-    find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_CURRENT_SOURCE_DIR}/) 
+    set(d_inc_file_found d_inc_file_found-NOTFOUND)
+    find_file(d_inc_file_found typesystem_${package}-java.java PATHS ${CMAKE_CURRENT_SOURCE_DIR}/)
     if(d_inc_file_found)
 	    set(gen_sources ${gen_sources} ${d_inc_file_found})
     endif()
 endforeach()
 mark_as_advanced(d_inc_file_found)
 set(d_inc_file_found 1)
-	
+
 foreach(path ${QT_INCLUDES})
     set(inc_paths_tmp ${path}${sep})
 endforeach()
@@ -247,10 +248,10 @@ add_custom_command(OUTPUT ${dgen_impl}
 	COMMAND "generator"
 	ARGS ${GEN_OPT} --include-paths=${inc_paths}
 	    --output-directory=${out_dir}
-	    --source-directory=${CMAKE_CURRENT_SOURCE_DIR} 
-	    ${CMAKE_BINARY_DIR}/CMakeFiles/qtjambi_masterinclude.h  
+	    --source-directory=${CMAKE_CURRENT_SOURCE_DIR}
+	    ${CMAKE_BINARY_DIR}/CMakeFiles/qtjambi_masterinclude.h
 	    ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
 	COMMENT "Generating binding..."
 	DEPENDS generator ${gen_sources} ${CMAKE_BINARY_DIR}/CMakeFiles/build.txt
-)       
-add_custom_target(dgen ALL DEPENDS ${dgen_impl} COMMENT "")     
+)
+add_custom_target(dgen ALL DEPENDS ${dgen_impl} COMMENT "")

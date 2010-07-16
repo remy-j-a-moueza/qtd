@@ -5,7 +5,7 @@
 
 
 // QPoint::manhattanLength() const
-QTD_EXTERN QTD_DLL_EXPORT int qtd_QPoint_manhattanLength
+QTD_EXTERN QTD_EXPORT int qtd_QPoint_manhattanLength
 (void* __this_nativeId)
 {
     QPoint *__qt_this = (QPoint *) __this_nativeId;
@@ -17,7 +17,7 @@ QTD_EXTERN QTD_DLL_EXPORT int qtd_QPoint_manhattanLength
 }
 
 // QPoint::operator<<(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_EXPORT void qtd_QPoint_writeTo_QDataStream
+QTD_EXTERN QTD_EXPORT void qtd_QPoint_writeTo_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {
@@ -28,7 +28,7 @@ QTD_EXTERN QTD_DLL_EXPORT void qtd_QPoint_writeTo_QDataStream
 }
 
 // QPoint::operator>>(QDataStream & arg__1)
-QTD_EXTERN QTD_DLL_EXPORT void qtd_QPoint_readFrom_QDataStream
+QTD_EXTERN QTD_EXPORT void qtd_QPoint_readFrom_QDataStream
 (void* __this_nativeId,
  void* arg__1)
 {

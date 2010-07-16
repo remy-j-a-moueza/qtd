@@ -1985,12 +1985,12 @@
     </extra-includes>
 
     <inject-code class="native">
-QTD_EXTERN QTD_DLL_PUBLIC int qtd_QMetaType_registerType(char* namePtr, VoidFunc dtor, VoidFunc ctor)
+QTD_EXTERN QTD_EXPORT int qtd_QMetaType_registerType(char* namePtr, VoidFunc dtor, VoidFunc ctor)
 {
     return QMetaType::registerType(namePtr, (QMetaType::Destructor)dtor, (QMetaType::Constructor)ctor);
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_QMetaType_registerStreamOperators(const char *typeName, VoidFunc saveOp,
+QTD_EXTERN QTD_EXPORT void qtd_QMetaType_registerStreamOperators(const char *typeName, VoidFunc saveOp,
                                         VoidFunc loadOp)
 {
     QMetaType::registerStreamOperators(typeName, (QMetaType::SaveOperator)saveOp,
@@ -2385,17 +2385,17 @@ QTD_EXTERN QTD_DLL_PUBLIC void qtd_QMetaType_registerStreamOperators(const char 
   <object-type name="QObject">
 	<inject-code class="native">
 
-QTD_EXTERN QTD_DLL_PUBLIC void* qtd_get_d_qobject(void *nativeId)
+QTD_EXTERN QTD_EXPORT void* qtd_get_d_qobject(void *nativeId)
 {
     return QObjectEntity::getDId((QObject*)nativeId);
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC void qtd_create_qobject_entity(void* nativeId, void *dId)
+QTD_EXTERN QTD_EXPORT void qtd_create_qobject_entity(void* nativeId, void *dId)
 {
 	new QObjectLink((QObject*)nativeId, dId);
 }
 
-QTD_EXTERN QTD_DLL_PUBLIC void* qtd_QObject_metaObject(void* nativeId)
+QTD_EXTERN QTD_EXPORT void* qtd_QObject_metaObject(void* nativeId)
 {
     return (void*)((QObject*)nativeId)->metaObject();
 }

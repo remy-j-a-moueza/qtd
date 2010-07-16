@@ -139,7 +139,7 @@ endmacro(add_d_debugs)
 ##	message(STATUS ${path})
 ## Output:
 ##	-- "c:\file_path\file_name.cpp"
-## Command "file(TO_NATIVE_PATH ...)" is wrong on Windows
+## Command "file(TO_NATIVE_PATH ...)" gives incorrect results on Windows
 macro(make_native_path pathname)
     if(CMAKE_HOST_WIN32)
 	# An extra \\ escape is necessary to get a \ through CMake's processing.
