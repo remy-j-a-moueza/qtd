@@ -917,12 +917,14 @@ void CppImplGenerator::writeInitCallbacks(QTextStream &s, const  AbstractMetaCla
     // virtual functions handlers
     AbstractMetaFunctionList virtualFunctions = java_class->virtualFunctions();
     AbstractMetaFunction::Options opts(AbstractMetaFunction::DeclaringClass | AbstractMetaFunction::NoExternNamespace);
-    for (int pos = 0; pos<virtualFunctions.size(); ++pos) {
-        const AbstractMetaFunction *function = virtualFunctions.at(pos);
+
+    size_t virtual_index = 0;
+    foreach (const AbstractMetaFunction *function, virtualFunctions) {        
         if (!notWrappedYet(function) && java_class == function->declaringClass()) { // qtd2
             QString mName = function->marshalledName(opts);
             s << "    qtd_" << mName << "_dispatch = "
-                 "(qtd_" << mName << "_dispatch_t) virts[" << pos << "];" << endl;
+                 "(qtd_" << mName << "_dispatch_t) virts[" << virtual_index << "];" << endl;
+            virtual_index++;
         }
     }
     // D-side signal callbacks

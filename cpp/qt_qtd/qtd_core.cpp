@@ -10,7 +10,7 @@ QTD_FUNC(CORE, toUtf8);
 QTD_FUNC(CORE, QtdObject_delete);
 
 QTD_EXTERN QTD_EXPORT void qtdInitCore()
-{
+{    
     QObjectLink::userDataId = QObject::registerUserData();
 }
 

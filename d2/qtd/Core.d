@@ -38,7 +38,7 @@ template Type(T)
 extern(C) alias void function() VoidFunc;
 extern(C) void qtdInitCore();
 
-static this()
+shared static this()
 {
     qtdInitCore();
 }

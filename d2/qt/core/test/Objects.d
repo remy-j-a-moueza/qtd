@@ -1,7 +1,5 @@
 module qt.core.test.Objects;
 
-import std.stdio;
-
 // make sure QtdUnittest is defined
 version (QtdUnittest) {} else { static assert(false); }
 
@@ -11,8 +9,6 @@ import
     qtd.meta.Runtime,
     qt.core.QObject,
     qt.core.QMetaObject;
-
-import std.stdio;
 
 extern (C) void* qtd_test_QObject_create(void* parent);
 extern (C) void qtd_test_QObject_delete(void* nativeId);
@@ -97,7 +93,6 @@ void test5()
 
 unittest
 {
-    writeln("Here");
     static void reset()
     {
         qtdDebug.reset();

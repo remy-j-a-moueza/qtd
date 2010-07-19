@@ -117,7 +117,6 @@ struct QtdObjectFlags
     /**
         Disables GC for this object;
      */
-    // TODO: needs to be properly synchronized
     final void qtdPin() const
     {
         assert(!_flags.pinned);
@@ -150,7 +149,6 @@ struct QtdObjectFlags
     /**
         Enables GC for this object.
      */
-    // TODO: needs to be properly synchronized
     final void qtdUnpin() const
     {
         assert(_flags.pinned);
@@ -171,7 +169,6 @@ struct QtdObjectFlags
     /**
         Sets the ownership of this object.
         Setting the same ownership twice results in undefined behavior.
-        The function is not thread-safe.
      */
     void qtdSetOwnership(QtdObjectOwnership own) const
     {
@@ -186,21 +183,27 @@ struct QtdObjectFlags
             if (_flags.polymorphic && _flags.createdByD)
                 qtdPin();
             else
+            {
+                assert (!obj._flags.nativeDeleteDisabled);
                 obj._flags.nativeDeleteDisabled = true;
+            }
         }
         else if (own == QtdObjectOwnership.d)
         {
             if (_flags.polymorphic && _flags.createdByD)
                 qtdUnpin();
             else
+            {
+                assert(obj._flags.nativeDeleteDisabled);
                 obj._flags.nativeDeleteDisabled = false;
+            }
         }
         else
             assert(false);
 
         mixin(debugHandler("onObjectOwnershipChanged", "obj"));
-    }
-
+    }    
+    
     // COMPILER BUG: 3206
     protected void qtdDeleteNative()
     {
@@ -227,18 +230,30 @@ struct QtdObjectFlags
     }
 }
 
+/* package */ abstract class PolymorphicObject : QtdObject
+{
+    this(void* nativeId, QtdObjectInitFlags initFlags = QtdObjectInitFlags.none)
+    {
+        _flags.polymorphic = true;
+        super(nativeId, initFlags); 
+    }
+    
+    abstract QtdMetaClass metaObject();
+}
+
 /**
     Base class for polymorphic non-QObjects (TBD).
  */
-/* package */ abstract class NonQObject : QtdObject
+/* package */ abstract class NonQObject : PolymorphicObject
 {
     alias NonQObjectMetaClass Meta;
 
     this(void* nativeId, QtdObjectInitFlags initFlags)
     {
-        _flags.polymorphic = true;
         super(nativeId, initFlags);
     }
+    
+    override abstract Meta metaObject();
 }
 
 /**
@@ -255,8 +270,7 @@ abstract class QtdMetaClass : MetaClass
 
     /**
      */
-    @property
-    void* nativeId()
+    @property void* nativeId()
     {
         return _nativeId;
     }
@@ -312,7 +326,7 @@ final class NonQObjectMetaClass : QtdMetaClass
     }
 }
 
-extern (C) bool qtdTypeInfosEqual(void* info1, void* info2);
+extern(C) bool qtdTypeInfosEqual(void* info1, void* info2);
 
 mixin(qtdExport("void", "QtdObject_delete", "void* dId",
     q{

@@ -2073,8 +2073,9 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                 implements = true;
             }
             */
+            // only QObjects are handled polymorphically for now
             if (d_class->isQObject())
-                s << " : QtdObject";
+                s << " : PolymorphicObject";
             else
                 s << " : QtdObject";
             implements = true;
@@ -2329,10 +2330,6 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                   << INDENT << "_flags.isQObject = true;" << endl;
             }
 
-            // only QObjects are handled polymorphically for now
-            if (d_class->name() == "QObject" /* d_class->polymorphicBase() == d_class */)
-                s << INDENT << "_flags.polymorphic = true;" << endl;
-
             s << INDENT << "super(nativeId, initFlags);" << endl;
 
             // pointers to native interface objects for classes that implement interfaces
@@ -2569,19 +2566,24 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
             AbstractMetaFunction::Options opts(AbstractMetaFunction::DeclaringClass | AbstractMetaFunction::NoExternNamespace);
 
             // virtual functions
-            s << INDENT << "void*[" << virtualFunctions.size() << "] virt_arr;" << endl;
-            for (int pos = 0; pos<virtualFunctions.size(); ++pos) {
-                const AbstractMetaFunction *function = virtualFunctions.at(pos);
+            int virtuals_index = 0;
+            QString virtuals_init;
+
+            foreach (const AbstractMetaFunction *function, virtualFunctions) {
                 if (!notWrappedYet(function) && d_class == function->declaringClass()) {
                     QString mName = function->marshalledName(opts);
-                    s << INDENT << "virt_arr[" << pos << "] = &qtd_export_" << mName << "_dispatch;" <<endl;
+                    virtuals_init += QString("    virt_arr[%1] = &qtd_export_%2_dispatch;\n").arg(virtuals_index).arg(mName);
+                    virtuals_index++;
                 }
             }
 
-            if (virtualFunctions.size() == 0)
+            if (virtuals_index == 0)
                 initArgs = "null";
-            else
+            else {
+                s << "    void*[" << virtuals_index << "] virt_arr;" << endl;
+                s << virtuals_init;
                 initArgs = "virt_arr.ptr";
+            }
 
             if (d_class->name() == "QObject") {
                 // qt_metacall, metaObject
