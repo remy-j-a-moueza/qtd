@@ -44,14 +44,14 @@ public struct QModelIndex
         return cast(void*)p;
     }
 
-    public final Object object() {
+    public final Object object() const {
         return cast(Object) p;
     }
 
     public final bool isValid() const {
         return __qtd_QModelIndex_isValid(cast(void*)&this);
     }
-    
+
     public final QAbstractItemModel model() {
 //        void* __qt_return_value = __qtd_QModelIndex_model(&this);
         void* __qt_return_value = m;
@@ -80,7 +80,7 @@ public struct QModelIndex
     public final QModelIndex sibling(int row, int column) {
         return __qtd_QModelIndex_sibling_int_int(&this, row, column);
     }
-    
+
     public alias void __isNativeValueType;
 
     struct QTypeInfo
@@ -125,4 +125,3 @@ private extern(C) int  __qtd_QModelIndex_row(void* __this_nativeId);
 private extern(C) QModelIndex  __qtd_QModelIndex_sibling_int_int(void* __this_nativeId,
  int row0,
  int column1);
- 
