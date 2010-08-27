@@ -11,6 +11,17 @@ public import // TODO: import privately
     qtd.String,
     qtd.Core;
 
+template QT_BEGIN_NAMESPACE() {
+}
+
+template QT_END_NAMESPACE() {
+}
+
+template QT_BEGIN_HEADER() {
+}
+
+template QT_END_HEADER() {
+}
 
 string tr(string arg) {
     return arg;
