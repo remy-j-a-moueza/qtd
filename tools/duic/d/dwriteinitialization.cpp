@@ -1413,7 +1413,7 @@ QString  WriteInitialization::writeSizePolicy(const DomSizePolicy *sp)
     const QString spName = m_driver->unique(QLatin1String("sizePolicy"));
     m_sizePolicyNameMap.insert(sizePolicyHandle, spName);
 
-    m_output << m_option.indent << "QSizePolicy " << spName;
+    m_output << m_option.indent << "auto " << spName << " = new QSizePolicy";
     do {
         if (sp->hasElementHSizeType() && sp->hasElementVSizeType()) {
             m_output << "(cast(QSizePolicy.Policy)(" << sp->elementHSizeType()
