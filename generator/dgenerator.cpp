@@ -660,8 +660,10 @@ void DGenerator::writeJavaCallThroughContents(QTextStream &s, const AbstractMeta
         referenceCounts = d_function->referenceCounts(d_function->implementingClass(),
                                                          i == 0 ? -1 : i);
 
-        foreach (ReferenceCount refCount, referenceCounts)
-            writeReferenceCount(s, refCount, i == 0 ? "this" : arguments.at(i-1)->argumentName(), arguments.at(i-1)->type());
+        foreach (ReferenceCount refCount, referenceCounts) {
+			// TODO: What is the correct value to pass as last parameter if (i == 0)?
+            writeReferenceCount(s, refCount, i == 0 ? "this" : arguments.at(i-1)->argumentName(), i == 0 ? 0 : arguments.at(i-1)->type());
+		}
     }
 
     referenceCounts = d_function->referenceCounts(d_function->implementingClass(), 0);

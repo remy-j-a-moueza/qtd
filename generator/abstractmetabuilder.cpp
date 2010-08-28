@@ -1723,7 +1723,7 @@ AbstractMetaType *AbstractMetaBuilder::translateType(const TypeInfo &_typei, boo
             newInfo.setVolatile(typei.isVolatile());
 
             AbstractMetaType *elementType = translateType(newInfo, ok);
-            if (!ok)
+            if (!(*ok))
                 return 0;
 
             for (int i=typeInfo.arrays.size()-1; i>=0; --i) {
