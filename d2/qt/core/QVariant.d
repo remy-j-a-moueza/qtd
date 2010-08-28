@@ -25,7 +25,8 @@ private import qt.core.QRect;
 private import qt.core.QLocale;
 
 import std.string;
-
+import std.traits : isDynamicArray, isStaticArray;
+import std.range : ElementType;
 
 public class QVariant : QtdObject
 {
@@ -90,13 +91,13 @@ public class QVariant : QtdObject
 
 // Functions
 
-    private int getMetaId(T)(string name)
+    static private int getMetaId(T)(string name)
     {
         static shared int sharedId;
         static int id;
         if (id == 0)
         {
-            synchronized(qtdMoLock)
+            synchronized
             {
                 if (sharedId == 0)
                     sharedId = qRegisterMetaType!T(name);
@@ -115,9 +116,9 @@ public class QVariant : QtdObject
             // TODO: Still hacky. No need to pass name to id getter.
             var = new QVariant(getMetaId!T(name), cast(void*)(obj));
         }
-        else static if (isDynamicArrayType!(T) || isStaticArrayType!(T) )
+        else static if (isDynamicArray!(T) || isStaticArray!(T) )
         {
-            string name = typeid(ElementTypeOfArray!(T)).toString ~ "[]";
+            string name = typeid(ElementType!(T)).toString ~ "[]";
             auto darray = new DArrayToC;
             darray.array = obj.dup;
             var = new QVariant(getMetaId!T(name), cast(void*)(darray));
