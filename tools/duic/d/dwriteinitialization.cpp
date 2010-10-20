@@ -172,7 +172,7 @@ namespace {
 
     inline void openIfndef(QTextStream &str, const QString &symbol)  { str << endl << QLatin1String("version(") << symbol << QLatin1String(") {} else {") << endl;  }
     inline void closeIfdef(QTextStream &str, const QString &symbol) { str << QLatin1String("} // ") << symbol << endl << endl; }
-    
+
     const char *accessibilityDefineC = "QT_NO_ACCESSIBILITY";
     const char *toolTipDefineC = "QT_NO_TOOLTIP";
     const char *whatsThisDefineC = "QT_NO_WHATSTHIS";
@@ -1193,7 +1193,7 @@ void WriteInitialization::writeProperties(const QString &varName,
         case DomProperty::Palette: {
             const DomPalette *pal = p->elementPalette();
             const QString paletteName = m_driver->unique(QLatin1String("palette"));
-            m_output << m_option.indent << "QPalette " << paletteName << ";\n";
+            m_output << m_option.indent << "auto " << paletteName << " = new QPalette;\n";
 
             writeColorGroup(pal->elementActive(), QLatin1String("QPalette.Active"), paletteName);
             writeColorGroup(pal->elementInactive(), QLatin1String("QPalette.Inactive"), paletteName);
@@ -1353,7 +1353,7 @@ void WriteInitialization::writeProperties(const QString &varName,
         case DomProperty::Unknown:
             break;
         }
-        
+
         propertyValue = propertyValue.replace("::", "."); // qtd
 
         if (propertyValue.size()) {
@@ -1535,12 +1535,12 @@ QString WriteInitialization::writeIconProperties(const DomResourceIcon *i)
 QString WriteInitialization::domColor2QString(const DomColor *c)
 {
     if (c->hasAttributeAlpha())
-        return QString::fromLatin1("QColor(%1, %2, %3, %4)")
+        return QString::fromLatin1("new QColor(%1, %2, %3, %4)")
             .arg(c->elementRed())
             .arg(c->elementGreen())
             .arg(c->elementBlue())
             .arg(c->attributeAlpha());
-    return QString::fromLatin1("QColor(%1, %2, %3)")
+    return QString::fromLatin1("new QColor(%1, %2, %3)")
         .arg(c->elementRed())
         .arg(c->elementGreen())
         .arg(c->elementBlue());
@@ -1651,17 +1651,17 @@ void WriteInitialization::writeBrush(const DomBrush *brush, const QString &brush
                 << stop->attributePosition() << ", "
                 << domColor2QString(color) << ");\n";
         }
-        m_output << m_option.indent << "QBrush " << brushName << '('
+        m_output << m_option.indent << "auto " << brushName << "= new QBrush("
             << gradientName << ");\n";
     } else if (style == QLatin1String("TexturePattern")) {
         const DomProperty *property = brush->elementTexture();
         const QString iconValue = iconCall(property);
 
-        m_output << m_option.indent << "QBrush " << brushName << " = QBrush("
+        m_output << m_option.indent << "auto " << brushName << " = new QBrush("
             << iconValue << ");\n";
     } else {
         const DomColor *color = brush->elementColor();
-        m_output << m_option.indent << "QBrush " << brushName << '('
+        m_output << m_option.indent << "auto " << brushName << " = new QBrush("
             << domColor2QString(color) << ");\n";
 
         m_output << m_option.indent << brushName << ".setStyle("
