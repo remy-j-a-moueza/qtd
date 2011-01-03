@@ -208,8 +208,7 @@ string signature(T...)(string name)
 string[] getSymbols(C)(string prefix)
 {
     string[] result;
-    auto allSymbols = __traits(derivedMembers, C);
-    foreach(s; allSymbols)
+    foreach(s; __traits(derivedMembers, C))
     {
         if(startsWith(s, prefix))
             result ~= s;
