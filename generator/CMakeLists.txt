@@ -200,6 +200,14 @@ if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}"
 	OR NOT EXISTS ${jambi_inc})
     file(REMOVE ${dgen_build_conf})
     file(REMOVE ${jambi_inc})
+
+	# Explicitly include qglobal.h before all the »master includes« to make
+	# sure Q_CORE_EXPORT and other macros are already defined for all
+	# processed headers. Otherwise, the parser would choke on classes in files
+	# included before "qglobal.h" in <QtCore/QtCore> using one of these macros
+	# (e.g. QXmlStreamReader).
+	file(APPEND ${jambi_inc} "#include <${QT_QTCORE_INCLUDE_DIR}/qglobal.h>")
+
     file(APPEND ${dgen_build_conf} "<typesystem>\n")
     foreach(package_normal ${packages})
     	string(TOLOWER ${package_normal} package)
