@@ -233,7 +233,7 @@ mark_as_advanced(d_inc_file_found)
 set(d_inc_file_found 1)
 
 foreach(path ${QT_INCLUDES})
-    set(inc_paths_tmp ${path}${sep})
+    set(inc_paths_tmp ${path}${sep}${inc_paths_tmp})
 endforeach()
 set(inc_paths ${inc_paths}${sep}${inc_paths_tmp})
 
