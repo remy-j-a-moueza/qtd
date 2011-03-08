@@ -206,7 +206,7 @@ if(	NOT "${packages_in_build_txt}" STREQUAL "${packages}"
 	# processed headers. Otherwise, the parser would choke on classes in files
 	# included before "qglobal.h" in <QtCore/QtCore> using one of these macros
 	# (e.g. QXmlStreamReader).
-	file(APPEND ${jambi_inc} "#include <${QT_QTCORE_INCLUDE_DIR}/qglobal.h>")
+	file(APPEND ${jambi_inc} "#include <${QT_QTCORE_INCLUDE_DIR}/qglobal.h>\n")
 
     file(APPEND ${dgen_build_conf} "<typesystem>\n")
     foreach(package_normal ${packages})
