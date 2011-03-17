@@ -34,13 +34,13 @@ class QMetaMethod : MetaBase
         this.signature = signature;
         this.index = index;
 
-        int openBracket = indexOf(signature, '(');
+        auto openBracket = indexOf(signature, '(');
         name = signature[0..openBracket];
     }
 
     string args() const
     {
-        int openBracket = indexOf(signature, '(');
+        auto openBracket = indexOf(signature, '(');
         if(signature.length - openBracket - 2 > 0)
             return signature[openBracket + 1 .. $-1];
         else

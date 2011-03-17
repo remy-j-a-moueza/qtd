@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 PROJECT(qtd CXX C)
 
-# Everything is in 32-bit mode for now.
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m32)
-
 # Debug and release flags.
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)

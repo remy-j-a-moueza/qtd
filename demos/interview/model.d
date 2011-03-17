@@ -178,7 +178,7 @@ class Model : QAbstractItemModel
     int row(Node node) const
     {
         auto v = node.parent !is null ? node.parent.children : tree;
-        return find(v, node);
+        return cast(int)find(v, node);
     }
 
 

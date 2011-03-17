@@ -91,7 +91,7 @@ string qtDeclArg(T)()
     Generates C++-to-D conversion code for the
     argument argIndex.
  */
-string generateConvToD(uint argIndex)
+string generateConvToD(size_t argIndex)
 {
     string res = format_ctfe(q{
 

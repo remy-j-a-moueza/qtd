@@ -209,7 +209,7 @@ class QCoreApplication___ extends QCoreApplication {
 //        if (m_instance != null)
 //            throw new RuntimeException("QCoreApplication can only be initialized once");
 
-		argc = args.length;
+		argc = cast(int) args.length;
 		argv = toStringzArray(args);
 		this(&argc, argv);
 
@@ -235,7 +235,7 @@ class QCoreApplication___ extends QCoreApplication {
 
 class QTranslator___ extends QTranslator {
    	public final bool load(ubyte[] data) {
-        return load(data.ptr, data.length);
+        return load(data.ptr, cast(int)data.length);
     }
 }// class
 
@@ -590,7 +590,7 @@ class QBuffer___ extends QBuffer {
     }
 
     public final void setData(byte data[]) {
-        setData(cast(char*)data.ptr, data.length);
+        setData(cast(char*)data.ptr, cast(int)data.length);
     }
 
 }// class

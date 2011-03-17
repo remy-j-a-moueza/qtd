@@ -85,7 +85,7 @@ private int grow(int size)
 {
     // dear compiler: don't optimize me out.
 //    synchronized {
-        int x = qAllocMore(size * (void*).sizeof, QListData.DataHeaderSize) / (void*).sizeof;
+        int x = cast(int) (qAllocMore(cast(int)(size * (void*).sizeof), QListData.DataHeaderSize) / (void*).sizeof);
         return x;
 //    }
 }
@@ -303,7 +303,7 @@ private:
     void **erase(void **xi)
     {
 //        Q_ASSERT(d.ref_ == 1);
-        int i = xi - (d.array.ptr + d.begin);
+        int i = cast(int)(xi - (d.array.ptr + d.begin));
         remove(i);
         return d.array.ptr + d.begin + i;
     }

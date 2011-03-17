@@ -40,7 +40,7 @@ string[] defaultValues(string signature)
     bool inDefaultValue = false;
     bool inStringLiteral = false;
     string[] res;
-    int startValue = 0;
+    sizediff_t startValue = 0;
 
     if(strip(signature).length == 0)
         return res;

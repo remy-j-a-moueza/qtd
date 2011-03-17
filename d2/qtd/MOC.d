@@ -20,11 +20,11 @@ private:
 /**
    Utils.
  */
-int lastIndexOf(T)(T[] haystack, T[] needle, int from = -1)
+sizediff_t lastIndexOf(T)(T[] haystack, T[] needle, sizediff_t from = -1)
 {
     auto l = haystack.length;
     auto ol = needle.length;
-    int delta = l - ol;
+    auto delta = l - ol;
     if (from < 0)
         from = delta;
     if (from < 0 || from > l)
@@ -41,7 +41,7 @@ int lastIndexOf(T)(T[] haystack, T[] needle, int from = -1)
     return -1;
 }
 
-string replicate(int n, char value)
+string replicate(size_t n, char value)
 {
     char[] ret = "".dup;
     if (n > 0)
@@ -144,11 +144,11 @@ struct Generator
 
 
 
-int lengthOfEscapeSequence(string s, uint i)
+int lengthOfEscapeSequence(string s, size_t i)
 {
     if (s[i] != '\\' || i >= s.length - 1)
         return 1;
-    const int startPos = i;
+    const startPos = i;
     ++i;
     auto ch = s[i];
     if (ch == 'x') {
@@ -164,7 +164,7 @@ int lengthOfEscapeSequence(string s, uint i)
     } else { // single character escape sequence
         i = qMin(i + 1, s.length);
     }
-    return i - startPos;
+    return cast(int)(i - startPos);
 }
 
 int strreg(ref Generator gen, string s)
@@ -274,7 +274,7 @@ string generateCode(ref Generator gen)
     gen.output ~= format_ctfe("    ${}, ${}, // classinfo\n", gen.cdef.classInfoList.length, gen.cdef.classInfoList.length ? index : 0);
     index += gen.cdef.classInfoList.length * 2;
 
-    int methodCount = gen.cdef.signalList.length + gen.cdef.slotList.length;// + cdef->methodList.count();
+    auto methodCount = gen.cdef.signalList.length + gen.cdef.slotList.length;// + cdef->methodList.count();
     gen.output ~= format_ctfe("    ${}, ${}, // methods\n", methodCount, methodCount ? index : 0);
     index += methodCount * 5;
     gen.output ~= format_ctfe("    ${}, ${}, // properties\n", propertyList.length, propertyList.length ? index : 0);
@@ -337,7 +337,7 @@ string generateCode(ref Generator gen)
     gen.output ~= "private static immutable char[] qt_meta_stringdata = \n";
     gen.output ~= format_ctfe("    \"");
     int col = 0;
-    int len = 0;
+    sizediff_t len = 0;
     foreach (i, s; gen.strings) {
         len = s.length;
         if (col && col + len >= 72) {
@@ -353,12 +353,12 @@ string generateCode(ref Generator gen)
                 col = 0;
                 gen.output ~= format_ctfe("\"\n    \"");
             }
-            int spanLen = qMin(cast(uint)70, s.length - idx);
+            sizediff_t spanLen = qMin(cast(size_t)70, s.length - idx);
             // don't cut escape sequences at the end of a line
-            int backSlashPos = s.lastIndexOf("\\", idx + spanLen - 1);
+            auto backSlashPos = s.lastIndexOf("\\", idx + spanLen - 1);
             if (backSlashPos >= idx) {
-                int escapeLen = lengthOfEscapeSequence(s, backSlashPos);
-                spanLen = qBound(spanLen, backSlashPos + escapeLen - idx, cast(int)(s.length - idx));
+                auto escapeLen = lengthOfEscapeSequence(s, backSlashPos);
+                spanLen = qBound(spanLen, backSlashPos + escapeLen - idx, cast(sizediff_t)(s.length - idx));
             }
             gen.output ~= s[idx..idx+spanLen];
             idx += spanLen;
