@@ -31,7 +31,7 @@ template MetaTypeOps(T)
 {
     static void* construct(void* copy)
     {
-        auto T* p = cast(T*)GC.malloc(T.sizeof);
+        T* p = cast(T*)GC.malloc(T.sizeof);
         if (!p)
             onOutOfMemoryError();
 
