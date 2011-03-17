@@ -44,7 +44,7 @@ if (DC)
     endif(dmd_version)
     message(STATUS "D compiler found -- ${D_COMPILER_NAME} v${D_VERSION}.${D_FRONTEND}")
 else (DC)
-    message(FATAL_ERROR "D compliler is not found")
+    message(FATAL_ERROR "D compiler is not found")
 endif (DC)
 
 ## Get D compiler path.
