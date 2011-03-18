@@ -145,6 +145,14 @@ class QObject___ extends QObject {
     {
         QMetaObject.connectImpl(sender, signal, receiver, method, type);
     }
+
+    public final QVariant property(string name) {
+        return property(name is null? null : toStringz(name));
+    }
+
+    public final bool setProperty(string name, QVariant value) {
+        return setProperty(name is null? null : toStringz(name), value);
+    }
 }// class
 
 abstract class QAbstractItemModel___ extends QAbstractItemModel {
