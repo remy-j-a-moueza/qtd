@@ -63,6 +63,6 @@ int main(string[] args)
 	if (translator.load(translatorFileName, QLibraryInfo.location(QLibraryInfo.TranslationsPath)))
 		app.installTranslator(translator);
 
-	auto dialog = new Dialog;
+	scope dialog = new Dialog;
 	return dialog.exec();
 }
