@@ -117,7 +117,7 @@ private: // slots
 
         rotableWidgets = rotableWidgets[1..$] ~ rotableWidgets[0];
 
-        int n = rotableWidgets.length;
+        auto n = rotableWidgets.length;
         for (int i = 0; i < n / 2; ++i) {
             rotableLayout.addWidget(rotableWidgets[n - i - 1], 0, i);
             rotableLayout.addWidget(rotableWidgets[i], 1, i);
@@ -146,7 +146,7 @@ private:
         rotableWidgets ~= a2;
         rotableWidgets ~= a3;
 
-        int n = rotableWidgets.length;
+        auto n = rotableWidgets.length;
 
         for (int i = 0; i < n; ++i)
             connect(rotableWidgets[i], "valueChanged", rotableWidgets[(i + 1) % n], "setValue");

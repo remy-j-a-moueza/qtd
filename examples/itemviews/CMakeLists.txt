@@ -1,2 +1,2 @@
- add_subdirectory(dirview)
+add_subdirectory(dirview)
 add_subdirectory(customsortfiltermodel)

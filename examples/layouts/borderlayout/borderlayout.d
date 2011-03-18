@@ -104,7 +104,7 @@ override
 
     int count() const
     {
-        return list.length;
+        return cast(int)list.length;
     }
 
     IQLayoutItem itemAt(int index) const
