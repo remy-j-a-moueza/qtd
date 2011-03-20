@@ -312,6 +312,14 @@ class QImage___ extends QImage {
     public this(string fileName, string format = null) {
         this(fileName, format == null ? null : toStringz(format));
     }
+
+    public final bool save(string fileName, string format, int quality = -1) {
+        return private_save(fileName, toStringz(format), quality);
+    }
+
+    public final bool save(QIODevice dev, string format, int quality = -1) {
+        return private_save(dev, toStringz(format), quality);
+    }
 }// class
 
 class QPen___ extends QPen {
