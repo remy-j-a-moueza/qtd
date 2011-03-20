@@ -1408,12 +1408,6 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
                 <remove-default-expression/>
             </modify-argument>
         </modify-function>
-        <inject-code>
-            <insert-template name="gui.pixmap_save">
-                <replace from="%INPUT_TYPE" to="qt.core.QIODevice"/>
-                <replace from="%INPUT_NAME" to="dev"/>
-            </insert-template>
-        </inject-code>
 
         <modify-function signature="save(const QString &amp;, const char *, int) const">
             <access modifier="private"/>
@@ -1425,12 +1419,6 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
                 <remove-default-expression/>
             </modify-argument>
         </modify-function>
-        <inject-code>
-            <insert-template name="gui.pixmap_save">
-                <replace from="%INPUT_TYPE" to="String"/>
-                <replace from="%INPUT_NAME" to="fileName"/>
-            </insert-template>
-        </inject-code>
 
         <modify-function signature="QPixmap(QString,const char*,QFlags&lt;Qt::ImageConversionFlag&gt;)">
             <access modifier="private"/>
@@ -1770,12 +1758,6 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
         <inject-code>
             <import-file name="typesystem_gui-java.java" quote-after-line="class QImage___" quote-before-line="}// class"/>
         </inject-code>
-        <inject-code>
-            <insert-template name="gui.pixmap_save">
-                <replace from="%INPUT_TYPE" to="String"/>
-                <replace from="%INPUT_NAME" to="fileName"/>
-            </insert-template>
-        </inject-code>
 
         <modify-function signature="save(QIODevice *, const char *, int) const">
             <access modifier="private"/>
@@ -1787,12 +1769,6 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
                 <remove-default-expression/>
             </modify-argument>
         </modify-function>
-        <inject-code>
-            <insert-template name="gui.pixmap_save">
-                <replace from="%INPUT_TYPE" to="qt.core.QIODevice"/>
-                <replace from="%INPUT_NAME" to="dev"/>
-            </insert-template>
-        </inject-code>
 
         <template name="gui.image_load">
         public final boolean %FUNCTION_NAME(%ARGUMENT_TYPE %ARGUMENT_NAME, String format) {
@@ -2025,7 +2001,7 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
 
         <template name="gui.fontmetricsf_boundingrect">
             <insert-template name="gui.fontmetrics_tabarray_function">
-                <replace from="%RETURN_TYPE" to="qt.core.QRectF"/>
+                <replace from="%RETURN_TYPE" to="QRectF"/>
                 <replace from="%FUNCTION_NAME" to="boundingRect"/>
                 <replace from="%RECT_ARGUMENTS" to="%RECT_ARGUMENTS, "/>
                 <replace from="%RECT_CALL_ARGUMENTS" to="%RECT_CALL_ARGUMENTS, "/>
@@ -2034,14 +2010,14 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
 
         <inject-code>
             <insert-template name="gui.fontmetricsf_boundingrect">
-                <replace from="%RECT_ARGUMENTS" to="qt.core.QRectF rect"/>
+                <replace from="%RECT_ARGUMENTS" to="QRectF rect"/>
                 <replace from="%RECT_CALL_ARGUMENTS" to="rect"/>
             </insert-template>
         </inject-code>
 
         <inject-code>
             <insert-template name="gui.fontmetrics_tabarray_function">
-                <replace from="%RETURN_TYPE" to="qt.core.QSizeF"/>
+                <replace from="%RETURN_TYPE" to="QSizeF"/>
                 <replace from="%FUNCTION_NAME" to="size"/>
                 <replace from="%RECT_ARGUMENTS" to=""/>
                 <replace from="%RECT_CALL_ARGUMENTS" to=""/>
@@ -2096,29 +2072,22 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
         </modify-argument>
     </modify-function>
 
- <!--
-        <template name="gui.fontmetrics_tabarray_function">
-        public final %RETURN_TYPE %FUNCTION_NAME(%RECT_ARGUMENTSint flags, String text, int tabStops, int tabArray[]) {
-            QNativePointer np = tabArray == null ? null : new QNativePointer(QNativePointer.Type.Int, tabArray.length + 1);
-            if (np != null) {
-                for (int i=0; i&lt;tabArray.length; ++i) np.setIntAt(i, tabArray[i]);
-                np.setIntAt(tabArray.length, 0);
+    <template name="gui.fontmetrics_tabarray_function">
+        public final %RETURN_TYPE %FUNCTION_NAME(%RECT_ARGUMENTSint flags, string text, int tabStops = 0, int[] tabArray = null) {
+            int* ptr;
+            if (tabArray != null) {
+                auto copy = new int[tabArray.length + 1];
+                copy[0..tabArray.length] = tabArray;
+                copy[tabArray.length] = 0;
+                ptr = copy.ptr;
             }
-            return %FUNCTION_NAME(%RECT_CALL_ARGUMENTSflags, text, tabStops, np);
-        }
-
-        public final %RETURN_TYPE %FUNCTION_NAME(%RECT_ARGUMENTSint flags, String text, int tabStops) {
-            return %FUNCTION_NAME(%RECT_CALL_ARGUMENTSflags, text, tabStops, (int []) null);
-        }
-
-        public final %RETURN_TYPE %FUNCTION_NAME(%RECT_ARGUMENTSint flags, String text) {
-            return %FUNCTION_NAME(%RECT_CALL_ARGUMENTSflags, text, 0);
+            return %FUNCTION_NAME(%RECT_CALL_ARGUMENTSflags, text, tabStops, ptr);
         }
         </template>
 
         <template name="gui.fontmetrics_boundingrect">
             <insert-template name="gui.fontmetrics_tabarray_function">
-                <replace from="%RETURN_TYPE" to="qt.core.QRect"/>
+                <replace from="%RETURN_TYPE" to="QRect"/>
                 <replace from="%FUNCTION_NAME" to="boundingRect"/>
                 <replace from="%RECT_ARGUMENTS" to="%RECT_ARGUMENTS, "/>
                 <replace from="%RECT_CALL_ARGUMENTS" to="%RECT_CALL_ARGUMENTS, "/>
@@ -2134,19 +2103,19 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
 
         <inject-code>
             <insert-template name="gui.fontmetrics_boundingrect">
-                <replace from="%RECT_ARGUMENTS" to="qt.core.QRect rect"/>
+                <replace from="%RECT_ARGUMENTS" to="QRect rect"/>
                 <replace from="%RECT_CALL_ARGUMENTS" to="rect"/>
             </insert-template>
         </inject-code>
 
         <inject-code>
             <insert-template name="gui.fontmetrics_tabarray_function">
-                <replace from="%RETURN_TYPE" to="qt.core.QSize"/>
+                <replace from="%RETURN_TYPE" to="QSize"/>
                 <replace from="%FUNCTION_NAME" to="size"/>
                 <replace from="%RECT_ARGUMENTS" to=""/>
                 <replace from="%RECT_CALL_ARGUMENTS" to=""/>
             </insert-template>
-        </inject-code>-->
+        </inject-code>
     </value-type>
 
   <value-type name="QGradient" force-abstract="yes" polymorphic-base="yes" polymorphic-id-expression="%1-&gt;type() == QGradient::NoGradient">
