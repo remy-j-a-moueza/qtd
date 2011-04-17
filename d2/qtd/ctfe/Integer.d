@@ -149,19 +149,20 @@ private
 
 version( Unittest )
 {
+    import std.conv : octal;
     static assert( format_ctfe(0) == "0", "got: " ~ format_ctfe(0) );
     static assert( format_ctfe(1) == "1" );
     static assert( format_ctfe(-1) == "-1" );
     static assert( format_ctfe(42) == "42" );
     static assert( format_ctfe(0xf00, 16) == "f00" );
-    static assert( format_ctfe(0123, 8) == "123" );
+    static assert( format_ctfe(octal!123, 8) == "123" );
     
     static assert( parse_ctfe!(long)("0") == 0 );
     static assert( parse_ctfe!(long)("1") == 1 );
     static assert( parse_ctfe!(long)("-1") == -1 );
     static assert( parse_ctfe!(long)("42") == 42 );
     static assert( parse_ctfe!(long)("f00", false, 16) == 0xf00 );
-    static assert( parse_ctfe!(long)("123", false, 8) == 0123 );
+    static assert( parse_ctfe!(long)("123", false, 8) == octal!123 );
     static assert( parse_ctfe!(long)("123ax", true) == 3 );
     static assert( parse_ctfe!(long)("123ax", true, 16) == 4 );
     
