@@ -2073,7 +2073,7 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
     </modify-function>
 
     <template name="gui.fontmetrics_tabarray_function">
-        public final %RETURN_TYPE %FUNCTION_NAME(%RECT_ARGUMENTSint flags, string text, int tabStops = 0, int[] tabArray = null) {
+        public final %RETURN_TYPE %FUNCTION_NAME(%RECT_ARGUMENTSint flags, string text, int tabStops = 0, in int[] tabArray = null) {
             int* ptr;
             if (tabArray != null) {
                 auto copy = new int[tabArray.length + 1];
