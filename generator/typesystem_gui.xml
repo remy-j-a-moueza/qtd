@@ -5754,7 +5754,32 @@ QTD_EXTERN QTD_EXPORT void qtd_QPolygonF_insert_int_int_QPointF
         </modify-function>
 -->
 
+    <!-- passing QRect by value to the native qtd_QWidget_setGeometry_QRect does not work well, so a QRect pointer instead -->
+    <modify-function signature="setGeometry(const QRect &amp;)" remove="all"/>
 
+    <inject-code class="java">
+    public final void setGeometry(QRect arg__1) {
+        qtd_QWidget_setGeometry_QRect(qtdNativeId, &amp;arg__1);
+    }
+    </inject-code>
+
+    <inject-code class="java-free">
+private extern(C) void  qtd_QWidget_setGeometry_QRect(void* __this_nativeId,
+ QRect* arg__1);	
+    </inject-code>
+
+    <inject-code class="native">
+// QWidget::setGeometry(const QRect &amp; arg__1)
+QTD_EXTERN QTD_EXPORT void qtd_QWidget_setGeometry_QRect
+(void* __this_nativeId,
+ QRect* arg__1)
+{
+	QRect arg1 = *arg__1;
+    QWidget_QtDShell *__qt_this = (QWidget_QtDShell *) __this_nativeId;
+    __qt_this->setGeometry((const QRect&amp; )arg1);
+
+}
+    </inject-code>
 
     </object-type>
 
