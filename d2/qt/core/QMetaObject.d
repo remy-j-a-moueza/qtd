@@ -186,7 +186,7 @@ final class QMetaObject : QtdMetaClass
     @property
     override This base()
     {
-        return super.base;
+        return static_cast!This(super.base);
     }
 
     /**
