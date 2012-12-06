@@ -180,10 +180,10 @@ struct GLUnurbs {}
 struct GLUquadric {}
 struct GLUtesselator {}
 
-typedef GLUnurbs GLUnurbsObj;
-typedef GLUquadric GLUquadricObj;
-typedef GLUtesselator GLUtesselatorObj;
-typedef GLUtesselator GLUtriangulatorObj;
+alias GLUnurbs GLUnurbsObj;
+alias GLUquadric GLUquadricObj;
+alias GLUtesselator GLUtesselatorObj;
+alias GLUtesselator GLUtriangulatorObj;
 
 extern(System)
 {
