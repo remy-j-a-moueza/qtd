@@ -2423,12 +2423,22 @@ void WriteInitialization::acceptConnection(DomConnection *connection)
     QRegExp excl_brackets("\\((.*)\\)");
     QString stripped_signal = connection->elementSignal().remove(excl_brackets);
     QString stripped_slot = connection->elementSlot().remove(excl_brackets);
+
+#ifdef DQT_UIC_D_1_GENERATOR
     m_output << m_option.indent
         << sender
         << "." << stripped_signal
         << ".connect"
         << "(&" << receiver << "."
         << stripped_slot << ");\n";
+#else
+    m_output << m_option.indent
+        << "QObject.connect"
+        << "(" << sender
+        << ", \"" << stripped_signal << "\""
+        << ", " << receiver << ", "
+        << "\"" << stripped_slot << "\");\n";
+#endif
 }
 
 DomImage *WriteInitialization::findImage(const QString &name) const
