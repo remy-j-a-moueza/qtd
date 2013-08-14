@@ -794,7 +794,7 @@ public:
     // returns true if this class or its base classes have a
     // virtual destructor
     bool hasVirtualDestructor() const { return m_has_virtual_destructor
-        || m_base_class && m_base_class->hasVirtualDestructor(); }
+        || (m_base_class && m_base_class->hasVirtualDestructor()); }
 
     const AbstractMetaClass* destructorBase() const
     {
