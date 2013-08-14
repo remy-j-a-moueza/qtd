@@ -834,7 +834,7 @@ public:
         return false;
     }
 
-    bool setHasVirtualDestructor(bool value) { m_has_virtual_destructor = value; }
+    void setHasVirtualDestructor(bool value) { m_has_virtual_destructor = value; }
 
     QList<TypeEntry *> templateArguments() const { return m_template_args; }
     void setTemplateArguments(const QList<TypeEntry *> &args) { m_template_args = args; }
