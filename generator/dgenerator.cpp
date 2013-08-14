@@ -3237,7 +3237,7 @@ void DGenerator::writeFunctionAttributes(QTextStream &s, const AbstractMetaFunct
                                             uint included_attributes, uint excluded_attributes,
                                             uint options)
 {
-    uint attr = d_function->attributes() & (~excluded_attributes) | included_attributes;
+    uint attr = (d_function->attributes() & (~excluded_attributes)) | included_attributes;
 
     if ((attr & AbstractMetaAttributes::Public) || (attr & AbstractMetaAttributes::Protected)) {
 
