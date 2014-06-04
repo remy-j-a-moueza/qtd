@@ -10,7 +10,7 @@ public import qt.core.QDataStream;
 
 public struct QRectF
 {
-    public static QRectF opCall()
+    public static @property QRectF init()
     {
         QRectF rt;
         rt.xp = rt.yp = 0.;

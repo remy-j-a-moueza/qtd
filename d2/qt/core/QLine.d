@@ -8,7 +8,7 @@ public import qt.core.QDataStream;
 
 public struct QLine
 {
-    public static QLine opCall() {
+    public static @property QLine init() {
         QLine ln;
         ln.pt1 = QPoint();
         ln.pt2 = QPoint();
@@ -78,7 +78,8 @@ public struct QLine
 
     void translate(int adx, int ady)
     {
-        translate(QPoint(adx, ady));
+        auto pt = QPoint(adx, ady);
+        translate(pt);
     }
 
     QLine translated(ref QPoint p) // const
@@ -88,7 +89,8 @@ public struct QLine
 
     QLine translated(int adx, int ady) // const
     {
-        return translated(QPoint(adx, ady));
+        auto pt = QPoint(adx, ady);
+        return translated(pt);
     }
 
     void p1(ref QPoint aP1)
@@ -167,7 +169,7 @@ public struct QLineF
     alias QLineF_IntersectType.BoundedIntersection BoundedIntersection;
     alias QLineF_IntersectType.UnboundedIntersection UnboundedIntersection;
 
-    public static QLineF opCall() {
+    public static @property QLineF init() {
         QLineF ln;
         ln.pt1 = QPointF();
         ln.pt2 = QPointF();
@@ -236,7 +238,8 @@ public struct QLineF
 
     QLineF normalVector() // const
     {
-        return QLineF(p1(), p1() + QPointF(dy(), -dx()));
+        auto delta = QPointF(dy(), -dx());
+        return QLineF(p1(), p1() + delta);
     }
 
     void translate(ref QPointF point)
@@ -247,7 +250,8 @@ public struct QLineF
 
     void translate(qreal adx, qreal ady)
     {
-        this.translate(QPointF(adx, ady));
+        auto pt = QPointF(adx, ady);
+        this.translate(pt);
     }
 
     QLineF translated(ref QPointF p) // const
@@ -257,7 +261,8 @@ public struct QLineF
 
     QLineF translated(qreal adx, qreal ady) // const
     {
-        return translated(QPointF(adx, ady));
+        auto pt = QPointF(adx, ady);
+        return translated(pt);
     }
 
     void setLength(qreal len)

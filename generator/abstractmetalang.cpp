@@ -783,6 +783,53 @@ QString AbstractMetaFunction::targetLangSignature(bool minimal) const
 }
 
 
+
+bool AbstractMetaFunction::shouldOverride () const {
+    const AbstractMetaClass * klass, * baseClass;
+
+    std::cout << "\n[DEBUG] shouldOverride in " << name().constData() << " " << minimalSignature().constData() << "\n";
+    
+    klass = ownerClass();
+    if (! klass) {
+        std::cout << "[DEBUG] no class: return false" << "\n";
+        return false;
+    }
+
+    std::cout << "[DEBUG] class is: " << klass->name().constData() << "\n";
+
+    baseClass = klass->baseClass();
+    if (! baseClass) {
+        std::cout << "[DEBUG] no base class : return false" << "\n";
+        return false;
+    }
+    std::cout << "[DEBUG] base class is: " << baseClass->name().toUtf8().constData() << "\n";
+
+    foreach (AbstractMetaFunction *f, baseClass->publicOverrideFunctions()) {
+        if (!f->isEmptyFunction() 
+        &&  (f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar) {
+
+            std::cout << "[DEBUG] publicOverrideFunctions: return true" << "\n";
+            return true;
+        }
+    }
+    foreach (AbstractMetaFunction *f, baseClass->virtualOverrideFunctions()) {
+        if (!f->isEmptyFunction()
+        &&  (f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+             == AbstractMetaFunction::PrettySimilar) {
+            
+            std::cout << "[DEBUG] virtualOverrideFunctions: return true" << "\n";
+            return true;
+        }
+    }
+    //foreach (AbstractMetaFunction *f, klass->virtualFunctions()) {
+    //    if ((f->compareTo(this) & AbstractMetaFunction::EqualName) == AbstractMetaFunction::EqualName)
+    //        return true;
+    //}
+    std::cout << "[DEBUG] this is the end: return false" << "\n";
+    return false;
+}
+
 bool function_sorter(AbstractMetaFunction *a, AbstractMetaFunction *b)
 {
     return a->signature() < b->signature();

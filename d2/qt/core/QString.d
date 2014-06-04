@@ -13,7 +13,7 @@ else
 
 struct QString
 {
-    public static QString opCall()
+    public static @property QString init()
     {
         QString str;
         qtd_QString_placed_ctor(&str);

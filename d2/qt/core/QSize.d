@@ -14,7 +14,7 @@ public struct QSize
     { wd = w; ht = h; }
 */
 
-    public static QSize opCall() {
+    public static @property init() {
     	QSize sz;
     	sz.wd = sz.ht = -1;
     	return sz;
@@ -59,7 +59,7 @@ public struct QSize
 	}
 
     void scale(int w, int h, Qt.AspectRatioMode mode) {
-    	scale(QSize(w, h), mode);
+    	scale(w, h, mode);
     }
     
     void scale(ref QSize s, Qt.AspectRatioMode mode) {

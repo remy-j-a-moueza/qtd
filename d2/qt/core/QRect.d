@@ -9,7 +9,7 @@ public import qt.core.QPoint;
 
 public struct QRect
 {
-    public static QRect opCall() {
+    public static @property QRect init() {
         QRect rt;
         rt.x1 = rt.y1 = 0;
         rt.x2 = rt.y2 = -1;

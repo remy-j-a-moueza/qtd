@@ -9,7 +9,7 @@ public struct QPoint
 {
 
 // Functions
-    public static QPoint opCall() {
+    public static @property QPoint init() {
         QPoint pt;
         pt.xp = pt.yp = 0;
         return pt;
@@ -123,7 +123,7 @@ private:
 
 public struct QPointF
 {
-    public static QPointF opCall() {
+    public static @property QPointF init() {
         QPointF pt;
         pt.xp = pt.yp = 0;
         return pt;

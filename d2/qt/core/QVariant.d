@@ -577,6 +577,7 @@ public class QVariant : QtdObject
         return qtd_QVariant_toSizeF(qtdNativeId);
     }
 
+    override
     public final string toString() {
         string res;
         qtd_QVariant_toString(qtdNativeId, &res);

@@ -97,8 +97,10 @@ void DGenerator::writeFieldAccessors(QTextStream &s, const AbstractMetaField *fi
                 .arg(declaringClass->name()).arg(setter->name()).arg(field->name());
             ReportHandler::warning(warning);
         } else {
-            if (!notWrappedYet(setter)) // qtd2
+            if (!notWrappedYet(setter)) { // qtd2
+                if (setter->shouldOverride()) s << INDENT << "override ";
                 writeFunction(s, setter);
+            }
         }
     }
 
@@ -111,8 +113,10 @@ void DGenerator::writeFieldAccessors(QTextStream &s, const AbstractMetaField *fi
                 .arg(declaringClass->name()).arg(getter->name()).arg(field->name());
             ReportHandler::warning(warning);
         } else {
-            if (!notWrappedYet(getter)) // qtd2
+            if (!notWrappedYet(getter)) { // qtd2
+                if (getter->shouldOverride()) s << INDENT << "override ";
                 writeFunction(s, getter);
+            }
         }
     }
 }
@@ -1736,10 +1740,11 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
 
 void DGenerator::writeOwnershipSetter(QTextStream &s, const AbstractMetaClass *d_class)
 {
+    
     if (d_class->isInterface())
         s << INDENT << "void qtdSetOwnership(QtdObjectOwnership own) const;";
     else if (!d_class->isNamespace()) // COMPILER BUG:
-        s << INDENT << "void qtdSetOwnership(QtdObjectOwnership own) const { super.qtdSetOwnership(own); }";
+        s << INDENT << "override void qtdSetOwnership(QtdObjectOwnership own) const { super.qtdSetOwnership(own); }";
 }
 
 void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_class)
@@ -2222,6 +2227,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
 */
 
     // Signals
+    s << "// Signals" << endl;
+    
     if (d_class->isQObject())
     {
         AbstractMetaFunctionList signal_funcs = signalFunctions(d_class, false);
@@ -2230,8 +2237,12 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         foreach (AbstractMetaFunction *signal, signal_funcs)
         {
             writeSignal(s, signal);
-            if(!signal->isPrivate())
+            if(!signal->isPrivate()) {
+                if (signal->shouldOverride()) { 
+                    s << INDENT << "override "; 
+                }
                 writeFunction(s, signal);
+            }
         }
     }
 
@@ -2259,7 +2270,8 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         AbstractMetaFunction *function = d_funcs_gen.at(i);
 //        if(function->isSlot())
 //            writeSlot(s, function);
-          writeFunction(s, function);
+        if (function->shouldOverride()) s << INDENT << "override "; 
+        writeFunction(s, function);
 // qtd       s << function->minimalSignature() << endl;
     }
     if(d_class->isInterface())
@@ -2446,8 +2458,9 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                 retrieveModifications(d_function, d_class, &exclude_attributes, &include_attributes);
                 if (notWrappedYet(d_function))
                     continue;
-                s << endl
-                  << INDENT << "override ";
+                s << endl;
+
+                s << "override "; 
                 writeFunctionAttributes(s, d_function, include_attributes, exclude_attributes,
                                         d_function->isNormal() || d_function->isSignal() ? 0 : SkipReturnType);
 
@@ -2750,12 +2763,17 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
     QString concrete_name = d_class->isAbstract() ? d_class->name() + "_ConcreteWrapper" : d_class->name();
 
     if (!d_class->isFinal()) {
-        s << "    int qt_metacall(MetaCall _c, int _id, void **_a) {" << endl
+        s << "    ";
+
+        if (d_class->name() != "QObject")
+            s << "override "; 
+
+        s << "int qt_metacall(MetaCall _c, int _id, void **_a) {" << endl
           << "        return qtd_" << d_class->name() << "_qt_metacall(qtdNativeId, _c, _id, _a);" << endl
           << "    }" << endl << endl;
     }
 
-    s << "    @property QMetaObject metaObject() {" << endl
+    s << "    override @property QMetaObject metaObject() {" << endl
       << "        return staticMetaObject;" << endl
       << "    }" << endl << endl
 
@@ -2892,8 +2910,16 @@ void DGenerator::writeNativeField(QTextStream &s, const AbstractMetaField *field
 void DGenerator::writeSignalSignatures(QTextStream &s, const AbstractMetaClass *d_class, AbstractMetaFunctionList signal_funcs)
 {
     writeMetaMethodSignatures(s, "__signalSignatures", signal_funcs);
+    
+    s << INDENT;
 
-    s << INDENT << "int signalSignature(int signalId, ref stringz signature) {" << endl;
+    AbstractMetaClass * parent = d_class->baseClass();
+
+    if (d_class->name() != "QObject") {
+        s << "override ";
+    }
+
+    s << "int signalSignature(int signalId, ref stringz signature) {" << endl;
     {
         Indentation indent(INDENT);
 
@@ -3314,6 +3340,7 @@ void DGenerator::writeFunctionAttributes(QTextStream &s, const AbstractMetaFunct
         if (resettableObject && !m_resettable_object_functions.contains(d_function))
             m_resettable_object_functions.append(d_function);
     }
+
 
     if ((options & SkipAttributes) == 0) {
         if (d_function->isEmptyFunction()

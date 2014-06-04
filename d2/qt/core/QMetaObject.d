@@ -191,6 +191,7 @@ final class QMetaObject : QtdMetaClass
 
     /**
      */
+    override
     @property
     QMetaObjectNative* nativeId()
     {

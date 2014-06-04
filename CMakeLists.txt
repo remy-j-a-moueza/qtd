@@ -217,6 +217,14 @@ set(DUIC ${CMAKE_BINARY_DIR}/tools/duic/duic CACHE INTERNAL "")
 set(QTD_IMPORT_PATH ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/d${D_VERSION} CACHE INTERNAL "")
 set(QTD_LIBRARIES_PATH ${CMAKE_BINARY_DIR}/lib CACHE INTERNAL "")
 
+
+# Issue #15
+# error: taking address of temporary [-fpermissive]
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+
+# Show what is executed to understand the generator.
+set(CMAKE_VERBOSE_MAKEFILE on)
+
 ##--------------------------------------------
 ## Macros and functions.
 ##--------------------------------------------
