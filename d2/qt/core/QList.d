@@ -318,7 +318,9 @@ private:
 import std.stdio;
 import std.conv;
 
-alias void Dummy; // DMD bug #3538
+//alias void Dummy; // DMD bug #3538
+
+struct Dummy {}
 
 struct QList(T, alias Default = Dummy)
 {

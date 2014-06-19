@@ -3,7 +3,7 @@
 ##--------------------------------------------
 
 ## Find D compiler and parse its version.
-find_program(DC NAMES dmd ldmd2 ldc2 ldc gdmd)
+find_program(DC NAMES dmd ldmd2 ldc2 ldc gdmd PATHS ENV PATH)
 if (DC)
     get_filename_component(dc_path ${DC} PATH)
     if("${dc_path}" STREQUAL ${CMAKE_BINARY_DIR})
