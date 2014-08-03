@@ -54,7 +54,7 @@ template QTypeInfo(T)
     {
         public enum
         {
-            isPointer = isPointer!T,
+            isPointer = std.traits.isPointer!T,
             isComplex = !isPointer,
             isStatic = !isPointer,
             isLarge = (T.sizeof > (void*).sizeof),
