@@ -98,7 +98,11 @@ void DGenerator::writeFieldAccessors(QTextStream &s, const AbstractMetaField *fi
             ReportHandler::warning(warning);
         } else {
             if (!notWrappedYet(setter)) { // qtd2
-                if (setter->shouldOverride()) s << INDENT << "override ";
+                if (setter->shouldOverride(s)) 
+                    s << INDENT << "override /*"
+                      << __FILE__ << ":" << __LINE__ << " */ ";
+                else s << INDENT << "/* NO override " 
+                       << __FILE__ << ":" << __LINE__ << " */ ";
                 writeFunction(s, setter);
             }
         }
@@ -114,7 +118,11 @@ void DGenerator::writeFieldAccessors(QTextStream &s, const AbstractMetaField *fi
             ReportHandler::warning(warning);
         } else {
             if (!notWrappedYet(getter)) { // qtd2
-                if (getter->shouldOverride()) s << INDENT << "override ";
+                if (getter->shouldOverride(s))
+                    s << INDENT << "override /*"
+                      << __FILE__ << ":" << __LINE__ << " */ ";
+                else s << INDENT << "/* NO override " 
+                       << __FILE__ << ":" << __LINE__ << " */ ";
                 writeFunction(s, getter);
             }
         }
@@ -248,7 +256,10 @@ QString DGenerator::argumentString(const AbstractMetaFunction *d_function,
 
     AbstractMetaType *type = d_argument->type();
     // qtd2 if argument is "QString &" ref attribute needed FIXME maybe we need this not only for QString, but for other Value types??
-    if (type->typeEntry()->isValue() && type->isNativePointer() && type->typeEntry()->name() == "QString")
+    if (type->typeEntry()->isValue() 
+    && type->isNativePointer() 
+    && type->typeEntry()->name() == "QString"
+    && d_argument->defaultValueExpression().isEmpty())
         arg = "ref ";
 
     if (modified_type.isEmpty())
@@ -1722,6 +1733,7 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
 
     if (d_class->isDestructorBase())
     {
+        s << INDENT << "/* " << __FILE__ << ":" << __LINE__ << " */" << endl;
         s << INDENT << "protected override void qtdDeleteNative() {" << endl;
         {
             s << INDENT << "    qtd_" << d_class->name() << "_delete(qtdNativeId);" << endl;
@@ -1740,11 +1752,21 @@ void DGenerator::writeDestructor(QTextStream &s, const AbstractMetaClass *d_clas
 
 void DGenerator::writeOwnershipSetter(QTextStream &s, const AbstractMetaClass *d_class)
 {
-    
+    s << "/* override: " << __FILE__ << ":" << __LINE__ 
+      << "d_class->isInterface (): " << d_class->isInterface () << " */ " 
+      << endl;
     if (d_class->isInterface())
         s << INDENT << "void qtdSetOwnership(QtdObjectOwnership own) const;";
-    else if (!d_class->isNamespace()) // COMPILER BUG:
-        s << INDENT << "override void qtdSetOwnership(QtdObjectOwnership own) const { super.qtdSetOwnership(own); }";
+    else if (!d_class->isNamespace()) { // COMPILER BUG:
+        s << INDENT;
+
+        if (d_class->name() != "QDateEdit"
+        &&  d_class->name() != "QTimeEdit") {
+            s << "override ";
+        }
+            
+        s << "void qtdSetOwnership(QtdObjectOwnership own) const { super.qtdSetOwnership(own); }";
+    }
 }
 
 void DGenerator::writeSignalHandlers(QTextStream &s, const AbstractMetaClass *d_class)
@@ -2238,9 +2260,13 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         {
             writeSignal(s, signal);
             if(!signal->isPrivate()) {
-                if (signal->shouldOverride()) { 
-                    s << INDENT << "override "; 
+                if (signal->shouldOverride(s)) { 
+                    s << INDENT << "override /* " 
+                       << __FILE__ << ":" << __LINE__ << " */ ";
+                    // s << INDENT << "override "; 
                 }
+                else s << INDENT << "/* NO override " 
+                       << __FILE__ << ":" << __LINE__ << " */ ";
                 writeFunction(s, signal);
             }
         }
@@ -2270,7 +2296,11 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
         AbstractMetaFunction *function = d_funcs_gen.at(i);
 //        if(function->isSlot())
 //            writeSlot(s, function);
-        if (function->shouldOverride()) s << INDENT << "override "; 
+        if (function->shouldOverride(s)) //s << INDENT << "override "; 
+            s << INDENT << "override /* " 
+               << __FILE__ << ":" << __LINE__ << " */ ";
+        else s << INDENT << "/* NO override " 
+               << __FILE__ << ":" << __LINE__ << " */ ";
         writeFunction(s, function);
 // qtd       s << function->minimalSignature() << endl;
     }
@@ -2460,7 +2490,9 @@ void DGenerator::write(QTextStream &s, const AbstractMetaClass *d_class)
                     continue;
                 s << endl;
 
-                s << "override "; 
+                //s << "override "; 
+                s << "override /* " 
+                   << __FILE__ << ":" << __LINE__ << " */ ";
                 writeFunctionAttributes(s, d_function, include_attributes, exclude_attributes,
                                         d_function->isNormal() || d_function->isSignal() ? 0 : SkipReturnType);
 
@@ -2765,15 +2797,26 @@ void DGenerator::writeQObjectFunctions(QTextStream &s, const AbstractMetaClass *
     if (!d_class->isFinal()) {
         s << "    ";
 
-        if (d_class->name() != "QObject")
-            s << "override "; 
+        if (d_class->name() != "QObject"
+        &&  d_class->name() != "QDateEdit"
+        &&  d_class->name() != "QTimeEdit") {
+            s << "override /* d_class->name() != \"QObject\" " 
+               << __FILE__ << ":" << __LINE__ << " */ ";
+        } else s << INDENT << "/* NO override " 
+               << __FILE__ << ":" << __LINE__ << " */ ";
 
         s << "int qt_metacall(MetaCall _c, int _id, void **_a) {" << endl
           << "        return qtd_" << d_class->name() << "_qt_metacall(qtdNativeId, _c, _id, _a);" << endl
           << "    }" << endl << endl;
     }
 
-    s << "    override @property QMetaObject metaObject() {" << endl
+    s << "/* override: " << __FILE__ << ":" << __LINE__ << " */ ";
+    s << "    "; 
+    if (d_class->name() != "QDateEdit"
+    &&  d_class->name() != "QTimeEdit") {
+        s << "override "; 
+    }
+    s <<      "@property QMetaObject metaObject() {" << endl
       << "        return staticMetaObject;" << endl
       << "    }" << endl << endl
 
@@ -2915,9 +2958,14 @@ void DGenerator::writeSignalSignatures(QTextStream &s, const AbstractMetaClass *
 
     AbstractMetaClass * parent = d_class->baseClass();
 
-    if (d_class->name() != "QObject") {
-        s << "override ";
+    if (d_class->name() != "QObject"
+    &&  d_class->name() != "QDateEdit"
+    &&  d_class->name() != "QTimeEdit") {
+        s << INDENT << "override /* " 
+           << __FILE__ << ":" << __LINE__ << " */ ";
     }
+    else s << INDENT << "/* NO override " 
+           << __FILE__ << ":" << __LINE__ << " */ ";
 
     s << "int signalSignature(int signalId, ref stringz signature) {" << endl;
     {

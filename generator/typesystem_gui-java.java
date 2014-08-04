@@ -1693,24 +1693,24 @@ class QGraphicsScene___ extends QGraphicsScene {
 }// class
 
 class QInputDialog___ extends QInputDialog {
-    public static double getDouble(QWidget _parent, string title, string label, double value = 0, double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1, ref bool ok = false, int flags = 0) {
-        return qtd_QInputDialog_getDouble_private_QWidget_string_string_double_double_double_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.qtdNativeId, title, label, value, minValue, maxValue, decimals, &ok, flags);
+    public static double getDouble(QWidget _parent, string title, string label, double value = 0, double minValue = -2147483647, double maxValue = 2147483647, int decimals = 1, inout(bool) ok = false, int flags = 0) {
+        return qtd_QInputDialog_getDouble_private_QWidget_string_string_double_double_double_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.qtdNativeId, title, label, value, minValue, maxValue, decimals, cast (bool*) &ok, flags);
     }
 
     static if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
     {
-        public static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, ref bool ok = false, int flags = 0) {
-            return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.qtdNativeId, title, label, value, minValue, maxValue, step, &ok, flags);
+        public static int getInt(QWidget _parent, string title, string label, int value = 0, int minValue = -2147483647, int maxValue = 2147483647, int step = 1, inout(bool) ok = false, int flags = 0) {
+            return qtd_QInputDialog_getInt_private_QWidget_string_string_int_int_int_int_nativepointerbool_WindowFlags(_parent is null ? null : _parent.qtdNativeId, title, label, value, minValue, maxValue, step, cast (bool*) &ok, flags);
     }
     }
 
-    public static string getItem(QWidget _parent, string title, string label, QList!(string) items, int current = 0, bool editable = true, ref bool ok = false, int flags = 0) {
-        return getItem_private(_parent, title, label, items, current, editable, &ok, flags);
+    public static string getItem(QWidget _parent, string title, string label, QList!(string) items, int current = 0, bool editable = true, inout(bool) ok = false, int flags = 0) {
+        return getItem_private(_parent, title, label, items, current, editable, cast (bool*) &ok, flags);
     }
 
-    public static string getText(QWidget _parent, string title, string label, QLineEdit.EchoMode echo = QLineEdit.EchoMode.Normal, string text = null, ref bool ok = false, int flags = 0) {
+    public static string getText(QWidget _parent, string title, string label, QLineEdit.EchoMode echo = QLineEdit.EchoMode.Normal, string text = null, inout(bool) ok = false, int flags = 0) {
         string res;
-        qtd_QInputDialog_getText_private_QWidget_string_string_EchoMode_string_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.qtdNativeId, title, label, echo, text, &ok, flags);
+        qtd_QInputDialog_getText_private_QWidget_string_string_EchoMode_string_nativepointerbool_WindowFlags(&res, _parent is null ? null : _parent.qtdNativeId, title, label, echo, text, cast (bool*) &ok, flags);
         return res;
     }
 }// class
@@ -1718,8 +1718,10 @@ class QInputDialog___ extends QInputDialog {
 class QFont___ extends QFont {
     version(D_Version2)
     {
-	void opAssign(in QFont arg__1)  {
-            this.qtdNativeId = qtd_QFont_QFont_QFont(arg__1 is null ? null : (cast(QFont)arg__1).qtdNativeId);
-	}
+    // Disabling it.
+    // QFont.d(530): Error: class qt.gui.QFont.QFont identity assignment operator overload is illegal
+	//~ void opAssign(in QFont arg__1)  {
+    //~         this.qtdNativeId = qtd_QFont_QFont_QFont(arg__1 is null ? null : (cast(QFont)arg__1).qtdNativeId);
+	//~ }
     }
 }// class"

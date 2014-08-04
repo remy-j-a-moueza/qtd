@@ -500,7 +500,7 @@ public:
     bool isSignal() const { return functionType() == SignalFunction; }
     bool isSlot() const { return functionType() == SlotFunction; }
     bool isEmptyFunction() const { return functionType() == EmptyFunction; }
-    bool shouldOverride () const; 
+    bool shouldOverride (QTextStream &s) const; 
     FunctionType functionType() const { return m_function_type; }
     void setFunctionType(FunctionType type) { m_function_type = type; }
 

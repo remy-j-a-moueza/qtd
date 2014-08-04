@@ -784,49 +784,150 @@ QString AbstractMetaFunction::targetLangSignature(bool minimal) const
 
 
 
-bool AbstractMetaFunction::shouldOverride () const {
+bool AbstractMetaFunction::shouldOverride (QTextStream &s) const {
     const AbstractMetaClass * klass, * baseClass;
 
-    std::cout << "\n[DEBUG] shouldOverride in " << name().constData() << " " << minimalSignature().constData() << "\n";
+    s << "/* [DEBUG] shouldOverride in " << name() << " "
+      << minimalSignature() << " */ " << endl;
     
     klass = ownerClass();
     if (! klass) {
-        std::cout << "[DEBUG] no class: return false" << "\n";
+        s << "/* [DEBUG] no class: return false */ " << endl;
         return false;
     }
 
-    std::cout << "[DEBUG] class is: " << klass->name().constData() << "\n";
+    s << "/* [DEBUG] class is: " << klass->name() << " */ " << endl << endl;
+
+    s << "/* [DEBUG] queried function found. */ " << endl;
+    s << "/* [DEBUG] this->isNative()                   :" << this->isNative()                    << " */" << endl;
+    s << "/* [DEBUG] this->isFinal()                    :" << this->isFinal()                     << " */" << endl;
+    s << "/* [DEBUG] this->isFinalInTargetLang()        :" << this->isFinalInTargetLang()         << " */" << endl;
+    s << "/* [DEBUG] this->isFinalInCpp()               :" << this->isFinalInCpp()                << " */" << endl;
+    s << "/* [DEBUG] this->isAbstract()                 :" << this->isAbstract()                  << " */" << endl;
+    s << "/* [DEBUG] this->isStatic()                   :" << this->isStatic()                    << " */" << endl;
+    s << "/* [DEBUG] this->isForcedShellImplementation():" << this->isForcedShellImplementation() << " */" << endl;
+    s << "/* [DEBUG] this->isInterfaceFunction()        :" << this->isInterfaceFunction()         << " */" << endl;
+    s << "/* [DEBUG] this->isFinalOverload()            :" << this->isFinalOverload()             << " */" << endl;
+    s << "/* [DEBUG] this->isInvokable()                :" << this->isInvokable()                 << " */" << endl << endl;
+
+     foreach (AbstractMetaFunction *f, klass->publicOverrideFunctions()) {
+        if (!f->isEmptyFunction() 
+        &&  (f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar) {
+
+            s << "/* [DEBUG] " << klass->name () << " publicOverrideFunctions: true */ " << endl;
+        }
+    }    
+
+    foreach (AbstractMetaFunction *f, klass->virtualOverrideFunctions()) {
+        if (!f->isEmptyFunction()
+        &&  (f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+             == AbstractMetaFunction::PrettySimilar
+        ) {
+            s << "/* [DEBUG] " << klass->name () << " virtualOverrideFunctions: true */ " << endl;
+        }
+    }
+    foreach (AbstractMetaFunction *f, klass->virtualFunctions()) {
+        if ((f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar) {
+            s << "/* [DEBUG] " << klass->name ()  << " virtualFunctions found. */ " << endl;
+        }
+    }
+    foreach (AbstractMetaFunction *f, 
+             klass->queryFunctions(AbstractMetaClass::VirtualInTargetLangFunctions)) {
+        if ((f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar) {
+            s << "/* [DEBUG] " << klass->name () << " virtualInTargetLangFunctions found. */ " << endl;
+        }
+    }
+
+    /* --------------------------------------------------------------------- */
 
     baseClass = klass->baseClass();
     if (! baseClass) {
-        std::cout << "[DEBUG] no base class : return false" << "\n";
+        if (minimalSignature() == "toString()const") {
+            s << "/*[DEBUG] no base class BUT \"toString\" : return true */ " 
+              << endl;
+            return true;
+        }
+        s << "/*[DEBUG] no base class : return false */ " << endl;
+
         return false;
     }
-    std::cout << "[DEBUG] base class is: " << baseClass->name().toUtf8().constData() << "\n";
+    s << "/* [DEBUG] base class is: " << baseClass->name() << " */ " << endl;
+    s << "/* [DEBUG] base class isInterface: "
+      << baseClass->isInterface() << " */ " << endl;
+
+    bool baseShouldOverride = false;
+    foreach (AbstractMetaFunction *f, 
+             baseClass->queryFunctionsByName(name())) {
+        if ((f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar) {
+            s << "/* [DEBUG] f->isNative()                   :" << f->isNative()                    << " */" << endl;
+            s << "/* [DEBUG] f->isFinal()                    :" << f->isFinal()                     << " */" << endl;
+            s << "/* [DEBUG] f->isFinalInTargetLang()        :" << f->isFinalInTargetLang()         << " */" << endl;
+            s << "/* [DEBUG] f->isFinalInCpp()               :" << f->isFinalInCpp()                << " */" << endl;
+            s << "/* [DEBUG] f->isAbstract()                 :" << f->isAbstract()                  << " */" << endl;
+            s << "/* [DEBUG] f->isStatic()                   :" << f->isStatic()                    << " */" << endl;
+            s << "/* [DEBUG] f->isForcedShellImplementation():" << f->isForcedShellImplementation() << " */" << endl;
+            s << "/* [DEBUG] f->isInterfaceFunction()        :" << f->isInterfaceFunction()         << " */" << endl;
+            s << "/* [DEBUG] f->isFinalOverload()            :" << f->isFinalOverload()             << " */" << endl;
+            s << "/* [DEBUG] f->isInvokable()                :" << f->isInvokable()                 << " */" << endl;
+
+            baseShouldOverride = f->shouldOverride (s);
+            s << "/* [DEBUG] baseShouldOverride: " << baseShouldOverride << " */" << endl;
+        }
+    }
+    
+    foreach (AbstractMetaFunction *f, 
+             baseClass->queryFunctionsByName(name())) {
+        if ((f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar
+        && f->isFinal ()) {
+            s << "/* [DEBUG] base class function is final. */" << endl;
+            return false;
+        }
+    }
+
+    QString baseName = baseClass->name ();
 
     foreach (AbstractMetaFunction *f, baseClass->publicOverrideFunctions()) {
         if (!f->isEmptyFunction() 
         &&  (f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
             == AbstractMetaFunction::PrettySimilar) {
 
-            std::cout << "[DEBUG] publicOverrideFunctions: return true" << "\n";
+            s << "/* [DEBUG] " << baseName << " publicOverrideFunctions: return true */ " << endl;
             return true;
         }
     }
     foreach (AbstractMetaFunction *f, baseClass->virtualOverrideFunctions()) {
         if (!f->isEmptyFunction()
         &&  (f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
-             == AbstractMetaFunction::PrettySimilar) {
+             == AbstractMetaFunction::PrettySimilar
+        &&  !f->isAbstract()) {
             
-            std::cout << "[DEBUG] virtualOverrideFunctions: return true" << "\n";
+            s << "/* [DEBUG] " << baseName << " virtualOverrideFunctions: return true */ " << endl;
             return true;
         }
     }
-    //foreach (AbstractMetaFunction *f, klass->virtualFunctions()) {
-    //    if ((f->compareTo(this) & AbstractMetaFunction::EqualName) == AbstractMetaFunction::EqualName)
-    //        return true;
-    //}
-    std::cout << "[DEBUG] this is the end: return false" << "\n";
+    foreach (AbstractMetaFunction *f, baseClass->virtualFunctions()) {
+        if ((f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar) {
+            s << "/* [DEBUG] " << baseName << " virtualFunctions found. */ " << endl;
+            return true;
+        }
+    }
+    foreach (AbstractMetaFunction *f, 
+             baseClass->queryFunctions(AbstractMetaClass::VirtualInTargetLangFunctions)) {
+        if ((f->compareTo(this) & AbstractMetaFunction::PrettySimilar) 
+            == AbstractMetaFunction::PrettySimilar) {
+            if (! f->isStatic()) {
+                s << "/* [DEBUG] queried function found. */ " << endl;
+                return true;
+            }
+        }
+    }
+    s << "/* [DEBUG] this is the end: return false */ " << endl;
     return false;
 }
 
