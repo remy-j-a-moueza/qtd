@@ -82,16 +82,14 @@ endif(NOT ONE_BUILD_COMMAND)
 
 ## Specific flags for build configurations.
 ## TODO: Add another targets.
-#set(D_RELEASE_FLAGS -O -release)
-set(D_RELEASE_FLAGS)
+set(D_RELEASE_FLAGS -O -release)
 set(D_DEBUG_FLAGS -g )
 if(D_IS_LLVM)
     set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -enable-inlining)
     set(D_VERSION_FLAG -d-version)
     set(D_DEBUG_FLAG -d-debug)
 else(D_IS_LLVM)
-    #set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -inline)
-    set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS})
+    set(D_RELEASE_FLAGS ${D_RELEASE_FLAGS} -inline)
     set(D_VERSION_FLAG -version)
     set(D_DEBUG_FLAG -debug)
 endif(D_IS_LLVM)
